@@ -1,0 +1,71 @@
+plugins {
+    id 'java'
+}
+
+group 'fr.inserm.u1078'
+version Version.getVersion()
+
+class Version{
+    Version(){
+
+    }
+
+    public static String getVersion(){
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("src/main/resources/CHANGELOG.md"));
+            String line;
+            while((line = br.readLine()) != null) {
+                if(line.startsWith("## ")) {
+                    br.close();
+                    return line.split(" ")[1].split("\\(")[0];
+                }
+            }
+            br.close();
+        } catch(Exception e){
+            //ignore
+        }
+        return "unknown";
+    }
+}
+
+repositories {
+    ivy {
+        url 'http://lysine.univ-brest.fr/maven/'
+        patternLayout {
+            artifact 'artifact/[organisation]/[module]-[revision].[ext]'
+            ivy 'ivy/[organisation]/[module]/[revision]/ivy.xml'
+            m2compatible = true
+        }
+    }
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'fr.inserm.u1078', name: 'MaokLib', version: '1.0.0'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'fr.inserm.u1078', name: 'MaokLib', version: '1.0.0'
+    compile group: 'jfree', name: 'jfreechart', version: '1.0.13'
+    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
+    compile 'org.jdom:jdom2:2.0.6'
+}
+
+task Release(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'fr.inserm.u1078.tludwig.vcfprocessor.Run'
+    }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+task Deploy(type: Copy) {
+    from "build/libs"
+    into "build/libs"
+    include "/${rootProject.name}-${version}.jar"
+    rename { String fileName -> fileName.replace("-${version}", "") }
+}
+
+Deploy.dependsOn(Release)
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+javadoc.options.encoding = 'UTF-8'
