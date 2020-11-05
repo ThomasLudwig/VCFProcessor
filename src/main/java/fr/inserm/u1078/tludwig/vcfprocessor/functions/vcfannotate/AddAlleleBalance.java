@@ -46,11 +46,11 @@ public class AddAlleleBalance extends ParallelVCFVariantFunction {
   @Override
   public Description getDesc() {
     return new Description("Adds the following annotations :")
-            .addItemize(new String[]{"AB : Allele balance for each het genotype",
+            .addItemize("AB : Allele balance for each het genotype",
               Description.bold("ABhet")+" : Allele Balance for heterozygous calls (ref/(ref+alt)), for each variant",
               Description.bold("ABhom")+" : Allele Balance for homozygous calls (A/(A+O)) where A is the allele (ref or alt) and O is anything other, for each variant",
               Description.bold("OND")+" : Overall non-diploid ratio (alleles/(alleles+non-alleles)), for each variant"
-            })
+            )
             .addLine("Algorithms is taken from GATK, with the following changes (Results are available for INDELs and multiallelic variants, use with caution)");
   }
 
@@ -103,7 +103,7 @@ public class AddAlleleBalance extends ParallelVCFVariantFunction {
             hasHet = true;
             ab = StringTools.formatDouble((double) ad[gt1] / (ad[gt1] + ad[gt2]), 3);
 
-            numHet += ad[Math.min(gt1,gt2)]; //min is to use the same allelle for each samples in case of phased data
+            numHet += ad[Math.min(gt1,gt2)]; //min is to use the same allele for each samples in case of phased data
             denomHet += ad[gt1] + ad[gt2];
 
             numHets[gt1] += ad[gt1];
@@ -126,8 +126,8 @@ public class AddAlleleBalance extends ParallelVCFVariantFunction {
             denomOND += totalReads;
           }
         }
-        genotype.addField(ab);
       }
+      genotype.addField(ab);
     }
 
     if (hasHet)

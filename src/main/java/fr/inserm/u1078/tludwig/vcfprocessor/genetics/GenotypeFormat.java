@@ -39,6 +39,10 @@ public class GenotypeFormat {
     return 0;
   }
 
+  public int getSize(){
+    return this.keys.size();
+  }
+
   public int getGQ(String genotype) {
     try {
       return Integer.parseInt(this.getValue(genotype, DP));

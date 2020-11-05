@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2 (2020-11-05)
+### core
+### functions
+* ```AddAlleleBalance``` : **fixed** GitHub.Issues#1 [`AB` field not added for missing genotypes] 
+### filters
+### other
+
 ## 1.0.1 (2020-09-30)
 ### core
 ### functions

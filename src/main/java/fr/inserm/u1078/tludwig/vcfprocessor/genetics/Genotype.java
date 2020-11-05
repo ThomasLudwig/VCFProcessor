@@ -274,12 +274,25 @@ public class Genotype {
   }
 
   /**
-   * Add a trailing filed, for a newly created annotation
+   * Add a trailing field, for a newly created annotation
    *
    * @param value
    */
   public void addField(String value) {
+    if(isShortFormatMissing() && ".".equals(value))
+      return;
     this.genotype += ":" + value;
+  }
+
+  /**
+   * returns true if a genotype with GT:DP:AD:PL is simply "." or "./." instead of "./.:.:.:."
+   * @return
+   */
+  public boolean isShortFormatMissing(){
+    String[] f = this.genotype.split(":", -1);
+    if(!f[0].startsWith("."))
+      return false;
+    return this.format.getSize() != f.length;
   }
 
   public void setMissing() {
