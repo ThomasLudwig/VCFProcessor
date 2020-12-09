@@ -48,7 +48,7 @@ public class FilterGenotype extends ParallelVCFFilterFunction { //TODO add suppo
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

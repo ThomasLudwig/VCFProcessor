@@ -89,7 +89,7 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return "Extra information are available if the input file was annotated with VEP";
   }
 

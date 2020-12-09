@@ -42,7 +42,7 @@ public class HQ extends ParallelVCFVariantFilterFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

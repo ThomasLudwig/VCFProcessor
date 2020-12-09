@@ -86,7 +86,7 @@ public class QCParametersDistribution extends ParallelVCFVariantFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return "The VCF File must contain the following INFO : " + String.join(",", KEYS);
   }
 

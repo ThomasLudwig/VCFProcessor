@@ -84,7 +84,7 @@ public class IQSBySample extends VCFPedFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

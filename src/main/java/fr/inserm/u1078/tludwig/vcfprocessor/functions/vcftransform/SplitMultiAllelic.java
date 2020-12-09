@@ -41,7 +41,7 @@ public class SplitMultiAllelic extends ParallelVCFFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

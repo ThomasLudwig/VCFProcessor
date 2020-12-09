@@ -41,7 +41,7 @@ public class VCF2TSV extends ParallelVCFFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

@@ -39,7 +39,7 @@ public class Recode extends ParallelVCFFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

@@ -44,7 +44,7 @@ public class StrictCompoundHeterozygous extends AbstractCompoundFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return "This function expects a complete definition of the sample, where all cases are affected children and both their parents are identified controls.";
   }
 

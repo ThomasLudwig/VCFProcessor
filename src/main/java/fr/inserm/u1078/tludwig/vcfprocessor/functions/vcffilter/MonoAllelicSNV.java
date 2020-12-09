@@ -35,7 +35,7 @@ public class MonoAllelicSNV extends ParallelVCFFilterFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

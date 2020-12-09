@@ -44,7 +44,7 @@ public class FoundInAllCases extends ParallelVCFVariantFilterFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

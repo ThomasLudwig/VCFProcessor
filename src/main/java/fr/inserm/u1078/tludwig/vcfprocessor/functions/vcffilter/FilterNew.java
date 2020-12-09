@@ -36,7 +36,7 @@ public class FilterNew extends ParallelVCFVariantFilterFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

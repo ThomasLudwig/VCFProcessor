@@ -59,7 +59,7 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

@@ -48,7 +48,7 @@ public class SplitFromDB extends VCFFunction { //TODO parallelize
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

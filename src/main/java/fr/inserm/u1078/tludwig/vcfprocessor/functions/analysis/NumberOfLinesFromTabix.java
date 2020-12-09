@@ -41,7 +41,7 @@ public class NumberOfLinesFromTabix extends VCFFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return "The bgzipped VCF file FILENAME.vcf.gz must have an associated tabix file FILENAME.vcf.gz.tbi";
   }
 

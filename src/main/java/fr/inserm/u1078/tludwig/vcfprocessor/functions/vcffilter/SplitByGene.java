@@ -50,7 +50,7 @@ public class SplitByGene extends VCFFunction { //TODO parallelize
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

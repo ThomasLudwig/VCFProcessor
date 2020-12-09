@@ -60,7 +60,7 @@ public class Kappa extends VCFFunction { //TODO parallelize like in IQS
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

@@ -17,7 +17,7 @@ public abstract class VCFFunction extends Function implements VCFHandling {
     Description desc = this.getDesc();
     if (this.needVEP())
       desc.addWarning("The input VCF File must have been previously annotated with vep.");
-    String custom = this.getCustomRequierment();
+    String custom = this.getCustomRequirement();
     if (custom != null)
       desc.addWarning(custom);
     String multi = this.getMultiallelicPolicy();

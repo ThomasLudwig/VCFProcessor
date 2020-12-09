@@ -46,7 +46,7 @@ public class AddAlleleBalance extends ParallelVCFVariantFunction {
   @Override
   public Description getDesc() {
     return new Description("Adds the following annotations :")
-            .addItemize("AB : Allele balance for each het genotype",
+            .addItemize(Description.bold("AB")+" : Allele balance for each het genotype (alleleDepth(gt1) / alleleDepth(gt1) + alleleDepth(gt2))",
               Description.bold("ABhet")+" : Allele Balance for heterozygous calls (ref/(ref+alt)), for each variant",
               Description.bold("ABhom")+" : Allele Balance for homozygous calls (A/(A+O)) where A is the allele (ref or alt) and O is anything other, for each variant",
               Description.bold("OND")+" : Overall non-diploid ratio (alleles/(alleles+non-alleles)), for each variant"
@@ -65,7 +65,7 @@ public class AddAlleleBalance extends ParallelVCFVariantFunction {
   }
   
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

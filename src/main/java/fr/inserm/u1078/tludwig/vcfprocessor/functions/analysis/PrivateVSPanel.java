@@ -57,7 +57,7 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

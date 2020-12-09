@@ -49,7 +49,7 @@ public class RandomVariants extends ParallelVCFFilterFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

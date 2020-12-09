@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.3 (2020-12-09)
+### core
+### functions
+* ```QC1078``` : **fixed** GitHub.Issues#2 non HQ variants were set to missing, so HQrate was equal to callrate. HQ parameter is removed (and now equal to callrate)
+* ```QC1078``` : **added** AB check for genotypes. Failed ab check will set genotype to missing.
+### filters
+### other
+* ```getCustomRequirement``` : **fixed** typo in method name
+
 ## 1.0.2 (2020-11-05)
 ### core
 ### functions

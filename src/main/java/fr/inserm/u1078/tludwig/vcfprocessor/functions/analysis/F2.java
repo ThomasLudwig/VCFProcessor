@@ -62,7 +62,7 @@ public class F2 extends ParallelVCFVariantPedFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

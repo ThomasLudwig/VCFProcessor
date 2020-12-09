@@ -51,7 +51,7 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

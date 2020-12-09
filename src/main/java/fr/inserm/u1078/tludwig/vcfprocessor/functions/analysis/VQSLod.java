@@ -45,7 +45,7 @@ public class VQSLod extends ParallelVCFFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return "File must contain VQSLOD annotations";
   }
 

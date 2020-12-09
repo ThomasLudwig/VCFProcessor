@@ -46,7 +46,7 @@ public class FrequencyCorrelation extends ParallelVCFVariantFunction { //TODO re
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

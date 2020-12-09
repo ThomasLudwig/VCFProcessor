@@ -116,7 +116,7 @@ public abstract class ParallelVCFFunction extends VCFFunction {
 
       threadPool.awaitTermination(100, TimeUnit.DAYS);
     } catch (InterruptedException e) {
-      Message.error("Thread was interupted", e);
+      Message.error("Thread was interrupted", e);
     }
 
     analyzer.willEnd();

@@ -43,7 +43,7 @@ public class MultiAllelicProportion extends ParallelVCFFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

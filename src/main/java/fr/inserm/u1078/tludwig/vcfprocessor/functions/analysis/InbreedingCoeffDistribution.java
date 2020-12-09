@@ -41,7 +41,7 @@ public class InbreedingCoeffDistribution extends ParallelVCFVariantFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return "Input file must contains Inbreeding Coeff. annotation";
   }
 

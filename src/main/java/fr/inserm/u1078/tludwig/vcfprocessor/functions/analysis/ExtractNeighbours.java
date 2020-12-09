@@ -47,7 +47,7 @@ public class ExtractNeighbours extends VCFFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

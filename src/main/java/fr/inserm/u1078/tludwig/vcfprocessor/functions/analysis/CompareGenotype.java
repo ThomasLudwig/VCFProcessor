@@ -62,7 +62,7 @@ public class CompareGenotype extends VCFPedFunction {//TODO parallelize like in 
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

@@ -24,5 +24,5 @@ public interface VCFHandling {
   
   public String getMultiallelicPolicy();
 
-  public String getCustomRequierment();
+  public String getCustomRequirement();
 }

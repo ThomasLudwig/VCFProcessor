@@ -50,7 +50,7 @@ public class SetGenotypeFromProbability extends ParallelVCFFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return "The input VCF file must contain Genotype Probability (GP=p1,p2,p3) for each genotype";
   }
 

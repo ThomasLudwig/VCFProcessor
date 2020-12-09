@@ -73,7 +73,7 @@ public class FilterF2 extends ParallelVCFPedFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 

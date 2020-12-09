@@ -37,7 +37,7 @@ public class FilterKnownID extends ParallelVCFFilterFunction {
   }
 
   @Override
-  public String getCustomRequierment() {
+  public String getCustomRequirement() {
     return null;
   }
 
