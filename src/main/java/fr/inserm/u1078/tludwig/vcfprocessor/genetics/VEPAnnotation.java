@@ -39,10 +39,22 @@ public class VEPAnnotation { //TODO rewrite this to be 100% compliant with vep91
     this.variant = info.getVariant();
   }
 */
+
+  /**
+   * to print only warning once for each missing key
+   */
+  private final static ArrayList<String> missingKeys = new ArrayList<>();
+
   public String getValue(String key) {
     int idx = format.getIndex(key);
     if (idx < 0){
-      Message.warning("Trying to access VEP annotation ["+key+"] which seem to be missing from this VCF file");
+      if(!missingKeys.contains(key)) {
+        missingKeys.add(key);
+        String message = "Trying to access VEP annotation [" + key + "] which seem to be missing from this VCF file";
+        Message.warning(message);
+        Message.debug(message, new AnnotationException(message));
+      }
+
       return null;
     }
     return values[idx];

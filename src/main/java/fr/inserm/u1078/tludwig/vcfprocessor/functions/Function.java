@@ -32,11 +32,13 @@ import java.util.Date;
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 20 mai 2015
  */
 public abstract class Function {
-  public static final String OPT_REF = "--ref";
+  public static final String OPT_REF = "--ref"; //TODO OPT as enum
   public static final String OPT_CPU = "--cpu";
   public static final String OPT_TPED = "--tped";
   public static final String OPT_FREX = "--frex";
   public static final String OPT_VCF = "--vcf";
+  public static final String OPT_SNP = "--snp";
+  public static final String OPT_INDEL = "--indel";
   public static final String OPT_BAM = "--bam";
   public static final String OPT_KEEP = "--bam";
   public static final String OPT_POSITION = "--position";

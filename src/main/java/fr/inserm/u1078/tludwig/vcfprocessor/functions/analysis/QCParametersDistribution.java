@@ -9,17 +9,17 @@ import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.PedException;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.PedFileParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC1078;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC1078.KEYS;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC1078.KEY_FS;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC1078.KEY_INBREEDING;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC1078.KEY_MQ;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC1078.KEY_MQRANKSUM;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC1078.KEY_QD;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC1078.KEY_READPOSRANKSUM;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC1078.KEY_SOR;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC1078.MIN_DP;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC1078.MIN_GQ;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC;
+import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.KEYS;
+import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.KEY_FS;
+import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.KEY_INBREEDING;
+import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.KEY_MQ;
+import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.KEY_MQRANKSUM;
+import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.KEY_QD;
+import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.KEY_READPOSRANKSUM;
+import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.KEY_SOR;
+import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.MIN_DP;
+import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.MIN_GQ;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Info;
@@ -28,8 +28,6 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Reports the distributions of each parameter used by the class QC1078
@@ -66,7 +64,7 @@ public class QCParametersDistribution extends ParallelVCFVariantFunction {
 
   @Override
   public String getSummary() {
-    return "Reports the distributions of each parameter used by " + QC1078.class.getSimpleName();
+    return "Reports the distributions of each parameter used by " + QC.class.getSimpleName();
   }
 
   @Override

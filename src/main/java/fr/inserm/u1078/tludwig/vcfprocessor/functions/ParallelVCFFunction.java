@@ -127,7 +127,7 @@ public abstract class ParallelVCFFunction extends VCFFunction {
       } catch(Exception e){
         //Nothing
       }
-    
+    this.vcf.printVariantKept();
     end();
     this.printFooters();
   }

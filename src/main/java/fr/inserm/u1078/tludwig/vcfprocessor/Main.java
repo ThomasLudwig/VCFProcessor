@@ -6,6 +6,7 @@ import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.commandline.Argument;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.FunctionFactory;
+import fr.inserm.u1078.tludwig.vcfprocessor.gui.LookAndFeel;
 import fr.inserm.u1078.tludwig.vcfprocessor.gui.MainWindow;
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,6 +19,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -51,7 +53,6 @@ public class Main {
 
   private static String[] args = null;
   private static final Date START = new Date();
-  private static String PLUGIN_DIRECTORY;
   private static CommandParser COMMAND_PARSER = null;
 
   /**
@@ -83,6 +84,11 @@ public class Main {
   private static void launchGUI() {
     Message.setVerboseActive(true);
     Message.setDebugActive(true);
+    try {
+      LookAndFeel.setup();
+    } catch(Exception e) {
+      Message.error("Failed to apply Look&Fell");
+    }
     MainWindow gui = new MainWindow();
   }
 
@@ -184,7 +190,26 @@ public class Main {
 
   private static void doStart(String[] args) throws StartUpException {
     Message.info("Welcome to " + TITLE + " " + getVersion() + " on " + System.getProperty("os.name"));
-    PLUGIN_DIRECTORY = initPluginDirectory();
+
+    //get plugin directory
+    String pDir = getDefaultPluginDirectory("VCFProcessor_Plugins");
+    for (int i = 0; i < args.length-1; i++) {
+      String arg = args[i];
+      String val = args[i+1];
+      if(KEY_PLUGIN.equals(args[i])) {
+        if (val == null)
+          throw new StartUpException("Argument following " + arg + " must be followed be a directory.");
+        if (val.startsWith("-"))
+          throw new StartUpException("Argument following " + arg + " must be followed be a directory. Invalid value {" + val + "}");
+        pDir = val;
+        break;
+      }
+    }
+
+    Message.info("Will look for plugins in " + pDir);
+
+    for (String plugin : FunctionFactory.initPlugins(pDir))
+      Message.info("Plugin : " + plugin);
 
     //check for Non Function usage    
     if (args.length > 0) {
@@ -228,15 +253,6 @@ public class Main {
         case KEY_GZ:
           Function.setOutputBgzipped();
           break;
-        case KEY_PLUGIN:
-          if (val == null)
-            throw new StartUpException("Argument following " + arg + " must be followed be a directory.");
-          if (val.startsWith("-"))
-            throw new StartUpException("Argument following " + arg + " must be followed be a directory. Invalid value {" + val + "}");
-          PLUGIN_DIRECTORY = val;
-          for (String plugin : FunctionFactory.getPlugins())
-            Message.info("Plugin : " + plugin);
-          break;
       }
     }
 
@@ -265,21 +281,15 @@ public class Main {
     }
   }
 
-  public static String initPluginDirectory() throws StartUpException {
+  public static String getDefaultPluginDirectory(String dir) throws StartUpException {
     String jar = getJar();
-    String plug = "VCFProcessor_Plugins";
     int index = jar.lastIndexOf(File.separator);
     if (index > -1) {
-      String pDir = jar.substring(0, index + 1) + plug;
-      Message.info("Will look for plugins in " + pDir);
+      String pDir = jar.substring(0, index + 1) + dir;
       return pDir;
     }
 
     return ".";
-  }
-
-  public static String getPluginDirectory() {
-    return Main.PLUGIN_DIRECTORY;
   }
 
   public static CommandParser getCommandParser() {

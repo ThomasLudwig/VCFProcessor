@@ -1,4 +1,17 @@
 # Changelog
+## 1.0.4 (2021-09-07)
+### core
+* `Main`: **optimized** Plug-in management
+* `Ped` : **added** SEX_MALE, SEX_FEMALE, PHENO_UNAFFECTED, PHENO_AFFECTED values
+* `VCF` : **fixed** count of read/filtered variants in AtomicInteger (multi-threading and i++ don't mix)
+* `VEPAnnotation``` : **fixed** when a key is missing from the VEP annotation, the warning is only displayed once. If debug mode is activated, print stacktrace
+### functions
+* `MaleFemale` : **added** Functions that shows (among other information) male/female AF
+* `MergeVQSR` : **added** Functions that Merges SNP and INDEL results files from VQSR
+* `QC1078` : **renamed** to ```QC```
+### filters
+* `SampleFilter` : Authorize VCF without samples
+### other
 
 ## 1.0.3 (2020-12-09)
 ### core

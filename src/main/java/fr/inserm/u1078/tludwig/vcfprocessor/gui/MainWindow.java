@@ -81,7 +81,7 @@ public class MainWindow extends JFrame {
     this.pack();
 
     try {
-      this.setIconImage(Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("fr/inserm/u1078/tludwig/vcfprocessor/gui/logo.vcfprocessor128.png")));
+      this.setIconImage(Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("logo.vcfprocessor128.png")));
     } catch (Exception e) {
       //Nothing
     }

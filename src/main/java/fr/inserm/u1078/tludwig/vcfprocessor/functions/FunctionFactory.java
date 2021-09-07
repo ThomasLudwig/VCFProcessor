@@ -26,6 +26,8 @@ import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Factory to instenciate Functions from command line arguments
@@ -33,14 +35,15 @@ import java.util.jar.JarInputStream;
  */
 public class FunctionFactory {
 
-  private static final ArrayList<Class> ALL_FUNCTIONS = getAllFunctions();
+  private static ArrayList<Class> ALL_FUNCTIONS = null;
+  private static ArrayList<String> PLUGINS=null;
 
   public static Function getFunction(String[] args) throws StartUpException {//[] and not ... otherwise method might get called without it arguments
     if (args.length < 1 || args[0].startsWith("-"))
       usage();
     String functionName = args[0];
 
-    for (Class clazz : ALL_FUNCTIONS)
+    for (Class clazz : getALLFUNCTIONS())
       if (clazz.getSimpleName().equalsIgnoreCase(functionName))
         return getFunction(clazz);
 
@@ -64,15 +67,15 @@ public class FunctionFactory {
 
   public static ArrayList<Class> getFunctionsFromType(String type) throws StartUpException {
     ArrayList<Class> ret = new ArrayList<>();
-    for (Class clazz : ALL_FUNCTIONS)
+    for (Class clazz : getALLFUNCTIONS())
       try {
         Constructor c = clazz.getConstructor();
         Function f = (Function) c.newInstance();
         //Function f = (Function)clazz.getConstructor().newInstance();
         String fType = f.getFunctionType();
-        if (type.equals(fType))
+        if (type.equals(fType) && !ret.contains(clazz))
           ret.add(clazz);
-      } catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException e) {
+      } catch (Exception e) {
         throw new StartUpException("Could not find empty constructor for class " + clazz.getSimpleName() + ". There are " + clazz.getConstructors()[0] + " constructors for this class", e);
       }
     return ret;
@@ -80,7 +83,7 @@ public class FunctionFactory {
 
   public static void generateTestingScriptForFunction(String functionName) throws StartUpException {
 
-    for (Class clazz : getAllFunctions())
+    for (Class clazz : getALLFUNCTIONS())
       if (clazz.getSimpleName().equalsIgnoreCase(functionName)) {
         Function f = getFunction(clazz);
         TestingScript[] scripts = f.getScripts();
@@ -204,15 +207,16 @@ public class FunctionFactory {
   }
 
 
-  public static ArrayList<String> getPlugins() {
-    ArrayList<String> plugins = new ArrayList<>();
-    plugins.addAll(getPlugins(new File(Main.getPluginDirectory())));
-    return plugins;
+  public static ArrayList<String> initPlugins(String directory) {// deported method, so the other one can be recurssive
+    PLUGINS = new ArrayList<>();
+
+    PLUGINS.addAll(getPlugins(new File(directory)));
+    return PLUGINS;
   }
 
   private static ArrayList<String> getPlugins(File f) {
     ArrayList<String> plugins = new ArrayList<>();
-    if (f.isDirectory())
+    if (f.isDirectory())//recursively scan subdirectory
       for (File sub : f.listFiles())
         plugins.addAll(getPlugins(sub));
     else {
@@ -232,17 +236,23 @@ public class FunctionFactory {
         URLClassLoader cl = URLClassLoader.newInstance(urls);
         while (e.hasMoreElements()) {
           JarEntry je = e.nextElement();
-
           if (je.isDirectory() || !je.getName().endsWith(".class"))
             continue;
           String className = je.getName().substring(0, je.getName().length() - String.valueOf(".class").length());
           className = className.replace('/', '.');
-          Class<?> clazz = cl.loadClass(className);
-          if (Function.class.isAssignableFrom(clazz))
-            return true;
+          try {
+            Class<?> clazz = cl.loadClass(className);
+            if (Function.class.isAssignableFrom(clazz))
+              return true;
+          } catch(Throwable ignore){
+            //ignore
+          }
         }
-      } catch (IOException | ClassNotFoundException e) {//TODO ignore or StartUpException
+        Message.info("Jar file ["+filename+"] contains no class extending "+Function.class.getSimpleName());
+      } catch (IOException e) {//TODO ignore or StartUpException
       }
+    else
+      Message.info("File ["+filename+"] is not a .jar file");
     return false;
   }
 
@@ -268,13 +278,11 @@ public class FunctionFactory {
       }
     }
 
-    ArrayList<String> plugins = getPlugins();
-
-    if (!plugins.isEmpty()) {
+    if (!PLUGINS.isEmpty()) {
       msg.newLine();
       msg.newLine(Message.red("ExternalFunction :"));
 
-      for (String plugin : plugins) {
+      for (String plugin : PLUGINS) {
         ArrayList<Class> functions = getFunctionsFromType(plugin);
 
         if (!functions.isEmpty()) {
@@ -292,6 +300,7 @@ public class FunctionFactory {
   }
 
   private static ArrayList<Class> getFunctionsFromPlugin(String filename) throws IOException {
+
     ArrayList<Class> functions = new ArrayList<>();
     if (filename.endsWith(".jar")) {
       JarFile jarFile = new JarFile(filename);
@@ -306,17 +315,23 @@ public class FunctionFactory {
         className = className.replace('/', '.');
         try{
           Class<?> clazz = cl.loadClass(className);
-          if (Function.class.isAssignableFrom(clazz))
+          if (Function.class.isAssignableFrom(clazz) && !Modifier.isAbstract(clazz.getModifiers()))
             functions.add(clazz);
-        } catch(ClassNotFoundException ex){
-          throw new StartUpException("Function["+className+"] could not be found in file ["+filename+"]", ex);
+        } catch(Throwable ex){
+          //throw new StartUpException("Function["+className+"] could not be found in file ["+filename+"]", ex);
         }
       }
     }
     return functions;
   }
 
-  private static ArrayList<Class> getAllFunctions() { //TODO manage plugin
+  private static ArrayList<Class> getALLFUNCTIONS() {
+    if(ALL_FUNCTIONS == null)
+      ALL_FUNCTIONS = initAllFunctions();
+    return ALL_FUNCTIONS;
+  }
+
+  private static ArrayList<Class> initAllFunctions() {
     ArrayList<Class> clazzes = new ArrayList<>();
     try {
       for (String classpathEntry : System.getProperty("java.class.path").split(System.getProperty("path.separator")))
@@ -338,10 +353,10 @@ public class FunctionFactory {
               }
             }
         }
-      for (String plugin : getPlugins())
+      for (String plugin : PLUGINS)
         try {
           clazzes.addAll(getFunctionsFromPlugin(plugin));
-        } catch (IOException e) {
+        } catch (Exception e) {
           throw new StartUpException("Could not get functions from plugin file [" + plugin + "]", e);
         }
 

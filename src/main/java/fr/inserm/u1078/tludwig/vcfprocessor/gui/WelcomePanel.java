@@ -25,11 +25,12 @@ public class WelcomePanel extends JPanel {
     welcome.setFont(new Font(font.getFontName(), Font.PLAIN, font.getSize() * 2));
     JLabel ltitle = new JLabel(title, JLabel.CENTER);
     ltitle.setFont(new Font(font.getFontName(), Font.BOLD, font.getSize() * 3));
-    JLabel logo = new JLabel(new ImageIcon(Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("fr/inserm/u1078/tludwig/vcfprocessor/gui/logo.vcfprocessor494.png"))), JLabel.CENTER);
+    JLabel logo = new JLabel(new ImageIcon(Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("logo.vcfprocessorbig.png"))), JLabel.CENTER);
     JLabel mail = new JLabel("thomas.ludwig@inserm.fr");
     mail.setFont(new Font(Font.MONOSPACED, Font.PLAIN, font.getSize()));
     JLabel inserm = new JLabel("INSERM UMR1078 / Brest / FRANCE");
     inserm.setFont(new Font(font.getFontName(), Font.BOLD, font.getSize()));
+    this.setOpaque(false);
 
     this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
     this.setBackground(Color.WHITE);

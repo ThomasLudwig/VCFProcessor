@@ -44,7 +44,7 @@ public class ProcessWindow extends JFrame {
     this.getContentPane().add(panel, BorderLayout.CENTER);
     this.pack();
     try {
-      this.setIconImage(Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("fr/inserm/u1078/tludwig/vcfprocessor/gui/gear.png")));
+      this.setIconImage(Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("gear.png")));
     } catch (Exception e) {
       //Nothing
     }

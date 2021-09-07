@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -61,8 +62,8 @@ public class VCF {
   private VEPFormat vepFormat;
   private final HashMap<String, Integer> sampleIndices;
   private final ArrayList<Integer> keptIndices;
-  private int nbVariantsRead = 0;
-  private int nbVariantsFiltered = 0;
+  private AtomicInteger nbVariantsRead = new AtomicInteger(0);
+  private AtomicInteger nbVariantsFiltered = new AtomicInteger(0);
 
   //private VariantReader uniqVCFReader = null;
   private Reader uniqLineReader = null;
@@ -192,7 +193,8 @@ public class VCF {
     int kept = originalSampleNb - filtered.size();
     Message.info("Sample kept : " + kept + "/" + originalSampleNb);
     if (kept == 0)
-      throw new VCFException("No sample remaining after filtering");
+      Message.warning("No Samples left in the VCF file");
+      //throw new VCFException("No sample remaining after filtering");
 
   }
 
@@ -376,7 +378,7 @@ public class VCF {
       if (f == null)
         f = filteredLine.split(T, -1);
       if (updateACANAF(f)) {//if all ACs are 0, drop the line
-        this.nbVariantsFiltered++;
+        this.nbVariantsFiltered.incrementAndGet();
         return null;
       }
 
@@ -390,7 +392,7 @@ public class VCF {
         f = filteredLine.split(T);
       for (LineFilter filter : this.commandParser.getLineFilters())
         if (!filter.pass(f)) {
-          this.nbVariantsFiltered++;
+          this.nbVariantsFiltered.incrementAndGet();
           return null;
         }
     }
@@ -398,7 +400,7 @@ public class VCF {
   }
 
   public void printVariantKept() {
-    Message.info("Variant Kept : " + (this.nbVariantsRead - this.nbVariantsFiltered) + "/" + this.nbVariantsRead + " (" + this.nbVariantsFiltered + " filtered)");
+    Message.info("Variant Kept : " + (this.nbVariantsRead.get() - this.nbVariantsFiltered.get()) + "/" + this.nbVariantsRead.get() + " (" + this.nbVariantsFiltered.get() + " filtered)");
   }
 
   private boolean updateACANAF(String[] f) {
@@ -484,7 +486,7 @@ public class VCF {
     String line;
     try {
       if ((line = in.readLine()) != null) {
-        this.nbVariantsRead++;
+        this.nbVariantsRead.incrementAndGet();
         return line;
       }
       in.close();
@@ -694,7 +696,7 @@ public class VCF {
       for (VariantFilter variantFilter : this.commandParser.getVariantFilters())
         if (!variantFilter.pass(variant)) {
           pass = false;
-          this.nbVariantsFiltered++;
+          this.nbVariantsFiltered.incrementAndGet();
           break;
         }
       if (pass)
@@ -956,7 +958,6 @@ public class VCF {
               double dur = DateTools.duration(start);
               int speed = (int) (consumed / dur);
               Message.info(consumed + "/" + read + " variants read from " + filename + " in " + dur + "s (" + speed + " v/s)");
-              printVariantKept();
             }
           } finally {
             readLock.unlock();

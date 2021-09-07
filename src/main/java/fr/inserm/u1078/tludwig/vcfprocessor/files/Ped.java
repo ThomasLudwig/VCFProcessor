@@ -15,6 +15,12 @@ import java.util.Collection;
  */
 public class Ped {
   public static final String NOGROUP = "NOGROUP";
+  public static final int SEX_MALE = 1;
+  public static final int SEX_FEMALE = 2;
+  public static final int PHENO_UNAFFECTED = 1;
+  public static final int PHENO_AFFECTED = 2;
+
+
 
   private final String filename;
   private ArrayList<Sample> samples;
