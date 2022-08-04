@@ -3,7 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class Sample {
+public class Sample implements Comparable<Sample> {
 
   /* PED File Description
         Family ID
@@ -163,5 +163,10 @@ public class Sample {
     setSex(pedSample.getSex()) ;
     setPhenotype(pedSample.getPhenotype()) ;
     setGroup(pedSample.getGroup()) ;
+  }
+
+  @Override
+  public int compareTo(Sample o) {
+    return this.getId().compareTo(o.getId());
   }
 }

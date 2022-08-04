@@ -4,6 +4,7 @@ import fr.inserm.u1078.tludwig.maok.tools.Message;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * One group of VEPAnnotation (comma separated, starting with csq=allele) is an object
@@ -39,10 +40,22 @@ public class VEPAnnotation { //TODO rewrite this to be 100% compliant with vep91
     this.variant = info.getVariant();
   }
 */
+
+  /**
+   * to print only warning once for each missing key
+   */
+  private final static ArrayList<String> missingKeys = new ArrayList<>();
+
   public String getValue(String key) {
     int idx = format.getIndex(key);
     if (idx < 0){
-      Message.warning("Trying to access VEP annotation ["+key+"] which seem to be missing from this VCF file");
+      if(!missingKeys.contains(key)) {
+        missingKeys.add(key);
+        String message = "Trying to access VEP annotation [" + key + "] which seem to be missing from this VCF file";
+        Message.warning(message);
+        Message.debug(message, new AnnotationException(message));
+      }
+
       return null;
     }
     return values[idx];
@@ -367,8 +380,8 @@ public class VEPAnnotation { //TODO rewrite this to be 100% compliant with vep91
     return worst;
   }
   
-  public static HashMap<String, VEPAnnotation> getWorstVEPAnnotationsByGene(Collection<VEPAnnotation> veps){
-    HashMap<String, VEPAnnotation> ret = new HashMap<>();
+  public static Map<String, VEPAnnotation> getWorstVEPAnnotationsByGene(Collection<VEPAnnotation> veps){
+    Map<String, VEPAnnotation> ret = new HashMap<>();
     for(String symbol : getDistinctSymbols(veps)){
       ret.put(symbol, getWorstVEPAnnotation(veps, symbol));
     }

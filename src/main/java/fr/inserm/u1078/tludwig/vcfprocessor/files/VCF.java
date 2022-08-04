@@ -22,13 +22,10 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -54,15 +51,16 @@ public class VCF {
 
   private final ArrayList<String> headers;
   private String originalSampleHeader;
-  private final ArrayList<Sample> samples;
+
   private final String filename;
   private final CommandParser commandParser;
   private final UniversalReader in;
   private VEPFormat vepFormat;
-  private final HashMap<String, Integer> sampleIndices;
-  private final ArrayList<Integer> keptIndices;
-  private int nbVariantsRead = 0;
-  private int nbVariantsFiltered = 0;
+  private final TreeMap<Sample, Integer> sampleIndices;
+  //private final ArrayList<Sample> samples; //Keep Duplicate ArrayList of Samples with TreeMap sampleIndices because it's faster to access samples directly than ask the ped to convert each time
+  //private final ArrayList<Integer> keptIndices;
+  private final AtomicInteger nbVariantsRead = new AtomicInteger(0);
+  private final AtomicInteger nbVariantsFiltered = new AtomicInteger(0);
 
   //private VariantReader uniqVCFReader = null;
   private Reader uniqLineReader = null;
@@ -101,9 +99,7 @@ public class VCF {
     this.step = step;
 
     this.headers = new ArrayList<>();
-    this.samples = new ArrayList<>();
-    this.sampleIndices = new HashMap<>();
-    this.keptIndices = new ArrayList<>();
+    this.sampleIndices = new TreeMap<>();
     try {
       in = new UniversalReader(this.filename);
     } catch (IOException e) {
@@ -111,7 +107,7 @@ public class VCF {
     }
 
     //Process command line arguments
-    this.commandParser = Main.getCommandParser();//TODO, a new commandParser is return for each VCF files, see how it al plays out when there are filters and multiple VCF
+    this.commandParser = Main.getCommandParser();//TODO, a new commandParser is returned for each VCF files, see how it al plays out when there are filters and multiple VCF
     this.commandParser.processSampleArguments();
     this.commandParser.processPositionArguments();
     this.commandParser.processGenotypeArguments();
@@ -135,7 +131,7 @@ public class VCF {
     return this.formatHeaders.get(name);
   }
 
-  private void filterSamples() throws VCFException {
+  private void filterSamples() {
     int originalSampleNb = this.getSamples().size();
     FamFilter famFilter = null;
     MaxSampleFilter maxSampleFilter = null;
@@ -147,13 +143,13 @@ public class VCF {
       else if (filter instanceof MaxSampleFilter)
         maxSampleFilter = (MaxSampleFilter) filter;
       else
-        sampleFilters.add((SampleFilter) filter);
+        sampleFilters.add(filter);
 
     ArrayList<Sample> filtered = new ArrayList<>();
 
     //First apply famFilter
     if (famFilter != null) {
-      for (Sample sample : samples)
+      for (Sample sample : sampleIndices.navigableKeySet())
         if (!famFilter.pass(sample)) {
           Message.verbose("Sample [" + sample.getId() + "] has been filtered out by " + famFilter.getClass().getSimpleName());
           filtered.add(sample);
@@ -162,7 +158,7 @@ public class VCF {
       this.bindToPed(famFilter.getFam());
     }
     //apply all filter        
-    for (Sample sample : samples)
+    for (Sample sample : sampleIndices.navigableKeySet())
       if (!filtered.contains(sample))
         for (SampleFilter filter : sampleFilters)
           if (!(filter.pass(sample))) {
@@ -174,12 +170,12 @@ public class VCF {
     //Last apply maxSampleFilter
     if (maxSampleFilter != null) {
       ArrayList<String> keptSoFar = new ArrayList<>();
-      for (Sample sample : this.samples)
+      for (Sample sample : sampleIndices.navigableKeySet())
         if (!filtered.contains(sample))
           keptSoFar.add(sample.getId());
 
       maxSampleFilter.setSamples(keptSoFar);
-      for (Sample sample : samples)
+      for (Sample sample : sampleIndices.navigableKeySet())
         if (!filtered.contains(sample))
           if (!(maxSampleFilter.pass(sample))) {
             Message.verbose("Sample [" + sample.getId() + "] has been filtered out by " + maxSampleFilter.getClass().getSimpleName());
@@ -192,7 +188,8 @@ public class VCF {
     int kept = originalSampleNb - filtered.size();
     Message.info("Sample kept : " + kept + "/" + originalSampleNb);
     if (kept == 0)
-      throw new VCFException("No sample remaining after filtering");
+      Message.warning("No Samples left in the VCF file");
+      //throw new VCFException("No sample remaining after filtering");
 
   }
 
@@ -200,17 +197,14 @@ public class VCF {
     return this.filename;
   }
 
-  private void initSamples() throws VCFException {
+  private void initSamples() {
     this.ped = new Ped(this.originalSampleHeader.split("\t"));
     this.sampleIndices.clear();
-    this.keptIndices.clear();
 
     for (int i = 0; i < this.ped.getSampleSize(); i++) {
       Sample s = this.ped.getSample(i);
       int idx = i + 9;
-      this.samples.add(s);
-      this.sampleIndices.put(s.getId(), idx);
-      this.keptIndices.add(idx);
+      this.sampleIndices.put(s, idx);
     }
   }
 
@@ -256,24 +250,18 @@ public class VCF {
         if (pedSample.getId().equals(vcfSample.getId()))
           vcfSample.apply(pedSample);
 
-    ped.keepOnly(this.samples);
+    ped.keepOnly(this.sampleIndices.navigableKeySet());
   }
 
   public void removeSamples(Collection<Sample> excluded) {
     ArrayList<Sample> original = new ArrayList<>();
-    for (Sample sample : samples)
+    for (Sample sample : sampleIndices.navigableKeySet())
       original.add(sample);
 
-    this.samples.clear();
     for (Sample sample : original)
       if (excluded.contains(sample))
-        this.sampleIndices.remove(sample.getId());
-      else
-        this.samples.add(sample);
-    this.keptIndices.clear();
-    for (Sample sample : samples)
-      this.keptIndices.add(this.sampleIndices.get(sample.getId()));
-    ped.keepOnly(this.samples); //ped is never null
+        this.sampleIndices.remove(sample);
+    ped.keepOnly(this.sampleIndices.navigableKeySet()); //ped is never null
   }
 
   private void readHeaders() throws VCFException {
@@ -334,8 +322,8 @@ public class VCF {
     for (int i = 0; i < 9; i++)
       out.addColumn(f[i]);
 
-    for (Integer i : keptIndices)
-      out.addColumn(f[i]);
+    for (Sample sample : sampleIndices.navigableKeySet())
+      out.addColumn(f[sampleIndices.get(sample)]);
 
     return out.substring(1);
   }
@@ -376,7 +364,7 @@ public class VCF {
       if (f == null)
         f = filteredLine.split(T, -1);
       if (updateACANAF(f)) {//if all ACs are 0, drop the line
-        this.nbVariantsFiltered++;
+        this.nbVariantsFiltered.incrementAndGet();
         return null;
       }
 
@@ -390,7 +378,7 @@ public class VCF {
         f = filteredLine.split(T);
       for (LineFilter filter : this.commandParser.getLineFilters())
         if (!filter.pass(f)) {
-          this.nbVariantsFiltered++;
+          this.nbVariantsFiltered.incrementAndGet();
           return null;
         }
     }
@@ -398,7 +386,7 @@ public class VCF {
   }
 
   public void printVariantKept() {
-    Message.info("Variant Kept : " + (this.nbVariantsRead - this.nbVariantsFiltered) + "/" + this.nbVariantsRead + " (" + this.nbVariantsFiltered + " filtered)");
+    Message.info("Variant Kept : " + (this.nbVariantsRead.get() - this.nbVariantsFiltered.get()) + "/" + this.nbVariantsRead.get() + " (" + this.nbVariantsFiltered.get() + " filtered)");
   }
 
   private boolean updateACANAF(String[] f) {
@@ -484,7 +472,7 @@ public class VCF {
     String line;
     try {
       if ((line = in.readLine()) != null) {
-        this.nbVariantsRead++;
+        this.nbVariantsRead.incrementAndGet();
         return line;
       }
       in.close();
@@ -594,7 +582,7 @@ public class VCF {
 
   public String getSampleHeader() {
     String ret = "#CHROM" + T + "POS" + T + "ID" + T + "REF" + T + "ALT" + T + "QUAL" + T + "FILTER" + T + "INFO" + T + "FORMAT";
-    for (Sample sample : this.samples)
+    for (Sample sample : this.sampleIndices.navigableKeySet())
       ret += T + sample.getId();
     return ret;
   }
@@ -655,7 +643,7 @@ public class VCF {
   public Variant createVariant(String line) throws VCFException {
     if (line == null)
       throw new VCFException("Could not create variant from null line");
-    int nbSamples = this.samples.size();
+    int nbSamples = this.sampleIndices.size();
     if (line.charAt(0) == '#')
       throw new VCFException("In vcf file " + this.filename + " Could not create variant from the folowing line\n" + line);
     if (nbSamples == 0)
@@ -681,12 +669,15 @@ public class VCF {
 
       //limit to selected samples : in fact, there is nothing to do because de input line has already been altered by SampleFilters
       Genotype[] genotypes = new Genotype[nbSamples];
-      for (int i = 0; i < this.samples.size(); i++) {
+      int i = 0;
+      for(Sample sample : sampleIndices.navigableKeySet()){
+      //for (int i = 0; i < this.samples.size(); i++) {
         int index = IDX_SAMPLE + i;
         String geno = fields[index];//right index, because line has already be cut
         if (checkMode(MODE_QUICK_GENOTYPING))
           geno = geno.split(":")[0];
-        genotypes[i] = new Genotype(geno, format, this.samples.get(i));//right index, because samples has already been reduces
+        genotypes[i] = new Genotype(geno, format, sample);//right index, because samples has already been reduces
+        i++;
       }
 
       Variant variant = new Variant(chrom, pos, id, ref, alt, qual, filter, info, format, genotypes);
@@ -694,7 +685,7 @@ public class VCF {
       for (VariantFilter variantFilter : this.commandParser.getVariantFilters())
         if (!variantFilter.pass(variant)) {
           pass = false;
-          this.nbVariantsFiltered++;
+          this.nbVariantsFiltered.incrementAndGet();
           break;
         }
       if (pass)
@@ -720,7 +711,7 @@ public class VCF {
 
   public static ArrayList<String> commonSamples(VCF file1, VCF file2) {
     ArrayList<String> ret = new ArrayList<>();
-    ArrayList<Sample> samples2 = file2.getSamples();
+    NavigableSet<Sample> samples2 = file2.getSamples();
     for (Sample sample : file1.getSamples())
       for (Sample s : samples2)
         if (sample.getId().equals(s.getId())) {
@@ -734,8 +725,22 @@ public class VCF {
     return headers;
   }
 
-  public ArrayList<Sample> getSamples() {
-    return this.samples;
+  public NavigableSet<Sample> getSamples() {
+    return sampleIndices.navigableKeySet();
+  }
+
+  public int indexOfSample(Sample sample){
+    return indexOfSample(sample.getId());
+  }
+
+  public int indexOfSample(String sampleID){
+    int i = 0;
+    for(Sample sample : this.sampleIndices.navigableKeySet()){
+      if(sample.getId().equals(sampleID))
+        return i;
+      i++;
+    }
+    return -1;
   }
 
   public boolean has1kGAnnotation() {
@@ -798,7 +803,7 @@ public class VCF {
     ArrayList<Integer> members = new ArrayList<>();
     if (group == null || group.isEmpty())
       return members;
-    for (Sample sample : this.samples)
+    for (Sample sample : sampleIndices.navigableKeySet())
       if (group.equals(sample.getGroup()))
         members.add(this.sampleIndices.get(sample.getId()));
     Message.debug(members.size() + " members found for " + group);
@@ -956,7 +961,6 @@ public class VCF {
               double dur = DateTools.duration(start);
               int speed = (int) (consumed / dur);
               Message.info(consumed + "/" + read + " variants read from " + filename + " in " + dur + "s (" + speed + " v/s)");
-              printVariantKept();
             }
           } finally {
             readLock.unlock();

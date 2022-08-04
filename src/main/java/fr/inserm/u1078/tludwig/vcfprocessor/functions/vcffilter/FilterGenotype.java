@@ -71,7 +71,7 @@ public class FilterGenotype extends ParallelVCFFilterFunction { //TODO add suppo
       samples[i] = split[0];
       genotypes[i] = split[1];
       keeps[i] = Boolean.parseBoolean(split[2]);
-      indices[i] = getVCF().getSamples().indexOf(getVCF().getPed().getSample(samples[i]));
+      indices[i] = getVCF().indexOfSample(samples[i]);
 
       Message.info((keeps[i] ? "KEEP  " : "REMOVE")+" "+genotypes[i]+" for "+samples[i]+"(#"+indices[i]+", column["+(VCF.IDX_SAMPLE+indices[i]+1)+"])");
       if (this.indices[i] == -1)

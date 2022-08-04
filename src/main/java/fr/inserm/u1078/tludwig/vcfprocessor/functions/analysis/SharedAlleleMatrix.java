@@ -9,7 +9,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.util.NavigableSet;
 
 /**
  * returns a series of matrices [individuals/individuals] with the number of shared alleles.
@@ -27,7 +27,7 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction {
   private int[][] snp05;
   private int[][] snp1;
   private int[][] snp5;
-  private ArrayList<Sample> samples;
+  private NavigableSet<Sample> samples;
 
   @Override
   public String getSummary() {
@@ -150,8 +150,10 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction {
       out1.println(header);
       out5.println(header);
 
-      for (int l = 0; l < samples.size(); l++) {
-        String lNew = samples.get(l).getId();
+      int l = 0;
+      for(Sample sample : samples) {
+      //for (int l = 0; l < samples.size(); l++) {
+        String lNew = sample.getId();
         String l05 = lNew;
         String l1 = lNew;
         String l5 = lNew;
@@ -166,6 +168,7 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction {
         out05.println(l05);
         out1.println(l1);
         out5.println(l5);
+        l++;
       }
 
       outNew.close();

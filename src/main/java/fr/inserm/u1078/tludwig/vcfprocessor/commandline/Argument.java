@@ -20,7 +20,6 @@ public class Argument {
   private final String value;
   private final String[][] examples;
   private final Description description;
-  //public static final HashMap<String, ArrayList<Argument>> ARGUMENTS = new HashMap<>();
   private static final Collection<String> KEYS = new ArrayList<String>();
 
   private Argument(String key, String type, String value, String[][] examples, Description description) {

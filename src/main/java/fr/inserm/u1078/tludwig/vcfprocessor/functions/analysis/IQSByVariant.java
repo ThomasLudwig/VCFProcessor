@@ -21,6 +21,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -231,7 +232,7 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
     String maxPop = "";
     double frex = v.getAlleleFrequencyPresent(a);
     */
-    HashMap<String, VEPAnnotation> worst = v.getInfo().getWorstVEPAnnotationsByGene(a);
+    Map<String, VEPAnnotation> worst = v.getInfo().getWorstVEPAnnotationsByGene(a);
     /*
     for (VEPAnnotation vep : v.getInfo().getVEPAnnotations(a)) {
       rs = vep.getValue("Existing_variation");

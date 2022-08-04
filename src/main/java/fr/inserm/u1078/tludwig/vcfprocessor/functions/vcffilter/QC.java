@@ -30,7 +30,7 @@ import java.util.HashMap;
  * Checked for release on 2020-08-03
  * Unit Test defined on 2020-08-03
  */
-public class QC1078 extends ParallelVCFVariantFunction {
+public class QC extends ParallelVCFVariantFunction {
 
   //TODO the disabled option doesn't work for missing values. Is this still true ?
   public final PedFileParameter pedfile = new PedFileParameter();
@@ -180,7 +180,7 @@ public class QC1078 extends ParallelVCFVariantFunction {
 
   @Override
   public String getSummary() {
-    return "Run a Quality Control on VCF Variants according to INSERM U1078 Best Practices";
+    return "Run a Quality Control on VCF Variants";
   }
 
   @Override

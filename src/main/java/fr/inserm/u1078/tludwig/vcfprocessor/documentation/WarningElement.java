@@ -18,7 +18,7 @@ public class WarningElement extends Element {
 
   @Override
   public String asHTML() {
-    return ("<font color=\"red\">"+TEXT+ " " + String.join("<br/>\n", text) + "</font>");
+    return ("<font color=\""+HTML_NICE_RED+"\">"+TEXT+ " " + String.join("<br/>\n", text) + "</font>");
   }
 
   @Override

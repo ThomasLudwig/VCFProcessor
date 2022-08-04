@@ -25,6 +25,6 @@ public class AlleleNumberFilter extends LineFilter {
 
   @Override
   public String getDetails() {
-    return this.minAllele+" <= Quality <= "+this.maxAllele;
+    return this.minAllele+" <= NbAlleles <= "+this.maxAllele;
   }
 }

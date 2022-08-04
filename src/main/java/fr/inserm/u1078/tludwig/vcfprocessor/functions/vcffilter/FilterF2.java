@@ -1,7 +1,5 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 
-import fr.inserm.u1078.tludwig.maok.SortedList;
-import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFPedFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.StringParameter;
@@ -11,8 +9,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.TreeMap;
 
 /**
  * Filters variants to keep only those contributing to F2 data.
@@ -38,8 +35,7 @@ public class FilterF2 extends ParallelVCFPedFunction {
   private static final int NEWSNV = 2;
   private static final int NEWIND = 3;
   private static final int OVERALL = 4;
-  private HashMap<Variant, boolean[]> storeF2;
-  private SortedList<Variant> output;
+  private TreeMap<Variant, boolean[]> storeF2;
 
   @Override
   public String getSummary() {
@@ -52,14 +48,14 @@ public class FilterF2 extends ParallelVCFPedFunction {
     return new Description(this.getSummary())
             .addLine("F2 data are described in PubMedId: 23128226, figure 3a")
             .addLine("Six sets of results are given, one for:")
-            .addEnumerate(new String[]{
-      "All variants",
-      "All SNVs",
-      "variants without rs",
-      "SNVs without rs",
-      "variants with rs",
-      "SNVs with rs"
-    });
+            .addEnumerate(
+                    "All variants",
+                    "All SNVs",
+                    "variants without rs",
+                    "SNVs without rs",
+                    "variants with rs",
+                    "SNVs with rs"
+            );
   }
 
   @Override
@@ -90,8 +86,7 @@ public class FilterF2 extends ParallelVCFPedFunction {
   @Override
   public void begin() {
     super.begin();
-    this.output = new SortedList<>(new ArrayList<>(), SortedList.Strategy.ADD_FROM_END);
-    this.storeF2 = new HashMap<>();
+    this.storeF2 = new TreeMap<>();
     String filename = this.dir.getDirectory() + this.prefix.getStringValue();
 
     try {
@@ -116,7 +111,7 @@ public class FilterF2 extends ParallelVCFPedFunction {
   public void end() {
     super.end();
 
-    for (Variant variant : this.output) {
+    for (Variant variant : this.storeF2.navigableKeySet()) {
       boolean[] isF2 = this.storeF2.get(variant);
       this.f2all.println(variant);
       if (isF2[NEWSNV])
@@ -187,7 +182,6 @@ public class FilterF2 extends ParallelVCFPedFunction {
       Object[] objects = (Object[]) analysis;
       Variant variant = (Variant) objects[0];
       boolean[] isF2 = (boolean[]) objects[1];
-      output.add(variant);//Avoid lines being printed out of order
       storeF2.put(variant, isF2);
     } catch (Exception e) {
       return false;

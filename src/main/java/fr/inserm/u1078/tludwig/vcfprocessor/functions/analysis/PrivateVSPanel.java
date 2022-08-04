@@ -121,7 +121,7 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
     }
     
     ref.getReaderAndStart();
-    ArrayList<Sample> samples = ref.getSamples();
+    ArrayList<Sample> samples = new ArrayList<>(ref.getSamples());
     
     Message.info("Processing  Ref VCF for " + N + " samples");
 

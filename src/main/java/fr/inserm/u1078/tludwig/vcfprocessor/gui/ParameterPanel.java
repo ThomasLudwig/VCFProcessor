@@ -100,7 +100,7 @@ class ParameterPanel extends JPanel {
                   "Launching...",
                   JOptionPane.OK_CANCEL_OPTION,
                   JOptionPane.QUESTION_MESSAGE,
-                  new ImageIcon(Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("fr/inserm/u1078/tludwig/vcfprocessor/gui/logo.vcfprocessor128.png")))) == JOptionPane.OK_OPTION) {
+                  new ImageIcon(Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("logo.vcfprocessor128.png")))) == JOptionPane.OK_OPTION) {
             ProcessWindow pw = new ProcessWindow(args.toArray(new String[args.size()]));
           }
         }

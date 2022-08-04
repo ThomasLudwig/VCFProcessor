@@ -1,6 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.gui;
 
-import java.awt.Dimension;
+import java.awt.*;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -17,7 +17,8 @@ class TextPanel extends JPanel {
   }
 
   private void implement(String text, int w, int h) {
-    JEditorPane jep = new JEditorPane("text/html", "<html>" + text + "</html>");
+    JEditorPane jep = new JEditorPane("text/html", "<html><body style=\"color:white;\">" + text + "</body></html>");
+    jep.setForeground(Color.WHITE);
     jep.setEditable(false);
     jep.setPreferredSize(new Dimension(w, h));
 

@@ -9,7 +9,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.TreeMap;
 
 /**
  * Creates an output VCF file for each gene.
@@ -58,32 +58,29 @@ public class SplitByGene extends VCFFunction { //TODO parallelize
   public void executeFunction() throws Exception {
     VCF vcf = this.vcffile.getVCF();
     vcf.getReaderAndStart();
-    ArrayList<String> allGenes = new ArrayList<>();
-    HashMap<String, ArrayList<String>> variants = new HashMap<>();
+    //ArrayList<String> allGenes = new ArrayList<>();
+    TreeMap<String, ArrayList<String>> variantsByGenes = new TreeMap<>();
 
     Variant variant;
     while ((variant = vcf.getNextVariant()) != null) {
       ArrayList<String> localGenes = new ArrayList<>();
       for (String gene : variant.getGeneList())
         if (!localGenes.contains(gene)) {
-          if (allGenes.contains(gene)) {
-            ArrayList<String> lines = variants.get(gene);
-            lines.add(variant.toString());
-            variants.put(gene, lines);
+          if (variantsByGenes.containsKey(gene)) {
+            variantsByGenes.get(gene).add(variant.toString());
           } else {
-            allGenes.add(gene);
             ArrayList<String> lines = new ArrayList<>();
             lines.add(variant.toString());
-            variants.put(gene, lines);
+            variantsByGenes.put(gene, lines);
           }
           localGenes.add(gene);
         }
     }
 
-    for (String gene : allGenes) {
+    for (String gene : variantsByGenes.navigableKeySet()) {
       PrintWriter out = getPrintWriter(this.dir.getDirectory() + File.separator + gene + ".vcf");
       vcf.printHeaders(out);
-      for (String l : variants.get(gene))
+      for (String l : variantsByGenes.get(gene))
         out.println(l);
       out.close();
     }

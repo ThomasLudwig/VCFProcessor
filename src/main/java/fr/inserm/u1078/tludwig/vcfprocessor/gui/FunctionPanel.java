@@ -25,7 +25,7 @@ public class FunctionPanel extends JPanel {
     this.add(summary);
     //this.add(new JLabel(("sdfsdfqsmldf kqsmfd kqsdfmlq")));
 
-    TextPanel description = new TextPanel(function.getDescription().asHTML(), pWidth - 100, (int) (pHeight * .2));
+    TextPanel description = new TextPanel(function.getDescription().asHTML(), pWidth - 100, (int) (pHeight * .3));
     description.setBorder(BorderFactory.createTitledBorder("Description"));
     this.add(description);
 

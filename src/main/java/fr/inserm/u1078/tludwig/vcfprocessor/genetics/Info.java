@@ -4,10 +4,8 @@ import fr.inserm.u1078.tludwig.maok.SortedList;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF.InfoFormatHeader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.TreeSet;
+
+import java.util.*;
 
 /**
  * Meta class contains all the data in the "INFO" field (including VEPAnnotations)
@@ -34,22 +32,19 @@ public class Info {
   private Variant variant;
 
   private final HashMap<Integer, ArrayList<VEPAnnotation>> vepAnnotations;
-  private final HashMap<String, String> infoMap;
-  private final ArrayList<String> sortedInfoKeys;
+  private final TreeMap<String, String> infoMap;
   private final VCF vcffile;
 
   public Info(String infoField, VCF vcffile) throws AnnotationException {
     this.vepAnnotations = new HashMap<>();
-    infoMap = new HashMap<>();
-    sortedInfoKeys = new ArrayList<>();
+    infoMap = new TreeMap<>();
     for (String kvString : infoField.split(";")) {
       String kv[] = kvString.split("=");
       String key = kv[0];
       String value = null;
       if (kv.length == 2)
         value = kv[1];
-      if (!sortedInfoKeys.contains(key)) {
-        sortedInfoKeys.add(key);
+      if (!infoMap.containsKey(key)) {
         infoMap.put(key, value);
       } else
         Message.warning("Duplicate key [" + kv[0] + "] found for info [" + infoField + "]");
@@ -863,8 +858,6 @@ public class Info {
   }
 
   public void update(String key, String value) {
-    if (!this.sortedInfoKeys.contains(key))
-      this.sortedInfoKeys.add(key);
     this.infoMap.put(key, value);
   }
   
@@ -902,7 +895,7 @@ public class Info {
 
   public ArrayList<String> getFields() {
     ArrayList<String> fields = new ArrayList<>();
-    for (String key : this.sortedInfoKeys) {
+    for (String key : this.infoMap.navigableKeySet()) {
       String value = this.infoMap.get(key);
       if (value == null) {
         InfoFormatHeader infoFormat = vcffile.getInfoHeader(key);
@@ -930,7 +923,7 @@ public class Info {
     return VEPAnnotation.getWorstVEPAnnotation(getVEPAnnotations(a));
   }
   
-  public HashMap<String, VEPAnnotation> getWorstVEPAnnotationsByGene(int a){
+  public Map<String, VEPAnnotation> getWorstVEPAnnotationsByGene(int a){
     return VEPAnnotation.getWorstVEPAnnotationsByGene(getVEPAnnotations(a));
   }
   
@@ -938,7 +931,7 @@ public class Info {
     return VEPAnnotation.getWorstVEPAnnotation(getAllVEPAnnotations());
   }
   
-  public HashMap<String, VEPAnnotation> getWorstVEPAnnotationsByGene(){
+  public Map<String, VEPAnnotation> getWorstVEPAnnotationsByGene(){
     return VEPAnnotation.getWorstVEPAnnotationsByGene(getAllVEPAnnotations());
   }
   

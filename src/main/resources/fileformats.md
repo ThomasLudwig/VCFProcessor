@@ -26,8 +26,8 @@ It is used to specify information about the samples present in the VCF files, an
 2. ID : the sample's unique ID
 3. MID : the ID of the sample's mother
 4. FID : the ID of the sample's father
-5. Sex : the sample's sex (0 male / 1 female)
-6. Pheno : the sample's phenotype (0 unaffected / 1 affected)
+5. Sex : the sample's sex (1 male / 2 female)
+6. Pheno : the sample's phenotype (1 unaffected / 2 affected)
 7. Group : the group to which the sample belongs (batch id, population, symptoms, ...)
 
 ## BED

@@ -83,7 +83,7 @@ public class F2Individuals extends ParallelVCFVariantPedFunction {
 
   @Override
   public void begin() {
-    samples = getVCF().getSamples();
+    samples = new ArrayList<>(getVCF().getSamples());
     total = samples.size();
     this.f2all = new int[total][total + 1];
     this.f2old = new int[total][total + 1];

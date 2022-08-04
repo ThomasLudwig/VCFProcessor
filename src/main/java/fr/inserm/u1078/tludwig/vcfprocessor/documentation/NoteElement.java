@@ -22,7 +22,7 @@ public class NoteElement extends Element {
 
   @Override
   public String asHTML() {
-    return ("<font color=\"blue\">" + TEXT + " " + String.join("<br/>", text) + "</font>");
+    return ("<font color=\""+HTML_NICE_BLUE+"\">" + TEXT + " " + String.join("<br/>", text) + "</font>");
   }
 
   @Override
