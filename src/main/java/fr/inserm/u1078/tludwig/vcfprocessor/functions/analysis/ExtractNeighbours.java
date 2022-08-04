@@ -9,6 +9,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
+import java.util.NavigableSet;
 
 /**
  * Creates a bed file of the positions where at least one sample has 2 SNVs that could be in the same triplet (regardless of the reading frame)
@@ -21,7 +22,7 @@ import java.util.ArrayList;
  */
 public class ExtractNeighbours extends VCFFunction {
 
-  private ArrayList<Sample> samples = null;
+  private NavigableSet<Sample> samples = null;
 
   @Override
   public String getSummary() {

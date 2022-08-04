@@ -131,7 +131,7 @@ public class SplitMultiAllelic extends ParallelVCFFunction {
   }
 
   private String convertGenotype(String genotype, String format, int alt) {
-    //TODO carefull on splitting AD/ PL/ ....
+    //TODO careful on splitting AD/ PL/ ....
     //for each genotype, 0->0, x->1, y->0
     int allele = alt+1;
     String[] g = genotype.split(":");

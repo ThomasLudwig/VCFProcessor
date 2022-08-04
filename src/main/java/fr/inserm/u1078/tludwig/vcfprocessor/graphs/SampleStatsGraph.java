@@ -2,13 +2,14 @@ package fr.inserm.u1078.tludwig.vcfprocessor.graphs;
 
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.ColorTools;
-import fr.inserm.u1078.tludwig.maok.tools.Message;
+
 import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.TreeMap;
+
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.DatasetRenderingOrder;
@@ -21,7 +22,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.RectangleEdge;
 
 /**
- * XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX CLASS DESCRIPTION XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+ * Graph Class for Sample Stats
  *
  * @author Thomas E. Ludwig (INSERM - U1078)
  * Started on 2020-09-08
@@ -44,9 +45,7 @@ public class SampleStatsGraph extends XYLineGraph {
   private final String filename;
   private final int type;
   private final String title;
-  private final ArrayList<String> allGroups;
-  private final ArrayList<String> groups;
-  private final HashMap<String, ArrayList<Double>> values;
+  private final TreeMap<String, ArrayList<Double>> valuesForGroups;
 
   private double min = Double.MAX_VALUE;
   private double max = -min;
@@ -55,9 +54,7 @@ public class SampleStatsGraph extends XYLineGraph {
     this.filename = filename;
     this.title = title;
     this.type = type;
-    allGroups = new ArrayList<>();
-    groups = new ArrayList<>();
-    values = new HashMap<>();
+    valuesForGroups = new TreeMap<>();
   }
 
   public String getExtensions() {
@@ -73,11 +70,8 @@ public class SampleStatsGraph extends XYLineGraph {
       while ((line = in.readLine()) != null) {
         String[] f = line.split(T);
         String group = f[1];
-        this.groups.add(group);
-        if (!allGroups.contains(group)){
-          allGroups.add(group);
-          this.values.put(group, new ArrayList<>());
-        }
+        if (!valuesForGroups.containsKey(group))
+          this.valuesForGroups.put(group, new ArrayList<>());
 
         double value = Double.parseDouble(f[INDEX[type]]);
 
@@ -85,16 +79,15 @@ public class SampleStatsGraph extends XYLineGraph {
           max = value;
         if (value < min)
           min = value;
-        
-        
-        this.values.get(group).add(value);
+
+        this.valuesForGroups.get(group).add(value);
       }
       in.close();
     } catch (Exception e) {
       throw new GraphException("Could not load data from " + this.filename, e);
     }
     
-    for(ArrayList<Double> vals : this.values.values())
+    for(ArrayList<Double> vals : this.valuesForGroups.values())
       Collections.sort(vals);
 
     double spread = (max - min) * 0.1;
@@ -108,9 +101,9 @@ public class SampleStatsGraph extends XYLineGraph {
   protected XYDataset createXYDataset() {
     XYSeriesCollection dataset = new XYSeriesCollection();
     int i = 0;
-    for (String group : allGroups){
+    for (String group : valuesForGroups.navigableKeySet()){
       XYSeries series = new XYSeries(capitalize(group));
-      for(double val : this.values.get(group))
+      for(double val : this.valuesForGroups.get(group))
         series.add(i++, val);      
       
       dataset.addSeries(series);
@@ -135,7 +128,7 @@ public class SampleStatsGraph extends XYLineGraph {
 
     NumberAxis xAxis = (NumberAxis) plot.getDomainAxis();
     int size = 0;
-    for(ArrayList<Double> vals : values.values())
+    for(ArrayList<Double> vals : valuesForGroups.values())
       size += vals.size();
     
     xAxis.setRange(-10, size + 10);
@@ -145,11 +138,14 @@ public class SampleStatsGraph extends XYLineGraph {
     final XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
 
     Shape shape = new Ellipse2D.Double(-3.0, -3.0, 6.0, 6.0);
-    for (int g = 0; g < allGroups.size(); g++) {
+    int g = 0;
+    for(String group : valuesForGroups.navigableKeySet()){
+    //for (int g = 0; g < allGroups.size(); g++) {
       renderer.setSeriesShapesVisible(g, true);
       renderer.setSeriesLinesVisible(g, false);
       renderer.setSeriesShape(g, shape);
-      renderer.setSeriesPaint(g, ColorTools.getColor(this.allGroups.get(g)));
+      renderer.setSeriesPaint(g, ColorTools.getColor(group));
+      g++;
     }
 
     plot.setRenderer(renderer);

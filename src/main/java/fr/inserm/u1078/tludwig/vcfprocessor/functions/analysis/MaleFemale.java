@@ -11,6 +11,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Shows Male/Female Allele Frequencies
@@ -102,7 +103,7 @@ public class MaleFemale extends ParallelVCFVariantPedFunction {
     }
 
     for(int a = 1 ; a < variant.getAlleleCount(); a++){
-      HashMap<String, VEPAnnotation> geneCsqs = variant.getInfo().getWorstVEPAnnotationsByGene(a);
+      Map<String, VEPAnnotation> geneCsqs = variant.getInfo().getWorstVEPAnnotationsByGene(a);
       String geneCsq = "";
       for(String gene : geneCsqs.keySet()){
         geneCsq += "," + gene + ":" + VEPConsequence.getWorstConsequence(geneCsqs.get(gene).getConsequence());

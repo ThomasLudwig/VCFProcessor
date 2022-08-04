@@ -19,7 +19,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -48,8 +48,8 @@ public class IQSBySample extends VCFPedFunction {
   private final VCFFileParameter imputedFilename = new VCFFileParameter(OPT_FILE, "imputed.vcf(.gz)", "VCF File Containing imputed data (can be gzipped)");
   public final IntegerParameter cpu = new IntegerParameter(OPT_CPU, "Integer", "number of cores", 1, Integer.MAX_VALUE);
   
-  private ArrayList<String> samples;
-  private HashMap<String, SampleData> sampleData;
+  //private ArrayList<String> samples;
+  private TreeMap<String, SampleData> sampleData;
 
   private final AtomicInteger totalVariants = new AtomicInteger(0);
 
@@ -109,18 +109,18 @@ public class IQSBySample extends VCFPedFunction {
 
   private void loadData() throws Exception {
     start = new Date().getTime();
-    sampleData = new HashMap<>();
+    sampleData = new TreeMap<>();
 
     act = this.vcffile.getVCF(VCF.STEP_OFF);
     imputedVCF = this.imputedFilename.getVCF(VCF.STEP_OFF);
     MultiVCFReader reader = new MultiVCFReader(act, imputedVCF);
-    samples = reader.getCommonsSamples();
-    for (String sample : samples)
+    //samples = reader.getCommonsSamples();
+    for (String sample : reader.getCommonsSamples())
       sampleData.put(sample, new SampleData());
 
     Message.info("Found " + act.getSamples().size() + " samples in " + act.getFilename());
     Message.info("Found " + imputedVCF.getSamples().size() + " samples in " + imputedVCF.getFilename());
-    Message.info("Found " + samples.size() + " in common");
+    Message.info("Found " + sampleData.size() + " in common");
 
     ExecutorService threadPool = Executors.newFixedThreadPool(cpu.getIntegerValue());
     Worker[] workers = new Worker[cpu.getIntegerValue()];
@@ -163,7 +163,7 @@ public class IQSBySample extends VCFPedFunction {
       ped = this.pedfile.getPed();
 
     Message.info("Computing IQS for Sample");
-    for (String sample : samples) {
+    for (String sample : sampleData.navigableKeySet()) {
       if (ped != null)
         group = ped.getSample(sample).getGroup();
       SampleData data = sampleData.get(sample);
@@ -174,7 +174,7 @@ public class IQSBySample extends VCFPedFunction {
     Message.info("\nDone");
   }
 
-  private class SampleData {
+  private static class SampleData {
     private int nbVariants;
     private final double[][] matrix;
     private final Lock lock = new ReentrantLock();
@@ -256,7 +256,7 @@ public class IQSBySample extends VCFPedFunction {
                         altA++;
                         if (actAlt.equals(imputed.getAlt())){
                           totalVariants.incrementAndGet();
-                          for (String sample : samples) {                            
+                          for (String sample : sampleData.navigableKeySet()) {
                             Genotype g = actual.getGenotype(sample);
                             if (!g.isMissing()) {
                               double[][] mat = new double[][]{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};

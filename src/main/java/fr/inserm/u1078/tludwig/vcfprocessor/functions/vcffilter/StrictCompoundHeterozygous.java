@@ -58,18 +58,16 @@ public class StrictCompoundHeterozygous extends AbstractCompoundFunction {
       this.fatalAndDie("No case sample present");
     int i = 0;
     for (Sample cas : ped.getCases()) {
-      int c = this.getVCF().getSamples().indexOf(cas);
-      Sample mother = ped.getSample(cas.getMid());
-      Sample father = ped.getSample(cas.getPid());
-      int mid = this.getVCF().getSamples().indexOf(mother);
-      int pid = this.getVCF().getSamples().indexOf(father);
+      int c = this.getVCF().indexOfSample(cas);
+      int mid = this.getVCF().indexOfSample(cas.getMid());
+      int pid = this.getVCF().indexOfSample(cas.getPid());
       if (mid == -1)
         this.fatalAndDie("No mother found for case [" + cas + "]");
       if (pid == -1)
         this.fatalAndDie("No father found for case [" + cas + "]");
       cases[i] = c;
       parents[i] = new int[]{mid, pid};
-      Message.verbose("Added trio : " + cas.getFid() + " " + cas.getId() + " [" + mother.getId() + "|" + father.getId() + "]");
+      Message.verbose("Added trio : " + cas.getFid() + " " + cas.getId() + " [" + cas.getMid() + "|" + cas.getPid() + "]");
       i++;
     }
   }

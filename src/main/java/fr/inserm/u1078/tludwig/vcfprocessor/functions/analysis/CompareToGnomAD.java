@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Compares the variants present in a VCF file to those present in a GnomAD VCF file
@@ -131,7 +132,7 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
         String qual = variant.getFilter();
         if (variant.isHQ())
           qual = "HQ";
-        HashMap<String, VEPAnnotation> csqGenes = variant.getInfo().getWorstVEPAnnotationsByGene(a);
+        Map<String, VEPAnnotation> csqGenes = variant.getInfo().getWorstVEPAnnotationsByGene(a);
         VEPConsequence worst = VEPConsequence.getWorst(csqGenes.values());
         ArrayList<String> genes = new ArrayList<>();
         for(String gene: csqGenes.keySet()){

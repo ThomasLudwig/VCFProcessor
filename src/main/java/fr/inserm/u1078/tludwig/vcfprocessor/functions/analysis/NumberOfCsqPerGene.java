@@ -11,7 +11,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Given a VCF file and a list of genes, prints the number of variants per gene for each consequence
@@ -22,10 +23,13 @@ import java.util.HashMap;
  * Unit Test defined on   2020-07-09
  */
 public class NumberOfCsqPerGene extends ParallelVCFVariantFunction {
-  
-  
-  private HashMap<String, Integer> table;
-  private ArrayList<String> genes;
+
+  /**
+   * Index Genes (lines), Key (columns)
+   * Inner Index VEPConsequence, Key (values : number of variants)
+   */
+  private TreeMap<String, TreeMap<VEPConsequence, Integer>> table;
+  //private ArrayList<String> genes;
   
 
   private final FileParameter geneFile = new FileParameter(OPT_GENES, "genes.txt", "File listing genes");
@@ -38,7 +42,7 @@ public class NumberOfCsqPerGene extends ParallelVCFVariantFunction {
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
-            .addLine("Multiallelic sites are concidered for each alternate allele");
+            .addLine("Multiallelic sites are considered for each alternate allele");
   }
 
   @Override
@@ -61,22 +65,18 @@ public class NumberOfCsqPerGene extends ParallelVCFVariantFunction {
     return OUT_TSV;
   }
   
-  private static String key(String gene, VEPConsequence v){
-    return gene+"+"+v.getName();
-  }
-
   @Override
   public void begin() {
-    table = new HashMap<>();
-    genes = new ArrayList<>();
-    
+    table = new TreeMap<>();
+
     String gene;
     try {
       UniversalReader in = this.geneFile.getReader();
       while ((gene = in.readLine()) != null) {
-        genes.add(gene);
+        TreeMap<VEPConsequence, Integer> columns = new TreeMap<>();
         for(VEPConsequence v : VEPConsequence.values())
-          table.put(key(gene,v), 0);
+          columns.put(v, 0);
+        table.put(gene, columns);
       }
       in.close();
     } catch (IOException e) {
@@ -87,14 +87,13 @@ public class NumberOfCsqPerGene extends ParallelVCFVariantFunction {
   @Override
   public String[] getFooters() {
     ArrayList<String> out = new ArrayList<>();
-    for (String gene : genes){
+    for (String gene : table.navigableKeySet()){
       LineBuilder line = new LineBuilder(gene);
-      for (VEPConsequence v : VEPConsequence.values()) {
-        line.addColumn(table.get(key(gene,v)));
-      }
+      for (VEPConsequence v : VEPConsequence.values())
+        line.addColumn(table.get(gene).get(v));
       out.add(line.toString());
     }
-    return out.toArray(new String[out.size()]);
+    return out.toArray(new String[0]);
   }
 
   @Override
@@ -114,9 +113,9 @@ public class NumberOfCsqPerGene extends ParallelVCFVariantFunction {
   @Override
   public String[] processInputVariant(Variant variant) {
     for(int a = 1 ; a < variant.getAlleleCount(); a++){
-      HashMap<String, VEPAnnotation>  worsts = variant.getInfo().getWorstVEPAnnotationsByGene(a);
+      Map<String, VEPAnnotation> worsts = variant.getInfo().getWorstVEPAnnotationsByGene(a);
       for (String gene : worsts.keySet()) {
-        if(genes.contains(gene)){
+        if(table.containsKey(gene)){
           VEPConsequence csq = VEPConsequence.getWorstConsequence(worsts.get(gene));
           this.pushAnalysis(new Object[]{gene, csq});
         }
@@ -131,8 +130,8 @@ public class NumberOfCsqPerGene extends ParallelVCFVariantFunction {
       String gene = (String)((Object[])analysis)[0];
       VEPConsequence v = (VEPConsequence)((Object[])analysis)[1];
       if(v.getLevel() > VEPConsequence.EMPTY.getLevel()){
-        String key = key(gene,v);
-        table.put(key, 1+table.get(key));
+        TreeMap<VEPConsequence, Integer> columns = table.get(gene);
+        columns.put(v, 1 + columns.get(v));
       }
       return true;
     } catch (Exception e) {

@@ -1,12 +1,12 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.commandline;
 
-import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.Main;
 import fr.inserm.u1078.tludwig.vcfprocessor.StartUpException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.PedException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.filters.genotype.GenotypeISKSVAFFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.AlleleCountFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.AlleleNumberFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.DPVariantFilter;
@@ -227,6 +227,12 @@ public class CommandParser {
     MinMaxParser keepGQ = new MinMaxParser(GenotypeArguments.MINGQ, GenotypeArguments.MAXGQ, MinMaxParser.TYPE_UNBOUNDED, "GQ (integer)");
     if (keepGQ.isValid())
       addFilter(new GenotypeGQFilter(keepGQ.getMinInt(), keepGQ.getMaxInt(99)));
+
+    //GenotypeArguments.MINVAF
+    //GenotypeArguments.MAXVAF
+    MinMaxParser keepVAF = new MinMaxParser(GenotypeArguments.MINVAF, GenotypeArguments.MAXVAF, MinMaxParser.TYPE_RATIO, "VAF (ratio)");
+    if(keepVAF.isValid())
+      addFilter(new GenotypeISKSVAFFilter(keepVAF.getMinDouble(), keepVAF.getMaxDouble()));
   }
 
   /**

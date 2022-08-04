@@ -4,6 +4,7 @@ import fr.inserm.u1078.tludwig.maok.tools.Message;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * One group of VEPAnnotation (comma separated, starting with csq=allele) is an object
@@ -379,8 +380,8 @@ public class VEPAnnotation { //TODO rewrite this to be 100% compliant with vep91
     return worst;
   }
   
-  public static HashMap<String, VEPAnnotation> getWorstVEPAnnotationsByGene(Collection<VEPAnnotation> veps){
-    HashMap<String, VEPAnnotation> ret = new HashMap<>();
+  public static Map<String, VEPAnnotation> getWorstVEPAnnotationsByGene(Collection<VEPAnnotation> veps){
+    Map<String, VEPAnnotation> ret = new HashMap<>();
     for(String symbol : getDistinctSymbols(veps)){
       ret.put(symbol, getWorstVEPAnnotation(veps, symbol));
     }

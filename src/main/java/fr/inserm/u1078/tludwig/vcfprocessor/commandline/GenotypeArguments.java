@@ -78,4 +78,17 @@ public class GenotypeArguments {
           new String[][]{{"30", "Sets genotypes to missing if GQ <=30"}},
           new Description("Sets genotypes to missing if GQ is not above the given value")
   );*/
+
+  public static final Argument MINVAF = Argument.newArgument("--minVAF",
+          TYPE,
+          "VAF = AD(variant)/DP",
+          new String[][]{{".35", "Sets genotypes to missing if VAR <.35"}},
+          new Description("Sets genotypes to missing if VAF is below the given value")
+  );
+  public static final Argument MAXVAF = Argument.newArgument("--maxVAF",
+          TYPE,
+          "VAF = AD(variant)/DP",
+          new String[][]{{".7", "Sets genotypes to missing if VAR > .7"}},
+          new Description("Sets genotypes to missing if VAF is above the given value")
+  );
 }

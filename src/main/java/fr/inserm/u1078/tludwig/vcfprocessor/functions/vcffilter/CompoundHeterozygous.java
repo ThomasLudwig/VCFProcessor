@@ -56,11 +56,12 @@ public class CompoundHeterozygous extends AbstractCompoundFunction {
     if (this.controls.length == 0)
       this.fatalAndDie("No control sample present");
     int i = 0;
+    ArrayList<Sample> samples = new ArrayList<>(this.getVCF().getSamples());
     for (Sample cas : ped.getCases())
-      cases[i++] = this.getVCF().getSamples().indexOf(cas);
+      cases[i++] = samples.indexOf(cas);
     i = 0;
     for (Sample control : ped.getControls())
-      controls[i++] = this.getVCF().getSamples().indexOf(control);
+      controls[i++] = samples.indexOf(control);
   }
 
   /**

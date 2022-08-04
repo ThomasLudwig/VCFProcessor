@@ -3,7 +3,6 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions;
 import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.maok.tools.JavaTools;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
-import fr.inserm.u1078.tludwig.vcfprocessor.Main;
 import fr.inserm.u1078.tludwig.vcfprocessor.StartUpException;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.GzParameter;
@@ -26,8 +25,6 @@ import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * Factory to instenciate Functions from command line arguments
@@ -211,6 +208,7 @@ public class FunctionFactory {
     PLUGINS = new ArrayList<>();
 
     PLUGINS.addAll(getPlugins(new File(directory)));
+    Message.info(PLUGINS.size()+" plugins found in ["+directory+"]");
     return PLUGINS;
   }
 
@@ -250,6 +248,7 @@ public class FunctionFactory {
         }
         Message.info("Jar file ["+filename+"] contains no class extending "+Function.class.getSimpleName());
       } catch (IOException e) {//TODO ignore or StartUpException
+        Message.error("file ["+filename+"] could not be loaded as Plugin", e);
       }
     else
       Message.info("File ["+filename+"] is not a .jar file");
