@@ -1,4 +1,23 @@
 # Changelog
+## 1.0.5 (2023-07-13)
+### core
+* `Genotype` : **added** getPl()
+* `Function` : **added** Print memory Heap Size
+* `VCFHandling` : **added** MULTIALLELIC_DROP
+* `Cannonical` : **added** deserialization from String
+* `Cannonical` : **added** isSNP()
+* `Genotpye` : **added** setTo(Genotype replacement)
+* `Genotpye` : **added** setToMissing()
+* `Region` : **fixed** Region had a compareTo, but did not explicitly implements the Comparable interface
+* `Region` : **added** Annotation for the region (Extra column of a bed file)
+* `Region` : **added** setters for start, end and annotation
+* `Region` : **added** boolean includes(Region r) to checkif a region if fully included in another one
+* `Bed` : **changed** Regions in the Bed file are sorted through SortedList and not by hand anymore
+### functions
+* `GetQCMetrics` : **added** Function that gets all the Metrics used by the QC function
+* `SimulateVCFFromExisting` :**added** Function that Simulates a VCF File from an existing VCF File be mixing genotypes of samples from different ancestries
+### filters
+
 ## 1.0.4 (2022-08-04)
 ### core
 * `Main`: **optimized** Plug-in management

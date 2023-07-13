@@ -43,6 +43,14 @@ public class Genotype {
     }
   }
 
+  public final void setTo(Genotype replacement) {
+    this.setTo(replacement.genotype);
+  }
+
+  public final void setToMissing() {
+    this.setTo(this.createMissingGenotype());
+  }
+
   public static Genotype createNullGenotype(GenotypeFormat format, Sample sample) throws GenotypeException {
 
     return new Genotype("./.", format, sample);
@@ -266,6 +274,21 @@ public class Genotype {
     if (ads != null)
       return ads[allele];
     return -1;
+  }
+
+  public int[] getPL() {
+    String ad = this.getValue(GenotypeFormat.PL);
+    if (ad != null)
+      try {
+        String[] strings = ad.split(",");
+        int[] ints = new int[strings.length];
+        for (int i = 0; i < strings.length; i++)
+          ints[i] = Integer.parseInt(strings[i]);
+        return ints;
+      } catch (Exception e) {
+        //Nothing
+      }
+    return null;
   }
 
   @Override

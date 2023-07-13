@@ -20,6 +20,8 @@ public class Canonical implements Comparable {
     this.allele = allele;
   }
 
+
+
   public int getChr() {
     return chr;
   }
@@ -34,6 +36,17 @@ public class Canonical implements Comparable {
 
   public String getAllele() {
     return allele;
+  }
+
+  public static Canonical deserialize(String string) {
+    String[] f = string.split(":");
+    String len = f[2];
+    String allele = f[3];
+
+    final int chr = Variant.chromToNumber(f[0]);
+    final int pos = Integer.parseInt(f[1]);
+    final int length = Integer.parseInt(f[2]);
+    return new Canonical(chr, pos, length, allele);
   }
 
   public static Canonical getCanonical(String line, int a) {
@@ -55,6 +68,10 @@ public class Canonical implements Comparable {
     for (int i = 0; i < ret.length; i++)
       ret[i] = new Canonical(chr, pos, ref, alt[i]);
     return ret;
+  }
+
+  public Canonical(String chr, int pos, String ref, String alt){
+    this(Variant.chromToNumber(chr), pos, ref, alt);
   }
 
   public Canonical(int chr, int pos, String ref, String alt) {
@@ -87,6 +104,10 @@ public class Canonical implements Comparable {
   @Override
   public String toString() {
     return this.chr + ":" + this.pos + ":" + this.length + ":" + this.allele;
+  }
+
+  public boolean isSNP() {
+    return length == 1 && !allele.startsWith("-") && allele.length() == 1;
   }
 
   @Override
