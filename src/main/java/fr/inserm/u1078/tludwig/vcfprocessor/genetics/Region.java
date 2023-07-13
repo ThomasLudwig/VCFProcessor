@@ -4,7 +4,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
  *
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 5 avr. 2016
  */
-public class Region {
+public class Region implements Comparable<Region> {
   public static final int FORMAT_BED = 1;
   public static final int FORMAT_BASE_1 = 2;
 
@@ -12,9 +12,35 @@ public class Region {
   private final int chromNum;
   private int start;
   private int end;
+  private String annotation;
 
   public Region(String line, int format) {//TODO Bed File Format is chr base0 base1, not chr base1 base1
-    this(line.split("\\s+")[0], new Integer(line.split("\\s+")[1]), new Integer(line.split("\\s+")[2]), format);
+    this(buildFromLine(line, format), format);
+  }
+
+  private static Region buildFromLine(String line, int format) {
+    String[] f = line.split("\\s+",-1);
+    String ch = f[0];
+    int st = Integer.parseInt(f[1]);
+    int en = Integer.parseInt(f[2]);
+
+    if(f.length > 3){
+      StringBuilder an = new StringBuilder("");
+      for(int i = 3; i < f.length; i++)
+        an.append("\t").append(f[i]);
+      String annotation = an.substring(1);
+      return new Region(ch, st, en, format, annotation);
+    } else
+      return new Region(ch, st, en, format);
+  }
+
+  public Region(Region r, int format){
+    this(r.chrom, r.start, r.end, format, r.annotation);
+  }
+
+  public Region(String chrom, int start, int end, int format, String annotation){
+    this(chrom, start, end, format);
+    this.annotation = annotation;
   }
 
   public Region(String chrom, int start, int end, int format) {
@@ -29,6 +55,8 @@ public class Region {
     }
     if(format == FORMAT_BED)
       this.start++;
+
+    this.annotation = null;
   }
   
   public void addPadding(int padding){
@@ -54,12 +82,35 @@ public class Region {
     return end;
   }
 
+  public void setStart(int start) {
+    this.start = start;
+  }
+
+  public void setEnd(int end) {
+    this.end = end;
+  }
+
+  public void setAnnotation(String annotation) {
+    this.annotation = annotation;
+  }
+
   public int getSize() {
     return 1 + this.end - this.start;
   }
 
+  /**
+   * Export Region in the bed format, but without Annotations
+   * @return
+   */
   public String asBed(){
     return this.chrom + "\t" + this.start + "\t" + this.end;
+  }
+
+  public String asBed(boolean withAnnotation) {
+    String ret = this.asBed();
+    if(withAnnotation && this.annotation != null)
+      return ret+"\t"+this.annotation;
+    return ret;
   }
   
   @Override
@@ -104,5 +155,13 @@ public class Region {
 
   public boolean contains(int chr, int pos) {
     return (this.chromNum == chr) && (this.start <= pos) && (this.end >= pos);
+  }
+
+  public boolean includes(Region r) {
+    return contains(r.chrom, r.start) && contains(r.chrom, r.end);
+  }
+
+  public String getAnnotation() {
+    return annotation;
   }
 }

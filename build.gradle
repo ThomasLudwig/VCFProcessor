@@ -41,9 +41,9 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'fr.inserm.u1078', name: 'MaokLib', version: '1.0.2'
+    implementation group: 'fr.inserm.u1078', name: 'MaokLib', version: '1.0.3'
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    compile group: 'fr.inserm.u1078', name: 'MaokLib', version: '1.0.1'
+    compile group: 'fr.inserm.u1078', name: 'MaokLib', version: '1.0.3'
     compile group: 'jfree', name: 'jfreechart', version: '1.0.13'
     compile 'com.jtattoo:JTattoo:1.6.13'
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.0'

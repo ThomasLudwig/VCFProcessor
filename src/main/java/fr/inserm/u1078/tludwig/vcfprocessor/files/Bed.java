@@ -1,5 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files;
 
+import fr.inserm.u1078.tludwig.maok.SortedList;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.RegionException;
@@ -15,7 +16,7 @@ import java.util.HashMap;
 public class Bed {
 
   private final String filename;
-  private final HashMap<Integer, ArrayList<Region>> regions;
+  private final HashMap<Integer, SortedList<Region>> regions;
 
   public Bed(String filename) {
     Message.info("Start loading Bed file : " + filename);
@@ -32,33 +33,27 @@ public class Bed {
       String line;
       while ((line = in.readLine()) != null)
         if (line.charAt(0) != '#')
-          this.addToSortedRegions(new Region(line, Region.FORMAT_BED));
+          this.addRegion(new Region(line, Region.FORMAT_BED));
       in.close();
     } catch (Exception e) {
       Message.error("Could not parse BED file " + this.filename + "\n" + e.getMessage());
     }
   }
 
-  private void addToSortedRegions(Region r) {
-    boolean added = false;
+  public ArrayList<Integer> getChromosomes(){
+    SortedList<Integer> ret = new SortedList<>(new ArrayList<Integer>(), SortedList.Strategy.ADD_FROM_END);
+    for(Integer i : this.regions.keySet())
+      ret.add(i);
+    return ret;
+  }
+
+  private void addRegion(Region r) {
     int num = Variant.chromToNumber(r.getChrom());
-    ArrayList<Region> chrReg = this.regions.get(num);
+    SortedList<Region> chrReg = this.regions.get(num);
 
     if (chrReg == null)
-      chrReg = new ArrayList<>();
-
-    for (int i = chrReg.size() - 1; i > -1; i--) {
-      Region c = chrReg.get(i);
-      if (r.compareTo(c) > 0) {
-        chrReg.add(i + 1, r);
-        added = true;
-        break;
-      }
-    }
-
-    if (!added)
-      chrReg.add(0, r);
-
+      chrReg = new SortedList<>(new ArrayList<Region>(), SortedList.Strategy.ADD_FROM_END);
+    chrReg.add(r);
     this.regions.put(num, chrReg);
   }
   
@@ -70,16 +65,14 @@ public class Bed {
   }
   
   private void addPadding(int seq, int padding){
-    for(Region region : this.regions.get(seq)){
+    for(Region region : this.regions.get(seq))
       region.addPadding(padding);
-    }
   }
   
   public void print(){
-    for (int n : this.regions.keySet())
-      for(Region region : this.regions.get(n)){
+    for (int chr :this.getChromosomes())
+      for(Region region : this.regions.get(chr))
         System.out.println(region.asBed());
-      }
   }
 
   private void simplify() {
@@ -88,8 +81,9 @@ public class Bed {
   }
 
   private void simplify(int n) {
-    ArrayList<Region> tmp = new ArrayList<>();
-    ArrayList<Region> reg = this.regions.get(n);
+    //TODO how to manage Annotations ? Here everything is put to the first region
+    SortedList<Region> tmp = new SortedList<>(new ArrayList<Region>(), SortedList.Strategy.ADD_FROM_END);
+    SortedList<Region> reg = this.regions.get(n);
 
     if (reg.size() > 0) {
       tmp.add(reg.get(0));
@@ -131,7 +125,11 @@ public class Bed {
   }
 
   public ArrayList<Region> getRegions(String chr) {
-    return regions.get(Variant.chromToNumber(chr));
+    return getRegions(Variant.chromToNumber(chr));
+  }
+
+  public ArrayList<Region> getRegions(int chr) {
+    return regions.get(chr);
   }
 
   public ArrayList<Region> getAllRegions() {
@@ -154,7 +152,6 @@ public class Bed {
         if (current == low)
           low++;
         current++;
-
       }
       Region r = reg.get(current);
       //Message.debug("target "+pos+" value "+r.getStart()+";"+r.getEnd()+" current "+current+" low "+low+" high "+high);

@@ -357,6 +357,21 @@ public abstract class Function {
     Message.info(this.getPackage() + "/" + this.getFunctionName() + " (" + JavaTools.getJarFileName(this.getClass()) + ")");
     this.printSummary();
     this.printParameters();
+    this.printMemoryUsage();
+  }
+
+  public void printMemoryUsage() {
+    // Get current size of heap in bytes
+    long heapSize = Runtime.getRuntime().totalMemory();
+    // Get maximum size of heap in bytes. The heap cannot grow beyond this size.// Any attempt will result in an OutOfMemoryException.
+    long heapMaxSize = Runtime.getRuntime().maxMemory();
+    // Get amount of free memory within the heap in bytes. This size will increase // after garbage collection and decrease as new objects are created.
+    long heapFreeSize = Runtime.getRuntime().freeMemory();
+
+    int heapMax = (int)(heapMaxSize / (1024*1024*1024));
+    int heapCurrent = (int)(heapSize / (1024*1024*1024));
+    int heapFree = (int)(heapFreeSize / (1024*1024*1024));
+    Message.info("Max Heap Size "+heapMax+"GB / Current Heap Size "+heapCurrent+"GB / Free Heap Size "+heapFree+"GB.");
   }
 
   /**

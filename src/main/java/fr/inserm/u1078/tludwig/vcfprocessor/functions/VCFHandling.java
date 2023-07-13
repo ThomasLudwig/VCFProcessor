@@ -15,6 +15,7 @@ public interface VCFHandling {
   public static final String MULTIALLELIC_NA = "na";
   public static final String MULTIALLELIC_ALLELE_AS_LINE = "Each alternate allele is processed independently.";
   public static final String MULTIALLELIC_FORBIDDEN = "An error will be thrown, as this function expects only monoallelic variants. The affected variant line will be dropped.";
+  public static final String MULTIALLELIC_DROP = "The affected variant line will be silently dropped.";
   public static final String MULTIALLELIC_ANNOTATION_FOR_ALL = "Annotation is added/updated for each alternate allele (comma-separated).";
   public static final String MULTIALLELIC_FILTER_ONE = "If at least one alternate allele satisfy all the conditions, the whole variant line is kept.";
   
