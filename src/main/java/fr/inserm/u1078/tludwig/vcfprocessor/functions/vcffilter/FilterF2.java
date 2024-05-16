@@ -26,14 +26,14 @@ public class FilterF2 extends ParallelVCFPedFunction {
   PrintWriter f2all;
   PrintWriter f2old;
   PrintWriter f2new;
-  PrintWriter f2snpall;
-  PrintWriter f2snpold;
-  PrintWriter f2snpnew;
+  PrintWriter f2snpAll;
+  PrintWriter f2snpOld;
+  PrintWriter f2snpNew;
   
-  private static final int OLDSNV = 0;
-  private static final int OLDIND = 1;
-  private static final int NEWSNV = 2;
-  private static final int NEWIND = 3;
+  private static final int OLD_SNV = 0;
+  private static final int OLD_IND = 1;
+  private static final int NEW_SNV = 2;
+  private static final int NEW_IND = 3;
   private static final int OVERALL = 4;
   private TreeMap<Variant, boolean[]> storeF2;
 
@@ -42,6 +42,7 @@ public class FilterF2 extends ParallelVCFPedFunction {
     return "Filters variants to keep only those contributing to F2 data.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
 
@@ -58,16 +59,19 @@ public class FilterF2 extends ParallelVCFPedFunction {
             );
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_FILTER_ONE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -78,11 +82,13 @@ public class FilterF2 extends ParallelVCFPedFunction {
     return OUT_NONE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return new String[]{};
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
@@ -93,20 +99,21 @@ public class FilterF2 extends ParallelVCFPedFunction {
       this.f2all = getPrintWriter(filename + ".all.vcf");
       this.f2old = getPrintWriter(filename + ".old.vcf");
       this.f2new = getPrintWriter(filename + ".new.vcf");
-      this.f2snpall = getPrintWriter(filename + ".snp.all.vcf");
-      this.f2snpold = getPrintWriter(filename + ".snp.old.vcf");
-      this.f2snpnew = getPrintWriter(filename + ".snp.new.vcf");
+      this.f2snpAll = getPrintWriter(filename + ".snp.all.vcf");
+      this.f2snpOld = getPrintWriter(filename + ".snp.old.vcf");
+      this.f2snpNew = getPrintWriter(filename + ".snp.new.vcf");
     } catch (IOException e) {
-      this.fatalAndDie("Unable to create result files", e);
+      this.fatalAndQuit("Unable to create result files", e);
     }
     this.getVCF().printHeaders(this.f2all);
     this.getVCF().printHeaders(this.f2old);
     this.getVCF().printHeaders(this.f2new);
-    this.getVCF().printHeaders(this.f2snpall);
-    this.getVCF().printHeaders(this.f2snpold);
-    this.getVCF().printHeaders(this.f2snpnew);
+    this.getVCF().printHeaders(this.f2snpAll);
+    this.getVCF().printHeaders(this.f2snpOld);
+    this.getVCF().printHeaders(this.f2snpNew);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void end() {
     super.end();
@@ -114,24 +121,24 @@ public class FilterF2 extends ParallelVCFPedFunction {
     for (Variant variant : this.storeF2.navigableKeySet()) {
       boolean[] isF2 = this.storeF2.get(variant);
       this.f2all.println(variant);
-      if (isF2[NEWSNV])
-        this.f2snpnew.println(variant);
-      if (isF2[OLDSNV])
-        this.f2snpold.println(variant);
-      if (isF2[NEWSNV] || isF2[OLDSNV])
-        this.f2snpall.println(variant);
-      if (isF2[OLDIND] || isF2[OLDSNV])
+      if (isF2[NEW_SNV])
+        this.f2snpNew.println(variant);
+      if (isF2[OLD_SNV])
+        this.f2snpOld.println(variant);
+      if (isF2[NEW_SNV] || isF2[OLD_SNV])
+        this.f2snpAll.println(variant);
+      if (isF2[OLD_IND] || isF2[OLD_SNV])
         this.f2old.println(variant);
-      if (isF2[NEWSNV] || isF2[NEWIND])
+      if (isF2[NEW_SNV] || isF2[NEW_IND])
         this.f2new.println(variant);
     }
 
     this.f2all.close();
     this.f2old.close();
     this.f2new.close();
-    this.f2snpall.close();
-    this.f2snpold.close();
-    this.f2snpnew.close();
+    this.f2snpAll.close();
+    this.f2snpOld.close();
+    this.f2snpNew.close();
   }
 
   @Override
@@ -146,13 +153,13 @@ public class FilterF2 extends ParallelVCFPedFunction {
       if (isF2[OVERALL])
         if (variant.isSNP(a))
           if (variant.getInfo().isInDBSNPVEP(a))
-            isF2[OLDSNV] = true;
+            isF2[OLD_SNV] = true;
           else
-            isF2[NEWSNV] = true;
+            isF2[NEW_SNV] = true;
         else if (variant.getInfo().isInDBSNPVEP(a))
-          isF2[OLDIND] = true;
+          isF2[OLD_IND] = true;
         else
-          isF2[NEWIND] = true;
+          isF2[NEW_IND] = true;
     }
     if (isF2[OVERALL])
       this.pushAnalysis(new Object[]{variant, isF2});
@@ -176,6 +183,7 @@ public class FilterF2 extends ParallelVCFPedFunction {
     return found == 2; //0 or 1 allele, not f2
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     try {

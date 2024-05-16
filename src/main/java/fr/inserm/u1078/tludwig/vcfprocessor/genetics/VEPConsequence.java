@@ -6,7 +6,7 @@ import java.util.Collection;
 
 /**
  *
- * @author Thomas E. Ludwig (INSERM - U1078) Started : 14 mars 2016
+ * @author Thomas E. Ludwig (INSERM - U1078) Started : 2016/03/14
  */
 public enum VEPConsequence {
 
@@ -56,7 +56,7 @@ public enum VEPConsequence {
   private final String name;
   private final Impact impact;
 
-  private VEPConsequence(int code, String name, Impact impact) {
+  VEPConsequence(int code, String name, Impact impact) {
     this.level = code;
     this.name = name;
     this.impact = impact;
@@ -113,18 +113,18 @@ public enum VEPConsequence {
   }
 
   public static VEPConsequence getWorstConsequence(Collection<VEPAnnotation> veps, String symbol) {
-    ArrayList<String> csqs = new ArrayList();
+    ArrayList<String> csqs = new ArrayList<>();
     for (VEPAnnotation vep : veps)
       if (vep.getSYMBOL().equalsIgnoreCase(symbol))
         csqs.add(vep.getConsequence());
-    return getWorstConsequence(csqs.toArray(new String[csqs.size()]));
+    return getWorstConsequence(csqs.toArray(new String[0]));
   }
 
   public static VEPConsequence getWorst(Collection<VEPAnnotation> veps) {
-    ArrayList<String> csqs = new ArrayList();
+    ArrayList<String> csqs = new ArrayList<>();
     for (VEPAnnotation vep : veps)
       csqs.add(vep.getConsequence());
-    return getWorstConsequence(csqs.toArray(new String[csqs.size()]));
+    return getWorstConsequence(csqs.toArray(new String[0]));
   }
 
   public static VEPConsequence getWorstConsequence(VEPAnnotation vep) {
@@ -132,7 +132,7 @@ public enum VEPConsequence {
   }
 
   public static VEPConsequence getWorstConsequence(Collection<String> csqs) {
-    return getWorstConsequence(csqs.toArray(new String[csqs.size()]));
+    return getWorstConsequence(csqs.toArray(new String[0]));
   }
 
   public static VEPConsequence getWorstConsequence(String... csqs) {

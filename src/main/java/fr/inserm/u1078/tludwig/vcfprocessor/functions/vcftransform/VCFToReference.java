@@ -10,8 +10,6 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FastaFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Outputs the given VCF File and reverts genotypes when ref/alt alleles are inverted according to given reference (as a fasta file)
@@ -23,7 +21,7 @@ import java.util.logging.Logger;
  */
 public class VCFToReference extends ParallelVCFFunction {
 
-  private final FastaFileParameter reffile = new FastaFileParameter();
+  private final FastaFileParameter refFile = new FastaFileParameter();
 
   private int kept = 0;
   private int reverted = 0;
@@ -34,6 +32,7 @@ public class VCFToReference extends ParallelVCFFunction {
     return "Outputs the given VCF File and reverts genotypes when ref/alt alleles are inverted according to given reference (as a fasta file)";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("This function can be used when ref/alt alleles might be inverted (for example when the vcf file has been converted from a plink file)")
@@ -43,16 +42,19 @@ public class VCFToReference extends ParallelVCFFunction {
             .addWarning("Annotation (INFO/AD/PL/...) are not updated");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_FORBIDDEN;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -65,7 +67,7 @@ public class VCFToReference extends ParallelVCFFunction {
 
   private String revert(String geno) {
     if (geno.length() != 3) {
-      fatalAndDie("Genotypes length != 3 : [" + geno + "]");
+      fatalAndQuit("Genotypes length != 3 : [" + geno + "]");
     }
     if (geno.charAt(1) == '|') {
       char f = geno.charAt(0);
@@ -92,11 +94,11 @@ public class VCFToReference extends ParallelVCFFunction {
     try {
       String[] f = line.split(T);
 
-      String vcfref = f[VCF.IDX_REF];
-      String vcfalt = f[VCF.IDX_ALT];
+      String vcfRef = f[VCF.IDX_REF];
+      String vcfAlt = f[VCF.IDX_ALT];
       
-      if(vcfref.length() != 1 || vcfalt.length() != 1){
-        Message.warning("Can't process multiallelic/nonSNV variant ["+Variant.shortString(" ", f)+"], in the ref.");
+      if(vcfRef.length() != 1 || vcfAlt.length() != 1){
+        Message.warning("Can't process multiallelic/nonSNV variant ["+String.join(" ", f)+"], in the ref.");
         return NO_OUTPUT;
       }
       
@@ -107,14 +109,14 @@ public class VCFToReference extends ParallelVCFFunction {
       }
       
       if (!f[VCF.IDX_ALT].equals(fastaRef)){ 
-        Message.warning("Can't process variant ["+Variant.shortString(" ", f)+"], reference from fasta not found ["+fastaRef+"]");
+        Message.warning("Can't process variant ["+String.join(" ", f)+"], reference from fasta not found ["+fastaRef+"]");
         return NO_OUTPUT;
       }
       
       this.pushAnalysis(Boolean.FALSE);//reverted++;
       //Swap ref/alt
-      f[VCF.IDX_REF] = vcfalt;
-      f[VCF.IDX_ALT] = vcfref;
+      f[VCF.IDX_REF] = vcfAlt;
+      f[VCF.IDX_ALT] = vcfRef;
       //Revert all genotypes
       //here we assume only biallelic snps
       for (int i = VCF.IDX_SAMPLE; i < f.length; i++) {
@@ -128,26 +130,29 @@ public class VCFToReference extends ParallelVCFFunction {
       
       return asOutput(v);
     } catch (FastaException | VCFException ex) {
-      this.fatalAndDie("Unable to process Line\n"+line, ex);
+      this.fatalAndQuit("Unable to process Line\n"+line, ex);
       return NO_OUTPUT;
     }
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
     try {
-      fasta = this.reffile.getFasta();
+      fasta = this.refFile.getFasta();
     } catch (FastaException e) {
-      this.fatalAndDie("Could not load fasta file", e);
+      this.fatalAndQuit("Could not load fasta file", e);
     }    
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void end() {
     Message.info("Done. " + kept + " variants kept, " + reverted + " variants reverted");
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     if(Boolean.TRUE.equals(analysis)){

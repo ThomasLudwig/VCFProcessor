@@ -26,22 +26,26 @@ public class MeanQuality extends ParallelVCFVariantFunction {
     return "Prints information and quality statistics for each variant.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("For each variant in the given vcf files. Prints :")
             .addColumns(HEADER);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -52,11 +56,13 @@ public class MeanQuality extends ParallelVCFVariantFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     samples = getVCF().getSamples().size();
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return new String[]{String.join(T, HEADER)};
@@ -83,15 +89,16 @@ public class MeanQuality extends ParallelVCFVariantFunction {
           }
         }
 
-      String meanDPwith = StringTools.formatRatio(totalDP, known, 4);
-      String meanGQwith = StringTools.formatRatio(totalGQ, known, 4);
-      String meanDPwithout = StringTools.formatRatio(totalDP, samples, 4);
-      String meanGQwithout = StringTools.formatRatio(totalGQ, samples, 4);
-      outs[a-1] = variant.getChrom() + T + variant.getPos() + T + inDbSNP + T + inGnomAD + T + meanDPwith + T + meanGQwith + T + meanDPwithout + T + meanGQwithout;
+      String meanDPWith = StringTools.formatRatio(totalDP, known, 4);
+      String meanGQWith = StringTools.formatRatio(totalGQ, known, 4);
+      String meanDPWithout = StringTools.formatRatio(totalDP, samples, 4);
+      String meanGQWithout = StringTools.formatRatio(totalGQ, samples, 4);
+      outs[a-1] = variant.getChrom() + T + variant.getPos() + T + inDbSNP + T + inGnomAD + T + meanDPWith + T + meanGQWith + T + meanDPWithout + T + meanGQWithout;
     }
     return outs;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

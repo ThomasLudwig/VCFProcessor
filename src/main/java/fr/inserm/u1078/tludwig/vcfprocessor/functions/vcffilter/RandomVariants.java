@@ -21,7 +21,7 @@ import java.util.ArrayList;
  */
 public class RandomVariants extends ParallelVCFFilterFunction {
 
-  private final RatioParameter proba = new RatioParameter(OPT_RATIO, "Probability of keeping each variant");
+  private final RatioParameter probability = new RatioParameter(OPT_RATIO, "Probability of keeping each variant");
   private final FileParameter keepPosition = new FileParameter(OPT_FILE, "positions.txt", "File listing Positions to keep regardless of given probability in format chr:position");
 
   ArrayList<String> positions;
@@ -31,23 +31,27 @@ public class RandomVariants extends ParallelVCFFilterFunction {
     return "kept only a portion of the variants from a VCF file.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
-            .addLine("Each line has a "+Description.code(this.proba.getKey()) + " chance of being kept.")
+            .addLine("Each line has a "+Description.code(this.probability.getKey()) + " chance of being kept.")
             .addLine("Position listed in the file " + Description.code(this.keepPosition.getKey()) + " are always kept");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -58,6 +62,7 @@ public class RandomVariants extends ParallelVCFFilterFunction {
     return OUT_VCF;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
@@ -66,7 +71,7 @@ public class RandomVariants extends ParallelVCFFilterFunction {
       UniversalReader in = this.keepPosition.getReader();
       String line;
       while ((line = in.readLine()) != null)
-        if (line.trim().length() > 0)
+        if (!line.trim().isEmpty())
           positions.add(line);
       in.close();
     } catch (IOException e) {
@@ -76,10 +81,10 @@ public class RandomVariants extends ParallelVCFFilterFunction {
 
   @Override
   public String[] processInputLineForFilter(String line) {
-    String f[] = line.split(T);
+    String[] f = line.split(T);
     if (positions.contains(f[VCF.IDX_ID]) || positions.contains(f[VCF.IDX_CHROM] + ":" + f[VCF.IDX_POS]))
       return new String[]{line};
-    return Math.random() < this.proba.getFloatValue() ? new String[]{line} : NO_OUTPUT;
+    return Math.random() < this.probability.getFloatValue() ? new String[]{line} : NO_OUTPUT;
   }
 
   @Override

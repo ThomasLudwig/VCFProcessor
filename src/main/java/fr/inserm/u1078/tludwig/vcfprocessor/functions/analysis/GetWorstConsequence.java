@@ -23,6 +23,7 @@ public class GetWorstConsequence extends ParallelVCFVariantFunction {
     return "Print the worst consequence/gene for each variant allele.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
@@ -30,16 +31,19 @@ public class GetWorstConsequence extends ParallelVCFVariantFunction {
             .addColumns(HEADER);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -50,6 +54,7 @@ public class GetWorstConsequence extends ParallelVCFVariantFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return new String[]{String.join(T,HEADER)};
@@ -65,6 +70,7 @@ public class GetWorstConsequence extends ParallelVCFVariantFunction {
     return outs;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

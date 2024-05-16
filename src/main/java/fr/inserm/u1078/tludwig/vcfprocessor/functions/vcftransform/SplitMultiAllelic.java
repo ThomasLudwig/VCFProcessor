@@ -25,21 +25,25 @@ public class SplitMultiAllelic extends ParallelVCFFunction {
     return "Splits multiallelic variants into several lines of monoallelic variants";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary());
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -50,6 +54,7 @@ public class SplitMultiAllelic extends ParallelVCFFunction {
     return OUT_VCF;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
@@ -63,6 +68,7 @@ public class SplitMultiAllelic extends ParallelVCFFunction {
     }
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;
@@ -82,11 +88,11 @@ public class SplitMultiAllelic extends ParallelVCFFunction {
       String[] ret = new String[out.length];
       for (int a = 0; a < alts.length; a++) {
         System.arraycopy(f, 0, out[a], 0, f.length);
-        //roduce new ref/alt couples
-        String[] newposrefalt = getNewPosRefAlt(f[VCF.IDX_POS], ref, alts[a]);
-        out[a][VCF.IDX_POS] = newposrefalt[0];
-        out[a][VCF.IDX_REF] = newposrefalt[1];
-        out[a][VCF.IDX_ALT] = newposrefalt[2];
+        //produce new ref/alt couples
+        String[] newPosRefAlt = getNewPosRefAlt(f[VCF.IDX_POS], ref, alts[a]);
+        out[a][VCF.IDX_POS] = newPosRefAlt[0];
+        out[a][VCF.IDX_REF] = newPosRefAlt[1];
+        out[a][VCF.IDX_ALT] = newPosRefAlt[2];
         String[] outInfos = new String[infos.length];
         for (int i = 0; i < outInfos.length; i++)
           outInfos[i] = convertInfo(infos[i], a);
@@ -154,11 +160,7 @@ public class SplitMultiAllelic extends ParallelVCFFunction {
     }
 
     g[0] = String.join(sep, gt);
-    /*
-    //revert 1/0 to 0/1
-    if (g[0].equals("1/0"))
-      g[0] = "0/1";
-    */
+
     //process the rest
     for (int i = 1; i < f.length && i < g.length; i++)
       if (!g[i].equals(".")) {
@@ -197,16 +199,15 @@ public class SplitMultiAllelic extends ParallelVCFFunction {
     return String.join(":", g);
   }
 
-  public static String[] getNewPosRefAlt(String oldpos, String oldref, String oldalt) {
+  public static String[] getNewPosRefAlt(String oldPos, String oldRef, String oldAlt) {
     //Only look at the right part and not the left
-    //Silplifying the left part would result in a change of position
+    //Simplifying the left part would result in a change of position
     //While this could be more relevant biologically, it could create all sorts of problem
-    //Especially if the new variants is colocalized with another pre existing variant
+    //Especially if the new variants is co-localized with another pre-existing variant
     //The result here is the same as the one from vcftools
     
-    String pos = oldpos;
-    String ref = oldref;
-    String alt = oldalt;
+    String ref = oldRef;
+    String alt = oldAlt;
     int rl = ref.length();
     int al = alt.length();
     int suffix = 0;
@@ -219,7 +220,7 @@ public class SplitMultiAllelic extends ParallelVCFFunction {
       alt = alt.substring(0, al-suffix);
     }
     
-    return new String[]{pos, ref, alt};
+    return new String[]{oldPos, ref, alt};
   }
   
   @Override

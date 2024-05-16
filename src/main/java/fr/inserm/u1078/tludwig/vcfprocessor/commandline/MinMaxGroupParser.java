@@ -56,7 +56,7 @@ public class MinMaxGroupParser {
             else
               Message.warning("Unknown Group name [" + group + "] for filter [" + keyMin + "]");
 
-            if (minMap.keySet().contains(group))
+            if (minMap.containsKey(group))
               Message.warning("Duplicate group [" + group + "] for argument [" + keyMin + "]");
             minMap.put(group, min);
           }
@@ -83,7 +83,7 @@ public class MinMaxGroupParser {
             else
               Message.warning("Unknown Group name [" + group + "] for filter [" + keyMax + "]");
 
-            if (maxMap.keySet().contains(group))
+            if (maxMap.containsKey(group))
               Message.warning("Duplicate group [" + group + "] for argument [" + keyMax + "]");
             maxMap.put(group, max);
           }
@@ -91,8 +91,7 @@ public class MinMaxGroupParser {
           handle(keyMax, type, e);
         }
 
-      for (String group : minMap.keySet())
-        this.groups.add(group);
+      this.groups.addAll(minMap.keySet());
       for (String group : maxMap.keySet())
         if (!this.groups.contains(group))
           this.groups.add(group);
@@ -115,7 +114,7 @@ public class MinMaxGroupParser {
       Message.warning("Unable to read Argument [" + key.toLowerCase() + "]. Correct syntax is \"" + key + " " + FrequencyArguments.FORMAT_GROUP_AC + "\"");
     else
       Message.warning("Unable to read Argument [" + key.toLowerCase() + "]. Correct syntax is \"" + key + " " + FrequencyArguments.FORMAT_GROUP_AF + "\"");
-    e.printStackTrace();
+    Message.error("Error in parsing", e);
   }
 
   public ArrayList<String> getGroups() {
@@ -140,8 +139,8 @@ public class MinMaxGroupParser {
 
   private static class IntegerInterval {
 
-    private int min = 0;
-    private int max = 1;
+    private int min;
+    private int max;
 
     IntegerInterval(int min, int max) {
       this.min = min;

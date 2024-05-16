@@ -9,8 +9,6 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -42,6 +40,7 @@ public class MaleFemale extends ParallelVCFVariantPedFunction {
     return "Show Male/Female Allele Frequencies";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
@@ -54,21 +53,25 @@ public class MaleFemale extends ParallelVCFVariantPedFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return new String[]{String.join(T, HEADERS)};
@@ -104,31 +107,32 @@ public class MaleFemale extends ParallelVCFVariantPedFunction {
 
     for(int a = 1 ; a < variant.getAlleleCount(); a++){
       Map<String, VEPAnnotation> geneCsqs = variant.getInfo().getWorstVEPAnnotationsByGene(a);
-      String geneCsq = "";
+      StringBuilder geneCsq = new StringBuilder();
       for(String gene : geneCsqs.keySet()){
-        geneCsq += "," + gene + ":" + VEPConsequence.getWorstConsequence(geneCsqs.get(gene).getConsequence());
+        geneCsq.append(",").append(gene).append(":").append(VEPConsequence.getWorstConsequence(geneCsqs.get(gene).getConsequence()));
       }
 
       if(geneCsq.length() > 0)
-        geneCsq = geneCsq.substring(1);
+        geneCsq = new StringBuilder(geneCsq.substring(1));
 
-      StringBuilder sb = new StringBuilder(variant.getChrom());
-      sb.append(T).append(variant.getPos());
-      sb.append(T).append(variant.getId());
-      sb.append(T).append(variant.getRef());
-      sb.append(T).append(variant.getAllele(a));
-      sb.append(T).append(variant.getFilter());
-      sb.append(T).append(geneCsq);
-      sb.append(T).append(afT[a]);
-      sb.append(T).append(af[Ped.SEX_MALE][a]);
-      sb.append(T).append(af[Ped.SEX_FEMALE][a]);
-
-      ret[a - 1] = sb.toString();
+      ret[a - 1] = String.join(T
+          , variant.getChrom()
+          , variant.getPos()+""
+          , variant.getId()
+          , variant.getRef()
+          , variant.getAllele(a)
+          , variant.getFilter()
+          , geneCsq
+          , afT[a]+""
+          , af[Ped.SEX_MALE][a]+""
+          , af[Ped.SEX_FEMALE][a]+""
+      );
     }
 
     return ret;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

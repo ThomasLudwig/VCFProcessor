@@ -15,7 +15,7 @@ VCFProcessor articulates itself around two main concepts :
 
 ### Functions
 
-VCFProcessor can apply one function at a time. A function is a traitement to execute on the input VCF file, it can be an analysis, an annotation, a transformation, a formatting operation, etc. The command line to do this is
+VCFProcessor can apply one function at a time. A function is a treatment to execute on the input VCF file, it can be an analysis, an annotation, a transformation, a formatting operation, etc. The command line to do this is
 
 ```bash
 java -jar VCFProcessor.jar FunctionName Mandatory_Function_Arguments [Optional_Function_Arguments] [Filters]

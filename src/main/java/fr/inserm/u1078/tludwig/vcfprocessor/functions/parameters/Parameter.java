@@ -1,8 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
-//import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.Input;
 
 /**
  *
@@ -37,14 +35,14 @@ public abstract class Parameter {
   }
   
   public String getCommandLineDescription(int keyLength, int exampleLength){
-    String theKey = this.getKey();
-    String theExample = this.getExample();
+    StringBuilder theKey = new StringBuilder(this.getKey());
+    StringBuilder theExample = new StringBuilder(this.getExample());
     while(theKey.length() < keyLength)
-      theKey += " ";
+      theKey.append(" ");
     while(theExample.length() < exampleLength)
-      theExample += " ";
+      theExample.append(" ");
     
-    return Message.cyan(theKey) + " " + Message.red(theExample) + " : " + this.getDescription();
+    return Message.cyan(theKey.toString()) + " " + Message.red(theExample.toString()) + " : " + this.getDescription();
   }
   
   public String getRSTCommandLine() {
@@ -72,11 +70,11 @@ public abstract class Parameter {
   }
   
   public String getFullDescription(){
-    String ret = this.getKey()+" "+this.toString();
+    StringBuilder ret = new StringBuilder(this.getKey() + " " + this);
     while(ret.length() < 30)
-      ret += " ";
-     ret += ": " + this.getDescription();
-     return ret;
+      ret.append(" ");
+     ret.append(": ").append(this.getDescription());
+     return ret.toString();
   }
 
   @Override
@@ -86,5 +84,4 @@ public abstract class Parameter {
 
   public abstract String showAllowedValues();
 
-  public abstract Input getInputForm();
 }

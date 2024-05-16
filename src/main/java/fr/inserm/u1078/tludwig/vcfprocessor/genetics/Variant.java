@@ -2,7 +2,6 @@ package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 
 import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.maok.tools.ArrayTools;
-import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,8 +12,8 @@ import java.util.TreeSet;
  *
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 23 juin 2015
  */
-public class Variant implements Comparable {
-  //TODO use contigs defined in header to manage chromosomes (the shortcut (chr)1->22 X Y M/MT) will not work for non humain organisms
+public class Variant implements Comparable<Variant> {
+  //TODO use contigs defined in header to manage chromosomes (the shortcut (chr)1->22 X Y M/MT) will not work for non human organisms
   private static final String[] CHROMS = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "x", "y", "m", "mt"};
 
   private final String chrom;
@@ -102,15 +101,11 @@ public class Variant implements Comparable {
         if (!genotype.isMissing()) {
           Genotype other = v.getGenotypes()[i];
           if (!genotype.isSame(other))
-            try {
-              this.genotypes[i] = Genotype.createNullGenotype(this.getFormat(), genotype.getSample());
-            } catch (GenotypeException e) {
-              throw new VariantException(prefix + "(problem create a null genotype for " + i + "th sample)" + suffix, e);
-            }
+            this.genotypes[i] = Genotype.createNullGenotype(this.getFormat(), genotype.getSample());
         }
       }
-    else { //alternative alleles are différents between both variants
-      int indices[] = new int[this.alleles.length];
+    else { //alternative alleles are different between both variants
+      int[] indices = new int[this.alleles.length];
       indices[0] = 0;
       for (int i = 1; i < indices.length; i++)
         indices[i] = ArrayTools.indexOf(v.getAlleles(), this.alleles[i]);
@@ -118,7 +113,7 @@ public class Variant implements Comparable {
         Genotype genotype = this.getGenotypes()[i];
         if (!genotype.isMissing()) {
           boolean clear = false;
-          Genotype other = v.getGenotypes()[i];
+          Genotype other = v.getGenotypes()[i];//TODO getGenotypes()[indices[i]] ???
           if (other.isMissing())
             clear = true;
           else
@@ -128,11 +123,7 @@ public class Variant implements Comparable {
               if (!genotype.isSame(other))
                 clear = true;
           if (clear)
-            try {
-              this.genotypes[i] = Genotype.createNullGenotype(this.getFormat(), genotype.getSample());
-            } catch (GenotypeException e) {
-              throw new VariantException(prefix + "(problem create a null genotype for " + i + "th sample)" + suffix, e);
-            }
+            this.genotypes[i] = Genotype.createNullGenotype(this.getFormat(), genotype.getSample());
         }
       }
     }
@@ -141,7 +132,7 @@ public class Variant implements Comparable {
   public static final String T = "\t";
 
   public String[] getFields() {
-    String ret[] = new String[9 + genotypes.length];
+    String[] ret = new String[9 + genotypes.length];
     ret[0] = this.chrom;
     ret[1] = this.pos + "";
     ret[2] = this.id;
@@ -164,16 +155,9 @@ public class Variant implements Comparable {
       ret.addColumn(genotype);
     return ret.toString();
   }
-  
-  public static String shortString(String delim, String... s){
-    String[] o = new String[5];
-    for(int i = 0 ; i < 5; i++)
-      o[i] = s[i];
-    return String.join(delim, o);
-  }
 
   public String shortString() {
-    return shortString(T, chrom, pos+"", id, getRef(), getAlt());
+    return String.join(T, chrom, pos+"", id, getRef(), getAlt());
   }
 
   public int getMostFrequentPloidy() {
@@ -261,7 +245,7 @@ public class Variant implements Comparable {
       if(!gene.isEmpty())
         geneList.add(gene);
     
-    return geneList.toArray(new String[geneList.size()]);
+    return geneList.toArray(new String[0]);
   }
   
   public String[] getGeneList() {
@@ -274,7 +258,7 @@ public class Variant implements Comparable {
       if(!gene.isEmpty())
         geneList.add(gene);
     
-    return geneList.toArray(new String[geneList.size()]);
+    return geneList.toArray(new String[0]);
   }
 
   public String getGenes() {
@@ -282,12 +266,7 @@ public class Variant implements Comparable {
     if (list == null)
       return null;
 
-    String genes = "";
-    for (String gene : list)
-      genes += "," + gene;
-    if (genes.length() > 0)
-      genes = genes.substring(1);
-    return genes;
+    return String.join(",", list);
   }
   
   public int[] getAC() {
@@ -436,8 +415,7 @@ public class Variant implements Comparable {
     String c = chr.replace("chr", "");
 
     try {
-      int num = Integer.parseInt(c);
-      return num;
+      return Integer.parseInt(c);
     } catch (NumberFormatException e) {
       switch (c.toLowerCase().charAt(0)) {
         case 'x':
@@ -465,10 +443,10 @@ public class Variant implements Comparable {
   }
 
   public String getAlt() {
-    String alt = this.alleles[1];
+    StringBuilder alt = new StringBuilder(this.alleles[1]);
     for (int i = 2; i < this.alleles.length; i++)
-      alt += "," + this.alleles[i];
-    return alt;
+      alt.append(",").append(this.alleles[i]);
+    return alt.toString();
   }
 
   public String getQual() {
@@ -545,8 +523,7 @@ public class Variant implements Comparable {
   }
 
   @Override
-  public int compareTo(Object o) {
-    Variant v = (Variant) o;
+  public int compareTo(Variant v) {
     return Variant.compare(this.getChrom(), this.getPos(), v.getChrom(), v.getPos());
   }
 
@@ -557,7 +534,7 @@ public class Variant implements Comparable {
     return CHROMS.length;
   }
 
-  public ArrayList<String> getGroupsWithAleternateAllele() {
+  public ArrayList<String> getGroupsWithAlternateAllele() {
     return Ped.getGroups(this.getSamplesWithAlternateAllele());
   }
 
@@ -599,25 +576,31 @@ public class Variant implements Comparable {
     return new Canonical(this.getChromNumber(), this.getPos(), this.getRef(), this.getAllele(allele));
   }
 
-  @Deprecated // Not DP but SUM(AD) because sometimes DP annotation is missing
-  public boolean isHQ() {
+  public boolean isHQ(boolean autosomeOnly, int minSumAD, int minGQ, double maxMissingRate, String... allowedFilters) {
     //Variant sites were considered high-quality if they met the following criteria:
     //Only autosome
-    if (getChromNumber() > 22)
+    if (autosomeOnly && getChromNumber() > 22)
       return false;
     //they were given a PASS filter status by VQSR (see above)
-    if (!getFilter().equalsIgnoreCase("PASS"))
+    boolean isFilterAllowed = false;
+    for(String filter : allowedFilters)
+      if (getFilter().equalsIgnoreCase(filter)){
+        isFilterAllowed = true;
+        break;
+      }
+
+    if(!isFilterAllowed)
       return false;
     int nbHQ = 0;
     int nbVariantHQ = 0;
     for (Genotype g : getGenotypes())
-      if (g.getSumAD() >= 10 && g.getGQ() >= 20) {
+      if (g.getSumAD() >= minSumAD && g.getGQ() >= minGQ) {
         nbHQ++;
         if (g.hasAlternate())
           nbVariantHQ++;
       }
     //at least 80% of the individuals in the dataset had at least depth (DP) >= 10 and genotype quality (GQ) >= 20 (i.e. AN_Adj >= 60706*0.8*2 or 97130)
-    int nb = (int) (0.8 * this.genotypes.length);
+    int nb = (int) (maxMissingRate * this.genotypes.length);
     if (nbHQ < nb)
       return false;
     //there was at least one individual harboring the alternate allele with depth >= 10 and GQ >= 20
@@ -648,21 +631,20 @@ public class Variant implements Comparable {
   }
 
   private void updateACANAF(int[] ac, int an) {
-    String newAC = "" + ac[1];
-    String newAF = "" + ((ac[1] * 1d) / an);
+    StringBuilder newAC = new StringBuilder("" + ac[1]);
+    StringBuilder newAF = new StringBuilder("" + ((ac[1] * 1d) / an));
     for (int i = 2; i < ac.length; i++) {
-      newAC += "," + ac[i];
-      newAF += "," + ((ac[i] * 1d) / an);
+      newAC.append(",").append(ac[i]);
+      newAF.append(",").append((ac[i] * 1d) / an);
     }
-    this.getInfo().update("AC", newAC);
+    this.getInfo().update("AC", newAC.toString());
     this.getInfo().update("AN", an + "");
-    this.getInfo().update("AF", newAF);
+    this.getInfo().update("AF", newAF.toString());
   }
 
   public void recomputeACAN() {
     this.an = 0;
-    for (int i = 0; i < ac.length; i++)
-      ac[i] = 0;
+    Arrays.fill(ac, 0);
 
     for (Genotype g : this.genotypes)
       if (!g.isMissing()) {

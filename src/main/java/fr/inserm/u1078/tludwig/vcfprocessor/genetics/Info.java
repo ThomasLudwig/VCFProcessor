@@ -8,7 +8,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF.InfoFormatHeader;
 import java.util.*;
 
 /**
- * Meta class contains all the data in the "INFO" field (including VEPAnnotations)
+ * Metaclass contains all the data in the "INFO" field (including VEPAnnotations)
  *
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 21 avr. 2016
  */
@@ -33,13 +33,13 @@ public class Info {
 
   private final HashMap<Integer, ArrayList<VEPAnnotation>> vepAnnotations;
   private final TreeMap<String, String> infoMap;
-  private final VCF vcffile;
+  private final VCF vcfFile;
 
-  public Info(String infoField, VCF vcffile) throws AnnotationException {
+  public Info(String infoField, VCF vcfFile) {
     this.vepAnnotations = new HashMap<>();
     infoMap = new TreeMap<>();
     for (String kvString : infoField.split(";")) {
-      String kv[] = kvString.split("=");
+      String[] kv = kvString.split("=");
       String key = kv[0];
       String value = null;
       if (kv.length == 2)
@@ -51,18 +51,14 @@ public class Info {
 
       if (kv[0].equals(CSQ_PREFIX))
         for (String annot : kv[1].split(",")) {
-          VEPAnnotation vepAnnotation = new VEPAnnotation(annot, vcffile.getVepFormat());
+          VEPAnnotation vepAnnotation = new VEPAnnotation(annot, vcfFile.getVepFormat());
           int allele = vepAnnotation.getAlleleNumber();
-          ArrayList<VEPAnnotation> list = this.vepAnnotations.get(allele);
-          if (list == null) {
-            list = new ArrayList<>();
-            this.vepAnnotations.put(allele, list);
-          }
+          ArrayList<VEPAnnotation> list = this.vepAnnotations.computeIfAbsent(allele, k -> new ArrayList<>());
           list.add(vepAnnotation);
           //this.vepAnnotations.add(); //Message.debug("Allele "+this.vepAnnotations.get(this.vepAnnotations.size()-1).getAllele());
         }
     }
-    this.vcffile = vcffile;
+    this.vcfFile = vcfFile;
   }
 
   public final String getAnnot(String key) {
@@ -133,7 +129,7 @@ public class Info {
     return ret;
   }
 
-  public ArrayList<String> getConsequencesSplitted(int a) {
+  public ArrayList<String> getConsequencesSplit(int a) {
     ArrayList<String> ret = new ArrayList<>();
     for(String consRaw : getConsequencesRaw(a))
       for (String consequences : consRaw.split("&"))
@@ -142,7 +138,7 @@ public class Info {
     return ret;
   }
   
-  public ArrayList<String> getConsequencesSplitted() {
+  public ArrayList<String> getConsequencesSplit() {
     ArrayList<String> ret = new ArrayList<>();
     for(String consRaw : getConsequencesRaw())
       for (String consequences : consRaw.split("&"))
@@ -165,7 +161,7 @@ public class Info {
       return null;
 
     SortedList<String> geneList = new SortedList<>(tmpGeneList, SortedList.Strategy.ADD_INSERT_SORT);
-    return geneList.toArray(new String[geneList.size()]);
+    return geneList.toArray(new String[0]);
   }
   
   public String[] getGeneSymbolSortedList(int allele) {
@@ -174,7 +170,7 @@ public class Info {
       return null;
 
     SortedList<String> geneList = new SortedList<>(tmpGeneList, SortedList.Strategy.ADD_INSERT_SORT);
-    return geneList.toArray(new String[geneList.size()]);
+    return geneList.toArray(new String[0]);
   }
 
   public ArrayList<String> getGenes() {
@@ -209,7 +205,7 @@ public class Info {
     return this.getAllVEPValues(VEPFormat.KEY_HGVSP);
   }
 
-  public ArrayList<String> getcDNA_positions() {
+  public ArrayList<String> getCDNA_positions() {
     return this.getAllVEPValues(VEPFormat.KEY_CDNA_POSITION);
   }
 
@@ -329,13 +325,17 @@ public class Info {
     return this.getAllVEPValues(VEPFormat.KEY_MOTIF_SCORE_CHANGE);
   }
 
-  public ArrayList<String> getCADD_PHREDs() {
-    return this.getAllVEPValues(VEPFormat.KEY_CADD_PHRED);
-  }
+  public double getCADD_PHRED() { return firstValueAsDouble(this.getCADD_PHREDs()); }
 
-  public ArrayList<String> getCADD_RAWs() {
-    return this.getAllVEPValues(VEPFormat.KEY_CADD_RAW);
-  }
+  public double getCADD_RAW() { return firstValueAsDouble(this.getCADD_RAWs()); }
+
+  public double getCADD_PHRED(int allele) { return firstValueAsDouble(this.getCADD_PHREDs(allele)); }
+
+  public double getCADD_RAW(int allele) { return firstValueAsDouble(this.getCADD_RAWs(allele)); }
+
+  public ArrayList<String> getCADD_PHREDs() { return this.getAllVEPValues(VEPFormat.KEY_CADD_PHRED); }
+
+  public ArrayList<String> getCADD_RAWs() { return this.getAllVEPValues(VEPFormat.KEY_CADD_RAW); }
 
   public ArrayList<String> getFATHMM_MKL_Cs() {
     return this.getAllVEPValues(VEPFormat.KEY_FATHMM_MKL_C);
@@ -421,7 +421,7 @@ public class Info {
     return this.getVEPValues(VEPFormat.KEY_HGVSP, allele);
   }
 
-  public ArrayList<String> getcDNA_positions(int allele) {
+  public ArrayList<String> getCDNA_positions(int allele) {
     return this.getVEPValues(VEPFormat.KEY_CDNA_POSITION, allele);
   }
 
@@ -450,11 +450,7 @@ public class Info {
     if (list == null)
       return null;
 
-    String rss = "";
-    for (String rs : list)
-      rss += "," + rs;
-
-    return rss.substring(1);
+    return String.join("," ,list);
   }
 
   public String[] getRSList() {
@@ -466,7 +462,7 @@ public class Info {
     if (rsList.isEmpty())
       return null;
 
-    return rsList.toArray(new String[rsList.size()]);
+    return rsList.toArray(new String[0]);
   }
   
   public String getRSs(int allele) {
@@ -474,11 +470,7 @@ public class Info {
     if (list == null)
       return null;
 
-    String rss = "";
-    for (String rs : list)
-      rss += "," + rs;
-
-    return rss.substring(1);
+    return String.join("," , list).substring(1);
   }
 
   public String[] getRSList(int allele) {
@@ -490,7 +482,7 @@ public class Info {
     if (rsList.isEmpty())
       return null;
 
-    return rsList.toArray(new String[rsList.size()]);
+    return rsList.toArray(new String[0]);
   }
 
   public ArrayList<String> getDISTANCEs(int allele) {
@@ -645,8 +637,7 @@ public class Info {
           return 0.5;
         String s = kv[1].split("\\)")[0];
         try {
-          double score = Double.parseDouble(s);
-          return score;
+          return Double.parseDouble(s);
         } catch (NumberFormatException e) {
           //nothing
         }
@@ -661,89 +652,55 @@ public class Info {
       if (kv.length > 1) {
         String s = kv[1].split("\\)")[0];
         try {
-          double score = Double.parseDouble(s);
-          return score;
-        } catch (NumberFormatException e) {
-
-        }
+          return Double.parseDouble(s);
+        } catch (NumberFormatException ignore) { }
       }
     }
     return 0;
   }
 
+  public double getFrequency(String key, int allele){ return firstValueAsDouble(getVEPValues(key, allele)); }
+
   public double getFreq1kgVEP(int allele) {
-    return asFrequency(getVEPValues(VEPFormat.KEY_AF, allele));
+    return getFrequency(VEPFormat.KEY_AF, allele);
   }
 
-  public double getFreq1kgAFRVEP(int allele) {
-    return asFrequency(getVEPValues(VEPFormat.KEY_AFR_AF, allele));
-  }
+  public double getFreq1kgAFRVEP(int allele) { return getFrequency(VEPFormat.KEY_AFR_AF, allele); }
 
-  public double getFreq1kgAMRVEP(int allele) {
-    return asFrequency(getVEPValues(VEPFormat.KEY_AMR_AF, allele));
-  }
+  public double getFreq1kgAMRVEP(int allele) { return getFrequency(VEPFormat.KEY_AMR_AF, allele);  }
 
-  public double getFreq1kgEASVEP(int allele) {
-    return asFrequency(getVEPValues(VEPFormat.KEY_EAS_AF, allele));
-  }
+  public double getFreq1kgEASVEP(int allele) { return getFrequency(VEPFormat.KEY_EAS_AF, allele); }
 
-  public double getFreq1kgEURVEP(int allele) {
-    return asFrequency(getVEPValues(VEPFormat.KEY_EUR_AF, allele));
-  }
+  public double getFreq1kgEURVEP(int allele) { return getFrequency(VEPFormat.KEY_EUR_AF, allele); }
 
-  public double getFreq1kgSASVEP(int allele) {
-    return asFrequency(getVEPValues(VEPFormat.KEY_SAS_AF, allele));
-  }
+  public double getFreq1kgSASVEP(int allele) { return getFrequency(VEPFormat.KEY_SAS_AF, allele); }
 
-  public double getFreqESP_AAVEP(int allele) {
-    return asFrequency(getVEPValues(VEPFormat.KEY_AA_AF, allele));
-  }
+  public double getFreqESP_AAVEP(int allele) { return getFrequency(VEPFormat.KEY_AA_AF, allele); }
 
-  public double getFreqESP_EAVEP(int allele) {
-    return asFrequency(getVEPValues(VEPFormat.KEY_EA_AF, allele));
-  }
+  public double getFreqESP_EAVEP(int allele) { return getFrequency(VEPFormat.KEY_EA_AF, allele); }
 
-  public double getFreqGnomadAFRVEP(int allele) {
-    return asFrequency(getVEPValues(VEPFormat.KEY_GNOMAD_AFR_AF, allele));
-  }
+  public double getFreqGnomadAFRVEP(int allele) { return getFrequency(VEPFormat.KEY_GNOMAD_AFR_AF, allele); }
 
-  public double getFreqGnomadAMRVEP(int allele) {
-    return asFrequency(getVEPValues(VEPFormat.KEY_GNOMAD_AMR_AF, allele));
-  }
+  public double getFreqGnomadAMRVEP(int allele) { return getFrequency(VEPFormat.KEY_GNOMAD_AMR_AF, allele); }
 
-  public double getFreqGnomadASJVEP(int allele) {
-    return asFrequency(getVEPValues(VEPFormat.KEY_GNOMAD_ASJ_AF, allele));
-  }
+  public double getFreqGnomadASJVEP(int allele) { return getFrequency(VEPFormat.KEY_GNOMAD_ASJ_AF, allele); }
 
-  public double getFreqGnomadEASVEP(int allele) {
-    return asFrequency(getVEPValues(VEPFormat.KEY_GNOMAD_EAS_AF, allele));
-  }
+  public double getFreqGnomadEASVEP(int allele) { return getFrequency(VEPFormat.KEY_GNOMAD_EAS_AF, allele); }
 
-  public double getFreqGnomadFINVEP(int allele) {
-    return asFrequency(getVEPValues(VEPFormat.KEY_GNOMAD_FIN_AF, allele));
-  }
+  public double getFreqGnomadFINVEP(int allele) { return getFrequency(VEPFormat.KEY_GNOMAD_FIN_AF, allele); }
 
-  public double getFreqGnomadNFEVEP(int allele) {
-    return asFrequency(getVEPValues(VEPFormat.KEY_GNOMAD_NFE_AF, allele));
-  }
+  public double getFreqGnomadNFEVEP(int allele) { return getFrequency(VEPFormat.KEY_GNOMAD_NFE_AF, allele); }
 
-  public double getFreqGnomadOTHVEP(int allele) {
-    return asFrequency(getVEPValues(VEPFormat.KEY_GNOMAD_OTH_AF, allele));
-  }
+  public double getFreqGnomadOTHVEP(int allele) { return getFrequency(VEPFormat.KEY_GNOMAD_OTH_AF, allele); }
 
-  public double getFreqGnomadSASVEP(int allele) {
-    return asFrequency(getVEPValues(VEPFormat.KEY_GNOMAD_SAS_AF, allele));
-  }
+  public double getFreqGnomadSASVEP(int allele) { return getFrequency(VEPFormat.KEY_GNOMAD_SAS_AF, allele); }
   
-  public double getFreqGnomadVEP(int allele) {
-    return asFrequency(getVEPValues(VEPFormat.KEY_GNOMAD_AF, allele));
-  }
+  public double getFreqGnomadVEP(int allele) { return getFrequency(VEPFormat.KEY_GNOMAD_AF, allele); }
 
-  private static double asFrequency(ArrayList<String> list) {
+  private static double firstValueAsDouble(ArrayList<String> list) {
     try {
-      return new Double(list.get(0));
-    } catch (Exception e) {
-    }
+      return Double.parseDouble(list.get(0));
+    } catch (Exception ignore) { }
     return 0;
   }
   
@@ -758,28 +715,25 @@ public class Info {
   public boolean isInDBSNPVEP(int allele){
     try {
       String rs = this.getExisting_variations(allele).get(0);
-      return rs != null && rs.length() > 0;
-    } catch (Exception e) {
-    }
+      return rs != null && !rs.isEmpty();
+    } catch (Exception ignore) { }
     return false;
   }
   
   public boolean isInDBSNPVEP(){
     try {
       String rs = this.getExisting_variations().get(0);
-      return rs != null && rs.length() > 0;
-    } catch (Exception e) {
-    }
+      return rs != null && !rs.isEmpty();
+    } catch (Exception ignore) { }
     return false;
   }
 
   public boolean hasExonic() {
     try {
       for(String exon : this.getEXONs())
-        if(exon.length() > 0)
+        if(!exon.isEmpty())
           return true;
-    } catch (Exception e) {
-    }
+    } catch (Exception ignore) { }
     return false;
   }
 
@@ -788,27 +742,27 @@ public class Info {
   }
 
   public boolean hasIntronic() {
-    return this.getConsequencesSplitted().contains(VEPConsequence.INTRON_VARIANT.getName());
+    return this.getConsequencesSplit().contains(VEPConsequence.INTRON_VARIANT.getName());
   }
 
   public boolean has5UTR() {
-    return this.getConsequencesSplitted().contains(VEPConsequence.PRIME_5_UTR_VARIANT.getName());
+    return this.getConsequencesSplit().contains(VEPConsequence.PRIME_5_UTR_VARIANT.getName());
   }
 
   public boolean has3UTR() {
-    return this.getConsequencesSplitted().contains(VEPConsequence.PRIME_3_UTR_VARIANT.getName());
+    return this.getConsequencesSplit().contains(VEPConsequence.PRIME_3_UTR_VARIANT.getName());
   }
 
   public boolean hasMissense(int allele) {
-    return this.getConsequencesSplitted().contains(VEPConsequence.MISSENSE_VARIANT.getName());
+    return this.getConsequencesSplit().contains(VEPConsequence.MISSENSE_VARIANT.getName());
   }
 
   public boolean hasIntergenic() {
-    return this.getConsequencesSplitted().contains(VEPConsequence.INTERGENIC_VARIANT.getName());
+    return this.getConsequencesSplit().contains(VEPConsequence.INTERGENIC_VARIANT.getName());
   }
 
   public boolean hasNonsense(int allele) {
-    return this.getConsequencesSplitted().contains(VEPConsequence.STOP_GAINED.getName());
+    return this.getConsequencesSplit().contains(VEPConsequence.STOP_GAINED.getName());
   }
 
   public boolean isProbablyDamaging(int allele) {
@@ -833,16 +787,15 @@ public class Info {
   }
 
   public boolean hasSynonymous(int allele) {
-    return this.getConsequencesSplitted().contains(VEPConsequence.SYNONYMOUS_VARIANT.getName());
+    return this.getConsequencesSplit().contains(VEPConsequence.SYNONYMOUS_VARIANT.getName());
   }
   
   public Double getInbreedingCoeff() {
     String value = getAnnot(Info.INBREEDING_COEFF);
     if (value != null)
       try {
-        double d = new Double(value);
-        return d;
-      } catch (NumberFormatException e) {
+        return new Double(value);
+      } catch (NumberFormatException ignore) {
         //Nothing
       }
     return null;
@@ -865,28 +818,26 @@ public class Info {
     return this.infoMap.get(key);
   }
   
-  public int[] getInts(String key){
+  public int[] getIntArray(String key){
     try {
       String[] vals = this.getValue(key).split(",");
       int[] ret = new int[vals.length];
       for(int i = 0; i < vals.length; i++)
         ret[i] = new Integer(vals[i]);
       return ret;
-    } catch (Exception e) {
-    }
+    } catch (Exception ignore) { }
     return null;
   }
   
   public int getInt(String key, int defaultValue){
     try {
       return new Integer(this.getValue(key));
-    } catch (Exception e) {
-    }
+    } catch (Exception ignore) { }
     return defaultValue;
   }
   
   public int[] getACs(){
-    return getInts("AC");
+    return getIntArray("AC");
   }
   
   public int getAN(){
@@ -898,7 +849,7 @@ public class Info {
     for (String key : this.infoMap.navigableKeySet()) {
       String value = this.infoMap.get(key);
       if (value == null) {
-        InfoFormatHeader infoFormat = vcffile.getInfoHeader(key);
+        InfoFormatHeader infoFormat = vcfFile.getInfoHeader(key);
         if (infoFormat != null && infoFormat.getNumber() == InfoFormatHeader.NUMBER_NONE)
           fields.add(key);
         else
@@ -914,11 +865,6 @@ public class Info {
     return String.join(";", getFields());
   }
 
-/*
-  public String[] getWorstConsequenceAndGene(int a) {
-    return VEPAnnotation.getWorstConsequenceAndGene(getVEPAnnotations(a));
-  }*/
-  
   public VEPAnnotation getWorstVEPAnnotation(int a) { //TODO check where this is called, 2-N genes can have the same worst csq
     return VEPAnnotation.getWorstVEPAnnotation(getVEPAnnotations(a));
   }
@@ -937,13 +883,13 @@ public class Info {
   
   /**
    * Gets worst Annotation for each allele
-   * @return 
+   * @return  the worst annotation for each allele
    */
   public HashMap<Integer, VEPAnnotation> getWorstAnnotationsByAllele(){
-    HashMap<Integer, VEPAnnotation> annots = new HashMap<>();        
+    HashMap<Integer, VEPAnnotation> annotations = new HashMap<>();
     for (int a = 1; a < variant.getAlleleCount(); a++) 
-      annots.put(a, getWorstVEPAnnotation(a));   
-    return annots;
+      annotations.put(a, getWorstVEPAnnotation(a));
+    return annotations;
   }
   
   /**
@@ -953,18 +899,18 @@ public class Info {
    * @return [CanonicalConsequence],[GeneSymbol]
    */
   public VEPAnnotation getCanonicalVEPAnnotation(int a) {
-    ArrayList<VEPAnnotation> canons = new ArrayList<>();
-    ArrayList<VEPAnnotation> noncanons = new ArrayList<>();
+    ArrayList<VEPAnnotation> canonicals = new ArrayList<>();
+    ArrayList<VEPAnnotation> nonCanonicals = new ArrayList<>();
     for (VEPAnnotation vep : getVEPAnnotations(a))
       if ("YES".equals(vep.getCANONICAL()))
-        canons.add(vep);
+        canonicals.add(vep);
       else
-        noncanons.add(vep);
+        nonCanonicals.add(vep);
 
-    if (!canons.isEmpty())
-      return VEPAnnotation.getWorstVEPAnnotation(canons);
+    if (!canonicals.isEmpty())
+      return VEPAnnotation.getWorstVEPAnnotation(canonicals);
 
     else
-      return VEPAnnotation.getWorstVEPAnnotation(noncanons);
+      return VEPAnnotation.getWorstVEPAnnotation(nonCanonicals);
   }
 }

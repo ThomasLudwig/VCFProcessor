@@ -41,6 +41,7 @@ public class GraphJFS extends GraphFunction {
             .addWarning("Expects a NxN matrix, where matrix[a][b] is the number of variants seen a times in the first set and b times in the second set.");
   }
     
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
     ArrayList<Graph> graphs = this.createGraph();

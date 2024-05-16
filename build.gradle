@@ -10,27 +10,27 @@ class Version{
 
     }
 
-    public static String getVersion(){
+    static String getVersion(){
         try {
-            BufferedReader br = new BufferedReader(new FileReader("src/main/resources/CHANGELOG.md"));
-            String line;
+            BufferedReader br = new BufferedReader(new FileReader("src/main/resources/CHANGELOG.md"))
+            String line
             while((line = br.readLine()) != null) {
                 if(line.startsWith("## ")) {
-                    br.close();
-                    return line.split(" ")[1].split("\\(")[0];
+                    br.close()
+                    return line.split(" ")[1].split("\\(")[0]
                 }
             }
-            br.close();
-        } catch(Exception e){
+            br.close()
+        } catch(Exception ignored){
             //ignore
         }
-        return "unknown";
+        return "unknown"
     }
 }
 
 repositories {
     ivy {
-        url 'http://lysine.univ-brest.fr/maven/'
+        url 'https://lysine.univ-brest.fr/maven/'
         patternLayout {
             artifact 'artifact/[organisation]/[module]-[revision].[ext]'
             ivy 'ivy/[organisation]/[module]/[revision]/ivy.xml'
@@ -41,24 +41,25 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'fr.inserm.u1078', name: 'MaokLib', version: '1.0.3'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    compile group: 'fr.inserm.u1078', name: 'MaokLib', version: '1.0.3'
-    compile group: 'jfree', name: 'jfreechart', version: '1.0.13'
-    compile 'com.jtattoo:JTattoo:1.6.13'
-    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
-    compile 'org.jdom:jdom2:2.0.6'
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    implementation group: 'fr.inserm.u1078', name: 'MaokLib', version: '1.0.4'
+    implementation group: 'jfree', name: 'jfreechart', version: '1.0.13'
+    implementation 'com.jtattoo:JTattoo:1.6.13'
+    implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
+    implementation 'org.jdom:jdom2:2.0.6.1'
 }
 
-task Release(type: Jar) {
+tasks.register('Release', Jar) {
     manifest {
         attributes 'Main-Class': 'fr.inserm.u1078.tludwig.vcfprocessor.Run'
     }
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
     with jar
 }
 
-task Deploy(type: Copy) {
+tasks.register('Deploy', Copy) {
     from "build/libs"
     into "build/libs"
     include "/${rootProject.name}-${version}.jar"

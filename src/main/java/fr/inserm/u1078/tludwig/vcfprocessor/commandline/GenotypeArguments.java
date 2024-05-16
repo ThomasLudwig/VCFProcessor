@@ -30,65 +30,47 @@ public class GenotypeArguments {
           new Description("Sets genotypes to missing when the "+GenotypeFlagFilter.FT+" field has at least one of the given value")
   );
 
-  public static final Argument MINDP = Argument.newArgument("--minDP",
+  public static final Argument MIN_DP = Argument.newArgument("--minDP",
           TYPE,
           "depth-of-coverage (integer)",
           new String[][]{{"10", "Sets genotypes to missing if DP <10 (or SUM(AD) if DP is missing)"}},//TODO check that
           new Description("Sets genotypes to missing if DP is below the given value (or SUM(AD) if DP is missing)")
   );
-  public static final Argument MAXDP = Argument.newArgument("--maxDP",
+  public static final Argument MAX_DP = Argument.newArgument("--maxDP",
           TYPE,
           "depth-of-coverage (integer)",
           new String[][]{{"10", "Sets genotypes to missing if DP >10 (or SUM(AD) if DP is missing)"}},//TODO check that
           new Description("Sets genotypes to missing if DP is above the given value (or SUM(AD) if DP is missing)")
   );
-  /*public static final Argument REMOVE_MINDP = Argument.newArgument("--remove-minDP",
-          TYPE,
-          "depth-of-coverage (integer)",
-          new String[][]{{"10", "Sets genotypes to missing if DP >=10 (or SUM(AD) if DP is missing)"}},//TODO check that
-          new Description("Sets genotypes to missing if DP is not below the given value (or SUM(AD) if DP is missing)")//sinnymous of maxDP ?
-  );
-  public static final Argument REMOVE_MAXDP = Argument.newArgument("--remove-maxDP",
-          TYPE,
-          "depth-of-coverage (integer)",
-          new String[][]{{"10", "Sets genotypes to missing if DP <=10 (or SUM(AD) if DP is missing)"}},//TODO check that
-          new Description("Sets genotypes to missing if DP is not above the given value (or SUM(AD) if DP is missing)")
-  );*/
-  public static final Argument MINGQ = Argument.newArgument("--minGQ",
+  public static final Argument MIN_GQ = Argument.newArgument("--minGQ",
           TYPE,
           "Genotype Quality (integer)",
           new String[][]{{"30", "Sets genotypes to missing if GQ <30"}},
           new Description("Sets genotypes to missing if GQ is below the given value")
   );
-  public static final Argument MAXGQ = Argument.newArgument("--maxGQ",
+  public static final Argument MAX_GQ = Argument.newArgument("--maxGQ",
           TYPE,
           "Genotype Quality (integer)",
           new String[][]{{"30", "Sets genotypes to missing if GQ >30"}},
           new Description("Sets genotypes to missing if GQ is above the given value")
   );
-  /*public static final Argument REMOVE_MINGQ = Argument.newArgument("--remove-minGQ",
-          TYPE,
-          "Genotype Quality (integer)",
-          new String[][]{{"30", "Sets genotypes to missing if GQ >=30"}},
-          new Description("Sets genotypes to missing if GQ is not below the given value")
-  );
-  public static final Argument REMOVE_MAXGQ = Argument.newArgument("--remove-maxGQ",
-          TYPE,
-          "Genotype Quality (integer)",
-          new String[][]{{"30", "Sets genotypes to missing if GQ <=30"}},
-          new Description("Sets genotypes to missing if GQ is not above the given value")
-  );*/
 
-  public static final Argument MINVAF = Argument.newArgument("--minVAF",
+  public static final Argument MIN_VAF = Argument.newArgument("--minVAF",
           TYPE,
           "VAF = AD(variant)/DP",
           new String[][]{{".35", "Sets genotypes to missing if VAR <.35"}},
           new Description("Sets genotypes to missing if VAF is below the given value")
   );
-  public static final Argument MAXVAF = Argument.newArgument("--maxVAF",
+  public static final Argument MAX_VAF = Argument.newArgument("--maxVAF",
           TYPE,
           "VAF = AD(variant)/DP",
           new String[][]{{".7", "Sets genotypes to missing if VAR > .7"}},
           new Description("Sets genotypes to missing if VAF is above the given value")
   );
+
+  public static final Argument ABHET_DEV = Argument.newArgument("--abhetdev",
+          TYPE,
+          "AB = AD1 / (AD1+AD2)",
+          new String[][]{{"0.25","Sets genotypes to missing if AB < 0.25-deviation or AB > 0.75"}},
+          new Description("Sets genotypes to missing if AB < 0.5-deviation or AB > 0.5+deviation"));
 }

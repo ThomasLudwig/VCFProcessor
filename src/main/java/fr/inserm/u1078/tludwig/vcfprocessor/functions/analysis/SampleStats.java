@@ -10,7 +10,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
 
 /**
- * Print Stats about each samples (Mean Depths, TS/TV Het/HomAlt).
+ * Print Stats about each sample (Mean Depths, TS/TV Het/HomAlt).
  * 
  * @author Thomas E. Ludwig (INSERM - U1078) 
  * Started on             2015-11-23
@@ -25,7 +25,7 @@ public class SampleStats extends ParallelVCFVariantPedFunction {
   private int[] depths;
   private int[] depthPresent;
   private int[] missings;
-  private int[] singleton;
+  private int[] singletons;
   private int[] tss;
   private int[] tvs;
   private int[] hets;
@@ -41,6 +41,7 @@ public class SampleStats extends ParallelVCFVariantPedFunction {
     return "Print Stats about each samples (Mean Depths, TS/TV Het/HomAlt).";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
@@ -48,16 +49,19 @@ public class SampleStats extends ParallelVCFVariantPedFunction {
             .addColumns(HEADERS);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -68,6 +72,7 @@ public class SampleStats extends ParallelVCFVariantPedFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getFooters() {
     ArrayList<String> out = new ArrayList<>();
@@ -81,7 +86,7 @@ public class SampleStats extends ParallelVCFVariantPedFunction {
       StringTools.formatRatio(100*this.missings[s], nbSites, 4)+"%",
       StringTools.formatRatio(this.depths[s],this.depthPresent[s],4),
       this.variants[s]+"",
-      this.singleton[s]+"",
+      this.singletons[s]+"",
       this.tss[s]+"",
       this.tvs[s]+"",
       this.tvs[s] != 0 ? StringTools.formatRatio(this.tss[s], tvs[s], 4) : "0",
@@ -91,21 +96,23 @@ public class SampleStats extends ParallelVCFVariantPedFunction {
       
       out.add(String.join(T, values));
     }
-    return out.toArray(new String[out.size()]);
+    return out.toArray(new String[0]);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return new String[]{"#"+ String.join(T, HEADERS)};
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     this.S = getPed().getSampleSize();
     depths = new int[S];
     depthPresent = new int[S];
     missings = new int[S];
-    singleton = new int[S];
+    singletons = new int[S];
     tss = new int[S];
     tvs = new int[S];
     hets = new int[S];
@@ -116,14 +123,14 @@ public class SampleStats extends ParallelVCFVariantPedFunction {
 
   @Override
   public String[] processInputVariant(Variant variant) {
-    int[] ltss = new int[S];
-    int[] ltvs = new int[S];
-    int[] lhomAlts = new int[S];
-    int[] lvariants = new int[S];
-    int[] lhets = new int[S];
-    int[] ldepths = new int[S];
-    int[] lsingleton = new int[S];
-    boolean[] lmissings = new boolean[S];
+    int[] lTransitions = new int[S];
+    int[] lTransversions = new int[S];
+    int[] lHomAlts = new int[S];
+    int[] lVariants = new int[S];
+    int[] lHets = new int[S];
+    int[] lDepths = new int[S];
+    int[] lSingletons = new int[S];
+    boolean[] lMissings = new boolean[S];
 
     boolean[] ts = new boolean[variant.getAlleles().length];
     boolean[] tv = new boolean[variant.getAlleles().length];
@@ -138,50 +145,51 @@ public class SampleStats extends ParallelVCFVariantPedFunction {
 
     for (int s = 0; s < S; s++) {
       Genotype geno = variant.getGenotype(samples.get(s));
-      ldepths[s] = geno.getDP(); //changed to get the same results as vcftools and bcftools (take dp of missing genotype, but if dp itself is missing does not fall back on sumAD)
+      lDepths[s] = geno.getDP(); //changed to get the same results as vcftools and bcftools (take dp of missing genotype, but if dp itself is missing does not fall back on sumAD)
       if (geno.isMissing())
-        lmissings[s] = true;
+        lMissings[s] = true;
       else {
-        //ldepths[s] = Math.max(geno.getSumAD(), geno.getDP()); //changed to get the same results as vcftools and bcftools
+        //lDepths[s] = Math.max(geno.getSumAD(), geno.getDP()); //changed to get the same results as vcftools and bcftools
         if(geno.isHeterozygousDiploid())
-          lhets[s]++;
+          lHets[s]++;
         for (int a = 1; a < variant.getAlleles().length; a++)
           if (geno.hasAllele(a)) {
-            lvariants[s]++;
+            lVariants[s]++;
             int ac = geno.getCount(a);
             if(ac == acs[a])
-              lsingleton[s] ++;
+              lSingletons[s] ++;
             
             if (ts[a])
-              ltss[s]++;
+              lTransitions[s]++;
             else if (tv[a])
-              ltvs[s]++;
+              lTransversions[s]++;
             if (geno.isHomozygousOrHaploid())
-              lhomAlts[s]++;
+              lHomAlts[s]++;
           }
       }
     }
-    this.pushAnalysis(new Analysis(ltss, ltvs, lhomAlts, lvariants, lhets, ldepths, lsingleton, lmissings));
+    this.pushAnalysis(new Analysis(lTransitions, lTransversions, lHomAlts, lVariants, lHets, lDepths, lSingletons, lMissings));
     return NO_OUTPUT;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     if (analysis instanceof Analysis) {
       Analysis a = (Analysis) analysis;
       nbSites++;
       for (int s = 0; s < S; s++) {
-        tss[s] += a.ltss[s];
-        tvs[s] += a.ltvs[s];
-        homAlts[s] += a.lhomAlts[s];
-        variants[s] += a.lvariants[s];
-        hets[s] += a.lhets[s];
-        singleton[s] += a.lsingleton[s];
-        if(a.ldepths[s] > -1){
-          depths[s] += a.ldepths[s];
+        tss[s] += a.lTransitions[s];
+        tvs[s] += a.lTransversions[s];
+        homAlts[s] += a.lHomAlts[s];
+        variants[s] += a.lVariants[s];
+        hets[s] += a.lHets[s];
+        singletons[s] += a.lSingletons[s];
+        if(a.lDepths[s] > -1){
+          depths[s] += a.lDepths[s];
           depthPresent[s]++;
         }
-        if(a.lmissings[s])
+        if(a.lMissings[s])
           missings[s]++;
       }
       return true;
@@ -194,20 +202,20 @@ public class SampleStats extends ParallelVCFVariantPedFunction {
     return TestingScript.getSimpleVCFPedAnalysisScript();
   }
 
-  private class Analysis {
+  private static class Analysis {
 
-    private final int[] ltss, ltvs, lhomAlts, lvariants, lhets, ldepths, lsingleton;
-    private final boolean[] lmissings;
+    private final int[] lTransitions, lTransversions, lHomAlts, lVariants, lHets, lDepths, lSingletons;
+    private final boolean[] lMissings;
 
-    Analysis(int[] ltss, int[] ltvs, int[] lhomAlts, int[] lvariants, int[] lhets, int[] ldepths, int[] lsingleton, boolean[] lmissings) {
-      this.ltss = ltss;
-      this.ltvs = ltvs;
-      this.lhomAlts = lhomAlts;
-      this.lvariants = lvariants;
-      this.lhets = lhets;
-      this.ldepths = ldepths;
-      this.lsingleton = lsingleton;
-      this.lmissings = lmissings;
+    Analysis(int[] lTransitions, int[] lTransversions, int[] lHomAlts, int[] lVariants, int[] lHets, int[] lDepths, int[] lSingletons, boolean[] lMissings) {
+      this.lTransitions = lTransitions;
+      this.lTransversions = lTransversions;
+      this.lHomAlts = lHomAlts;
+      this.lVariants = lVariants;
+      this.lHets = lHets;
+      this.lDepths = lDepths;
+      this.lSingletons = lSingletons;
+      this.lMissings = lMissings;
     }
   }
 }

@@ -24,6 +24,7 @@ public class DbSNPMismatch extends ParallelVCFVariantFunction {
     return "Check if there is a discrepancy between the ID Column and the VEP annotation for RS ID.";
   }
   
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
@@ -31,11 +32,13 @@ public class DbSNPMismatch extends ParallelVCFVariantFunction {
             .addColumns(HEADERS);
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -46,17 +49,20 @@ public class DbSNPMismatch extends ParallelVCFVariantFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return new String[]{String.join(T, HEADERS)};
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
-    this.outputs = new SortedList(new ArrayList<>(), SortedList.Strategy.ADD_FROM_END);
+    this.outputs = new SortedList<>(new ArrayList<>(), SortedList.Strategy.ADD_FROM_END);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return "RS IDs of every alternate allele are put in the ID field.";
@@ -79,25 +85,27 @@ public class DbSNPMismatch extends ParallelVCFVariantFunction {
     return NO_OUTPUT;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     try {
       MiniVar mini = (MiniVar)analysis;
       this.outputs.add(mini);
       return true;
-    } catch (Exception e) {
-      
-    }
+    } catch (Exception ignore) { }
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
-  public void end() {
+  public String[] getFooters() {
+    ArrayList<String> out = new ArrayList<>();
     for(MiniVar minivar : this.outputs)
-      this.println(minivar);
+      out.add(minivar.toString());
+    return out.toArray(new String[0]);
   }
   
-  private class MiniVar implements Comparable<MiniVar>{
+  private static class MiniVar implements Comparable<MiniVar>{
     private final String chr;
     private final int pos;
     private final String id;

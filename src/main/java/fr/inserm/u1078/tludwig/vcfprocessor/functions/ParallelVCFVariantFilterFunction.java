@@ -21,6 +21,7 @@ public abstract class ParallelVCFVariantFilterFunction extends ParallelVCFVarian
   
   public abstract String[] processInputVariantForFilter(Variant variant);
 
+  @SuppressWarnings("unused")
   @Override
   public final boolean checkAndProcessAnalysis(Object analysis) {
     try {
@@ -28,11 +29,11 @@ public abstract class ParallelVCFVariantFilterFunction extends ParallelVCFVarian
       this.inputLines++;
       this.outputLines+=add;
       return true;
-    } catch (Exception e) {
-    }
+    } catch (Exception ignore) { }
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void end() {
     super.end();

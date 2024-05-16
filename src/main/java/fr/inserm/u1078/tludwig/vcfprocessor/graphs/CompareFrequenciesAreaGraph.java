@@ -90,8 +90,7 @@ public class CompareFrequenciesAreaGraph extends CompareFrequenciesGraph {
   }
 
   private Color getColor(double count) {
-    Color c = ColorTools.getMonochromeScale(Math.log10(count + 1), 1, Math.log10(maxP + 1), BACKGROUND, FOREGROUND);
-    return c;
+    return ColorTools.getMonochromeScale(Math.log10(count + 1), 1, Math.log10(maxP + 1), BACKGROUND, FOREGROUND);
   }
 
   public class Area {

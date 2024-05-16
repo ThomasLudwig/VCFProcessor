@@ -54,49 +54,49 @@ public class SampleArguments {
           TYPE,
           "Fam1,Fam2,...",
           new String[][]{{"Fam1,Fam2", "Keep only the samples whose FamilyID are Fam1 or Fam2"}},
-          new Description("Keep only the sample with given FamilyID").addWarning("has to be combined to "+Description.code(KEY_PED)+"")
+          new Description("Keep only the sample with given FamilyID").addWarning("has to be combined to "+Description.code(KEY_PED))
   );
   public static final Argument REMOVE_FAMILY = Argument.newArgument("--remove-family",
           TYPE,
           "Fam1,Fam2,...",
           new String[][]{{"Fam1,Fam2", "Remove the samples whose FamilyID are Fam1 or Fam2"}},
-          new Description("Remove the sample with given FamilyID").addWarning("has to be combined to "+Description.code(KEY_PED)+"")
+          new Description("Remove the sample with given FamilyID").addWarning("has to be combined to "+Description.code(KEY_PED))
   );
   public static final Argument KEEP_SEX = Argument.newArgument("--keep-sex",
           TYPE,
           "sex (integer)",
           new String[][]{{"1", "Keep only the samples whose sex are 1"}},
-          new Description("Keep only the sample with given sex").addWarning("has to be combined to "+Description.code(KEY_PED)+"")
+          new Description("Keep only the sample with given sex").addWarning("has to be combined to "+Description.code(KEY_PED))
   );
   public static final Argument REMOVE_SEX = Argument.newArgument("--remove-sex",
           TYPE,
           "sex (integer)",
           new String[][]{{"1", "Remove the samples whose sex are 1"}},
-          new Description("Remove the sample with given sex").addWarning("has to be combined to "+Description.code(KEY_PED)+"")
+          new Description("Remove the sample with given sex").addWarning("has to be combined to "+Description.code(KEY_PED))
   );
   public static final Argument KEEP_PHENOTYPE = Argument.newArgument("--keep-phenotype",
           TYPE,
           "phenotype (integer)",
           new String[][]{{"1", "Keep only the samples whose phenotype are 1"}},
-          new Description("Keep only the sample with given phenotype").addWarning("has to be combined to "+Description.code(KEY_PED)+"")
+          new Description("Keep only the sample with given phenotype").addWarning("has to be combined to "+Description.code(KEY_PED))
   );
   public static final Argument REMOVE_PHENOTYPE = Argument.newArgument("--remove-phenotype",
           TYPE,
           "phenotype (integer)",
           new String[][]{{"1", "Remove the samples whose phenotype are 1"}},
-          new Description("Remove the sample with given phenotype").addWarning("has to be combined to "+Description.code(KEY_PED)+"")
+          new Description("Remove the sample with given phenotype").addWarning("has to be combined to "+Description.code(KEY_PED))
   );
   public static final Argument KEEP_GROUP = Argument.newArgument("--keep-group",
           TYPE,
           "Group1,Group2,...",
           new String[][]{{"CohortA,CohortB", "Keep only the samples belonging to CohortA or CohortB"}},
-          new Description("Keep only the sample belonging to given phenotype").addWarning("has to be combined to "+Description.code(KEY_PED)+"")
+          new Description("Keep only the sample belonging to given phenotype").addWarning("has to be combined to "+Description.code(KEY_PED))
   );
   public static final Argument REMOVE_GROUP = Argument.newArgument("--remove-group",
           TYPE,
           "Group1,Group2,...",
           new String[][]{{"CohortA,CohortB", "Remove the samples belonging to CohortA or CohortB"}},
-          new Description("Remove the sample belonging to given phenotype").addWarning("has to be combined to "+Description.code(KEY_PED)+"")
+          new Description("Remove the sample belonging to given phenotype").addWarning("has to be combined to "+Description.code(KEY_PED))
   );
 
 }

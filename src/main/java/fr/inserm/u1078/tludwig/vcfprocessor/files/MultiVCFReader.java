@@ -1,6 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
+import fr.inserm.u1078.tludwig.vcfprocessor.Main;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF.Reader;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
@@ -20,21 +21,16 @@ public class MultiVCFReader {
   private boolean finished = false;
   
   private final LinkedBlockingQueue<LinesPair> queue = new LinkedBlockingQueue<>(1000);
-  
-  private final ReaderWrapper r1;
-  private final ReaderWrapper r2;
-  
-  public MultiVCFReader(VCF vcf1, VCF vcf2) throws VCFException{
+
+  public MultiVCFReader(VCF vcf1, VCF vcf2) {
     this.vcf1 = vcf1;
     this.vcf2 = vcf2;
     this.commonsSamples = Sample.getCommonIDs(vcf1.getSamples(), vcf2.getSamples());
 
     this.reader1 = vcf1.getReaderWithoutStarting();
-    r1 = new ReaderWrapper(reader1, vcf1.getFilename());
-    r1.start();
+    new ReaderWrapper(reader1, vcf1.getFilename()).start();
     this.reader2 = vcf2.getReaderWithoutStarting();
-    r2 = new ReaderWrapper(reader2, vcf2.getFilename());
-    r2.start();
+    new ReaderWrapper(reader2, vcf2.getFilename()).start();
     new Synchronizer(new SyncReader()).start();
   }
 
@@ -59,39 +55,44 @@ public class MultiVCFReader {
     
     @Override
     public void run() {
-      Data data1 = nextLine(reader1);
-      Data data2 = nextLine(reader2);
-      while(data1.line != null && data2.line != null){
-        int compare = Variant.compare(data1.chrom, data1.pos, data2.chrom, data2.pos);
-        if(compare < 0){
-          data1 = nextLine(reader1);
-        } else if(compare > 0){
-          data2 = nextLine(reader2);
-        } else {          
-          //Both files can have multiple lines for the same position
-          ArrayList<String> lines1 = new ArrayList<>();
-          int pos = data1.pos;
-          //Message.debug("Match "+pos);
-          while(pos == data1.pos){
-            lines1.add(data1.line);
+      try{
+        Data data1 = nextLine(reader1);
+        Data data2 = nextLine(reader2);
+        while (data1.line != null && data2.line != null) {
+          int compare = Variant.compare(data1.chrom, data1.pos, data2.chrom, data2.pos);
+          if (compare < 0) {
             data1 = nextLine(reader1);
-          }
-          ArrayList<String> lines2 = new ArrayList<>();
-          while(pos == data2.pos){
-            lines2.add(data2.line);
+          } else if (compare > 0) {
             data2 = nextLine(reader2);
-          }
-          try {
-            queue.put(new LinesPair(lines1, lines2));
-          } catch (InterruptedException ex) {
-            //Ignore
+          } else {
+            //Both files can have multiple lines for the same position
+            ArrayList<String> lines1 = new ArrayList<>();
+            int pos = data1.pos;
+            //Message.debug("Match "+pos);
+            while (pos == data1.pos) {
+              lines1.add(data1.line);
+              data1 = nextLine(reader1);
+            }
+            ArrayList<String> lines2 = new ArrayList<>();
+            while (pos == data2.pos) {
+              lines2.add(data2.line);
+              data2 = nextLine(reader2);
+            }
+            try {
+              queue.put(new LinesPair(lines1, lines2));
+            } catch (InterruptedException ex) {
+              //Ignore
+            }
           }
         }
+        if (data1.line == null)
+          Message.info("Reached end of file " + vcf1.getFilename());
+        if (data2.line == null)
+          Message.info("Reached end of file " + vcf2.getFilename());
+      } catch (VCFException e){
+        Main.die("There was a problem while reading the VCF file", e);
       }
-      if (data1.line == null)
-        Message.info("Reached end of file " + vcf1.getFilename());
-      if (data2.line == null)
-        Message.info("Reached end of file " + vcf2.getFilename());
+
       reader1.close();
       reader2.close();
       
@@ -102,7 +103,7 @@ public class MultiVCFReader {
       }
     }
 
-    private Data nextLine(Reader reader){
+    private Data nextLine(Reader reader) throws VCFException{
       String ret = reader.nextLine().line;
       while(VCF.FILTERED_LINE.equals(ret)){
         ret = reader.nextLine().line;
@@ -134,8 +135,8 @@ public class MultiVCFReader {
     }
   }
   
-  private class Data{
-    private String line = null;
+  private static class Data{
+    private final String line;
     private String chrom = null;
     private int pos = -1;
     
@@ -146,13 +147,12 @@ public class MultiVCFReader {
         chrom = f[0];
         try {
           pos = new Integer(f[1]);
-        } catch (NumberFormatException e) {
-        }
+        } catch (NumberFormatException ignore) { }
       }
     }
   }
   
-  private class ReaderWrapper extends Thread {
+  private static class ReaderWrapper extends Thread {
     private final String name;
 
     ReaderWrapper(Runnable target, String name) {
@@ -166,7 +166,7 @@ public class MultiVCFReader {
     }    
   }
   
-  private class Synchronizer extends Thread {
+  private static class Synchronizer extends Thread {
 
     public Synchronizer(Runnable target) {
       super(target);

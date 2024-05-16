@@ -4,7 +4,6 @@ import fr.inserm.u1078.tludwig.maok.Point;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.geom.Ellipse2D;
-import java.util.ArrayList;
 import java.util.Collection;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYLineAnnotation;
@@ -22,8 +21,8 @@ import org.jfree.data.xy.XYSeriesCollection;
  */
 public class CompareFrequenciesGraph extends ScatterPlotGraph {
 
-  public static Color BACKGROUND = Color.BLACK;
-  public static Color FOREGROUND = Color.WHITE;
+  public static final Color BACKGROUND = Color.BLACK;
+  public static final Color FOREGROUND = Color.WHITE;
   //public static Color BACKGROUND = Color.WHITE; public static Color FOREGROUND = Color.BLACK;
 
   private final Collection<Point> points;

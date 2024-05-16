@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * Genotype from VCF File
  *
  * @author Thomas E. Ludwig (INSERM - U1078)
- * Started : 17 mars 2015
+ * Started : 2015/03/17
  */
 public class Genotype {
 
@@ -17,7 +17,7 @@ public class Genotype {
   private int[] alleles;
   private boolean phased = false;
 
-  public Genotype(String genotype, GenotypeFormat format, Sample sample) throws GenotypeException {
+  public Genotype(String genotype, GenotypeFormat format, Sample sample) {
     this.format = format;
     this.sample = sample;
     this.setTo(genotype);
@@ -51,7 +51,7 @@ public class Genotype {
     this.setTo(this.createMissingGenotype());
   }
 
-  public static Genotype createNullGenotype(GenotypeFormat format, Sample sample) throws GenotypeException {
+  public static Genotype createNullGenotype(GenotypeFormat format, Sample sample)  {
 
     return new Genotype("./.", format, sample);
   }
@@ -65,13 +65,13 @@ public class Genotype {
   }
 
   public String createMissingGenotype() {
-    String ret = ".";
+    StringBuilder ret = new StringBuilder(".");
     for (int i = 1; i < this.getFormatSize(); i++)
-      ret += ":.";
-    return ret;
+      ret.append(":.");
+    return ret.toString();
   }
 
-  public String getValue(String key/*, GenotypeFormat format*/) { //TODO posible bug source, don't understand why we had to provide format
+  public String getValue(String key/*, GenotypeFormat format*/) { //TODO possible bug source, don't understand why we had to provide format
     if (this.genotype.charAt(0) == '.')
       return null;
     return format.getValue(genotype, key);
@@ -123,7 +123,7 @@ public class Genotype {
 
   /**
    * returns true if all alleles are the same (1, 2 or more chromosomes) and this allele isn't ref
-   * @return 
+   * @return true if homozygous/haploid to alt
    */
   public boolean isHomozygousOrHaploidToAlt() {
     if(this.isMissing())
@@ -139,7 +139,7 @@ public class Genotype {
   
   /**
    * returns true if all alleles are the same (1, 2 or more chromosomes) 
-   * @return 
+   * @return true if homozygous of haploid
    */
   public boolean isHomozygousOrHaploid(){
     if(this.isMissing())
@@ -166,8 +166,8 @@ public class Genotype {
   }
   
   /**
-   * returns true if genotype has 2 chromosomes with differents alleles
-   * @return 
+   * returns true if genotype has 2 chromosomes with different alleles
+   * @return  if heterozygous and diploid
    */
   public boolean isHeterozygousDiploid() {
     if(this.nbChrom != 2)
@@ -204,8 +204,8 @@ public class Genotype {
   public boolean isDPBellow(int min) {
     String dp = this.getValue(GenotypeFormat.DP);
     try {
-      int intdp = Integer.parseInt(dp);
-      return intdp < min;
+      int intDP = Integer.parseInt(dp);
+      return intDP < min;
     } catch (Exception e) {
       //Nothing
     }
@@ -215,8 +215,8 @@ public class Genotype {
   public boolean isGQBellow(int min) {
     String gq = this.getValue(GenotypeFormat.GQ);
     try {
-      int intgq = Integer.parseInt(gq);
-      return intgq < min;
+      int intGQ = Integer.parseInt(gq);
+      return intGQ < min;
     } catch (Exception e) {
       //Nothing
     }
@@ -226,8 +226,7 @@ public class Genotype {
   public int getDP() {
     String dp = this.getValue(GenotypeFormat.DP);
     try {
-      int intdp = Integer.parseInt(dp);
-      return intdp;
+      return Integer.parseInt(dp);
     } catch (NumberFormatException e) {
       return -1;
     }
@@ -246,9 +245,8 @@ public class Genotype {
   public int getGQ() {
     String gq = this.getValue(GenotypeFormat.GQ);
     try {
-      int intgq = Integer.parseInt(gq);
-      return intgq;
-    } catch (Exception e) {
+      return Integer.parseInt(gq);
+    } catch (Exception ignore) {
       //Nothing
     }
     return -1;
@@ -259,10 +257,10 @@ public class Genotype {
     if (ad != null)
       try {
         String[] strings = ad.split(",");
-        int[] ints = new int[strings.length];
+        int[] intValues = new int[strings.length];
         for (int i = 0; i < strings.length; i++)
-          ints[i] = Integer.parseInt(strings[i]);
-        return ints;
+          intValues[i] = Integer.parseInt(strings[i]);
+        return intValues;
       } catch (Exception e) {
         //Nothing
       }
@@ -281,10 +279,10 @@ public class Genotype {
     if (ad != null)
       try {
         String[] strings = ad.split(",");
-        int[] ints = new int[strings.length];
+        int[] intValues = new int[strings.length];
         for (int i = 0; i < strings.length; i++)
-          ints[i] = Integer.parseInt(strings[i]);
-        return ints;
+          intValues[i] = Integer.parseInt(strings[i]);
+        return intValues;
       } catch (Exception e) {
         //Nothing
       }
@@ -299,7 +297,7 @@ public class Genotype {
   /**
    * Add a trailing field, for a newly created annotation
    *
-   * @param value
+   * @param value the value to add
    */
   public void addField(String value) {
     if(isShortFormatMissing() && ".".equals(value))
@@ -309,7 +307,7 @@ public class Genotype {
 
   /**
    * returns true if a genotype with GT:DP:AD:PL is simply "." or "./." instead of "./.:.:.:."
-   * @return
+   * @return true if a genotype is short missing
    */
   public boolean isShortFormatMissing(){
     String[] f = this.genotype.split(":", -1);

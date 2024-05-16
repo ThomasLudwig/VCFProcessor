@@ -26,14 +26,13 @@ import java.util.ArrayList;
  */
 public class CompareGenotype extends VCFPedFunction {//TODO parallelize like in IQS
 
-  private final VCFFileParameter vcffile2 = new VCFFileParameter(OPT_VCF + 2, "File2.vcf(.gz)", "the second input VCF file (can be bgzipped)");
+  private final VCFFileParameter vcfFile2 = new VCFFileParameter(OPT_VCF + 2, "File2.vcf(.gz)", "the second input VCF file (can be bgzipped)");
   private ArrayList<Sample> samples;
   private int[] totals;
   private int[] matches;
   private int[] mismatches;
-  private int[] missinglefts;
-  private int[] missingrights;
-  private NumberSeries[] stats;
+  private int[] missingLefts;
+  private int[] missingRights;
   NumberSeries global;
   private static final String[] HEADERS = {"Sample", "Group", "Total", "Concord", "Discord", "LeftMissing", "RightMissing", "%Concord"};
 
@@ -42,25 +41,29 @@ public class CompareGenotype extends VCFPedFunction {//TODO parallelize like in 
     return "Compares the genotypes of the samples in the first and second VCF file.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
-            .addLine("Both VCF are suppose to contain the same samples. This function compares the genotypes of each sample for each variant accross the files.")
+            .addLine("Both VCF are suppose to contain the same samples. This function compares the genotypes of each sample for each variant across the files.")
             .addLine("This can be useful, for example, to compare 2 calling algorithm.")
             .addLine("Output for is :")
             .addColumns(HEADERS);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return "Alternate alleles are expected to be the same and in the same order in both files"; //TODO change implementation
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -71,10 +74,11 @@ public class CompareGenotype extends VCFPedFunction {//TODO parallelize like in 
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
-    Ped ped = this.pedfile.getPed();
-    this.stats = new NumberSeries[ped.getGroups().size()];
+    Ped ped = this.pedFile.getPed();
+    NumberSeries[] stats = new NumberSeries[ped.getGroups().size()];
     for (int i = 0; i < stats.length; i++)
       stats[i] = new NumberSeries(ped.getGroups().get(i), SortedList.Strategy.SORT_AFTERWARDS);
     global = new NumberSeries("Global", SortedList.Strategy.SORT_AFTERWARDS);
@@ -82,13 +86,13 @@ public class CompareGenotype extends VCFPedFunction {//TODO parallelize like in 
     this.totals = new int[this.samples.size()];
     this.matches = new int[this.samples.size()];
     this.mismatches = new int[this.samples.size()];
-    this.missinglefts = new int[this.samples.size()];
-    this.missingrights = new int[this.samples.size()];
+    this.missingLefts = new int[this.samples.size()];
+    this.missingRights = new int[this.samples.size()];
     
     Message.debug("Opening VCFs");
 
-    VCF vcf1 = this.vcffile.getVCF(VCF.MODE_QUICK_GENOTYPING, VCF.STEP10000);//VCF vcf1 = this.vcffile.getVCF(ped, VCF.MODE_QUICK_GENOTYPING, VCF.STEP10000);
-    VCF vcf2 = this.vcffile2.getVCF(VCF.MODE_QUICK_GENOTYPING, VCF.STEP_OFF);//VCF vcf2 = this.vcffile2.getVCF(ped, VCF.MODE_QUICK_GENOTYPING, VCF.STEP_OFF);
+    VCF vcf1 = this.vcfFile.getVCF(VCF.MODE_QUICK_GENOTYPING, VCF.STEP10000);//VCF vcf1 = this.vcfFile.getVCF(ped, VCF.MODE_QUICK_GENOTYPING, VCF.STEP10000);
+    VCF vcf2 = this.vcfFile2.getVCF(VCF.MODE_QUICK_GENOTYPING, VCF.STEP_OFF);//VCF vcf2 = this.vcfFile2.getVCF(ped, VCF.MODE_QUICK_GENOTYPING, VCF.STEP_OFF);
     
     Message.debug("Opened");
     
@@ -97,8 +101,8 @@ public class CompareGenotype extends VCFPedFunction {//TODO parallelize like in 
     
     Message.debug("Reader started");
 
-    Variant v1 = vcf1.getNextVariant();
-    Variant v2 = vcf2.getNextVariant();    
+    Variant v1 = vcf1.getUnparallelizedNextVariant();
+    Variant v2 = vcf2.getUnparallelizedNextVariant();
     
     Message.debug("Ready");
     
@@ -124,11 +128,11 @@ public class CompareGenotype extends VCFPedFunction {//TODO parallelize like in 
         //++ this is the only way to make sure we do all the comparison in case the right variant is multiallelic
         //-- the drawback is that in the vast majority of equality of position, we do 1 superfluous position comparison
         nbReadLeft++;
-        v1 = vcf1.getNextVariant();
+        v1 = vcf1.getUnparallelizedNextVariant();
       }
       if (comparePosition >= 0) {
         nbReadRight++;
-        v2 = vcf2.getNextVariant();
+        v2 = vcf2.getUnparallelizedNextVariant();
       }
     }
     Message.info(nbProcessed + "/[" + nbReadLeft + "|" + nbReadRight + "] variants processed");
@@ -141,8 +145,8 @@ public class CompareGenotype extends VCFPedFunction {//TODO parallelize like in 
       int tot = this.totals[s];
       int match = this.matches[s];
       int mismatch = this.mismatches[s];
-      int left = this.missinglefts[s];
-      int right = this.missingrights[s];
+      int left = this.missingLefts[s];
+      int right = this.missingRights[s];
       double ratio = (100.0 * match) / tot;
       stats[idx].add(ratio);
       global.add(ratio);
@@ -168,9 +172,9 @@ public class CompareGenotype extends VCFPedFunction {//TODO parallelize like in 
 
       totals[s]++;
       if (g1.isMissing())
-        this.missinglefts[s]++;
+        this.missingLefts[s]++;
       else if (g2.isMissing())
-        this.missingrights[s]++;
+        this.missingRights[s]++;
       else
         if (g1.isSame(g2))
           this.matches[s]++;

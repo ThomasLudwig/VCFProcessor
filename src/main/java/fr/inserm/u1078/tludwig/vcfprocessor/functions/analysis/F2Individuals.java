@@ -29,9 +29,9 @@ public class F2Individuals extends ParallelVCFVariantPedFunction {
   private int[][] f2all;
   private int[][] f2old;
   private int[][] f2new;
-  private int[][] f2snpall;
-  private int[][] f2snpold;
-  private int[][] f2snpnew;
+  private int[][] f2snpAll;
+  private int[][] f2snpOld;
+  private int[][] f2snpNew;
   private int total;
   private ArrayList<Sample> samples;
 
@@ -40,32 +40,34 @@ public class F2Individuals extends ParallelVCFVariantPedFunction {
     return "Computes F2 data by samples and not by groups (Each sample is its own group).";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {    
     return new Description(this.getSummary())
             .addLine("F2 data are described in PubMedId: 23128226, figure 3a")
             .addLine("Six sets of results are given, one for:")
-            .addEnumerate(new String[]{
-              "All variants",
-              "All SNVs",
-              "variants without rs (new)",
-              "SNVs without rs (new)",
-              "variants with rs (known)",
-              "SNVs with rs (known)"
-            })
+            .addEnumerate("All variants",
+                "All SNVs",
+                "variants without rs (new)",
+                "SNVs without rs (new)",
+                "variants with rs (known)",
+                "SNVs with rs (known)")
             .addWarning("The difference between known and new is done by looking a the vep annotation, not the ID column.");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -76,11 +78,13 @@ public class F2Individuals extends ParallelVCFVariantPedFunction {
     return OUT_NONE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return null;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     samples = new ArrayList<>(getVCF().getSamples());
@@ -88,12 +92,12 @@ public class F2Individuals extends ParallelVCFVariantPedFunction {
     this.f2all = new int[total][total + 1];
     this.f2old = new int[total][total + 1];
     this.f2new = new int[total][total + 1];
-    this.f2snpall = new int[total][total + 1];
-    this.f2snpold = new int[total][total + 1];
-    this.f2snpnew = new int[total][total + 1];
+    this.f2snpAll = new int[total][total + 1];
+    this.f2snpOld = new int[total][total + 1];
+    this.f2snpNew = new int[total][total + 1];
   }
   
-  private void process(Variant variant, int a) {//use of a separate method so we don't have to manage multiple layers of for-break
+  private void process(Variant variant, int a) {//use of a separate method, so we don't have to manage multiple layers of for-break
     int found = 0;
     int first = -1;
     int second = -1;
@@ -127,6 +131,7 @@ public class F2Individuals extends ParallelVCFVariantPedFunction {
     return NO_OUTPUT;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     try {
@@ -142,17 +147,16 @@ public class F2Individuals extends ParallelVCFVariantPedFunction {
         increment(this.f2new, first, second);
 
       if (snp) {
-        increment(this.f2snpall, first, second);
+        increment(this.f2snpAll, first, second);
         if (old)
-          increment(this.f2snpold, first, second);
+          increment(this.f2snpOld, first, second);
         else
-          increment(this.f2snpnew, first, second);
+          increment(this.f2snpNew, first, second);
       }
 
       
       return true;
-    } catch (Exception e) {
-    }
+    } catch (Exception ignore) { }
     return false;
   }
   
@@ -166,15 +170,16 @@ public class F2Individuals extends ParallelVCFVariantPedFunction {
     }
   }  
 
+  @SuppressWarnings("unused")
   @Override
   public void end() {
     String filename = this.dir.getDirectory() + this.prefix.getStringValue();
     printResults(filename + ".all.tsv", this.f2all);
     printResults(filename + ".known.tsv", this.f2old);
     printResults(filename + ".new.tsv", this.f2new);
-    printResults(filename + ".snp.all.tsv", this.f2snpall);
-    printResults(filename + ".snp.known.tsv", this.f2snpold);
-    printResults(filename + ".snp.new.tsv", this.f2snpnew);
+    printResults(filename + ".snp.all.tsv", this.f2snpAll);
+    printResults(filename + ".snp.known.tsv", this.f2snpOld);
+    printResults(filename + ".snp.new.tsv", this.f2snpNew);
   }
 
   private void printResults(String filename, int[][] f2) {

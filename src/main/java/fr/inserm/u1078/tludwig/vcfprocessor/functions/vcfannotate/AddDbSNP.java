@@ -29,7 +29,7 @@ public class AddDbSNP extends ParallelVCFFunction {
   public static final String KEY_RS = "RS=";
   public static final String KEY_BUILD = "dbSNPBuildID=";
 
-  private final FileParameter reffile = new FileParameter(OPT_REF, "dbsnp.vcf", "dbSNP refenrece VCF File (can be gzipped)");
+  private final FileParameter refFile = new FileParameter(OPT_REF, "dbsnp.vcf", "dbSNP reference VCF File (can be gzipped)");
 
   private HashMap<String, String[]> dbsnp;
 
@@ -38,22 +38,26 @@ public class AddDbSNP extends ParallelVCFFunction {
     return "Adds/updates dbSNP information to the VCF from a dbSNP release file";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("Adds dbSNP RS in ID field and INFO field")
-            .addLine("Adds "+Description.code(KEY_RS)+" and "+Description.code(KEY_BUILD)+" in INFO field from the input file "+Description.code(reffile.getKey())+".");
+            .addLine("Adds "+Description.code(KEY_RS)+" and "+Description.code(KEY_BUILD)+" in INFO field from the input file "+Description.code(refFile.getKey())+".");
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ANNOTATION_FOR_ALL; //TODO needs to be comma separated
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -64,12 +68,13 @@ public class AddDbSNP extends ParallelVCFFunction {
     return OUT_VCF;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
     dbsnp = new HashMap<>();
     try {
-      UniversalReader in = this.reffile.getReader();
+      UniversalReader in = this.refFile.getReader();
       String line;
       Message.progressInfo("Loading");
       int read = 0;
@@ -98,12 +103,13 @@ public class AddDbSNP extends ParallelVCFFunction {
       }
       in.close();
     } catch (IOException e) {
-      this.fatalAndDie("Unable to read dbSNP file " + this.reffile.getFilename());
+      this.fatalAndQuit("Unable to read dbSNP file " + this.refFile.getFilename());
     }
 
     Message.info(("Loading done"));
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getExtraHeaders(){
     return new String[]{RS_HEADER, BUILD_HEADER};
@@ -122,6 +128,7 @@ public class AddDbSNP extends ParallelVCFFunction {
     return new String[]{line};
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

@@ -41,9 +41,8 @@ public class Bed {
   }
 
   public ArrayList<Integer> getChromosomes(){
-    SortedList<Integer> ret = new SortedList<>(new ArrayList<Integer>(), SortedList.Strategy.ADD_FROM_END);
-    for(Integer i : this.regions.keySet())
-      ret.add(i);
+    SortedList<Integer> ret = new SortedList<>(new ArrayList<>(), SortedList.Strategy.ADD_FROM_END);
+    ret.addAll(this.regions.keySet());
     return ret;
   }
 
@@ -52,7 +51,7 @@ public class Bed {
     SortedList<Region> chrReg = this.regions.get(num);
 
     if (chrReg == null)
-      chrReg = new SortedList<>(new ArrayList<Region>(), SortedList.Strategy.ADD_FROM_END);
+      chrReg = new SortedList<>(new ArrayList<>(), SortedList.Strategy.ADD_FROM_END);
     chrReg.add(r);
     this.regions.put(num, chrReg);
   }
@@ -82,10 +81,10 @@ public class Bed {
 
   private void simplify(int n) {
     //TODO how to manage Annotations ? Here everything is put to the first region
-    SortedList<Region> tmp = new SortedList<>(new ArrayList<Region>(), SortedList.Strategy.ADD_FROM_END);
+    SortedList<Region> tmp = new SortedList<>(new ArrayList<>(), SortedList.Strategy.ADD_FROM_END);
     SortedList<Region> reg = this.regions.get(n);
 
-    if (reg.size() > 0) {
+    if (!reg.isEmpty()) {
       tmp.add(reg.get(0));
       for (int i = 1; i < reg.size(); i++) {
         Region current = reg.get(i);

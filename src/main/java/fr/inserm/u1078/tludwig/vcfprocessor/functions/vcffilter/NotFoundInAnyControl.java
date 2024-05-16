@@ -17,7 +17,7 @@ import java.util.ArrayList;
  * Unit Test defined on   2020-08-07
  */
 public class NotFoundInAnyControl extends ParallelVCFVariantFilterFunction {
-  public final PedFileParameter pedfile = new PedFileParameter();
+  public final PedFileParameter pedFile = new PedFileParameter();
   private ArrayList<Sample> controls;
 
   @Override
@@ -25,23 +25,27 @@ public class NotFoundInAnyControl extends ParallelVCFVariantFilterFunction {
     return "Removes Variants that are found in controls.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
-            .addLine("Control samples are defined by a \"2\" in the 6th field of the " + Description.code(this.pedfile.getKey()) + " file.")
+            .addLine("Control samples are defined by a \"2\" in the 6th field of the " + Description.code(this.pedFile.getKey()) + " file.")
             .addLine("In case of a multiallelic variant, if any variant allele isn't found, the whole variant is kept.");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_FILTER_ONE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -52,6 +56,7 @@ public class NotFoundInAnyControl extends ParallelVCFVariantFilterFunction {
     return OUT_VCF;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();

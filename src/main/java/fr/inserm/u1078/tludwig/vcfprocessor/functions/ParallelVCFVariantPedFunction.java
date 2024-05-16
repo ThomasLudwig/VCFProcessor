@@ -12,13 +12,13 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.PedFileParamete
  */
 public abstract class ParallelVCFVariantPedFunction extends ParallelVCFVariantFunction {
   
-  public final PedFileParameter pedfile = new PedFileParameter();
+  public final PedFileParameter pedFile = new PedFileParameter();
   private Ped ped;
 
   @Override
-  public void openVCF() throws VCFException, PedException { //TODO why, should be the same in VCFPedFunction and ParallelVCFLinePedFunction ? should avoid also direct contact with this.pedfile and get ped through the VCF ?
-    this.setVCF(new VCF(this.vcffile.getFilename(), VCF.STEP_OFF));
-    this.setPed(pedfile.getPed());
+  public void openVCF() throws VCFException, PedException { //TODO why, should be the same in VCFPedFunction and ParallelVCFLinePedFunction ? should avoid also direct contact with this.pedFile and get ped through the VCF ?
+    this.setVCF(new VCF(this.vcfFile.getFilename(), VCF.STEP_OFF));
+    this.setPed(pedFile.getPed());
   }
 
   public final Ped getPed() {

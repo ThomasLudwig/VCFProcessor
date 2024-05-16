@@ -28,26 +28,27 @@ public class StrictCompoundHeterozygous extends AbstractCompoundFunction {
     return "Keeps only variants that strictly respect the Compound Heterozygous pattern of inheritance.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
             .addLine("In the Compound Heterozygous pattern of inheritance, two variants V1 and V2 from the same gene are valid if")
-            .addItemize(new String[]{
-      "All cases have V1 and V2 from their parents",
-      "All controls (parents) have one of V1/V2 while the other parents have V2/V1"})
+            .addItemize("All cases have V1 and V2 from their parents",
+                "All controls (parents) have one of V1/V2 while the other parents have V2/V1")
             .addLine("A variant is kept if and only if :")
-            .addItemize(new String[]{
-      "All case have V1 and V2",
-      "All cases have a parent (control) with V1 and not V2, and this other parent with V2 and not V1",})
-            .addLine("The " + Description.code(nohomo.getKey()) + " options allows to reject alternate alleles if a sample is homozygous to it.")
+            .addItemize("All case have V1 and V2",
+                "All cases have a parent (control) with V1 and not V2, and this other parent with V2 and not V1")
+            .addLine("The " + Description.code(noHomo.getKey()) + " options allows to reject alternate alleles if a sample is homozygous to it.")
             .addDescription(WARNING);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return "This function expects a complete definition of the sample, where all cases are affected children and both their parents are identified controls.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
@@ -55,16 +56,16 @@ public class StrictCompoundHeterozygous extends AbstractCompoundFunction {
     this.cases = new int[ped.getCases().size()];
     this.parents = new int[ped.getCases().size()][2];
     if (this.cases.length == 0)
-      this.fatalAndDie("No case sample present");
+      this.fatalAndQuit("No case sample present");
     int i = 0;
     for (Sample cas : ped.getCases()) {
       int c = this.getVCF().indexOfSample(cas);
       int mid = this.getVCF().indexOfSample(cas.getMid());
       int pid = this.getVCF().indexOfSample(cas.getPid());
       if (mid == -1)
-        this.fatalAndDie("No mother found for case [" + cas + "]");
+        this.fatalAndQuit("No mother found for case [" + cas + "]");
       if (pid == -1)
-        this.fatalAndDie("No father found for case [" + cas + "]");
+        this.fatalAndQuit("No father found for case [" + cas + "]");
       cases[i] = c;
       parents[i] = new int[]{mid, pid};
       Message.verbose("Added trio : " + cas.getFid() + " " + cas.getId() + " [" + cas.getMid() + "|" + cas.getPid() + "]");
@@ -81,7 +82,7 @@ public class StrictCompoundHeterozygous extends AbstractCompoundFunction {
       int cc = genos[cases[c]].getCount(a);
       int cm = genos[parents[c][MOTHER]].getCount(a);
       int cf = genos[parents[c][FATHER]].getCount(a);
-      if (this.nohomo.getBooleanValue()) {
+      if (this.noHomo.getBooleanValue()) {
         if (cc != 1) //absence or homo
           return false;
         if (cm == 2 || cf == 2)  //homo
@@ -118,19 +119,20 @@ public class StrictCompoundHeterozygous extends AbstractCompoundFunction {
     }
     return true;
   }
-  
+
+  @SuppressWarnings("SpellCheckingInspection")
   @Override
   public TestingScript[] getScripts() {
     ArrayList<TestingScript> scripts = new ArrayList<>();
-    for(String setname : new String[]{"2trios", "trio", "fake"})
-      for(String nohomoP : new String[]{"false", "true"}){
+    for(String setName : new String[]{"2trios", "trio", "fake"})
+      for(String noHomoP : new String[]{"false", "true"}){
          TestingScript scr = TestingScript.newFileTransform();
-         scr.addNamingFilename("vcf", setname+".vcf");
-         scr.addAnonymousFilename("ped", setname+".ped");
-         scr.addNamingValue("nohomo", nohomoP);
+         scr.addNamingFilename("vcf", setName+".vcf");
+         scr.addAnonymousFilename("ped", setName+".ped");
+         scr.addNamingValue("nohomo", noHomoP);
          scripts.add(scr);
        }
     
-    return scripts.toArray(new TestingScript[scripts.size()]);
+    return scripts.toArray(new TestingScript[0]);
   }
 }

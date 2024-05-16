@@ -1,18 +1,14 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.graphs;
 
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.AxisLocation;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.PaintScale;
 import org.jfree.chart.renderer.xy.XYBlockRenderer;
 import org.jfree.chart.title.PaintScaleLegend;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.data.general.Dataset;
-import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.data.xy.XYZDataset;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
@@ -29,17 +25,6 @@ public abstract class HeatMapGraph extends JFreeGraph {
 
   @Override
   protected final JFreeChart createChart() {
-    /*boolean legend = ((XYSeriesCollection) this.getDataset()).getSeriesCount() > 1;
-    return ChartFactory.createScatterPlot(
-            this.getMainTitle(), // chart title
-            this.getXAxisLabel(), // x axis label
-            this.getYAxisLabel(), // y axis label
-            (XYZDataset) this.getDataset(), // data
-            PlotOrientation.VERTICAL,
-            legend, // include legend
-            true, // tooltips
-            false // urls
-    );*/
 
     PaintScale ps = this.getPaintScale();
     

@@ -27,17 +27,20 @@ public class FilterCsqExtractGene extends ParallelVCFVariantFunction {
     return "Filters Variants according to consequences. Replaces ID by gene_chr_pos.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("Filters Variants according to consequence.")
             .addLine("Replaces ID by gene_chr_pos.");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return "Only Ref and one alternate allele are Kept. The Kept alternate is (in this order) : 1. the most severe; 2. the most frequent in the file; 3. the first one.";
@@ -45,6 +48,7 @@ public class FilterCsqExtractGene extends ParallelVCFVariantFunction {
   
   
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -57,16 +61,16 @@ public class FilterCsqExtractGene extends ParallelVCFVariantFunction {
 
   @Override
   public String[] processInputVariant(Variant variant) {
-    HashMap<Integer, VEPAnnotation> annots = variant.getInfo().getWorstAnnotationsByAllele(); 
+    HashMap<Integer, VEPAnnotation> annotations = variant.getInfo().getWorstAnnotationsByAllele();
 
     int worst = 1;
-    int worstCsq = VEPConsequence.getWorstConsequence(annots.get(1)).getLevel();
+    int worstCsq = VEPConsequence.getWorstConsequence(annotations.get(1)).getLevel();
 
     if (variant.getAlleleCount() > 2) {
       int worstAC = variant.getAlleleCount(worst);
 
       for (int a = 2; a < variant.getAlleleCount(); a++) {
-        int currentCsq = VEPConsequence.getWorstConsequence(annots.get(a)).getLevel();
+        int currentCsq = VEPConsequence.getWorstConsequence(annotations.get(a)).getLevel();
         if (currentCsq > worstCsq) {
           worst = a;
           worstCsq = currentCsq;
@@ -82,12 +86,13 @@ public class FilterCsqExtractGene extends ParallelVCFVariantFunction {
 
     if (worstCsq >= this.leastCsq.getConsequenceLevel()) {
       String[] f = variant.getFields();
-      f[VCF.IDX_ID] = annots.get(worst).getSYMBOL() + "_" + variant.getChrom() + "_" + variant.getPos();
+      f[VCF.IDX_ID] = annotations.get(worst).getSYMBOL() + "_" + variant.getChrom() + "_" + variant.getPos();
       return new String[]{String.join(T, f)};
     }
     return NO_OUTPUT;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

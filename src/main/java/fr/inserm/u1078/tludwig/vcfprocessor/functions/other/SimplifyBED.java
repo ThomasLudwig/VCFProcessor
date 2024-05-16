@@ -15,7 +15,7 @@ import java.util.ArrayList;
  */
 public class SimplifyBED extends Function {
 
-  private final BedFileParameter bedfile = new BedFileParameter(OPT_BED, "region.bed", "the Bed File to process");
+  private final BedFileParameter bedFile = new BedFileParameter(OPT_BED, "region.bed", "the Bed File to process");
 
   @Override
   public String getSummary() {
@@ -33,15 +33,16 @@ public class SimplifyBED extends Function {
     return OUT_BED;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
     ArrayList<Region> regions = new ArrayList<>();
-    UniversalReader in = this.bedfile.getReader();
-    //Bed bed = this.bedfile.getBed();
+    UniversalReader in = this.bedFile.getReader();
+    //Bed bed = this.bedFile.getBed();
 
     String line;
     while ((line = in.readLine()) != null)
-      if (line.length() > 0)
+      if (!line.isEmpty())
         if (line.charAt(0) != '#') {
           Region r = new Region(line, Region.FORMAT_BED);
           boolean added = false;
@@ -55,12 +56,12 @@ public class SimplifyBED extends Function {
             regions.add(r);
         }
 
-    Message.info("Originaly there are " + regions.size() + " regions in the file");
+    Message.info("Originally there are " + regions.size() + " regions in the file");
     ArrayList<Region> merged = new ArrayList<>();
-    if (regions.size() > 0) {
+    if (!regions.isEmpty()) {
 
       merged.add(regions.remove(0));
-      while (regions.size() > 0) {
+      while (!regions.isEmpty()) {
         Region r = regions.remove(0);
         Region c = merged.remove(merged.size() - 1);
         if (r.overlap(c))
@@ -77,11 +78,6 @@ public class SimplifyBED extends Function {
       println(m.getChrom() + T + m.getStart() + T + m.getEnd());
 
     in.close();
-
-    /*
-        for(Region r : bed.getAllRegions()) //Check if regions are automatically merged or not when creating a Bed Object
-            println(r.getChrom()+T+r.getStart()+T+r.getEnd());
-     */
   }
 
   @Override

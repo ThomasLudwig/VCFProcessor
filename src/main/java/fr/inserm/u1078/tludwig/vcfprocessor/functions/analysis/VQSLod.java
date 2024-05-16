@@ -27,6 +27,7 @@ public class VQSLod extends ParallelVCFFunction {
     return "Print VQSLod statistics for each tranche.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
@@ -34,16 +35,19 @@ public class VQSLod extends ParallelVCFFunction {
             .addColumns(HEADER);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return "File must contain VQSLOD annotations";
@@ -54,29 +58,37 @@ public class VQSLod extends ParallelVCFFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
     tranches = new HashMap<>();
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return new String[]{String.join(T, HEADER)};
   }
 
+  @SuppressWarnings("unused")
   @Override
-  public void end() {
-    for (NumberSeries tranche : tranches.values())
-      printStats(tranche);
+  public String[] getFooters() {
+    String[] ret = new String[tranches.size()];
+    int i = 0;
+    for (NumberSeries tranche : tranches.values()) {
+      ret[i] = getStats(tranche);
+      i++;
+    }
+    return ret;
   }
 
-  private void printStats(NumberSeries tranche) {
-    String out = tranche.getName();
-    out += T + tranche.getMean();
+  private String getStats(NumberSeries tranche) {
+    StringBuilder out = new StringBuilder(tranche.getName());
+    out.append(T).append(tranche.getMean());
     for (double d = 0; d <= 1; d += .1)
-      out += T + tranche.getPercentile(d);
-    println(out);
+      out.append(T).append(tranche.getPercentile(d));
+    return out.toString();
   }
 
   @Override
@@ -92,15 +104,16 @@ public class VQSLod extends ParallelVCFFunction {
     return new String[]{};
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     if (analysis instanceof Object[]) {
-      String tranch = (String) ((Object[]) analysis)[0];
+      String tranche = (String) ((Object[]) analysis)[0];
       Double vqslod = (Double) ((Object[]) analysis)[1];
-      NumberSeries ns = tranches.get(tranch);
+      NumberSeries ns = tranches.get(tranche);
       if (ns == null) {
-        ns = new NumberSeries(tranch, SortedList.Strategy.ADD_INSERT_SORT);
-        tranches.put(tranch, ns);
+        ns = new NumberSeries(tranche, SortedList.Strategy.ADD_INSERT_SORT);
+        tranches.put(tranche, ns);
       }
       ns.add(vqslod);
       return true;

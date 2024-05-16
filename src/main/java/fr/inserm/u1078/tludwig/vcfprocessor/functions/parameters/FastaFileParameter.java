@@ -15,7 +15,7 @@ public class FastaFileParameter extends FileParameter {
   }
   
   public FastaFileParameter(){
-    super(Function.OPT_REF, "Reference.fasta", "Fasta File containing the reference genome");
+    this(Function.OPT_REF, "Reference.fasta", "Fasta File containing the reference genome");
   }
 
   @Override

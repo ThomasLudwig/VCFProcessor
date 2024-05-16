@@ -12,7 +12,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
  */
 public class GeneCards extends Function {
 
-  private final FileParameter genelist = new FileParameter(OPT_FILE, "genes.txt", "file listing genes");
+  private final FileParameter geneList = new FileParameter(OPT_FILE, "genes.txt", "file listing genes");
 
   @Override
   public String getSummary() {
@@ -29,17 +29,18 @@ public class GeneCards extends Function {
     return OUT_TXT;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
     println("#!/bin/bash");
-    UniversalReader in = this.genelist.getReader();
+    UniversalReader in = this.geneList.getReader();
     String line;
     while ((line = in.readLine()) != null)
       getHTML(line);
   }
 
   private void getHTML(String gene) {
-    println("wget http://www.genecards.org/cgi-bin/carddisp.pl?gene=" + gene + " -O " + gene + ".html;");
+    println("wget https://www.genecards.org/cgi-bin/carddisp.pl?gene=" + gene + " -O " + gene + ".html;");
   }
   
   @Override

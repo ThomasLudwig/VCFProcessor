@@ -123,8 +123,8 @@ public class Sample implements Comparable<Sample> {
   }
   
   /**
-   * Not 1 = Control 2 = Case (won't work with 0 / 1 files
-   * @return 
+   * Note 1 = Control 2 = Case (won't work with 0 / 1 files
+   * @return  true if phenotype != 2
    */
   public boolean isCase(){
     return this.phenotype == 2;

@@ -49,9 +49,7 @@ public class AlleleCountFilter extends LineFilter {
         for (String gt : geno.split("[/\\|]")) //split by / or | 
           try {
             acs[new Integer(gt)]++;
-          } catch (NumberFormatException e) {
-            //ingores "."
-          }
+          } catch (NumberFormatException ignore) {}
       }
 
       switch (type) {
@@ -92,9 +90,7 @@ public class AlleleCountFilter extends LineFilter {
                   int a = new Integer(gt);
                   tacs[a]++;
                   gacs[g][a]++;
-                } catch (NumberFormatException e) {
-                  //ingores "."
-                }
+                } catch (NumberFormatException ignore) { }
             }
           }
 
@@ -127,9 +123,7 @@ public class AlleleCountFilter extends LineFilter {
                 try {
                   if (0 == new Integer(gt))
                     ac++;
-                } catch (NumberFormatException e) {
-                  //ingores "."
-                }
+                } catch (NumberFormatException ignore) { }
             }
             if (!(gMinAC <= ac && ac <= gMaxAC))
               return false;
@@ -147,9 +141,7 @@ public class AlleleCountFilter extends LineFilter {
               for (String gt : geno.split("[/\\|]")) //split by / or | 
                 try {
                   acs[new Integer(gt)]++;
-                } catch (NumberFormatException e) {
-                  //ingores "."
-                }
+                } catch (NumberFormatException ignore) { }
             }
 
             for (int a = 1; a < acs.length; a++)
@@ -173,9 +165,7 @@ public class AlleleCountFilter extends LineFilter {
               for (String gt : geno.split("[/\\|]")) //split by / or | 
                 try {
                   acs[new Integer(gt)]++;
-                } catch (NumberFormatException e) {
-                  //ingores "."
-                }
+                } catch (NumberFormatException ignore) { }
             }
 
             for (int a = 1; a < acs.length; a++)

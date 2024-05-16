@@ -20,7 +20,7 @@ public class Argument {
   private final String value;
   private final String[][] examples;
   private final Description description;
-  private static final Collection<String> KEYS = new ArrayList<String>();
+  private static final Collection<String> KEYS = new ArrayList<>();
 
   private Argument(String key, String type, String value, String[][] examples, Description description) {
     this.key = key;
@@ -33,6 +33,7 @@ public class Argument {
             .addCodeBlock(key + " " + value);
     if(examples.length > 0){
       description.addLine(Description.bold(examples.length > 1 ? "Examples" : "Example"));
+      description.addLine("");
       for (String[] ex : examples)
          description.addLine(Description.code(key + " " + ex[0]) + " : " + Description.italic(ex[1]));
     }
@@ -49,20 +50,13 @@ public class Argument {
     if(KEYS.contains(key))
       throw new StartUpException("Several Argument use the same key ["+arg.getKey()+"]");
     KEYS.add(key);
-    /*
-    ArrayList<Argument> list = ARGUMENTS.get(arg.type);
-    if (list == null) {
-      list = new ArrayList<>();
-      ARGUMENTS.put(arg.type, list);
-    }
-    list.add(arg);*/
   }
   
   public static Collection<String> getAllowedKeys(){
     return new ArrayList<>(KEYS);    
   }
   
-  public static String getArgumentType(Class argumentClass){
+  public static String getArgumentType(Class<?> argumentClass){
     if(argumentClass.equals(PositionArguments.class))
       return PositionArguments.TYPE;
     if(argumentClass.equals(SampleArguments.class))
@@ -76,7 +70,7 @@ public class Argument {
     return "Unknown Filter Type";
   }
 
-  public static ArrayList<Argument> getAllArguments(Class argClass){
+  public static ArrayList<Argument> getAllArguments(Class<?> argClass){
     ArrayList<Argument> args = new ArrayList<>();
     Field[] fields = argClass.getDeclaredFields();
     for (Field f : fields) {
@@ -98,20 +92,18 @@ public class Argument {
     sb.newLine("Here is the list of filters available to limit the variants, genotypes or samples taken into account.");
     sb.newLine();
     
-    Class[] argClasses = new Class[]{PositionArguments.class, SampleArguments.class, GenotypeArguments.class, FrequencyArguments.class, PropertyArguments.class};
-    for (Class argClass : argClasses) {
+    Class<?>[] argClasses = new Class<?>[]{PositionArguments.class, SampleArguments.class, GenotypeArguments.class, FrequencyArguments.class, PropertyArguments.class};
+    for (Class<?> argClass : argClasses) {
       Message.verbose("type "+argClass.getSimpleName());
       ArrayList<Argument> arguments = getAllArguments(argClass);
-      if (arguments != null) {
-        sb.rstSection(getArgumentType(argClass));
-        for (Argument arg : arguments) {
-          sb.rstSubsection(arg.key.substring(2));
-          sb.newLine(arg.description.asRST());
-          if(!argClass.equals(argClasses[argClasses.length-1])){
-            sb.rstHorizontalLine();
-          }
-          sb.newLine();
+      sb.rstSection(getArgumentType(argClass));
+      for (Argument arg : arguments) {
+        sb.rstSubsection(arg.key.substring(2));
+        sb.newLine(arg.description.asRST());
+        if(!argClass.equals(argClasses[argClasses.length-1])){
+          sb.rstHorizontalLine();
         }
+        sb.newLine();
       }
     }
     return sb.toString();

@@ -9,7 +9,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 /**
- * Counts the genotypes 0/1 1/1 for each variants
+ * Counts the genotypes 0/1 1/1 for each variant
  * 
  * @author Thomas E. Ludwig (INSERM - U1078) 
  * Started on             2015-11-20
@@ -27,6 +27,7 @@ public class CountGenotypes extends ParallelVCFVariantPedFunction {
     return "Counts the genotypes "+Description.code("0/1")+" and "+Description.code("1/1")+" for each variants";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
@@ -35,11 +36,13 @@ public class CountGenotypes extends ParallelVCFVariantPedFunction {
             .addLine("Followed by the number of heterozygous and homozygous for each group defined in the ped file.");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -50,25 +53,27 @@ public class CountGenotypes extends ParallelVCFVariantPedFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     GRP = getPed().getGroups().size();
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
-    String line = "";
+    StringBuilder header1 = new StringBuilder();
     for (String group : getPed().getGroups())
-      line += T + group + T + getPed().getGroupSize(group);
-    println(line.substring(1));
+      header1.append(T).append(group).append(T).append(getPed().getGroupSize(group));
 
-    line = String.join(T, HEADER);
+    StringBuilder header2 = new StringBuilder(String.join(T, HEADER));
 
     for (String group : getPed().getGroups())
-      line += T + group + "_HETEROZYGOUS" + T + group + "_HOMOZYGOUS_ALT";
-    return new String[]{line};
+      header2.append(T).append(group).append("_HETEROZYGOUS").append(T).append(group).append("_HOMOZYGOUS_ALT");
+    return new String[]{header1.substring(1), header2.toString()};
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
@@ -78,7 +83,7 @@ public class CountGenotypes extends ParallelVCFVariantPedFunction {
   public String[] processInputVariant(Variant variant) {
     String[] outs = new String[variant.getAlleleCount() -1];
     for (int a = 1; a < variant.getAlleleCount(); a++) {
-      int counts[][] = new int[GRP + 1][3];
+      int[][] counts = new int[GRP + 1][3];
 
       for (Genotype g : variant.getGenotypes()) {
         int d = g.getCount(a);
@@ -100,6 +105,7 @@ public class CountGenotypes extends ParallelVCFVariantPedFunction {
     return outs;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

@@ -21,11 +21,11 @@ public class VEPAnnotation { //TODO rewrite this to be 100% compliant with vep91
   private final VEPFormat format;
   private final String[] values;
 
-  public VEPAnnotation(String annotations, VEPFormat format) throws AnnotationException {
+  public VEPAnnotation(String annotations, VEPFormat format) {
     //this.variant = variant;
     this.format = format;
     String[] tmpValues = annotations.split("\\|", -1);
-    if (tmpValues.length != format.size()){//TODO temporarily disabled, should be reenabled : for some annotated 1000g variant this is false !!
+    if (tmpValues.length != format.size()){//TODO temporarily disabled, should be reEnabled : for some annotated 1000g variant this is false !!
       String msg = "Mismatch between number of values (" + tmpValues.length + ") and size of format (" + format.size() + ") : line \n" + annotations;
       Message.warning(msg);
       //throw new AnnotationException(msg);
@@ -34,12 +34,6 @@ public class VEPAnnotation { //TODO rewrite this to be 100% compliant with vep91
     } else
       this.values = tmpValues;
   }
-/*
-  final void attach(Info info) {
-    this.info = info;
-    this.variant = info.getVariant();
-  }
-*/
 
   /**
    * to print only warning once for each missing key
@@ -109,7 +103,7 @@ public class VEPAnnotation { //TODO rewrite this to be 100% compliant with vep91
     return this.getValue(VEPFormat.KEY_HGVSP);
   }
 
-  public String getcDNA_position() {
+  public String getCDNA_position() {
     return this.getValue(VEPFormat.KEY_CDNA_POSITION);
   }
 
@@ -224,11 +218,7 @@ public class VEPAnnotation { //TODO rewrite this to be 100% compliant with vep91
   public String getGNOMAD_FIN_AF() {
     return this.getValue(VEPFormat.KEY_GNOMAD_FIN_AF);
   }
-  
-  public String getEGNOMAD_NFE_AF() {
-    return this.getValue(VEPFormat.KEY_GNOMAD_NFE_AF);
-  }
-  
+
   public String getGNOMAD_OTH_AF() {
     return this.getValue(VEPFormat.KEY_GNOMAD_OTH_AF);
   }
@@ -356,7 +346,7 @@ public class VEPAnnotation { //TODO rewrite this to be 100% compliant with vep91
     if(veps == null || veps.isEmpty())
       return null;
     
-    return VEPAnnotation.getWorstVEPAnnotation(veps.toArray(new VEPAnnotation[veps.size()]));
+    return VEPAnnotation.getWorstVEPAnnotation(veps.toArray(new VEPAnnotation[0]));
   }
   
   public static VEPAnnotation getWorstVEPAnnotation(Collection<VEPAnnotation> veps, String symbol) {

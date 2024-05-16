@@ -24,7 +24,6 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -57,8 +56,6 @@ public class VCF {
   private final UniversalReader in;
   private VEPFormat vepFormat;
   private final TreeMap<Sample, Integer> sampleIndices;
-  //private final ArrayList<Sample> samples; //Keep Duplicate ArrayList of Samples with TreeMap sampleIndices because it's faster to access samples directly than ask the ped to convert each time
-  //private final ArrayList<Integer> keptIndices;
   private final AtomicInteger nbVariantsRead = new AtomicInteger(0);
   private final AtomicInteger nbVariantsFiltered = new AtomicInteger(0);
 
@@ -211,52 +208,31 @@ public class VCF {
   /**
    * Doesn't remove the samples anymore, this will be done from the famFilter
    *
-   * @param ped
+   * @param ped the ped file to bind
    */
   public void bindToPed(Ped ped) {
     Message.verbose("Binding ped file [" + ped.getFilename() + "] to VCF file [" + this.getFilename() + "]");
     this.ped = ped;
-    /*
-    ArrayList<String> vcfNames = new ArrayList<>();
 
-    //get all the current names
-    for (Sample sample : this.samples)
-      vcfNames.add(sample.getId());
-    
-    //clear the samples
-    this.samples.clear();
-    //adds vcf variants that are also in ped
-    for (String name : vcfNames) {
-      Sample sample = ped.getSample(name);
-      if (sample != null)
-        this.samples.add(sample);
+    List<Sample> keep = this.applyPedSamples();
+    ped.keepOnly(keep);
+    //ped.keepOnly(this.sampleIndices.navigableKeySet());
+  }
+
+  private List<Sample> applyPedSamples(){
+    List<Sample> keep = new ArrayList<>();
+    for (Sample pedSample : ped.getSamples()) {
+      Sample s = this.getSample(pedSample.getId());
+      if(s != null) {
+        s.apply(pedSample);
+        keep.add(s);
+      }
     }
-
-    //remove indices of samples not found in the ped file
-    ArrayList<String> excluded = new ArrayList<>();
-    for (String name : this.sampleIndices.keySet())
-      if (!pedNames.contains(name))
-        excluded.add(name);
-    for (String name : excluded)
-      this.sampleIndices.remove(name);
-
-    this.keptIndices.clear();
-    for (Sample sample : samples)
-      this.keptIndices.add(this.sampleIndices.get(sample.getId()));
-     */
-
-    for (Sample pedSample : ped.getSamples())
-      for (Sample vcfSample : this.getSamples())
-        if (pedSample.getId().equals(vcfSample.getId()))
-          vcfSample.apply(pedSample);
-
-    ped.keepOnly(this.sampleIndices.navigableKeySet());
+    return keep;
   }
 
   public void removeSamples(Collection<Sample> excluded) {
-    ArrayList<Sample> original = new ArrayList<>();
-    for (Sample sample : sampleIndices.navigableKeySet())
-      original.add(sample);
+    ArrayList<Sample> original = new ArrayList<>(sampleIndices.navigableKeySet());
 
     for (Sample sample : original)
       if (excluded.contains(sample))
@@ -312,25 +288,28 @@ public class VCF {
     return "##" + title + "CommandLine=<ID=" + title + ",Version=" + version + ",Date=\"" + date + "\",Epoch=" + epoch + ",CommandLineOptions=\"" + options + "\">";
   }
 
-  private String applySampleFilters(String line) {
-
+  private String applySampleFilters(String line) throws VCFException {
     if ((this.commandParser.getSampleFilters().isEmpty()) || line == null)
       return line;
 
     LineBuilder out = new LineBuilder();
     String[] f = line.split(T);
-    for (int i = 0; i < 9; i++)
+    for (int i = IDX_CHROM; i < IDX_SAMPLE; i++)
       out.addColumn(f[i]);
 
-    for (Sample sample : sampleIndices.navigableKeySet())
-      out.addColumn(f[sampleIndices.get(sample)]);
-
+    for (Sample sample : sampleIndices.navigableKeySet()) {
+      int idx = sampleIndices.get(sample);
+      if(idx >= f.length)
+        throw new VCFException("Could not create variant from the following line (not enough fields: "+(f.length-9)+" samples)\n"+line);
+      String value = f[idx];
+      out.addColumn(value);
+    }
     return out.substring(1);
   }
 
   int nt = 0;
 
-  private String applyNonVariantFilters(String rawLine) {
+  private String applyNonVariantFilters(String rawLine) throws VCFException {
     //boolean debug = rawLine.startsWith("1\t866524");
 
     //removing unwanted individuals
@@ -338,7 +317,7 @@ public class VCF {
     //Message.debug(debug, "SAMPLE : "+filteredLine);
     String[] f = null; //Trying to split only once, if there is a line filter and a genotype filter
 
-    //apply genotype filters ++ Must be called before linefilter (max missing geno is part of line filters)
+    //apply genotype filters ++ Must be called before lineFilter (max missing geno is part of line filters)
     boolean hasMissingGenotypes = false;
     if (!this.commandParser.getGenotypeFilters().isEmpty()) {
       nt++;
@@ -359,7 +338,7 @@ public class VCF {
     }
 
     //update line (missing samples or genotypes impact AC,AF,AN
-    //Message.debug("hasMissingGenotypes:"+hasMissingGenotypes+" hasSampleFileted:"+hasSampleFileted);
+    //Message.debug("hasMissingGenotypes:"+hasMissingGenotypes+" hasSampleFilters:"+hasSampleFilters);
     if (hasMissingGenotypes || !this.commandParser.getSampleFilters().isEmpty()) {
       if (f == null)
         f = filteredLine.split(T, -1);
@@ -395,9 +374,7 @@ public class VCF {
 
     for (int i = IDX_SAMPLE; i < f.length; i++) {
       String geno = f[i].split(":")[0];
-      if (geno == null || geno.isEmpty()) {
-        //Nothing
-      } else
+      if (geno != null && !geno.isEmpty()) {
         for (String g : geno.split("[/\\|]")) //split on '|' and '/'
           try {
             int a = new Integer(g);
@@ -408,22 +385,23 @@ public class VCF {
           } catch (ArrayIndexOutOfBoundsException ae) {
             Message.warning("genotype [" + f[i] + "] impossible with " + ac.length + " alleles (at " + f[0] + ":" + f[1] + " " + f[2] + " " + f[3] + "/" + f[4] + ")");
           }
+      }
     }
 
     //replace old values of AC/AN/AF if present
     String newAN = "AN=" + an;
-    String newAC = "";
-    String newAF = "";
+    StringBuilder newAC = new StringBuilder();
+    StringBuilder newAF = new StringBuilder();
 
     int sumAC = 0;
     for (int i = 1; i < ac.length; i++) {
       sumAC += ac[i];
-      newAC += "," + ac[i];
-      newAF += "," + (1d * ac[i]) / an;
+      newAC.append(",").append(ac[i]);
+      newAF.append(",").append((1d * ac[i]) / an);
     }
 
-    newAC = "AC=" + newAC.substring(1);
-    newAF = "AF=" + newAF.substring(1);
+    newAC = new StringBuilder("AC=" + newAC.substring(1));
+    newAF = new StringBuilder("AF=" + newAF.substring(1));
 
     String[] info = f[IDX_INFO].split(";");
     boolean replacedAC = false;
@@ -434,11 +412,11 @@ public class VCF {
       switch (kv[0]) {
         case "AC":
           replacedAC = true;
-          info[i] = newAC;
+          info[i] = newAC.toString();
           break;
         case "AF":
           replacedAF = true;
-          info[i] = newAF;
+          info[i] = newAF.toString();
           break;
         case "AN":
           replacedAN = true;
@@ -455,17 +433,6 @@ public class VCF {
 
     //return true if all ACs are null
     return sumAC == 0;
-  }
-
-  /**
-   * Should only be called by getunfilteredline
-   *
-   * @return
-   * @throws VCFException
-   */
-  private String readNextLine() throws VCFException {
-    String rawLine = this.readNextPhysicalLine();
-    return rawLine == null ? null : applyNonVariantFilters(rawLine);
   }
 
   private String readNextPhysicalLine() throws VCFException {
@@ -485,86 +452,42 @@ public class VCF {
   /**
    * should be accessed by multiple threads
    *
-   * @return
-   * @throws VCFException
+   * @return a wrapper for the next line
    */
   public Wrapper getNextLineWrapper() throws VCFException {
     return this.getReaderWithoutStarting().nextLine();
   }
 
-  @Deprecated
+
   /**
-   * Use using this method does not full exploit the paralelism
-   * Here
-   * this method should only be accessed privately in VCF.
+   * Use using this method does not fully exploit the parallelism
    *
-   * @return
-   * @throws VCFException
+   * @return the next line
    */
-  public String getNextLine() throws VCFException {
+  public String getUnparallelizedNextLine() throws VCFException{
     return this.getNextLineWrapper().line;
   }
 
-  @Deprecated
   /**
-   * Using this method does not fully exploit the paralelism
+   * Using this method does not fully exploit the parallelism
    * If not called through multiple worker threads, it might be slow
    * <p>
    * If this is stuck, make sure vcf.getReaderAndStart() has been called before
    *
-   * @return
-   * @throws VCFException
+   * @return the next variant
+   * @throws VCFException if there was a problem while parsing the line
    */
-  public Variant getNextVariant() throws VCFException {
-    Variant variant = null;
-    String line = this.getNextLine();
-    while (line != null && variant == null) {
-      variant = this.createVariant(line);
-      if (variant != null)
-        return variant;
-      line = this.getNextLine();
-    }
-    return variant;
-  }
-
-  @Deprecated
-  /**
-   * This method reads the file and not the Queue, so it should only be accessed by the LineReader
-   *
-   * @return
-   * @throws VCFException
-   */
-  private String getNextUnfilteredLine() throws VCFException {
-    if (this.commandParser.getVariantFilters().isEmpty())
-      return this.readNextLine();
-    String line;
-    while ((line = this.readNextLine()) != null) {
+  public Variant getUnparallelizedNextVariant() throws VCFException {
+    String line = this.getUnparallelizedNextLine();
+    while (line != null) {
       Variant variant = this.createVariant(line);
       if (variant != null)
-        return line;
+        return variant;
+      line = this.getUnparallelizedNextLine();
     }
     return null;
   }
 
-  /*
-  public VariantWrapper getNextVariantWrapper() throws VCFException {
-    return this.getVariantReader().nextVariant();
-  }
-
-  public Variant getNextVariant() throws VCFException {
-    return this.getNextVariantWrapper().variant;
-  }
-
-  private Variant readNextVariant() throws VCFException {
-    String line;
-    while ((line = this.readNextLine()) != null) {
-      Variant variant = this.createVariant(line);
-      if (variant != null)
-        return variant;
-    }
-    return null;
-  }
-   */
   public static boolean isSNP(String line) {
     String[] f = line.split("\t");
     if (f[3].length() != 1)
@@ -576,15 +499,15 @@ public class VCF {
   }
 
   public static boolean isGE(String line, String chrom, int pos) {
-    String f[] = line.split("\t");
+    String[] f = line.split("\t");
     return Variant.compare(f[0], Integer.parseInt(f[1]), chrom, pos) >= 0;
   }
 
   public String getSampleHeader() {
-    String ret = "#CHROM" + T + "POS" + T + "ID" + T + "REF" + T + "ALT" + T + "QUAL" + T + "FILTER" + T + "INFO" + T + "FORMAT";
+    StringBuilder ret = new StringBuilder(String.join(T, "#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT"));
     for (Sample sample : this.sampleIndices.navigableKeySet())
-      ret += T + sample.getId();
-    return ret;
+      ret.append(T).append(sample.getId());
+    return ret.toString();
   }
 
   public boolean checkMode(int pattern) {
@@ -612,17 +535,15 @@ public class VCF {
    * Possible Types for INFO fields are: Integer, Float, Flag, Character, and String.
    * The ‘Flag’ type indicates that the INFO field does not contain a Value entry, and hence the Number should be 0 in this case.
    *
-   * @param id
-   * @param description
+   * @param id the ID for the filter
+   * @param description the description for the filter
    */
   public void addFilter(String id, String description) {
     this.headers.add("##FILTER=<ID=" + id + ",Description=\"" + description + "\">");
   }
 
   public ArrayList<String> getFullHeaders() {
-    ArrayList<String> ret = new ArrayList<>();
-    for (String h : this.getHeadersWithoutSamples())
-      ret.add(h);
+    ArrayList<String> ret = new ArrayList<>(this.getHeadersWithoutSamples());
     ret.add(this.getSampleHeader());
     return ret;
   }
@@ -645,13 +566,14 @@ public class VCF {
       throw new VCFException("Could not create variant from null line");
     int nbSamples = this.sampleIndices.size();
     if (line.charAt(0) == '#')
-      throw new VCFException("In vcf file " + this.filename + " Could not create variant from the folowing line\n" + line);
-    if (nbSamples == 0)
-      throw new VCFException("In vcf file " + this.filename + " Could not create variant from the folowing line (list of selected sample is empty)\n" + line);
+      throw new VCFException("In vcf file " + this.filename + " Could not create variant from the following line\n" + line);
+    if (nbSamples == 0) //TODO allow this somehow
+      throw new VCFException("In vcf file " + this.filename + " Could not create variant from the following line (list of selected sample is empty)\n" + line);
+
 
     String[] fields = line.split("\t");
 
-    if (fields.length < 9 + nbSamples)
+    if (fields.length < VCF.IDX_SAMPLE + nbSamples)
       throw new VCFException("(In vcf file" + this.filename + "). Could not create variant from the following line (not enough fields " + (fields.length - 9) + "/" + nbSamples + " samples)\n" + line);
 
     try {
@@ -673,7 +595,7 @@ public class VCF {
       for(Sample sample : sampleIndices.navigableKeySet()){
       //for (int i = 0; i < this.samples.size(); i++) {
         int index = IDX_SAMPLE + i;
-        String geno = fields[index];//right index, because line has already be cut
+        String geno = fields[index];//right index, because line has already been cut
         if (checkMode(MODE_QUICK_GENOTYPING))
           geno = geno.split(":")[0];
         genotypes[i] = new Genotype(geno, format, sample);//right index, because samples has already been reduces
@@ -693,7 +615,7 @@ public class VCF {
       return null;
 
     } catch (VariantException | NumberFormatException e) {
-      throw new VCFException("In vcf file " + this.filename + " Could not create variant from the folowing line\n" + line + "\n" + e.getMessage(), e);
+      throw new VCFException("In vcf file " + this.filename + " Could not create variant from the following line\n" + line + "\n" + e.getMessage(), e);
     }
   }
 
@@ -727,6 +649,13 @@ public class VCF {
 
   public NavigableSet<Sample> getSamples() {
     return sampleIndices.navigableKeySet();
+  }
+
+  public Sample getSample(String id){
+    for(Sample s : getSamples())
+      if(s.getId().equals(id))
+        return s;
+    return null;
   }
 
   public int indexOfSample(Sample sample){
@@ -795,8 +724,8 @@ public class VCF {
   /**
    * Gets the indices of samples for the given group
    *
-   * @param group
-   * @return
+   * @param group the group to consider
+   * @return the list of indices for the samples in the group
    */
   public ArrayList<Integer> getMatrixForGroup(String group) {
     Message.debug("Looking for " + group);
@@ -805,7 +734,7 @@ public class VCF {
       return members;
     for (Sample sample : sampleIndices.navigableKeySet())
       if (group.equals(sample.getGroup()))
-        members.add(this.sampleIndices.get(sample.getId()));
+        members.add(this.sampleIndices.get(sample));
     Message.debug(members.size() + " members found for " + group);
     return members;
   }
@@ -815,13 +744,13 @@ public class VCF {
    *
    * @param line   the original line
    * @param extras the extra info fields
-   * @return
+   * @return the variant line with extra info fields
    */
   public static String addInfo(String line, String[] extras) {
     if (line == null)
       return null;
     String[] f = line.split(T);
-    if (extras != null && extras.length > 0)
+    if (extras != null)
       for (String extra : extras)
         if (extra != null && !extra.isEmpty())
           f[IDX_INFO] += ";" + extra;
@@ -833,40 +762,24 @@ public class VCF {
    *
    * @param line  the original line
    * @param extra the extra info field
-   * @return
+   * @return the variant line with extra info fields
    */
   public static String addInfo(String line, String extra) {
     if (line == null)
       return null;
     String[] f = line.split("\t");
-    if (extra != null && extra.length() > 0)
+    if (extra != null && !extra.isEmpty())
       f[IDX_INFO] += ";" + extra;
     return String.join("\t", f);
   }
 
-  /*
-  public VariantReader getVariantReader() throws VCFException {
-    if (this.uniqLineReader != null)
-      throw new VCFException("A " + VariantReader.class.getSimpleName() + " cannot be obtained for this VCF as a " + LineReader.class.getSimpleName() + " has already been provided");
-    if (this.uniqVCFReader == null) {
-      readLock.lock();
-      try {
-        if (this.uniqVCFReader == null)
-          this.uniqVCFReader = new VariantReader();
-      } finally {
-        readLock.unlock();
-      }
-    }
-    return this.uniqVCFReader;
-  }
-   */
-  public Reader getReaderAndStart() throws VCFException {
+  public Reader getReaderAndStart() {
     Reader reader = this.getReaderWithoutStarting();
     new Thread(reader).start();
     return reader;
   }
 
-  public Reader getReaderWithoutStarting() throws VCFException {
+  public Reader getReaderWithoutStarting() {
     if (this.uniqLineReader == null) {
       readLock.lock();
       try {
@@ -879,9 +792,6 @@ public class VCF {
     return this.uniqLineReader;
   }
 
-  public static final long TIMEOUT = 10;
-  public static final TimeUnit TIMEUNIT = TimeUnit.MILLISECONDS;
-
   public boolean hasSample(String id) {
     for (Sample sample : this.getSamples())
       if (sample.getId().equals(id))
@@ -889,7 +799,7 @@ public class VCF {
     return false;
   }
 
-  public class Wrapper {
+  public static class Wrapper {
 
     public final int index;
     public String line;
@@ -921,7 +831,7 @@ public class VCF {
         while (run && (line = VCF.this.readNextPhysicalLine()) != null)
           this.queue.put(new Wrapper(++read, line));
       } catch (VCFException e) {
-        Message.die("Unable to read from file [" + getFilename() + "]", e); //TODO change, the STDERR/STDOUT are not closed properly
+        Main.die("Unable to read from file [" + getFilename() + "]", e); //TODO change, the STDERR/STDOUT are not closed properly
       } catch (InterruptedException ex) {
         //ignore
       }
@@ -937,7 +847,7 @@ public class VCF {
       run = false;
     }
 
-    public Wrapper nextLine() {
+    public Wrapper nextLine() throws VCFException {
       if (start < 0)
         start = new Date().getTime();
       Wrapper next = null;
@@ -977,7 +887,7 @@ public class VCF {
     }
   }
 
-  public class InfoFormatHeader {
+  public static class InfoFormatHeader {
 
     private final String name;
     private final String description;

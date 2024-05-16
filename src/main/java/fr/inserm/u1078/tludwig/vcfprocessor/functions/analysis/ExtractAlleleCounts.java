@@ -9,7 +9,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 /**
- * For every variants, exports the variant allele count for each sample
+ * For every variant, exports the variant allele count for each sample
  * 
  * @author Thomas E. Ludwig (INSERM - U1078) 
  * Started on             2018-10-05
@@ -17,7 +17,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
  * Unit Test defined on   2020-05-14
  */
 public class ExtractAlleleCounts extends ParallelVCFVariantFunction {
-  String[] HEADERS = {"#CHROM","POS","ID","REF","ALT"};
+  final String[] HEADERS = {"#CHROM","POS","ID","REF","ALT"};
   
   @Override
   public String getOutputExtension() {
@@ -29,34 +29,39 @@ public class ExtractAlleleCounts extends ParallelVCFVariantFunction {
     return "For every variants, exports the variant allele count for each sample";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
             .addLine("Output has the following format")
             .addColumns(HEADERS)
             .addLine("Followed by the allele count for each sample")
-            .addLine("Allele Counts can be 0, 1 or 2 for diploides")
+            .addLine("Allele Counts can be 0, 1 or 2 for diploids")
             .addLine("Missing genotypes have \".\" as an allele count");    
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
-    String header = String.join(T, HEADERS);
+    StringBuilder header = new StringBuilder(String.join(T, HEADERS));
     for (Sample sample : getVCF().getSamples())
-      header += T + sample.getId();
-    return new String[]{header};
+      header.append(T).append(sample.getId());
+    return new String[]{header.toString()};
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
@@ -86,6 +91,7 @@ public class ExtractAlleleCounts extends ParallelVCFVariantFunction {
     return outs;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

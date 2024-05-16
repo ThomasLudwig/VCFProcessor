@@ -21,23 +21,27 @@ public class Scramble extends ParallelVCFFunction {
     return "Outputs the same VCF same but randomly reassigns the genotypes among the samples";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
-    return new Description("This function can be used to annonymize a VCF file. The AC/AN/AF of each variants will stay consistent, but the haplotypes will be broken.")
-            .addLine("For each line, the genotypes are randomely reassigned among the samples.")
+    return new Description("This function can be used to anonymize a VCF file. The AC/AN/AF of each variants will stay consistent, but the haplotypes will be broken.")
+            .addLine("For each line, the genotypes are randomly reassigned among the samples.")
             .addLine("The random reassignment is different for each line");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -50,7 +54,7 @@ public class Scramble extends ParallelVCFFunction {
 
   @Override
   public String[] processInputLine(String line) {
-    String f[] = line.split(T);
+    String[] f = line.split(T);
     LineBuilder out = new LineBuilder(f[0]);
     for (int i = 1; i < 9; i++)
       out.addColumn(f[i]);
@@ -64,6 +68,7 @@ public class Scramble extends ParallelVCFFunction {
     return new String[]{out.toString()};
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;
@@ -74,16 +79,17 @@ public class Scramble extends ParallelVCFFunction {
     return new TestingScript[]{new CustomScript()};
   }
   
-  class CustomScript extends TestingScript {
+  private static class CustomScript extends TestingScript {
     
     CustomScript() {
       super(TestingScript.FILE, 0);
       this.addAnonymousFilename("vcf", "vcf");
     }
 
+    @SuppressWarnings("SpellCheckingInspection")
     @Override
     public LineBuilder testSingleFile() {
-      LineBuilder out = new LineBuilder(getIndentNumber());
+      LineBuilder out = new LineBuilder(TAB2);
       out.newLine("dif=`diff $exp $out | wc -l`;");
       out.newLine("countout=`cat $out | grep -v \"^#\" | wc -c`");
       out.newLine("countexp=`cat $exp | grep -v \"^#\" | wc -c`");

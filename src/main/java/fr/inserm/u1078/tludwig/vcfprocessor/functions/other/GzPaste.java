@@ -33,6 +33,7 @@ public class GzPaste extends Function {
     return OUT_TXT;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
     String[] fns = filenames.getList();

@@ -51,10 +51,11 @@ public class GenerateHomoRefForPosition extends Function { //TODO Parallelize
             .addLine("Alt = Transition(Ref) : A"+LEFT_RIGHT_ARROW+"G / C"+LEFT_RIGHT_ARROW+"T")
             .addLine("Format for each position is " + Description.code(DEFAULT_FORMAT))
             .addLine("Each genotypes is " + Description.code(DEFAULT_GENOTYPE))
-            //.addWarning("this function only work in a Unix operation system !")
+            //.addWarning("this function only work in a Unix operating system !")
             ;    
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
     println("##fileformat=VCFv4.1");
@@ -64,7 +65,7 @@ public class GenerateHomoRefForPosition extends Function { //TODO Parallelize
     println("##FORMAT=<ID=GQ,Number=1,Type=Integer,Description=\"Genotype Quality\">");
     println("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">");
     println("##FORMAT=<ID=PL,Number=G,Type=Integer,Description=\"Normalized, Phred-scaled likelihoods for genotypes as defined in the VCF specification\">");
-    
+
     println("##contig=<ID=1,length=249250621,assembly=b37>");//TODO get from ref get contig from index http://www.htslib.org/doc/faidx.html
     println("##contig=<ID=2,length=243199373,assembly=b37>");
     println("##contig=<ID=3,length=198022430,assembly=b37>");
@@ -95,19 +96,19 @@ public class GenerateHomoRefForPosition extends Function { //TODO Parallelize
     println(VCF.getStamp());
 
     //Get Samples
-    String header = "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT";
+    StringBuilder header = new StringBuilder(String.join(T,"#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT"));
     int nbSample = 0;
     UniversalReader sIn = sampleFile.getReader();
     String line;
     while ((line = sIn.readLine()) != null) {
       nbSample++;
-      header += T + line;
+      header.append(T).append(line);
     }
     sIn.close();
 
     Fasta reference = fasta.getFasta();
 
-    println(header);
+    println(header.toString());
     UniversalReader in = positionFile.getReader();
     Date start = new Date();
     int read = 0;

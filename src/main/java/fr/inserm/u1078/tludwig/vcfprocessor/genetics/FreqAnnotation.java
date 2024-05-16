@@ -65,12 +65,12 @@ public class FreqAnnotation {
 
   public FreqAnnotation(Info info) {
     int nbAlt = 1;
-    
-    for(int p = 0 ; p < POPS.length; p++){
-      String value = info.getAnnot(POPS[p]);
-      if(value != null){
+
+    for (String pop : POPS) {
+      String value = info.getAnnot(pop);
+      if (value != null) {
         String[] values = value.split(",", -1);
-        nbAlt = Math.max(nbAlt,values.length);
+        nbAlt = Math.max(nbAlt, values.length);
       }
     }
     this.frequencies = new double[POPS.length][nbAlt];
@@ -80,34 +80,10 @@ public class FreqAnnotation {
       if(value != null){
         String[] values = value.split(",", -1);
         for (int a = 0; a < nbAlt; a++)
-            if (values[a] != null && values[a].length() > 0)
+            if (values[a] != null && !values[a].isEmpty())
               this.frequencies[p][a] = new Double(values[a]);
       }
     }    
-    
-    /*
-    String[] fs = info.split(";");
-    for (String f : fs) {
-      String[] kv = f.split("=");
-      if (kv[0].equalsIgnoreCase(POPS[0]) && (kv.length > 1)) {
-        String[] values = kv[1].split(",", -1);
-        nbAlt = values.length;
-        break;
-      }
-    }
-*/
-    //this.frequencies = new double[POPS.length][nbAlt];
-
-    /*for (String f : fs) {
-      String[] kv = f.split("=", -1);
-      for (int p = 0; p < POPS.length; p++)
-        if (kv[0].equalsIgnoreCase(POPS[p])) {
-          String[] values = kv[1].split(",", -1);
-          for (int a = 0; a < nbAlt; a++)
-            if (values[a] != null && values[a].length() > 0)
-              this.frequencies[p][a] = new Double(values[a]);
-        }
-    }*/
   }
 
   public int getIndex(String pop) {

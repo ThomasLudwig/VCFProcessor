@@ -24,7 +24,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Unit Test defined on   XXXX-XX-XX
  */
 public class SimulateVCFFromExisting extends ParallelVCFPedFunction {
+
   //Parameters
+  @SuppressWarnings("SpellCheckingInspection")
   final TSVFileParameter variantFile = new TSVFileParameter(OPT_TSV, "variantlist.tsv", "File containing the list of biallelic variants with affected gene");
   //Global data
   private final HashMap<String, String> variants2Genes = new HashMap<>();
@@ -43,18 +45,22 @@ public class SimulateVCFFromExisting extends ParallelVCFPedFunction {
   public String getSummary() {
     return "Simulate a VCF File from an existing VCF File be mixing genotypes of samples from different ancestries";
   }
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(getSummary());
   }
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
   }
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_DROP;
@@ -63,6 +69,7 @@ public class SimulateVCFFromExisting extends ParallelVCFPedFunction {
   public String getOutputExtension() {
     return OUT_VCF;
   }
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
@@ -72,7 +79,7 @@ public class SimulateVCFFromExisting extends ParallelVCFPedFunction {
       computeReplacementsPerGenes();
       Message.info("End of Preparation");
     } catch(IOException e){
-      Message.die("Could not load variant list", e);
+      fatalAndQuit("Could not load variant list", e);
     }
   }
   private void computeReplacementsPerGenes() {
@@ -117,14 +124,14 @@ public class SimulateVCFFromExisting extends ParallelVCFPedFunction {
         replace.put(index, sample);
     }
     if(cases.size() != replace.size()){
-      Message.die("Number of case samples ["+cases.size()+"] and replacement samples ["+replace.size()+"] mismatch");
+      fatalAndQuit("Number of case samples ["+cases.size()+"] and replacement samples ["+replace.size()+"] mismatch");
     }
 
     for(String index : cases.keySet()){
       final Sample c = cases.get(index);
       final Sample r = replace.get(index);
       if(r == null)
-        Message.die("Cannot find a replacement Samples for case ["+c.toString()+"]");
+        fatalAndQuit("Cannot find a replacement Samples for case ["+c.toString()+"]");
       replacements.put(c, r);
 
       //Sort Replacements
@@ -201,6 +208,7 @@ public class SimulateVCFFromExisting extends ParallelVCFPedFunction {
     return NO_OUTPUT;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     if(KEPT == analysis) {
@@ -214,6 +222,7 @@ public class SimulateVCFFromExisting extends ParallelVCFPedFunction {
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void end() {
     super.end();

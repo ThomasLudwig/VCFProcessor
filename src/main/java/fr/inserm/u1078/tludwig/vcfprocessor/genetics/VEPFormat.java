@@ -66,16 +66,6 @@ public class VEPFormat {
   public static final String KEY_MOTIF_POS = "MOTIF_POS";
   public static final String KEY_HIGH_INF_POS = "HIGH_INF_POS";
   public static final String KEY_MOTIF_SCORE_CHANGE = "MOTIF_SCORE_CHANGE";
-/*  public static final String KEY_EXAC_AF = "ExAC_AF";
-  public static final String KEY_EXAC_AF_AFR = "ExAC_AF_AFR";
-  public static final String KEY_EXAC_AF_AMR = "ExAC_AF_AMR";
-  public static final String KEY_EXAC_AF_ADJ = "ExAC_AF_Adj";
-  public static final String KEY_EXAC_AF_EAS = "ExAC_AF_EAS";
-  public static final String KEY_EXAC_AF_FIN = "ExAC_AF_FIN";
-  public static final String KEY_EXAC_AF_NFE = "ExAC_AF_NFE";
-  public static final String KEY_EXAC_AF_OTH = "ExAC_AF_OTH";
-  public static final String KEY_EXAC_AF_SAS = "ExAC_AF_SAS";
-*/
   public static final String KEY_CADD_PHRED = "CADD_PHRED";
   public static final String KEY_CADD_RAW = "CADD_RAW";
   public static final String KEY_FATHMM_MKL_C = "FATHMM_MKL_C";
@@ -103,16 +93,12 @@ public class VEPFormat {
     keys = format.split("\\|");
     boolean found = false;
     for(String key : keys)
-      if(key.equals(KEY_ALLELE_NUMBER))
+      if(key.equals(KEY_ALLELE_NUMBER)) {
         found = true;
+        break;
+      }
     if(!found)
       Message.error("VEP annotations must contain ["+KEY_ALLELE_NUMBER+"]");
-    /*
-        String debug = "";
-        for(int i = 0 ; i < keys.length; i++)
-            debug += i+":"+keys[i]+" ";
-        Message.debug("VEP Keys : "+debug);
-     */
   }
 
   public static VEPFormat createVepFormat(String line) {
@@ -121,18 +107,16 @@ public class VEPFormat {
 
     int cut = line.indexOf(CUT) + CUT.length();
     int end = line.indexOf(END);
-    String subline = line.substring(cut, end);
-    return new VEPFormat(subline);
+    String subLine = line.substring(cut, end);
+    return new VEPFormat(subLine);
   }
 
   public static boolean isValid(String line) {
-    if (line.substring(0, PREFIX.length()).toUpperCase().equals(PREFIX)) {
-      int cut = line.indexOf(CUT);
-      int end = line.indexOf(END);
-      if (cut != -1 && end != -1)
-        return true;
-    }
-    return false;
+    if (!line.substring(0, PREFIX.length()).equalsIgnoreCase(PREFIX))
+      return false;
+    int cut = line.indexOf(CUT);
+    int end = line.indexOf(END);
+    return (cut != -1 && end != -1);
   }
 
   protected int getIndex(String key) {

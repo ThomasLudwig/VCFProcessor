@@ -39,6 +39,7 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
     return "Compares the variants present in a VCF file to those present in a GnomAD VCF file";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
@@ -46,11 +47,13 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
             .addColumns(HEADER);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -61,11 +64,13 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return new String[]{String.join(T, HEADER)};
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     gnomadData = new HashMap<>();
@@ -90,12 +95,10 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
           String[] infos = f[VCF.IDX_INFO].split(";");
           int[] acs = getACs(infos);
           int an = getAN(infos);
-          //String[] acs = f[VCF.IDX_INFO].split(";")[0].split("=")[1].split(","); 
-          //int an = new Integer(f[VCF.IDX_INFO].split(";")[2].split("=")[1]);
           for (int i = 0; i < alts.length; i++) {
             String canonical = new Canonical(chr, pos, ref, alts[i]).toString();
             int ac = acs[i];
-            double af = new Double(ac) / an;
+            double af = (1.0*ac) / an;
             gnomadData.put(canonical, ac + T + af + T + an);
           }
         }
@@ -104,10 +107,11 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
       Message.info("GnomAD data loaded (" + gnomadData.size() + " variants). Start reading VCF file");
       in.close();
     } catch (IOException | NumberFormatException e) {
-      this.fatalAndDie("Unable to read gnomAD file "+this.gnomad.getFilename(), e);
+      this.fatalAndQuit("Unable to read gnomAD file "+this.gnomad.getFilename(), e);
     }
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
@@ -119,18 +123,16 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
       String[] infos = variant.getInfo().toString().split(";");
       int[] acs = getACs(infos);
       int an = getAN(infos);
-      //String[] acs = info.split(";")[0].split("=")[1].split(",");
-      //int an = new Integer(info.split(";")[2].split("=")[1]);
       String[] outs = new String[variant.getAlleleCount() - 1];
       for (int a = 1; a < variant.getAlleleCount(); a++) {
         int ac = acs[a - 1];
-        double af = new Double(ac) / an;
+        double af = (1.0 * ac) / an;
         String canonical = new Canonical(variant.getChromNumber(), variant.getPos(), variant.getRef(), variant.getAllele(a)).toString();
         String gnom = gnomadData.get(canonical);
         if (gnom == null)
           gnom = T + T;
         String qual = variant.getFilter();
-        if (variant.isHQ())
+        if (variant.isHQ(true, 10, 20, .8, "PASS"))
           qual = "HQ";
         Map<String, VEPAnnotation> csqGenes = variant.getInfo().getWorstVEPAnnotationsByGene(a);
         VEPConsequence worst = VEPConsequence.getWorst(csqGenes.values());
@@ -144,7 +146,7 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
       }
       return outs;
     } catch (NumberFormatException e) {
-      Message.error("Problem while processing line [" + variant.toString() + "]");
+      Message.error("Problem while processing line [" + variant + "]");
       return NO_OUTPUT;
     }
   }
@@ -152,7 +154,7 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
   private static int[] getACs(String[] infos){
     for(String info : infos)
       if(info.startsWith("AC=")){
-        String acs[] = info.substring(3).split(",");
+        String[] acs = info.substring(3).split(",");
         int[] ret = new int[acs.length];
         for(int i = 0 ; i < acs.length; i++)
           ret[i] = new Integer(acs[i]);
@@ -168,6 +170,7 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
     return -1;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

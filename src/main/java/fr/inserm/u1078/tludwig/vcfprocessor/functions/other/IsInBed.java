@@ -17,11 +17,11 @@ public class IsInBed extends Function {
 
   private final StringParameter chromosome = new StringParameter(OPT_CHROM, "chromosome", "chromosome name : (chr)[1-25]/X/Y/M/MT");
   private final PositiveIntegerParameter position = new PositiveIntegerParameter(OPT_POS, "Position");
-  private final BedFileParameter bedfile = new BedFileParameter(OPT_BED, "region.bed", "the Bed File to process");
+  private final BedFileParameter bedFile = new BedFileParameter(OPT_BED, "region.bed", "the Bed File to process");
 
   @Override
   public String getSummary() {
-    return "Check if a given chromosome:position is contained in a bedfile";
+    return "Check if a given chromosome:position is contained in a bedFile";
   }
 
   @Override
@@ -36,20 +36,19 @@ public class IsInBed extends Function {
     return OUT_TXT;
   }
 
+  @SuppressWarnings("unused")
   @Override
-  public void executeFunction() throws Exception {
+  public void executeFunction() {
     Region previousRegion = null;
     Region nextRegion = null;
-    /* int previousPosition = 0;
-        String nextLine="";*/
 
-    Bed bed = this.bedfile.getBed();
+    Bed bed = this.bedFile.getBed();
     String chr = this.chromosome.getStringValue();
     int pos = this.position.getIntegerValue();
 
     for (Region r : bed.getRegions(this.chromosome.getStringValue())) {
       if (r.contains(chr, pos)) {
-        println("The position " + this.chromosome + ":" + this.position + " has been found in bed file " + this.bedfile.getFilename());
+        println("The position " + this.chromosome + ":" + this.position + " has been found in bed file " + this.bedFile.getFilename());
         println(r.toString());
         return;
       }
@@ -65,13 +64,13 @@ public class IsInBed extends Function {
       }
     }
 
-    println("Position " + this.chromosome + ":" + this.position + " is not covered bed file " + this.bedfile);
+    println("Position " + this.chromosome + ":" + this.position + " is not covered bed file " + this.bedFile);
     if (previousRegion != null) {
-      println("Previous Intervale");
+      println("Previous Interval");
       println(previousRegion.toString());
     }
     if (nextRegion != null) {
-      println("Next Intervale");
+      println("Next Interval");
       println(nextRegion.toString());
     }
   }

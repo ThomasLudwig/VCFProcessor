@@ -22,22 +22,26 @@ public class Recode extends ParallelVCFFunction {
     return "Reads all lines in a VCF Files";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary()).
-            addLine("Ouputs the input VCF file after applying the various command line filters");
+            addLine("Outputs the input VCF file after applying the various command line filters");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -48,27 +52,19 @@ public class Recode extends ParallelVCFFunction {
     return OUT_VCF;
   }
 
-  @Override
-  public String[] getHeaders() {
-    return super.getHeaders();
-  }
-
+  @SuppressWarnings("unused")
   @Override
   public void end() {
     Message.info("Lines processes : " + read);
   }
 
   @Override
-  public void begin() {
-    super.begin();
-  }
-  
-  @Override
   public String[] processInputLine(String line) {
     pushAnalysis(Boolean.TRUE);
     return new String[]{line};
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis){
     if(Boolean.TRUE.equals(analysis)){

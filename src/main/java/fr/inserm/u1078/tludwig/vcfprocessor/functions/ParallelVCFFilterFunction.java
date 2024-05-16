@@ -21,6 +21,7 @@ public abstract class ParallelVCFFilterFunction extends ParallelVCFFunction {
   
   public abstract String[] processInputLineForFilter(String line);
 
+  @SuppressWarnings("unused")
   @Override
   public final boolean checkAndProcessAnalysis(Object analysis) {
     try {
@@ -28,11 +29,11 @@ public abstract class ParallelVCFFilterFunction extends ParallelVCFFunction {
       this.inputLines++;
       this.outputLines+=add;
       return true;
-    } catch (Exception e) {
-    }
+    } catch (Exception ignore) { }
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void end() {
     super.end();

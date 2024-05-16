@@ -22,26 +22,28 @@ public class AddGroupACANAF extends ParallelVCFVariantPedFunction {
     return "Add AN,AC,AF annotation for each group described in the ped file";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("For each group "+Description.bold("G")+", the info field has new annotations")
-            .addItemize(new String[]{
-              Description.code("G_AN")+" AlleleNumber for this group",
-              Description.code("G_AC")+" AlleleCounts for this group",
-              Description.code("G_AF")+" AlleleFrequencies for this group"
-            });
+            .addItemize(Description.code("G_AN")+" AlleleNumber for this group",
+                Description.code("G_AC")+" AlleleCounts for this group",
+                Description.code("G_AF")+" AlleleFrequencies for this group");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ANNOTATION_FOR_ALL;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -52,6 +54,7 @@ public class AddGroupACANAF extends ParallelVCFVariantPedFunction {
     return OUT_VCF;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getExtraHeaders(){
     ArrayList<String> groups = getPed().getGroups();
@@ -99,6 +102,7 @@ public class AddGroupACANAF extends ParallelVCFVariantPedFunction {
     return asOutput(variant);
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

@@ -14,7 +14,6 @@ import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
@@ -41,8 +40,6 @@ public class CompareGenotypesGraph  extends XYLineGraph {
     //private int[][] countTotal;
     private String[] groups;
     private final ArrayList<int[][]> countsStep; // count[1 + (100/step)][2]   2 : 0/1   1/1
-    private int[] totals;
-    private int total;
     private final int nbSpikes;
     
     public CompareGenotypesGraph(String filename, String csq){
@@ -59,9 +56,9 @@ public class CompareGenotypesGraph  extends XYLineGraph {
             UniversalReader in = new UniversalReader(this.filename);
             line = in.readLine();
             String[] f = line.split(T);
-            total = 0;
+          int total = 0;
             int nbGroup = f.length/2;
-            totals = new int[nbGroup];
+          int[] totals = new int[nbGroup];
             groups = new String[nbGroup];
             for(int i = 0; i < nbGroup; i++){
                 groups[i] = f[i*2];
@@ -110,7 +107,7 @@ public class CompareGenotypesGraph  extends XYLineGraph {
     }
     
     public int x(int n, int tot){
-      return (int)((100*n)/(STEP*tot));
+      return (100*n)/(STEP*tot);
     }
     
     @Override

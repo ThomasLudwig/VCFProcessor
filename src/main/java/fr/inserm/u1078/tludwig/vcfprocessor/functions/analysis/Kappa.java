@@ -17,7 +17,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
- * Kappa Comparision between to vcf files.
+ * Kappa Comparison between to vcf files.
  * 
  * @author Thomas E. Ludwig (INSERM - U1078) 
  * Started on             2016-06-14
@@ -26,7 +26,7 @@ import java.util.ArrayList;
  */
 public class Kappa extends VCFFunction { //TODO parallelize like in IQS
 
-  private final VCFFileParameter vcffile2 = new VCFFileParameter(OPT_VCF + 2, "File2.vcf", "the second input VCF File (can be gzipped)");
+  private final VCFFileParameter vcfFile2 = new VCFFileParameter(OPT_VCF + 2, "File2.vcf", "the second input VCF File (can be gzipped)");
   private final TSVFileParameter project = new TSVFileParameter(OPT_TSV, "output.tsv", "the result TSV File");
   private final OutputDirectoryParameter dir = new OutputDirectoryParameter();
   private static final String[] HEADER = {"CHROM","POS","ID","MAF_FILE1","MAF_FILE2","KAPPA_With_Missing","KAPPA_Ignore_Missing"};
@@ -38,9 +38,10 @@ public class Kappa extends VCFFunction { //TODO parallelize like in IQS
   
   @Override
   public String getSummary() {
-    return "Kappa Comparision between to vcf files.";
+    return "Kappa Comparison between to vcf files.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
@@ -49,16 +50,19 @@ public class Kappa extends VCFFunction { //TODO parallelize like in IQS
             .addColumns(HEADER);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return "Results are given for the first alternate allele, why is expected to be the same in both files."; //TODO change implementation
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -69,24 +73,25 @@ public class Kappa extends VCFFunction { //TODO parallelize like in IQS
     return OUT_NONE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
-    VCF vcf1 = this.vcffile.getVCF(VCF.MODE_QUICK_GENOTYPING, VCF.STEP10000);//VCF vcf1 = this.vcffile.getVCF(ped, VCF.MODE_QUICK_GENOTYPING, VCF.STEP10000);
-    VCF vcf2 = this.vcffile2.getVCF(VCF.MODE_QUICK_GENOTYPING, VCF.STEP_OFF);//VCF vcf2 = this.vcffile2.getVCF(ped, VCF.MODE_QUICK_GENOTYPING, VCF.STEP_OFF);
+    VCF vcf1 = this.vcfFile.getVCF(VCF.MODE_QUICK_GENOTYPING, VCF.STEP10000);//VCF vcf1 = this.vcfFile.getVCF(ped, VCF.MODE_QUICK_GENOTYPING, VCF.STEP10000);
+    VCF vcf2 = this.vcfFile2.getVCF(VCF.MODE_QUICK_GENOTYPING, VCF.STEP_OFF);//VCF vcf2 = this.vcfFile2.getVCF(ped, VCF.MODE_QUICK_GENOTYPING, VCF.STEP_OFF);
     this.samples = VCF.commonSamples(vcf1, vcf2);
 
     vcf1.getReaderAndStart();
     vcf2.getReaderAndStart();
     
-    Variant v1 = vcf1.getNextVariant();
-    Variant v2 = vcf2.getNextVariant();
+    Variant v1 = vcf1.getUnparallelizedNextVariant();
+    Variant v2 = vcf2.getUnparallelizedNextVariant();
     int nbReadLeft = 1;
     int nbReadRight = 1;
     int nbProcessed = 0;
 
     PrintWriter out = getPrintWriter(dir.getDirectory() + this.project + ".tsv");
 
-    out.println("CHROM" + T + "POS" + T + "ID" + T + "MAF_" + this.vcffile.getBasename() + T + "MAF_" + this.vcffile2.getBasename() + T + "KAPPA_With_Missing" + T + "KAPPA_Ignore_Missing");
+    out.println("CHROM" + T + "POS" + T + "ID" + T + "MAF_" + this.vcfFile.getBasename() + T + "MAF_" + this.vcfFile2.getBasename() + T + "KAPPA_With_Missing" + T + "KAPPA_Ignore_Missing");
 
     while (v1 != null && v2 != null) {
       if (nbReadLeft % 10000 == 0)
@@ -105,11 +110,11 @@ public class Kappa extends VCFFunction { //TODO parallelize like in IQS
         //++ this is the only way to make sure we do all the comparison in case the right variant is multiallelic
         //-- the drawback is that in the vast majority of equality of position, we do 1 superfluous position comparison
         nbReadLeft++;
-        v1 = vcf1.getNextVariant();
+        v1 = vcf1.getUnparallelizedNextVariant();
       }
       if (comparePosition >= 0) {
         nbReadRight++;
-        v2 = vcf2.getNextVariant();
+        v2 = vcf2.getUnparallelizedNextVariant();
       }
     }
     vcf1.close();
@@ -147,15 +152,15 @@ public class Kappa extends VCFFunction { //TODO parallelize like in IQS
       id = v2.getId();
     String maf1 = StringTools.formatDouble(v1.getAlleleFrequencyTotal(1), 3);
     String maf2 = StringTools.formatDouble(v2.getAlleleFrequencyTotal(1), 3);
-    double kappawith = this.kappa(v1, v2);
-    double kappaignore = this.kappaIgnoreMissing(v1, v2);
-    String kappaW = StringTools.formatDouble(kappawith, 3);
-    String kappaI = StringTools.formatDouble(kappaignore, 3);
+    double kappaWith = this.kappa(v1, v2);
+    double kappaIgnore = this.kappaIgnoreMissing(v1, v2);
+    String kappaW = StringTools.formatDouble(kappaWith, 3);
+    String kappaI = StringTools.formatDouble(kappaIgnore, 3);
 
-    this.missing.add(kappawith);
+    this.missing.add(kappaWith);
 
-    if (!Double.isNaN(kappaignore))
-      this.ignore.add(kappaignore);
+    if (!Double.isNaN(kappaIgnore))
+      this.ignore.add(kappaIgnore);
 
     out.println(chrom + T + pos + T + id + T + maf1 + T + maf2 + T + kappaW + T + kappaI);
   }
@@ -197,14 +202,7 @@ public class Kappa extends VCFFunction { //TODO parallelize like in IQS
       t[TOT][TOT]++;
     }
     
-    /*LineBuilder msg = new LineBuilder();
-    for(int i = 0 ; i <= TOT; i++){
-      msg.append("[");
-      msg.append(Arrays.toString(t[i]));
-      msg.append("]");
-    }*/
 
-    
     double pa = 0;
     double pe = 0;
 
@@ -215,18 +213,14 @@ public class Kappa extends VCFFunction { //TODO parallelize like in IQS
     pa = pa / t[TOT][TOT];
     pe = pe / (t[TOT][TOT] * t[TOT][TOT]);
     
-    /*msg.addSpace("pa=").append(pa);
-    msg.addSpace("pe=").append(pe);
-    Message.debug(msg.toString());*/
-    
+
     if (pe == 1) //pe == 1, when all observation, for both files are in the same unique category
       return 1;
     
     if (pa == 1) //pa == 1, when all observation match in both files
       return 1; //avoid pointless division x/x
 
-    double kappa = (pa - pe) / (1 - pe);
-    return kappa;
+    return (pa - pe) / (1 - pe);
   }
 
   private double kappaIgnoreMissing(Variant a, Variant b) {
@@ -263,8 +257,7 @@ public class Kappa extends VCFFunction { //TODO parallelize like in IQS
     if (pa == 1) //pa == 1, when all observation match in both files
       return 1; //avoid pointless division x/x
 
-    double kappa = (pa - pe) / (1 - pe);
-    return kappa;
+    return (pa - pe) / (1 - pe);
   }
   
   @Override

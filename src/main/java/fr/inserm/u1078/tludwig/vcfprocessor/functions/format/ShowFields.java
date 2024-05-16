@@ -42,6 +42,7 @@ public class ShowFields extends ParallelVCFVariantFunction {
     return "Shows selected fields of a VCF File";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
@@ -51,16 +52,19 @@ public class ShowFields extends ParallelVCFVariantFunction {
             .addLine("or " + Description.code(PREFIX_GENO + "key1;key2;...;keyN")+" ex : " + Description.code(PREFIX_GENO + "GT;AD;GQ"));    //TODO extend to vep
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -71,6 +75,7 @@ public class ShowFields extends ParallelVCFVariantFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     LineBuilder sb = new LineBuilder();
@@ -94,11 +99,13 @@ public class ShowFields extends ParallelVCFVariantFunction {
     return new String[]{sb.toString()};
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
@@ -106,7 +113,7 @@ public class ShowFields extends ParallelVCFVariantFunction {
     String q = this.query.getStringValue();
 
     if (q.isEmpty())
-      this.fatalAndDie("Your query is empty");
+      this.fatalAndQuit("Your query is empty");
 
     for (String key : q.split(","))
       if (key.toLowerCase().startsWith(PREFIX_INFO)) {

@@ -19,7 +19,7 @@ public class FAI {
    * Create a FAI for the fastq index file with the given name
    *
    * @param filename - name of the index file
-   * @throws fr.inserm.u1078.tludwig.vcfprocessor.exceptions.FAIException
+   * @throws FAIException if there is a problem with the fasta index file
    */
   public FAI(String filename) throws FAIException {
     this.filename = filename;
@@ -36,7 +36,7 @@ public class FAI {
    *
    * @param chromosome - the chromosome to look for
    * @param position   - the position on the chromosome
-   * @return
+   * @return the index for the position
    */
   public long getIndexForPosition(String chromosome, long position) {
     FAILine faiLine = this.chromosomes.get(chromosome.toUpperCase());
@@ -61,7 +61,7 @@ public class FAI {
   /**
    * One line from the fastq index file
    */
-  private class FAILine {
+  private static class FAILine {
 
     /**
      * chromosome name
@@ -80,14 +80,14 @@ public class FAI {
      */
     private final long lineBases;
     /**
-     * some other length of the fastq lines called "line_blen" in the source code? Appears to typically (for me) be length of fastq line + 1
+     * some other length of the fastq lines called "line_bLength" in the source code? Appears to typically (for me) be length of fastq line + 1
      */
     private final long lineCharacters;
 
     /**
-     * Create a FAIline from a line from the fastq index file
+     * Create a FAILine from a line from the fastq index file
      *
-     * @param line
+     * @param line the line from them index file
      */
     public FAILine(String line) {
       String[] fields = line.split("\t");
@@ -101,24 +101,27 @@ public class FAI {
     /**
      * Return the index in the fastq file associated to a given position for the current chromosome
      *
-     * @param position - the chromosomic position to look for
-     * @return
+     * @param position - the chromosomal position to look for
+     * @return the index for the position
      */
     public long getIndexForPosition(long position) {
       long numberOfLine = (position - 1) / this.lineBases;
       long characterInLine = (position - 1) % this.lineBases;
       long localOffset = numberOfLine * this.lineCharacters + characterInLine;
-      long index = this.fileOffset + localOffset;
-      return index;
+      return this.fileOffset + localOffset;
     }
 
     /**
      * Gets the chromosome associated to this line
      *
-     * @return
+     * @return the chromosome
      */
     public String getChromosome() {
       return this.chromosome;
+    }
+
+    public long getChromosomeLength() {
+      return chromosomeLength;
     }
   }
 }

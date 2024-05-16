@@ -41,8 +41,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class IQSBySample extends VCFPedFunction {
 
   public static final int STEP = 5000;
-  public static final int DELAY = 10;
-  
+
   private static final String[] HEADERS = {"#SAMPLE","GROUP","IQS","NB_VARIANTS","TOTAL_VARIANTS"};
 
   private final VCFFileParameter imputedFilename = new VCFFileParameter(OPT_FILE, "imputed.vcf(.gz)", "VCF File Containing imputed data (can be gzipped)");
@@ -64,25 +63,29 @@ public class IQSBySample extends VCFPedFunction {
     return "Computes the IQS score for each sample between sequences data and data imputed from genotyping.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("Computes the IQS score between sequences data and data imputed from genotyping.")
-            .addLine("Ref PMID26458263, See http://lysine.univ-brest.fr/redmine/issues/84")//TODO update URL to public doc
+            .addLine("Ref PMID26458263, See https://lysine.univ-brest.fr/redmine/issues/84")//TODO update URL to public doc
             .addLine("Here the IQS score is computed for each sample.")
             .addLine("Output format is :")
             .addColumns(HEADERS);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -93,6 +96,7 @@ public class IQSBySample extends VCFPedFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
     this.loadData();
@@ -100,10 +104,10 @@ public class IQSBySample extends VCFPedFunction {
   }
   
   private void update(){
-    int prog = ++done;
-    if(prog % STEP == 0){
+    int progress = ++done;
+    if(progress % STEP == 0){
       double dur = DateTools.duration(start);
-      Message.progressInfo(prog + " common variants processed in " +dur+ "s (" + (int)(prog / dur) + " v/s)");
+      Message.progressInfo(progress + " common variants processed in " +dur+ "s (" + (int)(progress / dur) + " v/s)");
     }
   }
 
@@ -111,7 +115,7 @@ public class IQSBySample extends VCFPedFunction {
     start = new Date().getTime();
     sampleData = new TreeMap<>();
 
-    act = this.vcffile.getVCF(VCF.STEP_OFF);
+    act = this.vcfFile.getVCF(VCF.STEP_OFF);
     imputedVCF = this.imputedFilename.getVCF(VCF.STEP_OFF);
     MultiVCFReader reader = new MultiVCFReader(act, imputedVCF);
     //samples = reader.getCommonsSamples();
@@ -141,7 +145,8 @@ public class IQSBySample extends VCFPedFunction {
 
     Message.info("All variants have been loaded");
     threadPool.shutdown();
-    threadPool.awaitTermination(100, TimeUnit.DAYS);
+    if(!threadPool.awaitTermination(100, TimeUnit.DAYS))
+      Message.error("Timeout reached");
     double dur = DateTools.duration(start);
     Message.info(done + " common variants processed in " +dur + "s (" + (int)(done / dur) + " v/s)");
   }
@@ -157,10 +162,10 @@ public class IQSBySample extends VCFPedFunction {
   public void computeIQS() throws PedException {
     println(String.join(T, HEADERS));
 
-    String group = "NOGROUP";
+    String group = "NO_GROUP";
     Ped ped = null;
-    if (!this.pedfile.getFilename().equals("null"))
-      ped = this.pedfile.getPed();
+    if (!this.pedFile.getFilename().equals("null"))
+      ped = this.pedFile.getPed();
 
     Message.info("Computing IQS for Sample");
     for (String sample : sampleData.navigableKeySet()) {
@@ -200,8 +205,8 @@ public class IQSBySample extends VCFPedFunction {
   private static class IQSData {
     static final IQSData LAST = new IQSData(new LinesPair());
     
-    ArrayList<String> actLines;
-    ArrayList<String> impLines;
+    private final ArrayList<String> actLines;
+    private final ArrayList<String> impLines;
 
     IQSData(LinesPair pair) {
       this.actLines = pair.getFirst();
@@ -210,7 +215,7 @@ public class IQSBySample extends VCFPedFunction {
   }
 
   private class Worker implements Runnable {
-    LinkedBlockingQueue<IQSData> queue = new LinkedBlockingQueue<>(1000);
+    private final LinkedBlockingQueue<IQSData> queue = new LinkedBlockingQueue<>(1000);
 
     public void willEnd() {
       put(IQSData.LAST);
@@ -238,7 +243,7 @@ public class IQSBySample extends VCFPedFunction {
               try {
                 actual = act.createVariant(actLine);
               } catch (VCFException e) {
-                fatalAndDie("Unable to create variant from following line in " + act.getFilename() + "\n" + actLine, e);
+                fatalAndQuit("Unable to create variant from following line in " + act.getFilename() + "\n" + actLine, e);
               }
               if (actual != null) //Not filtered 
                 for (String impLine : data.impLines) {
@@ -246,7 +251,7 @@ public class IQSBySample extends VCFPedFunction {
                   try {
                     imputed = imputedVCF.createVariant(impLine);
                   } catch (VCFException e) {
-                    fatalAndDie("Unable to create variant from following line in " + imputedVCF.getFilename() + "\n" + impLine, e);
+                    fatalAndQuit("Unable to create variant from following line in " + imputedVCF.getFilename() + "\n" + impLine, e);
                   }
 
                   if (imputed != null)//Not filtered

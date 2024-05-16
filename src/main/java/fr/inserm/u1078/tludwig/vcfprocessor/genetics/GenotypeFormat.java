@@ -33,9 +33,7 @@ public class GenotypeFormat {
   public int getDP(String genotype) {
     try {
       return Integer.parseInt(this.getValue(genotype, DP));
-    } catch (NumberFormatException e) {
-
-    }
+    } catch (NumberFormatException ignore) { }
     return 0;
   }
 
@@ -46,14 +44,12 @@ public class GenotypeFormat {
   public int getGQ(String genotype) {
     try {
       return Integer.parseInt(this.getValue(genotype, DP));
-    } catch (NumberFormatException e) {
-
-    }
+    } catch (NumberFormatException ignore) { }
     return 0;
   }
 
   public String getValue(String genotype, String key) {
-    String value = "";
+    String value;
     int index = getIndex(key);
     try {
       value = genotype.split(":")[index];

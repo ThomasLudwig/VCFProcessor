@@ -34,28 +34,30 @@ public class CountMissing extends ParallelVCFVariantPedFunction {
     return "For each samples in the PED file, print a summary of missingness";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("for each samples in the PED file, prints a summary, in the format")
             .addColumns((HEADER + T + "Total_Variants" + T + "Kept_Variants").split(T))
             .addLine("where")
-            .addItemize(new String[]{
-              Description.code("SAMPLE")+" the sample name",
-              Description.code("TOTAL")+" total variants kept",
-              Description.code("GENOTYPED")+" variants with non missing genotypes for this sample",
-              Description.code("NB_MISSING")+" variants with missing genotypes for this sample",
-              Description.code("%_MISSING")+" percent of genotypes missing for this sample",
-              Description.code("REF")+" number of variants homozygous to the ref for this sample",
-              Description.code("ALT")+" number of variants not homozygous to the ref for this sample"})
+            .addItemize(Description.code("SAMPLE")+" the sample name",
+                Description.code("TOTAL")+" total variants kept",
+                Description.code("GENOTYPED")+" variants with non missing genotypes for this sample",
+                Description.code("NB_MISSING")+" variants with missing genotypes for this sample",
+                Description.code("%_MISSING")+" percent of genotypes missing for this sample",
+                Description.code("REF")+" number of variants homozygous to the ref for this sample",
+                Description.code("ALT")+" number of variants not homozygous to the ref for this sample")
             .addLine("The header of the output also contains the total number of variants present in the input file and the number of variants that are kept")
             .addWarning("Kept variants are those with less than " + Description.code(maxInd.getKey()) + " genotypes missing");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -66,6 +68,7 @@ public class CountMissing extends ParallelVCFVariantPedFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     samples = getPed().getSamples();
@@ -75,11 +78,13 @@ public class CountMissing extends ParallelVCFVariantPedFunction {
     alt = new int[samples.size()];
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return new String[]{HEADER + T + "Total_variants:" + total + T + "Kept_variants:" + kept};
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String[] getFooters() {
     ArrayList<String> out = new ArrayList<>();
@@ -90,9 +95,10 @@ public class CountMissing extends ParallelVCFVariantPedFunction {
       double percent = (missing * 1.0) / kept;
       out.add(name + T + kept + T + genotyped + T + missing + T + percent + T + ref[s] + T + alt[s]);
     }
-    return out.toArray(new String[out.size()]);
+    return out.toArray(new String[0]);
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
@@ -101,35 +107,36 @@ public class CountMissing extends ParallelVCFVariantPedFunction {
   @Override
   public String[] processInputVariant(Variant variant) {
     //total++;
-    boolean[] sref = new boolean[samples.size()];
-    boolean[] salt = new boolean[samples.size()];
+    boolean[] sRef = new boolean[samples.size()];
+    boolean[] sAlt = new boolean[samples.size()];
     if (variant.getPercentMissing() <= maxInd.getFloatValue()) {
       //kept++;
       for (int s = 0; s < samples.size(); s++) {
         Genotype g = variant.getGenotype(samples.get(s));
         if (!g.isMissing())
           if (!g.hasAlternate())
-            sref[s] = true;
+            sRef[s] = true;
           else
-            salt[s] = true;
+            sAlt[s] = true;
       }
     }
-    this.pushAnalysis(new Object[]{sref, salt});
+    this.pushAnalysis(new Object[]{sRef, sAlt});
     return NO_OUTPUT;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     try {
-      boolean[] sref = (boolean[])((Object[])analysis)[0];
-      boolean[] salt = (boolean[])((Object[])analysis)[1];
+      boolean[] sRef = (boolean[])((Object[])analysis)[0];
+      boolean[] sAlt = (boolean[])((Object[])analysis)[1];
       boolean keep = false;
-      for(int s = 0; s < sref.length; s++){
-        if(sref[s]){
+      for(int s = 0; s < sRef.length; s++){
+        if(sRef[s]){
           ref[s]++;
           keep = true;
         }
-        if(salt[s]){
+        if(sAlt[s]){
           alt[s]++;
           keep = true;
         }
@@ -138,8 +145,7 @@ public class CountMissing extends ParallelVCFVariantPedFunction {
         kept++;
       total++;
       return true;
-    } catch (Exception e) {
-    }
+    } catch (Exception ignore) { }
     return false;
   }
   

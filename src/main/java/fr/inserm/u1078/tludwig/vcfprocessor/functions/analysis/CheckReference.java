@@ -19,7 +19,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 public class CheckReference extends ParallelVCFFunction {  
   private Fasta fasta;
 
-  private final FastaFileParameter reffile = new FastaFileParameter();
+  private final FastaFileParameter refFile = new FastaFileParameter();
   private static final String[] HEADER = {"CHROM","POS","VCF_REF","FASTA_REF"};
 
   @Override
@@ -27,6 +27,7 @@ public class CheckReference extends ParallelVCFFunction {
     return "For every position in the vcf file, compares the reference from the VCF to the one in the fasta";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("For every position in the vcf file, gets the reference from the given fasta and prints :")
@@ -34,16 +35,19 @@ public class CheckReference extends ParallelVCFFunction {
             .addWarning("Lines containing indels are ignored");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -54,20 +58,23 @@ public class CheckReference extends ParallelVCFFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     try {
-      fasta = this.reffile.getFasta();
+      fasta = this.refFile.getFasta();
     } catch (FastaException e) {
-      this.fatalAndDie("Unable to open fasta file " + this.reffile.getFilename(), e);
+      this.fatalAndQuit("Unable to open fasta file " + this.refFile.getFilename(), e);
     }
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void end() {
     fasta.close();
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return new String[]{String.join(T, HEADER)};
@@ -90,16 +97,16 @@ public class CheckReference extends ParallelVCFFunction {
 
     if (onlySNVs) {
       try {
-        char vcfref = ref.charAt(0);
-        if(!isValid(vcfref))
-          Message.warning("Unexception vcf allele ["+vcfref+"]");
-        char fastaref = fasta.getCharacterFor(chrom, pos);
-        if(!isValid(fastaref))
-          Message.warning("Unexception fasta allele ["+fastaref+"]");
-        if (vcfref != fastaref)
-          return new String[]{chrom + T + pos + T + vcfref + T + fastaref};
+        char vcfRef = ref.charAt(0);
+        if(!isValid(vcfRef))
+          Message.warning("Unexpected vcf allele ["+vcfRef+"]");
+        char fastaRef = fasta.getCharacterFor(chrom, pos);
+        if(!isValid(fastaRef))
+          Message.warning("Unexpected fasta allele ["+fastaRef+"]");
+        if (vcfRef != fastaRef)
+          return new String[]{chrom + T + pos + T + vcfRef + T + fastaRef};
       } catch (FastaException ex) {
-        this.fatalAndDie("Unable to process line\n"+line, ex);
+        this.fatalAndQuit("Unable to process line\n"+line, ex);
       }
     }
     return NO_OUTPUT;
@@ -121,6 +128,7 @@ public class CheckReference extends ParallelVCFFunction {
     }
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

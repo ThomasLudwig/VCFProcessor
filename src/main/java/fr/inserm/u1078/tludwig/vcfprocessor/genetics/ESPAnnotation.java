@@ -8,10 +8,10 @@ import fr.inserm.u1078.tludwig.maok.tools.ArrayTools;
  */
 public class ESPAnnotation {
 
-  private final String alleles[];
-  private final double espFreq[];
-  private final double eaFreq[];
-  private final double aaFreq[];
+  private final String[] alleles;
+  private final double[] espFreq;
+  private final double[] eaFreq;
+  private final double[] aaFreq;
 
   ESPAnnotation() {
     this.alleles = new String[]{" "};
@@ -40,9 +40,7 @@ public class ESPAnnotation {
   private double convertFrequency(String string) {
     try {
       return Double.parseDouble(string);
-    } catch (NumberFormatException e) {
-
-    }
+    } catch (NumberFormatException ignore) { }
     return 0;
   }
 

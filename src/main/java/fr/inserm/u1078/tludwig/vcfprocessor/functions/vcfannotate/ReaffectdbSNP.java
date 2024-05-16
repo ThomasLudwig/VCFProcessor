@@ -22,21 +22,25 @@ public class ReaffectdbSNP extends ParallelVCFVariantFunction {
     return "Puts all observed RS numbers in the ID column";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("Takes the rs numbers from the "+Description.italic(VEPFormat.KEY_EXISTING_VARIATION)+" annotation (from vep) and adds them to the ID column of the VCF. Puts \".\" if no RS has been found ");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return "Every RS IDs from every alternate alleles are listed in the ID column.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -58,6 +62,7 @@ public class ReaffectdbSNP extends ParallelVCFVariantFunction {
     return new String[]{String.join(T, f)};
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

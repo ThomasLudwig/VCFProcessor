@@ -11,8 +11,8 @@ import java.util.Collection;
 public class Stats {
 
   public static double pValueExactHWE(int oHom1, int oHet, int oHom2) {
-    int oRef = oHom1 < oHom2 ? oHom2 : oHom1;
-    int oAlt = oHom1 < oHom2 ? oHom1 : oHom2;
+    int oRef = Math.max(oHom1, oHom2);
+    int oAlt = Math.min(oHom1, oHom2);
 
     int na = 2 * oAlt + oHet;
 
@@ -30,63 +30,50 @@ public class Stats {
       mid++;
 
     int curr_hets = mid;
-    int curr_homr = (na - mid) / 2;
-    int curr_homc = n - curr_hets - curr_homr;
+    int curr_homR = (na - mid) / 2;
+    int curr_homC = n - curr_hets - curr_homR;
 
     probRA[mid] = 1.0;
     double sum = probRA[mid];
     for (curr_hets = mid; curr_hets > 1; curr_hets -= 2) {
       probRA[curr_hets - 2] = probRA[curr_hets] * curr_hets * (curr_hets - 1.0)
-              / (4.0 * (curr_homr + 1.0) * (curr_homc + 1.0));
+              / (4.0 * (curr_homR + 1.0) * (curr_homC + 1.0));
       sum += probRA[curr_hets - 2];
 
       /* 2 fewer heterozygotes for next iteration -> add one rare, one common homozygote */
-      curr_homr++;
-      curr_homc++;
+      curr_homR++;
+      curr_homC++;
     }
 
     curr_hets = mid;
-    curr_homr = (na - mid) / 2;
-    curr_homc = n - curr_hets - curr_homr;
+    curr_homR = (na - mid) / 2;
+    curr_homC = n - curr_hets - curr_homR;
     for (curr_hets = mid; curr_hets <= na - 2; curr_hets += 2) {
-      probRA[curr_hets + 2] = probRA[curr_hets] * 4.0 * curr_homr * curr_homc
+      probRA[curr_hets + 2] = probRA[curr_hets] * 4.0 * curr_homR * curr_homC
               / ((curr_hets + 2.0) * (curr_hets + 1.0));
       sum += probRA[curr_hets + 2];
 
       /* add 2 heterozygotes for next iteration -> subtract one rare, one common homozygote */
-      curr_homr--;
-      curr_homc--;
+      curr_homR--;
+      curr_homC--;
     }
 
     for (int i = 0; i <= na; i++)
       probRA[i] /= sum;
 
-    /* alternate p-value calculation for p_hi/p_lo
-         double p_hi = het_probs[obs_hets];
-         for (i = obs_hets + 1; i <= rare_copies; i++)
-         p_hi += het_probs[i];
-   
-         double p_lo = het_probs[obs_hets];
-         for (i = obs_hets - 1; i >= 0; i--)
-         p_lo += het_probs[i];
-
-   
-         double p_hi_lo = p_hi < p_lo ? 2.0 * p_hi : 2.0 * p_lo;
-     */
     double p_hwe = 0.0;
     /*  p-value calculation for p_hwe  */
-    for (int i = 0; i <= na; i++) {
-      if (probRA[i] > probRA[oHet])
-        continue;
-      p_hwe += probRA[i];
-    }
+    for (int i = 0; i <= na; i++)
+      if (probRA[i] <= probRA[oHet])
+        p_hwe += probRA[i];
 
-    p_hwe = p_hwe > 1.0 ? 1.0 : p_hwe;
+
+    p_hwe = Math.min(p_hwe, 1.0);
 
     return p_hwe;
   }
 
-  public static double HWE_chisq(double oRef, double oHet, double oAlt) {
+  public static double HWE_chiSquare(double oRef, double oHet, double oAlt) {
     double n = oRef + oHet + oAlt;
     double p = ((2 * oRef) + oHet) / (2 * n);
     double q = 1 - p;
@@ -94,7 +81,7 @@ public class Stats {
     double eHet = 2 * p * q * n;
     double eAlt = q * q * n;
 
-    return chisq(new double[]{eRef, eHet, eAlt}, new double[]{oRef, oHet, oAlt});
+    return chiSquare(new double[]{eRef, eHet, eAlt}, new double[]{oRef, oHet, oAlt});
   }
 
   public static double test(double chr, int dof) {
@@ -170,13 +157,13 @@ public class Stats {
     return d;
   }
 
-  public static double chisq(double[] expected, double[] observed) {
-    double chisq = 0;
+  public static double chiSquare(double[] expected, double[] observed) {
+    double chiSquare = 0;
     for (int i = 0; i < expected.length; i++) {
       double sqrt = expected[i] - observed[i];
-      chisq += (sqrt * sqrt) / expected[i];
+      chiSquare += (sqrt * sqrt) / expected[i];
     }
-    return chisq;
+    return chiSquare;
   }
 
   public static double HWE_exact(int nrr, int nra, int naa) {
@@ -184,25 +171,25 @@ public class Stats {
     int nr = 2 * nrr + nra;
     int na = 2 * naa + nra;
 
-    ArrayList<Integer> fn = factoriel(n);
-    ArrayList<Integer> fnrr = factoriel(nrr);
+    ArrayList<Integer> fn = factorial(n);
+    ArrayList<Integer> fnRR = factorial(nrr);
 
-    ArrayList<Integer> fnr = factoriel(nr);
-    ArrayList<Integer> fnra = factoriel(nra);
+    ArrayList<Integer> fnr = factorial(nr);
+    ArrayList<Integer> fnRA = factorial(nra);
 
-    ArrayList<Integer> fna = factoriel(na);
-    ArrayList<Integer> fnaa = factoriel(naa);
+    ArrayList<Integer> fna = factorial(na);
+    ArrayList<Integer> fnAA = factorial(naa);
 
     ArrayList<Integer> pow = power(2, nra);
-    ArrayList<Integer> f2n = factoriel(2 * n);
+    ArrayList<Integer> f2n = factorial(2 * n);
 
     ArrayList<Integer> num = combine(combine(fn, fnr), combine(fna, pow));
-    ArrayList<Integer> denum = combine(combine(fnrr, fnra), combine(fnaa, f2n));
+    ArrayList<Integer> denom = combine(combine(fnRR, fnRA), combine(fnAA, f2n));
 
-    return divide(num, denum);
+    return divide(num, denom);
   }
 
-  private static ArrayList<Integer> factoriel(int f) {
+  private static ArrayList<Integer> factorial(int f) {
     ArrayList<Integer> ret = new ArrayList<>();
     for (int i = 1; i <= f; i++)
       ret.add(i);

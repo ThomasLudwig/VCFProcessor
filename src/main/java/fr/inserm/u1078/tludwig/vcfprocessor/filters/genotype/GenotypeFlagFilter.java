@@ -40,9 +40,7 @@ public class GenotypeFlagFilter extends GenotypeFilter {
 
     try {
       flag = t.split(":")[this.filterPos];
-    } catch (Exception e) {
-    }
-    
+    } catch (Exception ignore) { }
 
     if(flag.isEmpty() || flag.equals("."))
       return true;

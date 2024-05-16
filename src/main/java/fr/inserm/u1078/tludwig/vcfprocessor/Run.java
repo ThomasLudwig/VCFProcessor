@@ -8,9 +8,9 @@ package fr.inserm.u1078.tludwig.vcfprocessor;
  * Checked for release on xxxx-xx-xx
  * Unit Test defined on xxxx-xx-xx
  */
+
 public class Run {
   public static void main(String[] args){
-    ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
     Main.start(args);
   }
 }

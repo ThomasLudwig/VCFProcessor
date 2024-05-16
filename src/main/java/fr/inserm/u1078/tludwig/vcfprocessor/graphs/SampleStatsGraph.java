@@ -38,6 +38,7 @@ public class SampleStatsGraph extends XYLineGraph {
   public static final int TYPE_MISSING = 4;//"missing";
   public static final int[] TYPES = {TYPE_VAR, TYPE_DEPTH, TYPE_TSTV, TYPE_HETHOM, TYPE_MISSING};
 
+  @SuppressWarnings("SpellCheckingInspection")
   private static final String[] EXT = {"variants", "depth", "tstv", "hethom", "missing"};
   public static final String[] TITLE = {"Number of Variants", "Mean Depth", "TS/TV", "Het/HomAlt", "Missing"};
   private static final int[] INDEX = {7, 6, 11, 13, 4};
@@ -87,8 +88,8 @@ public class SampleStatsGraph extends XYLineGraph {
       throw new GraphException("Could not load data from " + this.filename, e);
     }
     
-    for(ArrayList<Double> vals : this.valuesForGroups.values())
-      Collections.sort(vals);
+    for(ArrayList<Double> values : this.valuesForGroups.values())
+      Collections.sort(values);
 
     double spread = (max - min) * 0.1;
     if (spread == 0)
@@ -128,8 +129,8 @@ public class SampleStatsGraph extends XYLineGraph {
 
     NumberAxis xAxis = (NumberAxis) plot.getDomainAxis();
     int size = 0;
-    for(ArrayList<Double> vals : valuesForGroups.values())
-      size += vals.size();
+    for(ArrayList<Double> values : valuesForGroups.values())
+      size += values.size();
     
     xAxis.setRange(-10, size + 10);
     NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();

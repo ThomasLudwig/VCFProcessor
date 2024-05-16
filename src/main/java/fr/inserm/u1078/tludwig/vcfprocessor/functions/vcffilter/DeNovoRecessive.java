@@ -1,6 +1,5 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 
-import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFilterFunction;
@@ -19,7 +18,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
  * Unit Test defined on   2020-08-07
   */
 public class DeNovoRecessive extends ParallelVCFVariantFilterFunction {
-  public final PedFileParameter pedfile = new PedFileParameter();
+  public final PedFileParameter pedFile = new PedFileParameter();
   private Sample p1;
   private Sample p2;
   private Sample child;
@@ -29,6 +28,7 @@ public class DeNovoRecessive extends ParallelVCFVariantFilterFunction {
     return "Keeps only variants that strictly respect this genotypes "+Description.italic("parent1")+" 0/1 + "+Description.italic("parent2")+" 0/0 + "+Description.italic("child")+" 1/1";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
@@ -36,16 +36,19 @@ public class DeNovoRecessive extends ParallelVCFVariantFilterFunction {
             .addWarning("Will only run if input file has a trio with 1 case an 2 controls");    
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_FILTER_ONE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -56,14 +59,15 @@ public class DeNovoRecessive extends ParallelVCFVariantFilterFunction {
     return OUT_VCF;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     Ped ped = this.getVCF().getPed();
     super.begin();
     if (ped.getCases().size() != 1)
-      this.fatalAndDie("There should be exactly 1 case (child of 2 controles)");
+      this.fatalAndQuit("There should be exactly 1 case (child of 2 controls)");
     if (ped.getControls().size() != 2)
-      this.fatalAndDie("There should be exactly 2 controles (parent of the case)");
+      this.fatalAndQuit("There should be exactly 2 controls (parent of the case)");
 
     p1 = ped.getControls().get(0);
     p2 = ped.getControls().get(1);

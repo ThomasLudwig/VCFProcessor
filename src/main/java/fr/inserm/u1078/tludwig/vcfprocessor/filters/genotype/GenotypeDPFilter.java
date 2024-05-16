@@ -9,8 +9,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.filters.GenotypeFilter;
 public class GenotypeDPFilter extends GenotypeFilter {
   public static final String DP = "DP"; //TODO propose to use sumAD() if DP is missing
   
-  int min;
-  int max;
+  private final int min;
+  private final int max;
   String[] format;
   int dpPos = -1;
 

@@ -55,14 +55,14 @@ public class JFSGraph extends HeatMapGraph {
 
       while ((line = in.readLine()) != null) {
         String[] f = line.split("\\s+", -1);
-        int[] vals = new int[f.length];
+        int[] values = new int[f.length];
         for (int x = 0; x < f.length; x++){
           int val = new Integer(f[x]);
           if(val > this.maxValue)
             this.maxValue = val;
-          vals[x] = val;
+          values[x] = val;
         }
-        this.counts.add(vals);
+        this.counts.add(values);
       }
 
       in.close();
@@ -118,7 +118,7 @@ public class JFSGraph extends HeatMapGraph {
     try {
       max = Integer.parseInt(this.maxScale);
     } catch (NumberFormatException e) {
-      //Ignore, if unparsable, it means local max
+      //Ignore, if not parsable, it means local max
     }
     return new LogPaintScale(max);
   }

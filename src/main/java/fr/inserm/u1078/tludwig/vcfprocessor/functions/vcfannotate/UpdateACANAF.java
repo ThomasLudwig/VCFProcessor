@@ -19,21 +19,25 @@ public class UpdateACANAF extends ParallelVCFVariantFunction {
     return "Resets the "+Description.code("AC")+" "+Description.code("AN")+" and "+Description.code("AF")+" values for the given VCF file";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("Adds/Updates the "+Description.code("AC")+" "+Description.code("AN")+" and "+Description.code("AF")+" values for the VCF.");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ANNOTATION_FOR_ALL;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -50,6 +54,7 @@ public class UpdateACANAF extends ParallelVCFVariantFunction {
     return asOutput(variant);
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

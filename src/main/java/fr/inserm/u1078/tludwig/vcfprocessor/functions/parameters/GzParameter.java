@@ -1,7 +1,5 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters;
 
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.Input;
-
 /**
  * XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX CLASS DESCRIPTION XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  *
@@ -24,15 +22,11 @@ public final class GzParameter extends Parameter {
   }
 
   @Override
-  public void parseParameter(String value) throws ParameterException {}
+  public void parseParameter(String value) {}
 
   @Override
   public String showAllowedValues() {
     return null;
   }
 
-  @Override
-  public Input getInputForm() {
-    return null;
-  }
 }

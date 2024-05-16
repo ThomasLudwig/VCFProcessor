@@ -27,6 +27,7 @@ public class Chi2 extends ParallelVCFVariantPedFunction {
     return "Performs a chi² Association Tests on an input VCF file";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("Does a simple association test on the data present in the input vcf file.")
@@ -34,16 +35,19 @@ public class Chi2 extends ParallelVCFVariantPedFunction {
             .addLine("then does a chi² on those values");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -54,30 +58,33 @@ public class Chi2 extends ParallelVCFVariantPedFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     allelesCases = new int[getPed().getCases().size()];
     allelesControls = new int[getPed().getControls().size()];
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return null;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getFooters() {
     ArrayList<String> out = new ArrayList<>();
     int maxCase = MathTools.min(allelesCases);
     int maxControls = MathTools.max(allelesControls);
-    int max = maxCase > maxControls ? maxCase : maxControls;
+    int max = Math.max(maxCase, maxControls);
 
     if (max > 0) {
       int[][] input = new int[2][max + 1];
-      for (int i = 0; i < allelesCases.length; i++)
-        input[0][allelesCases[i]]++;
-      for (int i = 0; i < allelesControls.length; i++)
-        input[1][allelesControls[i]]++;
+      for (int cas : allelesCases)
+        input[0][cas]++;
+      for (int ctrl : allelesControls)
+        input[1][ctrl]++;
 
       out.add("#" + T + "Cases" + T + "Controls");
       for (int i = 0; i <= max; i++)
@@ -131,9 +138,9 @@ public class Chi2 extends ParallelVCFVariantPedFunction {
           out.add("Chi2 = [" + chiPA + "] pvalue=[" + pvaluePA + "]");
         }
       } else
-        out.add("Not enough catagories with non empty data");
+        out.add("Not enough categories with non empty data");
     }
-    return out.toArray(new String[out.size()]);
+    return out.toArray(new String[0]);
   }
 
   @Override
@@ -159,6 +166,7 @@ public class Chi2 extends ParallelVCFVariantPedFunction {
     return NO_OUTPUT;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     try {
@@ -169,8 +177,7 @@ public class Chi2 extends ParallelVCFVariantPedFunction {
       else
         allelesControls[i]++;
       return true;
-    } catch (Exception e) {
-    }
+    } catch (Exception ignore) { }
     return false;
   } 
   

@@ -25,17 +25,20 @@ public class FrequencyForPrivate extends ParallelVCFVariantPedFunction {
     return "Prints the Allele frequency in the file and each group, for variants not found in dbSNP, 1kG or GnomAD.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("For each variant in the file, if the variant is not found in dbSNP, 1KG or GnomAD :")
             .addLine("Prints the frequency in the file, and in each group, as well as its consequence");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -46,20 +49,23 @@ public class FrequencyForPrivate extends ParallelVCFVariantPedFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     G = getPed().getGroups().size();
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
-    String out = "CHROM" + T + "POS" + T + "REF" + T + "ALT" + T + "Frq_Total";
+    StringBuilder out = new StringBuilder("CHROM" + T + "POS" + T + "REF" + T + "ALT" + T + "Frq_Total");
     for (int i = 0; i < G; i++)
-      out += T + "Frq_" + getPed().getGroups().get(i);
-    out += T + "Consequences";
-    return new String[]{out};
+      out.append(T + "Frq_").append(getPed().getGroups().get(i));
+    out.append(T + "Consequences");
+    return new String[]{out.toString()};
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
@@ -95,12 +101,13 @@ public class FrequencyForPrivate extends ParallelVCFVariantPedFunction {
         out.addColumn(count / (1d * total));
         for (int g = 0; g < G; g++)
           out.addColumn(countByGroup[g] / (1d * totalInGroup[g]));
-        out.addColumn(String.join(",", variant.getInfo().getConsequencesSplitted(a)));
+        out.addColumn(String.join(",", variant.getInfo().getConsequencesSplit(a)));
         outs.add(out.toString());
       }
-    return outs.toArray(new String[outs.size()]);
+    return outs.toArray(new String[0]);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

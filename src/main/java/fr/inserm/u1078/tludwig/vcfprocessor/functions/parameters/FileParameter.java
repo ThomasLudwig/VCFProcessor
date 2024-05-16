@@ -3,8 +3,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters;
 
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.Input;
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.LoadInput;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -58,7 +56,7 @@ public class FileParameter extends Parameter {
   }
 
   @Override
-  public void parseParameter(String s) throws ParameterException {
+  public void parseParameter(String s) {
     this.value = s;
   }
 
@@ -66,11 +64,6 @@ public class FileParameter extends Parameter {
     if(this.reader == null || this.reader.isClosed())
       this.reader = new UniversalReader(this.getFilename());
     return this.reader;
-  }
-
-  @Override
-  public Input getInputForm() {
-    return new LoadInput(this);
   }
 
   public String getBasename() {

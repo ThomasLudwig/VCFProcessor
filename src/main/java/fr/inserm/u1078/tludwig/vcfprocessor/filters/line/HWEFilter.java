@@ -7,7 +7,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
  * @author Thomas E. Ludwig (INSERM - U1078) 2018-11-22
  */
 public class HWEFilter extends LineFilter {
-//TODO completly different from vcftools
+//TODO completely different from vcftools
   private final double threshold;
 
   public HWEFilter(double threshold, boolean keep) {

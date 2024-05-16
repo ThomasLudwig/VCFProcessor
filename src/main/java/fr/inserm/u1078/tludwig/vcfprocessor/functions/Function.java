@@ -12,10 +12,8 @@ import fr.inserm.u1078.tludwig.maok.BgzipOutputStream;
 import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.vcfprocessor.commandline.CommandParser;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.GzParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.TextAreaOutputStream;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -23,6 +21,8 @@ import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -34,6 +34,8 @@ import java.util.Date;
 public abstract class Function {
   public static final String OPT_REF = "--ref"; //TODO OPT as enum
   public static final String OPT_CPU = "--cpu";
+
+  @SuppressWarnings("SpellCheckingInspection")
   public static final String OPT_TPED = "--tped";
   public static final String OPT_FREX = "--frex";
   public static final String OPT_VCF = "--vcf";
@@ -70,6 +72,7 @@ public abstract class Function {
   public static final String OPT_GENE = "--gene";
   public static final String OPT_HOMO = "--homo";
   public static final String OPT_MISSING = "--missing";
+  @SuppressWarnings("SpellCheckingInspection")
   public static final String OPT_NO_HOMO = "--nohomo";
   public static final String OPT_MODE = "--mode";
   public static final String OPT_TYPE = "--type";
@@ -133,6 +136,8 @@ public abstract class Function {
     TYPE_UNKNOWN
   };
 
+  //TODO gradle has a lot of compatibility uses (strong correlation with java version), maybe switch to another compiler ?
+
   public final String getFunctionType() {
     String jar = Main.getJar(this.getClass());
     String main = Main.getJar();
@@ -162,10 +167,9 @@ public abstract class Function {
   /**
    * The starting time of the function
    */
-  private Date startDate;
 
-  public final OutputParameter outfilename = new OutputParameter(OPT_OUT, this.getOutputExtension(), "ResultFile", "File that will contain the function's results", OutputParameter.TYPE_OUT);
-  public final OutputParameter errfilename = new OutputParameter(OPT_ERR, OUT_LOG, "LogFile", "File that will contain the function's log", OutputParameter.TYPE_ERR);
+  public final OutputParameter outFilename = new OutputParameter(OPT_OUT, this.getOutputExtension(), "ResultFile", "File that will contain the function's results", OutputParameter.TYPE_OUT);
+  public final OutputParameter errFilename = new OutputParameter(OPT_ERR, OUT_LOG, "LogFile", "File that will contain the function's log", OutputParameter.TYPE_ERR);
 
   
   private static boolean FIRST_CALL_OUTPUT_BGZIPPED = true;
@@ -183,7 +187,7 @@ public abstract class Function {
     if(FIRST_CALL_OUTPUT_BGZIPPED)
       BGZIPPED_OUTPUT = true;
     else
-      Message.fatal("Call to "+Function.class.getSimpleName()+".setBgzippedOutput() can only made once");
+      Main.die("Call to "+Function.class.getSimpleName()+".setBgzippedOutput() can only made once");
     FIRST_CALL_OUTPUT_BGZIPPED = false;
   }
   
@@ -191,34 +195,34 @@ public abstract class Function {
     return BGZIPPED_OUTPUT;
   }
 
-  public final boolean start(String[] args) { //TODO not called, appart through reflect... hard to debug
-    String msg = "";
+  public final boolean start(String[] args) { //TODO not called, except through reflect... hard to debug
+    StringBuilder msg = new StringBuilder();
     for (Parameter p : this.getParameters())
       try {
         p.parseParameter(args);
       } catch (ParameterException e) {
-        msg += "\n" + e.getMessage();
+        msg.append("\n").append(e.getMessage());
       }
     
     ArrayList<String> allowed = CommandParser.getAllowedKeys(args);
     for(String a : args){
       if(a.startsWith("-") && !allowed.contains(a.toLowerCase()))
-        msg += "\n" + "Unexception argument ["+a+"]"; 
+        msg.append("\n" + "Unexpected argument [").append(a).append("]");
     }
     
     if (msg.length() > 0) {
       this.showUsage();
-      this.fatalAndDie("Invalid argument(s)" + msg);
+      this.fatalAndQuit("Invalid argument(s)" + msg);
       return false;
     }
 
     try {
-      String out = outfilename.getStringValue();
+      String out = outFilename.getStringValue();
       if (out != null) {
         if(BGZIPPED_OUTPUT || out.endsWith(".gz"))
           outStream = new PrintStream(new BgzipOutputStream(out.endsWith(".gz") ? out : out+".gz"));
         else
-          outStream = new PrintStream(new BufferedOutputStream(new FileOutputStream(out)));
+          outStream = new PrintStream(new BufferedOutputStream(Files.newOutputStream(Paths.get(out))));
         
         System.setOut(outStream);
       } else {
@@ -228,41 +232,36 @@ public abstract class Function {
         }
       }
 
-      String err = errfilename.getStringValue();
+      String err = errFilename.getStringValue();
       if (err != null) {
-        errStream = new PrintStream(new BufferedOutputStream(new FileOutputStream(err)));
+        errStream = new PrintStream(new BufferedOutputStream(Files.newOutputStream(Paths.get(err))));
         System.setErr(errStream);
       }
     } catch (IOException e) {
-      this.fatalAndDie("Could not redirect output", e);
+      this.fatalAndQuit("Could not redirect output", e);
       return false;
     }
     return true;
   }
 
-  public OutputParameter getOutfilename() {
-    return outfilename;
+  public OutputParameter getOutFilename() {
+    return outFilename;
   }
 
-  public OutputParameter getErrfilename() {
-    return errfilename;
+  public OutputParameter getErrFilename() {
+    return errFilename;
   }
-
+/*
   public final void checkParameters() throws ParameterException {
     ArrayList<String> keys = new ArrayList<>();
     for (Parameter p : this.getParameters()) {
       String key = p.getKey();
       if (keys.contains(key))
-        throw new ParameterException("Duplicate key [" + key + "] requiered by Function " + this.getFunctionName());
+        throw new ParameterException("Duplicate key [" + key + "] required by Function " + this.getFunctionName());
       keys.add(key);
     }
   }
-
-  public void setGuiStream(TextAreaOutputStream guiStream) {
-    Message.setProgressBarActive(false);
-    this.errStream = new PrintStream(guiStream);
-    System.setErr(this.errStream);
-  }
+*/
 
   /**
    * Executes the function :
@@ -275,13 +274,14 @@ public abstract class Function {
    * </li>
    */
   public final void execute() {
-    startDate = new Date();
+    Date startDate = new Date();
     this.printWelcomeMessage();
     Message.info("Called from " + System.getProperty("user.name") + "@" + getHostname() + ":" + System.getProperty("user.dir") + " [" + startDate + "]");
     try {
       this.executeFunction();
     } catch (Exception e) {
-      Function.this.fatalAndDie("Unable to execute function " + this.getFunctionName(), e);
+      Function.this.fatalAndQuit("Unable to execute function " + this.getFunctionName(), e);
+
     }
     Date endDate = new Date();
     Message.info("Computation Ended at " + endDate + " (duration " + DateTools.durationInSeconds(startDate, endDate) + "s), waiting for output file to be written.");
@@ -296,31 +296,8 @@ public abstract class Function {
     }
   }
 
-  @Deprecated
-  public final void println(String line) {
-    System.out.println(line);
-  }
-
-  @Deprecated
-  public final void println(Object o) { //TODO why is it deprecated  ? OK it should be in process or getFooters, but still
-    //TODO because automatically in System.out... what about a --out  ?..it is --out that set System.out to the file
+  public final void println(Object o) {
     System.out.println(o);
-  }
-  
-  public void fatalAndDie(String message, Exception e) { //TODO should not be called through GUI
-    Message.fatal(message, e);
-    this.die();
-  }
-  
-  public void fatalAndDie(String message){ //TODO should not be called through GUI
-    Message.fatal(message);
-    this.die();
-  }
-  
-  public void die(){
-    this.quit();
-
-    System.exit(1);//TODO should not be called through GUI
   }
 
   public void fatalAndQuit(String message, Exception e) {
@@ -341,6 +318,7 @@ public abstract class Function {
       errStream.close();
     System.setErr(STD_ERR);
     Message.setProgressBarActive(true);
+    System.exit(-1);
   }
 
   public final String getPackage() {
@@ -385,28 +363,33 @@ public abstract class Function {
    * Prints the function parameters
    */
   private void printParameters() {
-    String msg = "Parameters :";
+    StringBuilder msg = new StringBuilder("Parameters :");
     for (Parameter parameter : this.getParameters())
-      msg += "\n" + parameter.getFullDescription();
-    Message.info(msg);
+      msg.append("\n").append(parameter.getFullDescription());
+    Message.info(msg.toString());
   }
 
   /**
    * Gets the Function name
    *
-   * @return
+   * @return the name of the function
    */
   public final String getFunctionName() {
     return this.getClass().getSimpleName();
   }
 
   /**
-   * Gets the Function description
+   * Gets the Function summary
    *
-   * @return
+   * @return the summary description of the function
    */
   public abstract String getSummary();
 
+  /**
+   * Gets the Function Description
+   *
+   * @return the full description of the function
+   */
   public abstract Description getDescription();
   
   public abstract TestingScript[] getScripts();
@@ -433,15 +416,15 @@ public abstract class Function {
   }
 
   public final String getShortUsage() {
-    String msg = Message.yellow(this.getClass().getSimpleName());
+    StringBuilder msg = new StringBuilder(Message.yellow(this.getClass().getSimpleName()));
     for (Parameter param : this.getParameters())
       if (param != null && !(param instanceof OutputParameter))
-        msg += param.getCommandLine(); //space is in the getCommandLine()
+        msg.append(param.getCommandLine()); //space is in the getCommandLine()
     return msg + " " + Message.white("(" + Description.descriptionToPlainText(this.getSummary()) + ")");
   }
 
   public void showUsage() {
-    Message.fatal("Usage : " + JavaTools.command(this.getClass()) + "\n" + this.getUsage() + "\n" + this.getDescription().asText());
+    Main.die("Usage : " + JavaTools.command(this.getClass()) + "\n" + this.getUsage() + "\n" + this.getDescription().asText());
   }
 
   public final Parameter[] getParameters() { //there are mention of VCFFunction ... for sorting purpose
@@ -500,7 +483,7 @@ public abstract class Function {
       fields.removeAll(removes);
 
     } catch (IllegalAccessException | IllegalArgumentException | SecurityException e) {
-      this.fatalAndDie("Problem getting field for function " + this.getFunctionName(), e);
+      this.fatalAndQuit("Problem getting field for function " + this.getFunctionName(), e);
     }
 
     //check validity
@@ -508,19 +491,20 @@ public abstract class Function {
     for (Parameter param : ret) {
       String key = param.getKey();
       if (keys.contains(key))
-        this.fatalAndDie("Duplicate key [" + key + "] in the definition of Function " + this.getFunctionName() + " (" + this.getFunctionType() + ")");
+        this.fatalAndQuit("Duplicate key [" + key + "] in the definition of Function " + this.getFunctionName() + " (" + this.getFunctionType() + ")");
       else
         keys.add(key);
     }
 
-    return ret.toArray(new Parameter[ret.size()]);
+    return ret.toArray(new Parameter[0]);
   }
 
   /**
    * Really executes the function
    *
-   * @throws java.lang.Exception
+   * @throws java.lang.Exception if something went wrong
    */
+  @SuppressWarnings("unused")
   public abstract void executeFunction() throws Exception; //TODO should be FunctionException
   
   public static PrintWriter getPrintWriter(String filename, boolean bgzip) throws IOException{

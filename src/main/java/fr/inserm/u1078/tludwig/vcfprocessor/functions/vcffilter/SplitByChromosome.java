@@ -25,21 +25,25 @@ public class SplitByChromosome extends VCFFunction { //TODO parallelize
     return "Splits a given vcf file by chromosome";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("Splits a given vcf file and produces one resulting vcf file by chromosome.");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -50,17 +54,18 @@ public class SplitByChromosome extends VCFFunction { //TODO parallelize
     return OUT_NONE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
-    String basename = this.vcffile.getBasename();
-    VCF vcf = this.vcffile.getVCF();
+    String basename = this.vcfFile.getBasename();
+    VCF vcf = this.vcfFile.getVCF();
     vcf.getReaderAndStart();
     String current = "current";
     PrintWriter out = null;
 
     String line;
-    while ((line = vcf.getNextLine()) != null) {
-      String chrom = line.split("\t")[VCF.IDX_CHROM];
+    while ((line = vcf.getUnparallelizedNextLine()) != null) {
+      String chrom = line.substring(0,40).split(T)[VCF.IDX_CHROM];
       if (!current.equals(chrom)) {
         current = chrom;
         if (out != null)
@@ -70,6 +75,7 @@ public class SplitByChromosome extends VCFFunction { //TODO parallelize
         out = getPrintWriter(filename);
         vcf.printHeaders(out);
       }
+      assert out != null : "PrintWriter is null";
       out.println(line);
     }
     if (out != null)

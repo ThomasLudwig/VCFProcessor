@@ -34,6 +34,7 @@ public class VCF2HTML extends ParallelVCFFunction {
     return "Generates an HTML legible file for the given VCF file";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("Creates a HTML file, that contains the variants of the VCF file.")
@@ -41,16 +42,19 @@ public class VCF2HTML extends ParallelVCFFunction {
             .addLine("All vep annotation are formatted and shown.");
   }
 
+  @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {//TODO implements version where CSQ is optionnal
+  public boolean needVEP() {//TODO implements version where CSQ is optional
     return true;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -61,6 +65,7 @@ public class VCF2HTML extends ParallelVCFFunction {
     return OUT_HTML;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
@@ -75,21 +80,22 @@ public class VCF2HTML extends ParallelVCFFunction {
     setSamples(getVCF().getSampleHeader());
 
     if (samples == null) {
-      this.fatalAndDie("No Samples available");
+      this.fatalAndQuit("No Samples available");
     }
     if (info == null) {
-      this.fatalAndDie("No INFO available");
+      this.fatalAndQuit("No INFO available");
     }
   }
 
+  @SuppressWarnings({"unused"})
   @Override
   public String[] getHeaders() {
     ArrayList<String> out = new ArrayList<>();
     out.add("<html>");
     out.add("<head>");
-    out.add("<title>" + this.vcffile.getFilename() + "</title>");
+    out.add("<title>" + this.vcfFile.getFilename() + "</title>");
     out.add("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
-    out.add("<link rel=\"stylesheet\" type=\"text/css\" href=\"http://lysine.univ-brest.fr/css/vcf.css\">");
+    out.add("<link rel=\"stylesheet\" type=\"text/css\" href=\"https://lysine.univ-brest.fr/css/vcf.css\">");
     out.add("</head>");
     out.add("<body>");
     out.add("<table class=\"vcftable\">");
@@ -105,16 +111,17 @@ public class VCF2HTML extends ParallelVCFFunction {
     line.closeHTML("tr");
     out.add(line.toString());
     
-    return out.toArray(new String[out.size()]);
+    return out.toArray(new String[0]);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getFooters() {
     ArrayList<String> out = new ArrayList<>();
     out.add("</table>");
     out.add("</body>");
     out.add("</html>");
-    return out.toArray(new String[out.size()]);
+    return out.toArray(new String[0]);
   }
 
   private void setInfoHeader(String line) {
@@ -122,17 +129,14 @@ public class VCF2HTML extends ParallelVCFFunction {
     String tmp = line.split(":")[1].split("\"")[0].trim();
     this.info.addAll(Arrays.asList(tmp.split("\\|")));
     System.err.println(info.size() + " info in the header");
-    String msg = "";
-    for (String inf : info)
-      msg += "|" + inf;
+    String msg = "|" + String.join("|", info);
     System.err.println(msg);
   }
 
   private void setSamples(String line) {
     this.samples = new ArrayList<>();
     String[] f = line.split(T);
-    for (int i = 8; i < f.length; i++) //!! For easier processing, FORMAT is considered a SAMPLE
-      this.samples.add(f[i]);
+    this.samples.addAll(Arrays.asList(f).subList(8, f.length));
     System.err.println((samples.size() - 1) + " samples");
   }
 
@@ -157,22 +161,22 @@ public class VCF2HTML extends ParallelVCFFunction {
     String[] f = line.split(T);
 
     String[] infs = f[7].split(";");
-    String infoo = infs[0];
-    String[] csqlists = null;
+    StringBuilder infoo = new StringBuilder(infs[0]);
+    String[] csqLists = null;
 
     for (int i = 1; i < infs.length; i++)
       if (infs[i].startsWith(CSQ))
-        csqlists = infs[i].substring(CSQ.length()).split(",");
+        csqLists = infs[i].substring(CSQ.length()).split(",");
       else
-        infoo += ";" + infs[i];
+        infoo.append(";").append(infs[i]);
 
-    if(csqlists == null)
+    if(csqLists == null)
       return NO_OUTPUT;
     
     boolean first = true;
-    String[] outs = new String[csqlists.length];
-    for (int c = 0 ; c < csqlists.length; c++) {
-      String csqs = csqlists[c];
+    String[] outs = new String[csqLists.length];
+    for (int c = 0 ; c < csqLists.length; c++) {
+      String csqs = csqLists[c];
       LineBuilder out = new LineBuilder();
       out.openHTML("tr");
       for (int i = 0; i < COMMONS.length - 1; i++)
@@ -181,18 +185,18 @@ public class VCF2HTML extends ParallelVCFFunction {
         else
           td(out, "", COMMONS[i]);
       if (first)
-        td(out, infoo, COMMONS[COMMONS.length - 1]);
+        td(out, infoo.toString(), COMMONS[COMMONS.length - 1]);
       else
         td(out, "", COMMONS[COMMONS.length - 1]);
       String[] csq = (csqs + " ").split("\\|");
       if (csq.length != info.size()) {
-        fatalAndDie("Mismatch between csq (" + csq.length + ") and info [" + info.size() + "]\n" + csqs);
+        fatalAndQuit("Mismatch between csq (" + csq.length + ") and info [" + info.size() + "]\n" + csqs);
       }
       for (int i = 0; i < info.size(); i++){
         String infoType = info.get(i).trim();
         if (infoType.equalsIgnoreCase(SYMBOL)){
           out.openHTML("td", infoType);
-          out.openHTML("a", new String[][]{{"href", "http://www.genecards.org/cgi-bin/carddisp.pl?gene=" + csq[i]}});
+          out.openHTML("a", new String[][]{{"href", "https://www.genecards.org/cgi-bin/carddisp.pl?gene=" + csq[i]}});
           out.append(csq[i]);
           out.closeHTML("a");
           out.closeHTML("td");
@@ -215,6 +219,7 @@ public class VCF2HTML extends ParallelVCFFunction {
     return outs;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

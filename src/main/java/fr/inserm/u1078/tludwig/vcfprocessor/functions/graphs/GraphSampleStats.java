@@ -38,6 +38,7 @@ public class GraphSampleStats extends GraphFunction {
             .addItemize(SampleStatsGraph.TITLE);
   }
   
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
     

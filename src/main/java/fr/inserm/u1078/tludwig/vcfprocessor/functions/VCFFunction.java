@@ -10,7 +10,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParamete
 public abstract class VCFFunction extends Function implements VCFHandling {
   //public static final String MULTIALLELIC_ALL_PROCESSED  =  PREFIX_MULTIALLELIC+"All alternate alleles are processed";
 
-  public final VCFFileParameter vcffile = new VCFFileParameter(OPT_VCF, "input.vcf(.gz)", "VCF file to use as an input. Can be bgzipped");
+  public final VCFFileParameter vcfFile = new VCFFileParameter(OPT_VCF, "input.vcf(.gz)", "VCF file to use as an input. Can be bgzipped");
 
   @Override
   public final Description getDescription() {

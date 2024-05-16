@@ -2,7 +2,6 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
-import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.ConsequenceParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
@@ -33,6 +32,7 @@ public class FilterGeneCsqLevel extends ParallelVCFVariantFilterFunction {
     return "Filters the variants according to their consequences on a list of genes.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
@@ -40,16 +40,19 @@ public class FilterGeneCsqLevel extends ParallelVCFVariantFilterFunction {
             .addLine("The consequence of the variant on the gene must be at least as severe as the one given");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_FILTER_ONE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -60,6 +63,7 @@ public class FilterGeneCsqLevel extends ParallelVCFVariantFilterFunction {
     return OUT_VCF;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
@@ -71,7 +75,7 @@ public class FilterGeneCsqLevel extends ParallelVCFVariantFilterFunction {
         genes.add(line.split(T)[0]);
       in.close();
     } catch (IOException e) {
-      this.fatalAndDie("Unable to read gene file : " + this.geneFile.getFilename());
+      this.fatalAndQuit("Unable to read gene file : " + this.geneFile.getFilename());
     }
   }
 

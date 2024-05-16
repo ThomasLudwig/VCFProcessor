@@ -19,10 +19,10 @@ public class SamplePhenotypeFilter extends SampleFilter {
     this.phenotypes = new ArrayList<>();
   }
 
-  public SamplePhenotypeFilter(boolean keep, String... phenos) {
+  public SamplePhenotypeFilter(boolean keep, String... phenotypes) {
     this(keep);
 
-    for (String pheno : phenos)
+    for (String pheno : phenotypes)
       try {
         this.add(new Integer(pheno));
       } catch (Exception e) {

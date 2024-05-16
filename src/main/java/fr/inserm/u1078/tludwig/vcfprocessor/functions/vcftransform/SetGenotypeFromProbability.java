@@ -5,7 +5,6 @@ import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.BooleanParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 /**
@@ -27,28 +26,30 @@ public class SetGenotypeFromProbability extends ParallelVCFFunction {
     return "Affect a genotype for each sample, for each position from the GenotypeProbability annotation. If a genotype is already present, it can be kept or replaced";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
-    return new Description("The highest probabilty (given by annotation GP=p1,p2,p3) determines the genotype that will be affect")
-            .addItemize(new String[]{
-              "highest=p1 "+Description.RIGHT_ARROW+" 0/0",
-              "highest=p2 "+Description.RIGHT_ARROW+" 0/1",
-              "highest=p3 "+Description.RIGHT_ARROW+" 1/1"
-            })
+    return new Description("The highest probability (given by annotation GP=p1,p2,p3) determines the genotype that will be affect")
+            .addItemize("highest=p1 "+Description.RIGHT_ARROW+" 0/0",
+                "highest=p2 "+Description.RIGHT_ARROW+" 0/1",
+                "highest=p3 "+Description.RIGHT_ARROW+" 1/1")
             .addLine("If a genotype is already present, it can be kept or replaced");
             
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_FORBIDDEN;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return "The input VCF file must contain Genotype Probability (GP=p1,p2,p3) for each genotype";
@@ -65,17 +66,17 @@ public class SetGenotypeFromProbability extends ParallelVCFFunction {
 
     if (geno.equals("./.") || this.overwrite.getBooleanValue()) {
       String[] ps = f[p].split(",");
-      double[] probas = new double[]{new Double(ps[0]), new Double(ps[1]), new Double(ps[2])};
+      double[] probabilities = new double[]{new Double(ps[0]), new Double(ps[1]), new Double(ps[2])};
       int max = 0;
-      if (probas[1] > probas[0])
+      if (probabilities[1] > probabilities[0])
         max = 1;
-      if (probas[2] > probas[max])
+      if (probabilities[2] > probabilities[max])
         max = 2;
       geno = GENOS[max];
-      String ret = geno;
+      StringBuilder ret = new StringBuilder(geno);
       for (int i = 1; i < f.length; i++)
-        ret += ":" + f[i];
-      return ret;
+        ret.append(":").append(f[i]);
+      return ret.toString();
     }
     return sample;
   }
@@ -84,7 +85,7 @@ public class SetGenotypeFromProbability extends ParallelVCFFunction {
   public String[] processInputLine(String line) {
     String[] f = line.split(T);
     if(f[VCF.IDX_ALT].split(",").length > 1){
-      Message.warning("Can't process line why more than 1 alternate allele ["+Variant.shortString(" ", f)+"].");
+      Message.warning("Can't process line why more than 1 alternate allele ["+String.join(" ", f)+"].");
       return NO_OUTPUT;
     }
       
@@ -96,7 +97,7 @@ public class SetGenotypeFromProbability extends ParallelVCFFunction {
         p = i;
 
     if (p == -1) {
-      Message.warning("Missing GP field in line  ["+Variant.shortString(" ", f)+"].");
+      Message.warning("Missing GP field in line  ["+String.join(" ", f)+"].");
       return NO_OUTPUT;
     }
 
@@ -106,6 +107,7 @@ public class SetGenotypeFromProbability extends ParallelVCFFunction {
     return new String[]{String.join(T, f)};
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

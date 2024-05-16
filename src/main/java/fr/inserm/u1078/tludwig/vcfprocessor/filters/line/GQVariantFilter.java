@@ -37,13 +37,12 @@ public class GQVariantFilter extends LineFilter {
 
     NumberSeries gqs = new NumberSeries("gq", SortedList.Strategy.SORT_AFTERWARDS);
     for (int i = 9; i < t.length; i++) {
-      int gq = 0;
       try {
-        gq = new Integer(t[i].split(":")[idx]);
-        //here is ignore missing
-        gqs.add(gq);//here is ingore missing
+        int gq = new Integer(t[i].split(":")[idx]);
+        //here is "ignore missing"
+        gqs.add(gq);//here is "ignore missing"
       } catch (Exception e) {
-        //unparsable because .
+        //not parsable because .
         //missing because . instead of ./.:.:.:.:.                
       }
       //gqs.add(gq);//here if missing counts as dp=0

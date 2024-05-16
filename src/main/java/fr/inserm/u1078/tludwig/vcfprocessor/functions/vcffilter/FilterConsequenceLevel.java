@@ -24,22 +24,26 @@ public class FilterConsequenceLevel  extends ParallelVCFVariantFilterFunction {
     return "Filters the variants according to their consequences";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
             .addLine("The consequence of the variant must be at least as severe as the one given");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_FILTER_ONE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;

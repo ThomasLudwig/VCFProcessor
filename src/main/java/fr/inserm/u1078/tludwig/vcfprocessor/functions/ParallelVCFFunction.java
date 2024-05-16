@@ -20,11 +20,8 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class ParallelVCFFunction extends VCFFunction {
 
-  public static final byte[] EOL = "\n".getBytes();
-
   public static final int QUEUE_DEPTH = 200;
   public static final int STEP = 10000;
-  public static final int DELAY = 10;
   public static final String END_MESSAGE = "XXX_NO_MORE_LINES_XXX";
   public static final String EMPTY = "ZZZ_EMPTY_ZZZ";
   public static final String[] NO_OUTPUT = new String[]{};
@@ -39,20 +36,23 @@ public abstract class ParallelVCFFunction extends VCFFunction {
     println(line);
   }
 
+  @SuppressWarnings("unused")
   public void begin() {
-    //Nothing
+    Message.info("Starting at " + new Date());
   }
 
+  @SuppressWarnings("unused")
   public String[] getExtraHeaders() {
     return null;
   }
 
+  @SuppressWarnings("unused")
   public String[] getHeaders() {
     getVCF().addExtraHeaders(getExtraHeaders());
     return getVCF().getFullHeaders().toArray(new String[0]);
   }
 
-  public final void printHeaders() {
+  public final void printHeaders() { //TODO can't begin/headers/execute/end/footers be moved to Function ?
     String[] headers = this.getHeaders();
     if (headers != null)
       for (String header : headers)
@@ -66,10 +66,12 @@ public abstract class ParallelVCFFunction extends VCFFunction {
         println(footer);
   }
 
+  @SuppressWarnings("unused")
   public String[] getFooters() {
     return null;
   }
 
+  @SuppressWarnings("unused")
   public void end() {
     //No default
   }
@@ -79,7 +81,7 @@ public abstract class ParallelVCFFunction extends VCFFunction {
   }
 
   public void openVCF() throws VCFException, PedException {
-    this.setVCF(this.vcffile.getVCF(VCF.STEP_OFF));
+    this.setVCF(this.vcfFile.getVCF(VCF.STEP_OFF));
   }
 
   public final void setVCF(VCF vcf) {
@@ -90,6 +92,7 @@ public abstract class ParallelVCFFunction extends VCFFunction {
     return new String[]{variant.toString()};
   }
 
+  @SuppressWarnings("unused")
   @Override
   public final void executeFunction() throws Exception {
     this.openVCF();
@@ -114,7 +117,8 @@ public abstract class ParallelVCFFunction extends VCFFunction {
 
       threadPool.shutdown();
 
-      threadPool.awaitTermination(100, TimeUnit.DAYS);
+      if(!threadPool.awaitTermination(100, TimeUnit.DAYS))
+        Message.error("Thread reached its timeout");
     } catch (InterruptedException e) {
       Message.error("Thread was interrupted", e);
     }
@@ -136,7 +140,7 @@ public abstract class ParallelVCFFunction extends VCFFunction {
     try {
       this.outputLines.put(new Output(n, lines));
     } catch (InterruptedException e) {
-      this.fatalAndDie("Synchronisation Exception", e);
+      this.fatalAndQuit("Synchronisation Exception", e);
     }
   }
 
@@ -149,7 +153,7 @@ public abstract class ParallelVCFFunction extends VCFFunction {
       try {
         this.putOutput(n, this.processInputLine(line));
       } catch (Exception e) {
-        this.fatalAndDie("Unable to process line \n" + line, e);
+        this.fatalAndQuit("Unable to process line \n" + line, e);
       }
   }
 
@@ -172,17 +176,19 @@ public abstract class ParallelVCFFunction extends VCFFunction {
           wrapper = getVCF().getNextLineWrapper();
         }
         pushOutput(wrapper.index, END_MESSAGE);
-      } catch (VCFException e) {
-        fatalAndDie("Unable to read next line from VCF file", e);
+      } catch(VCFException e){
+        fatalAndQuit("There was a problem while reading the VCF file", e);
       }
     }
   }
 
   /**
    * Process the analysis
-   * @param analysis
+   * @param analysis the analysis result to process
    * @return false if the analysis object is on an unexpected type
    */
+
+  @SuppressWarnings("unused")
   public abstract boolean checkAndProcessAnalysis(Object analysis);
 
   public final void pushAnalysis(Object analysis) {
@@ -197,11 +203,11 @@ public abstract class ParallelVCFFunction extends VCFFunction {
    */
   public class Analyzer extends Thread {
 
-    private final LinkedBlockingQueue analyzes;
+    private final LinkedBlockingQueue<Object> analyzes;
     private boolean stillRunning = true;
 
     public Analyzer() {
-      this.analyzes = new LinkedBlockingQueue(QUEUE_DEPTH);
+      this.analyzes = new LinkedBlockingQueue<>(QUEUE_DEPTH);
     }
 
     @Override
@@ -244,11 +250,11 @@ public abstract class ParallelVCFFunction extends VCFFunction {
 
   public class Consumer extends Thread {
 
-    private final ArrayList<Output> unqueuedOutput;
+    private final ArrayList<Output> dequeuedOutput;
     private long start;
 
     public Consumer() {
-      this.unqueuedOutput = new ArrayList<>();
+      this.dequeuedOutput = new ArrayList<>();
     }
 
     private boolean process(Output out) {
@@ -256,7 +262,7 @@ public abstract class ParallelVCFFunction extends VCFFunction {
       if (out.n % STEP == 0) {
         double dur = DateTools.duration(start);
         int rate = (int)(out.n / dur);
-        Message.info(out.n + " variants processed from " + vcffile.getFilename() + " in " + dur + "s (" + rate + " variants/s)");
+        Message.info(out.n + " variants processed from " + vcfFile.getFilename() + " in " + dur + "s (" + rate + " variants/s)");
       }
 
       //Process output
@@ -265,7 +271,7 @@ public abstract class ParallelVCFFunction extends VCFFunction {
           case END_MESSAGE:
             double dur = DateTools.duration(start);
             int rate = (int)(out.n / dur);
-            Message.info(out.n - 1 + " variants processed from " + vcffile.getFilename() + " in " + dur + "s (" + rate + " variants/s)");
+            Message.info(out.n - 1 + " variants processed from " + vcfFile.getFilename() + " in " + dur + "s (" + rate + " variants/s)");
             run = false;
             break;
           case EMPTY:
@@ -278,9 +284,9 @@ public abstract class ParallelVCFFunction extends VCFFunction {
     }
 
     private Output remove(int nb) {
-      for (int i = 0; i < this.unqueuedOutput.size(); i++)
-        if (this.unqueuedOutput.get(i).n == nb)
-          return this.unqueuedOutput.remove(i);
+      for (int i = 0; i < this.dequeuedOutput.size(); i++)
+        if (this.dequeuedOutput.get(i).n == nb)
+          return this.dequeuedOutput.remove(i);
 
       return null;
     }
@@ -299,9 +305,9 @@ public abstract class ParallelVCFFunction extends VCFFunction {
               running = false;
             nb++;
           } else { //out.n > nb 
-            this.unqueuedOutput.add(out);
+            this.dequeuedOutput.add(out);
 
-            Output lines;// = this.unqueuedOutput.remove(nb);
+            Output lines;// = this.dequeuedOutput.remove(nb);
             while ((lines = remove(nb)) != null) {
               if (!process(lines))
                 running = false;
@@ -309,7 +315,7 @@ public abstract class ParallelVCFFunction extends VCFFunction {
             }
           }
         } catch (InterruptedException e) {
-          fatalAndDie("Consumer interrupted", e);
+          fatalAndQuit("Consumer interrupted", e);
         }
     }
   }

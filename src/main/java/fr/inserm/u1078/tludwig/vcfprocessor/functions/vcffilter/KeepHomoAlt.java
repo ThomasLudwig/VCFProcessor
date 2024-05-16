@@ -24,21 +24,25 @@ public class KeepHomoAlt extends ParallelVCFVariantFilterFunction {
     return "Returns a VCF containing only the position homozygous to alt for the given SAMPLES";
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return "Various is kept if different samples are homozygous to different alternative alleles";//TODO maybe change that
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary());
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -49,6 +53,7 @@ public class KeepHomoAlt extends ParallelVCFVariantFilterFunction {
     return OUT_VCF;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
@@ -62,7 +67,8 @@ public class KeepHomoAlt extends ParallelVCFVariantFilterFunction {
         return NO_OUTPUT;
     return asOutput(variant);
   }
-  
+
+  @SuppressWarnings("SpellCheckingInspection")
   @Override
   public TestingScript[] getScripts() {
     TestingScript scr = TestingScript.newFileTransform();

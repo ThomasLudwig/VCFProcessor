@@ -25,7 +25,7 @@ public class Region implements Comparable<Region> {
     int en = Integer.parseInt(f[2]);
 
     if(f.length > 3){
-      StringBuilder an = new StringBuilder("");
+      StringBuilder an = new StringBuilder();
       for(int i = 3; i < f.length; i++)
         an.append("\t").append(f[i]);
       String annotation = an.substring(1);
@@ -100,7 +100,7 @@ public class Region implements Comparable<Region> {
 
   /**
    * Export Region in the bed format, but without Annotations
-   * @return
+   * @return the Bed line for the region
    */
   public String asBed(){
     return this.chrom + "\t" + this.start + "\t" + this.end;

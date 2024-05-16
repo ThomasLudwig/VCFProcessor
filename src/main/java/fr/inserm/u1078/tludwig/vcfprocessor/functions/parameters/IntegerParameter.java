@@ -2,9 +2,6 @@
  */
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters;
 
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.DefaultInput;
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.Input;
-
 /**
  *
  * @author Thomas E. Ludwig (INSERM - U1078) 2018-08-24
@@ -54,8 +51,4 @@ public class IntegerParameter extends Parameter {
       throw new ParameterException("Value for " + this.getKey() + " can't be larger than " + max);
   }
 
-  @Override
-  public Input getInputForm() {
-    return new DefaultInput(this);
-  }
 }

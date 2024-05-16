@@ -20,7 +20,6 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -51,7 +50,7 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
     "Freq_GnomAD_NFE",
     "Freq_MaxPop",
     "Max_Pop",
-    //"Imput",
+    //"Imputation",
     "IQS",
     "Info"
   };
@@ -70,25 +69,29 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
     return "Computes the IQS score for each variant between sequences data and data imputed from genotyping.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("Computes the IQS score between sequences data and data imputed from genotyping.")
-            .addLine("Ref PMID26458263, See http://lysine.univ-brest.fr/redmine/issues/84")//TODO update URL to public doc
+            .addLine("Ref PMID26458263, See https://lysine.univ-brest.fr/redmine/issues/84")//TODO update URL to public doc
             .addLine("Here the IQS score is computed for each variant.")
             .addLine("Output format is :")
             .addColumns(HEADERS);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return "Extra information are available if the input file was annotated with VEP";
@@ -99,10 +102,11 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
     int nb = 0;
-    act = this.vcffile.getVCF(VCF.STEP_OFF);
+    act = this.vcfFile.getVCF(VCF.STEP_OFF);
     imputedVCF = imputedFilename.getVCF(VCF.STEP_OFF);
     MultiVCFReader reader = new MultiVCFReader(act, imputedVCF);
 
@@ -138,8 +142,8 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
       Thread.sleep(DELAY);
   }
 
-  private class IQSData {
-    LinesPair lines;
+  private static class IQSData {
+    private final LinesPair lines;
     private final int nb;
 
     IQSData(LinesPair lines, int nb) {
@@ -150,7 +154,7 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
 
   private class Worker implements Runnable {
 
-    LinkedBlockingQueue<IQSData> queue = new LinkedBlockingQueue<>(1000);
+    private final LinkedBlockingQueue<IQSData> queue = new LinkedBlockingQueue<>(1000);
 
     public void willEnd(int nb) {
       put(new IQSData(null, nb));
@@ -179,7 +183,7 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
               try {
                 actual = act.createVariant(actLine);
               } catch (VCFException e) {
-                fatalAndDie("Unable to create variant from following line in " + act.getFilename() + "\n" + actLine, e);
+                fatalAndQuit("Unable to create variant from following line in " + act.getFilename() + "\n" + actLine, e);
               }
               if (actual != null) //Not filtered
                 for (String impLine : data.lines.getSecond()) {
@@ -187,7 +191,7 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
                   try {
                     imputed = imputedVCF.createVariant(impLine);
                   } catch (VCFException e) {
-                    fatalAndDie("Unable to create variant from following line in " + imputedVCF.getFilename() + "\n" + impLine, e);
+                    fatalAndQuit("Unable to create variant from following line in " + imputedVCF.getFilename() + "\n" + impLine, e);
                   }
 
                   if (imputed != null)//Not filtered
@@ -206,7 +210,7 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
                     }
                 }
             }
-            pushOutput(data.nb, outputs.toArray(new String[outputs.size()]));
+            pushOutput(data.nb, outputs.toArray(new String[0]));
           } else {
             run = false;
             pushOutput(data.nb, new String[]{END_MESSAGE});
@@ -224,29 +228,9 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
     for (int i = 1; i < v.getAlleles().length; i++)
       if (v.getAllele(i).equals(allele))
         a = i;
-/*
-    HashMap<String, String> worstCSQ = new HashMap<>();
-    String rs = ".";
-    String gnomADNFE = "";
-    String maxFreq = "";
-    String maxPop = "";
-    double frex = v.getAlleleFrequencyPresent(a);
-    */
     Map<String, VEPAnnotation> worst = v.getInfo().getWorstVEPAnnotationsByGene(a);
-    /*
-    for (VEPAnnotation vep : v.getInfo().getVEPAnnotations(a)) {
-      rs = vep.getValue("Existing_variation");
-      gnomADNFE = vep.getValue("gnomAD_NFE_AF");
-      maxFreq = vep.getValue("MAX_AF");
-      maxPop = vep.getValue("MAX_AF_POPS");
-      String gene = vep.getSYMBOL();
-      String worst = worstCSQ.get(gene);
-      if (worst == null)
-        worst = "";
+    //TODO get the worst annotation for each gene and process
 
-      worstCSQ.put(gene, VEPAnnotation.getWorstConsequence((vep.getConsequence() + "&" + worst).split("&")));
-    }//TODO get the worst annotation for each gene and process
-    */
     for (String gene : worst.keySet()) {
       VEPAnnotation annot = worst.get(gene);
       LineBuilder prefix = new LineBuilder(v.getChrom());
@@ -269,15 +253,15 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
       
       String rs = "";
       String nfe = "";
-      String maxaf ="";
-      String maxpop = "";
+      String maxAF ="";
+      String maxPop = "";
       if(veps !=null && !veps.isEmpty()){
         VEPAnnotation first = veps.get(0);
         if(first != null){
           rs = first.getExisting_variation();
           nfe = first.getGNOMAD_NFE_AF();
-          maxaf = first.getMAF_AF();
-          maxpop = first.getMAX_AF_POPS();
+          maxAF = first.getMAF_AF();
+          maxPop = first.getMAX_AF_POPS();
         }
       }
       prefix.addColumn(v.getPos())
@@ -288,8 +272,8 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
               .addColumn()
               .addColumn(v.getAlleleFrequencyPresent(a))
               .addColumn(nfe)
-              .addColumn(maxaf)
-              .addColumn(maxpop);
+              .addColumn(maxAF)
+              .addColumn(maxPop);
       ret.add(prefix);
     }
 
@@ -338,18 +322,18 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
     try {
       this.outputLines.put(new Output(n, lines));
     } catch (InterruptedException e) {
-      this.fatalAndDie("Producer interrupted");
+      this.fatalAndQuit("Producer interrupted");
     }
   }
 
   public class Consumer implements Runnable {
 
-    private final ArrayList<Output> unqueuedOutput;
+    private final ArrayList<Output> dequeuedOutput;
     private long start;
     private boolean running = true;
 
     public Consumer() {
-      this.unqueuedOutput = new ArrayList<>();
+      this.dequeuedOutput = new ArrayList<>();
     }
 
     public boolean isRunning() {
@@ -357,9 +341,9 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
     }
 
     private Output remove(int nb) {
-      for (int i = 0; i < this.unqueuedOutput.size(); i++)
-        if (this.unqueuedOutput.get(i).n == nb)
-          return this.unqueuedOutput.remove(i);
+      for (int i = 0; i < this.dequeuedOutput.size(); i++)
+        if (this.dequeuedOutput.get(i).n == nb)
+          return this.dequeuedOutput.remove(i);
 
       return null;
     }
@@ -369,7 +353,7 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
       if (out.n % STEP == 0) {
         double dur = DateTools.duration(start);
         int rate = (int) (out.n / dur);
-        Message.info(out.n + " common variants processed from " + vcffile.getFilename() + " in " + dur + "s (" + rate + " variants/s)");
+        Message.info(out.n + " common variants processed from " + vcfFile.getFilename() + " in " + dur + "s (" + rate + " variants/s)");
       }
 
       //Process output
@@ -378,7 +362,7 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
           case END_MESSAGE:
             double dur = DateTools.duration(start);
             int rate = (int) (out.n / dur);
-            Message.info(out.n - 1 + " common variants processed from " + vcffile.getFilename() + " in " + dur + "s (" + rate + " variants/s)");
+            Message.info(out.n - 1 + " common variants processed from " + vcfFile.getFilename() + " in " + dur + "s (" + rate + " variants/s)");
             run = false;
             break;
           case EMPTY:
@@ -403,9 +387,9 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
               running = false;
             nb++;
           } else { //out.n > nb 
-            this.unqueuedOutput.add(out);
+            this.dequeuedOutput.add(out);
 
-            Output lines;// = this.unqueuedOutput.remove(nb);
+            Output lines;// = this.dequeuedOutput.remove(nb);
             while ((lines = remove(nb)) != null) {
               if (!process(lines))
                 running = false;
@@ -413,21 +397,21 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
             }
           }
         } catch (Exception e) {
-          fatalAndDie("Consumer interrupted", e);
+          fatalAndQuit("Consumer interrupted", e);
         }
     }
   }
   
   @Override
   public TestingScript[] getScripts() {
-    TestingScript novep = TestingScript.newFileAnalysis();
-    novep.addNamingFilename("vcf", "vcf.novep");
-    novep.addAnonymousFilename("file", "file");
-    novep.addAnonymousValue("cpu", "8");
+    TestingScript noVep = TestingScript.newFileAnalysis();
+    noVep.addNamingFilename("vcf", "vcf.noVep");
+    noVep.addAnonymousFilename("file", "file");
+    noVep.addAnonymousValue("cpu", "8");
     TestingScript vep = TestingScript.newFileAnalysis();
     vep.addNamingFilename("vcf", "vcf.vep");
     vep.addAnonymousFilename("file", "file");
     vep.addAnonymousValue("cpu", "8");
-    return new TestingScript[]{novep, vep};
+    return new TestingScript[]{noVep, vep};
   }
 }

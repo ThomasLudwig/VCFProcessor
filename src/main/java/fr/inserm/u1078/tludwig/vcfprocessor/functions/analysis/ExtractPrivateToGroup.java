@@ -24,20 +24,23 @@ public class ExtractPrivateToGroup extends ParallelVCFVariantPedFunction {
     return "Extracts All Variants that are private to a Group.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
-            .addLine("Only the variants found in a single group of samples (as defined in the ped file) are exctrated")
+            .addLine("Only the variants found in a single group of samples (as defined in the ped file) are extracted")
             .addLine("The list of the N samples in the group that have the variant is given")
             .addLine("Output Format :")
             .addColumns(HEADER);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -48,11 +51,13 @@ public class ExtractPrivateToGroup extends ParallelVCFVariantPedFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return new String[]{String.join(T,HEADER)};
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
@@ -65,17 +70,18 @@ public class ExtractPrivateToGroup extends ParallelVCFVariantPedFunction {
       ArrayList<String> groups = variant.getGroupsWithAllele(a);
       if (groups.size() == 1) {
         String out = variant.getChrom() + T + variant.getPos() + T + groups.get(0);
-        String smpls = "";
+        StringBuilder samples = new StringBuilder();
         for (Genotype g : variant.getGenotypes())
           if (g.hasAllele(a))
-            smpls += "," + g.getSample().getId();
-        out += T + smpls.substring(1);
+            samples.append(",").append(g.getSample().getId());
+        out += T + samples.substring(1);
         outs.add(out);
       }
     }
-    return outs.toArray(new String[outs.size()]);
+    return outs.toArray(new String[0]);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

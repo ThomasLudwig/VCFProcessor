@@ -33,6 +33,7 @@ public class CountFromPublicDB extends ParallelVCFVariantFunction {
     return "Returns the number of Variants, SNVs, INDEL, in dbSNP, 1kG, GnomAD.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
@@ -40,11 +41,13 @@ public class CountFromPublicDB extends ParallelVCFVariantFunction {
             .addColumns(HEADER);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -55,6 +58,7 @@ public class CountFromPublicDB extends ParallelVCFVariantFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getFooters() {
     int total = snp + indel;
@@ -90,11 +94,13 @@ public class CountFromPublicDB extends ParallelVCFVariantFunction {
     };
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return new String[]{T + String.join(T, HEADER)};
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
@@ -107,6 +113,7 @@ public class CountFromPublicDB extends ParallelVCFVariantFunction {
     return NO_OUTPUT;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     if(analysis instanceof Analysis){
@@ -133,7 +140,7 @@ public class CountFromPublicDB extends ParallelVCFVariantFunction {
     return false;
   }
   
-  private class Analysis{
+  private static class Analysis{
     private final boolean isSNP;
     private final boolean isInDBSNP;
     private final boolean isIn1KG;

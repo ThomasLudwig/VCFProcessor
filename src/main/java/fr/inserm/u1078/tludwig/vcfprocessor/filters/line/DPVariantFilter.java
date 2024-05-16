@@ -40,9 +40,9 @@ public class DPVariantFilter extends LineFilter {
       int dp;
       try {
         dp = new Integer(t[i].split(":")[idx]);
-        dps.add(dp);//here is ignore missing
+        dps.add(dp);//here is "ignore missing"
       } catch (Exception e) {
-        //unparsable because .
+        //not parsable because .
         //missing because . instead of ./.:.:.:.:.                
       }
       //dps.add(dp);//here if missing counts as dp=0

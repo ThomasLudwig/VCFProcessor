@@ -15,7 +15,7 @@ import java.util.ArrayList;
  */
 public class GeneCardsParser extends Function {
 
-  private final FileParameter html = new FileParameter(OPT_FILE, "input.html", "input genecargs HTML file");
+  private final FileParameter html = new FileParameter(OPT_FILE, "input.html", "input genecards HTML file");
 
   private final static String[] HEADERS = {"#Gene","GeneCards","Entrez Gene","UniProtKB/Swiss-Prot"};
 
@@ -37,6 +37,7 @@ public class GeneCardsParser extends Function {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
     File f = new File(this.html.getFilename());
@@ -56,14 +57,14 @@ public class GeneCardsParser extends Function {
   }
 
   private static String getGeneCards(ArrayList<String> lines) {
-    String out = "";
+    StringBuilder out = new StringBuilder();
 
     for (int i = 0; i < lines.size(); i++) {
       String head = lines.get(i);
       if (head.trim().startsWith("GeneCards Summary for")) {
         for (int j = i + 1; j < lines.size(); j++) {
           String line = lines.get(j);
-          out += " " + line;
+          out.append(" ").append(line);
           if (line.contains("</p>"))
             break;
         }
@@ -71,18 +72,18 @@ public class GeneCardsParser extends Function {
       }
     }
 
-    return trimHTML(out);
+    return trimHTML(out.toString());
   }
 
   private static String getEntrez(ArrayList<String> lines) {
-    String out = "";
+    StringBuilder out = new StringBuilder();
 
     for (int i = 0; i < lines.size(); i++) {
       String head = lines.get(i);
       if (head.trim().startsWith("<h3>Entrez Gene Summary for")) {
         for (int j = i + 1; j < lines.size(); j++) {
           String line = lines.get(j);
-          out += " " + line;
+          out.append(" ").append(line);
           if (line.contains("</p>"))
             break;
         }
@@ -90,18 +91,18 @@ public class GeneCardsParser extends Function {
       }
     }
 
-    return trimHTML(out);
+    return trimHTML(out.toString());
   }
 
   private static String getUniProt(ArrayList<String> lines) {
-    String out = "";
+    StringBuilder out = new StringBuilder();
 
     for (int i = 0; i < lines.size(); i++) {
       String head = lines.get(i);
       if (head.trim().startsWith("<h3>UniProtKB/Swiss-Prot for")) {
         for (int j = i + 1; j < lines.size(); j++) {
           String line = lines.get(j);
-          out += " " + line;
+          out.append(" ").append(line);
           if (line.contains("</p>"))
             break;
         }
@@ -109,7 +110,7 @@ public class GeneCardsParser extends Function {
       }
     }
 
-    return trimHTML(out);
+    return trimHTML(out.toString());
   }
 
   private static String trimHTML(String s) {

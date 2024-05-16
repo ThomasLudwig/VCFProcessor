@@ -13,7 +13,7 @@ import java.io.RandomAccessFile;
 public class Fasta {
 
   /**
-   * the filename of the fasq file
+   * the filename of the fastq file
    */
   private final String filename;
   /**
@@ -23,14 +23,14 @@ public class Fasta {
   /**
    * A unique RandomAccessFile to do the job
    */
-  private RandomAccessFile raf;
+  private final RandomAccessFile raf;
 
   /**
    * Creates a Fasta, from a fasta file with the given name
    * <b>/!\ a fasta index file with the name filename.fai must exist in the same directory</b>
    *
    * @param filename - name of the fasta file
-   * @throws fr.inserm.u1078.tludwig.vcfprocessor.files.FastaException
+   * @throws FastaException if there is a problem with the fasta file
    */
   public Fasta(String filename) throws FastaException {
     this(filename, filename + ".fai");
@@ -41,7 +41,7 @@ public class Fasta {
    *
    * @param filename  - name of the fasta file
    * @param indexName - name of the fasta index file
-   * @throws fr.inserm.u1078.tludwig.vcfprocessor.files.FastaException
+   * @throws FastaException if there is a problem with the fasta file
    */
   public Fasta(String filename, String indexName) throws FastaException {
     this.filename = filename;
@@ -58,10 +58,10 @@ public class Fasta {
   /**
    * Gets the allele (as a character) for the given position on the given chromosome
    *
-   * @param chromosome
-   * @param position
-   * @return
-   * @throws fr.inserm.u1078.tludwig.vcfprocessor.files.FastaException
+   * @param chromosome the chromosome name
+   * @param position the position on the chromosome
+   * @return the character at the position
+   * @throws FastaException if there is a problem with the fasta file
    */
   public char getCharacterFor(String chromosome, long position) throws FastaException {
     return this.getCharactersAt(chromosome, position, 1)[0];
@@ -70,11 +70,11 @@ public class Fasta {
   /**
    * Gets the sequence (as a String) of given length, start at the given position on the given chromosome
    *
-   * @param chromosome
-   * @param position
-   * @param length
-   * @return
-   * @throws fr.inserm.u1078.tludwig.vcfprocessor.files.FastaException
+   * @param chromosome the chromosome name
+   * @param position the position on the chromosome
+   * @param length the length of the sequence to read
+   * @return the sequence of the given length at the position
+   * @throws FastaException if there is a problem with the fasta file
    */
   public String getStringFor(String chromosome, long position, int length) throws FastaException {
     return new String(this.getCharactersAt(chromosome, position, length));
@@ -83,10 +83,11 @@ public class Fasta {
   /**
    * Gets the sequence (as a char[]) of given length, start at the given position on the given chromosome
    *
-   * @param chromosome
-   * @param position
-   * @param length
-   * @return
+   * @param chromosome the chromosome name
+   * @param position the position on the chromosome
+   * @param length the length of the sequence to read
+   * @return the sequence of the given length at the position
+   * @throws FastaException if there is a problem with the fasta file
    */
   synchronized
   private char[] getCharactersAt(String chromosome, long position, int length) throws FastaException {
@@ -105,7 +106,7 @@ public class Fasta {
   }
 
   /**
-   * closes the fastq file (closes it's associate RandomAccesFile)
+   * closes the fastq file (closes its associate RandomAccessFile)
    */
   public void close() {
     try {

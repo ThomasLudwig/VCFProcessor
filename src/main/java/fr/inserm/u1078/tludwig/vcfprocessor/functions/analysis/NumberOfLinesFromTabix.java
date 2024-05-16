@@ -25,29 +25,34 @@ public class NumberOfLinesFromTabix extends VCFFunction {
     return "Gets the number of lines indexed by a tabix file";
   }
 
+    @SuppressWarnings("unused")
     @Override
   public Description getDesc() {
     return new Description(this.getSummary());
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return "The bgzipped VCF file FILENAME.vcf.gz must have an associated tabix file FILENAME.vcf.gz.tbi";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
-    TabixReader tabix = new TabixReader(this.vcffile.getFilename());
+    TabixReader tabix = new TabixReader(this.vcfFile.getFilename());
     long total = 0;
     for(String chr : tabix.getChromosomes()){
       long nb = tabix.getVariantCount(chr);

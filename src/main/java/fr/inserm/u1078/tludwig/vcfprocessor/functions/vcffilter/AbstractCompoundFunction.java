@@ -3,10 +3,6 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 import fr.inserm.u1078.tludwig.maok.SortedList;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.Function.OPT_NO_HOMO;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.Function.OUT_VCF;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction.NO_OUTPUT;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction.asOutput;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.BooleanParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
@@ -25,39 +21,40 @@ import java.util.Objects;
  */
 public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunction {
 
-  public final BooleanParameter nohomo = new BooleanParameter(OPT_NO_HOMO, "Reject if a case is homozygous to alternate allele or if a control has none of the allele ?");
+  public final BooleanParameter noHomo = new BooleanParameter(OPT_NO_HOMO, "Reject if a case is homozygous to alternate allele or if a control has none of the allele ?");
   public static final String FIELD = "COMPOUND";
-  public static final String DEFINITION = "##INFO=<ID=" + FIELD + ",Number=.,Type=String,Description=\"Partner variants and affected genes, when the vairant is involved in a Compound Heterozygous couple. Format : AlleleNumber1>PartnerVariant1(geneA|geneB|geneC)&PartnerVariant1(geneD|geneE|geneF),AlleleNumber2>PartnerVariant3(geneG|geneH|geneI)&PartnerVariant4(geneJ|geneK|geneL),... \">";
+  public static final String DEFINITION = "##INFO=<ID=" + FIELD + ",Number=.,Type=String,Description=\"Partner variants and affected genes, when the variant is involved in a Compound Heterozygous couple. Format : AlleleNumber1>PartnerVariant1(geneA|geneB|geneC)&PartnerVariant1(geneD|geneE|geneF),AlleleNumber2>PartnerVariant3(geneG|geneH|geneI)&PartnerVariant4(geneJ|geneK|geneL),... \">";
 
   private SortedList<Variant> results;
   private HashMap<String, HashMap<Variant, ArrayList<Integer>>> byGenes;
   /**
-   * Variant is current variant, Integer is concerned allelle, String is partner chr:pos:ref:alt, list<String> is list of genes
+   * Variant is current variant, Integer is concerned allele, String is partner chr:pos:ref:alt, list<String> is list of genes
    * No need to use a SortedList, genes were previously sorted and are added in that order
    */
   private HashMap<Variant, HashMap<Integer, HashMap<Partner, SortedList<String>>>> annotations;
   private int kept = 0;
 
   public static final Description WARNING = new Description("It might be difficult to read results, since several combination of valid variants might exist. "
-          + "So an extra INFO field " + FIELD + " is added detailling the variants relation.")
+          + "So an extra INFO field " + FIELD + " is added detailing the variants relation.")
           .addLine("This field reads as")
           .addLine(Description.code(FIELD + "=A1>P1(gA|gB|gC)&P2(gD|gE|gF),A2>P3(gG|gH|gI)&P4(gJ|gK|gL),..."))
-          .addLine("Where:").addEnumerate(new String[]{
-            Description.code("Ax") + " is the number of the allele involved",
-            Description.code("Px") + " is the partener allele in form chr:pos:ref:alt",
-            Description.code("gX") + " is the symbol of the gene common to this allele and it partner"
-          });
+          .addLine("Where:").addEnumerate(Description.code("Ax") + " is the number of the allele involved",
+          Description.code("Px") + " is the partner allele in form chr:pos:ref:alt",
+          Description.code("gX") + " is the symbol of the gene common to this allele and it partner");
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_FILTER_ONE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -68,11 +65,13 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
     return OUT_VCF;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getExtraHeaders() {
     return new String[]{DEFINITION};
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
@@ -98,28 +97,22 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
     return NO_OUTPUT;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public final boolean checkAndProcessAnalysis(Object analysis) {
     try {
       Object[] objects = (Object[]) analysis;
       Variant variant = (Variant) objects[0];
-      HashMap<Integer, String[]> genesByAllele = (HashMap) objects[1];
+      @SuppressWarnings("unchecked")
+      HashMap<Integer, String[]> genesByAllele = (HashMap<Integer, String[]>) objects[1];
       kept++;
 
       for (int allele : genesByAllele.keySet())
         //Add variant for each gene
         for (String gene : genesByAllele.get(allele))
           if (!gene.isEmpty()) {
-            HashMap<Variant, ArrayList<Integer>> map = this.byGenes.get(gene);
-            if (map == null) {
-              map = new HashMap<>();
-              this.byGenes.put(gene, map);
-            }
-            ArrayList<Integer> alleles = map.get(variant);
-            if (alleles == null) {
-              alleles = new ArrayList<>();
-              map.put(variant, alleles);
-            }
+            HashMap<Variant, ArrayList<Integer>> map = this.byGenes.computeIfAbsent(gene, k -> new HashMap<>());
+            ArrayList<Integer> alleles = map.computeIfAbsent(variant, k -> new ArrayList<>());
             alleles.add(allele);
           }
       return true;
@@ -128,9 +121,10 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
     }
   }
 
+  @SuppressWarnings("unused")
   @Override
-  public final void end() {
-    super.end();
+  public String[] getFooters(){
+    ArrayList<String> out = new ArrayList<>();
     //Here there is a list of variant per gene, such has all variants are OK for the cases
     //Need to remove variants not valid for the controls...
     //take each pair of variants, if a pair is valid, add both variants (and annotate variants)
@@ -165,7 +159,7 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
     Message.info("Processed genes 100% : " + w);
 
     //Then export the results List
-    Message.info("Writting results (" + results.size() + " variants left after looking at controls genotypes)");
+    Message.info("Writing results (" + results.size() + " variants left after looking at controls genotypes)");
     total = results.size();
     p = -1;
     w = 0;
@@ -178,9 +172,10 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
       }
 
       variant.addInfo(getAnnotation(variant));
-      this.println(asOutput(variant)[0]);
+      out.add(asOutput(variant)[0]);
     }
     Message.info("Output written 100% (" + w + " variants)");
+    return out.toArray(new String[0]);
   }
 
   //To store Annotation there are three levels
@@ -201,16 +196,12 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
       results.add(variant);
     }
 
-    HashMap<Partner, SortedList<String>> partnerMap = alleleMap.get(num);
-    if (partnerMap == null) {
-      partnerMap = new HashMap<>();
-      alleleMap.put(num, partnerMap);
-    }
+    HashMap<Partner, SortedList<String>> partnerMap = alleleMap.computeIfAbsent(num, k -> new HashMap<>());
 
     Partner partner = new Partner(partnerV, allele);
     SortedList<String> geneList = partnerMap.get(partner);
     if (geneList == null) {
-      geneList = new SortedList(new ArrayList<>(), SortedList.Strategy.ADD_INSERT_SORT);
+      geneList = new SortedList<>(new ArrayList<>(), SortedList.Strategy.ADD_INSERT_SORT);
       partnerMap.put(partner, geneList);
     }
 
@@ -221,7 +212,7 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
   //Here order, first by allele, then by partner, then order genes
   private String getAnnotation(Variant v) {
     ArrayList<String> byAlleles = new ArrayList<>();
-    SortedList<Integer> sortedAlleles = new SortedList(annotations.get(v).keySet(), SortedList.Strategy.ADD_INSERT_SORT);
+    SortedList<Integer> sortedAlleles = new SortedList<>(annotations.get(v).keySet(), SortedList.Strategy.ADD_INSERT_SORT);
     for (int a : sortedAlleles) {
       HashMap<Partner, SortedList<String>> partnerMap = annotations.get(v).get(a);
       ArrayList<String> byPartner = new ArrayList<>();
@@ -234,7 +225,7 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
     return FIELD + "=" + String.join(",", byAlleles);
   }
   
-  private class Partner implements Comparable<Partner> {
+  private static class Partner implements Comparable<Partner> {
     private final String chr;
     private final int pos;
     private final String ret;

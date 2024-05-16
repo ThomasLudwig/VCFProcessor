@@ -19,8 +19,6 @@ import java.io.PrintWriter;
 public class SplitFromDB extends VCFFunction { //TODO parallelize
 
   private final OutputDirectoryParameter dir = new OutputDirectoryParameter();
-  private PrintWriter outIn;
-  private PrintWriter outNot;
 
   @Override
   public String getSummary() {
@@ -28,25 +26,27 @@ public class SplitFromDB extends VCFFunction { //TODO parallelize
   }
 //TODO this code needs to be checked
   
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("Generates two new VCF files : ")
-            .addItemize(new String[]{
-              Description.bold("inDB.MYVCF.vcf")+" (with variants present in 1kG/GnomAD)",
-              Description.bold("notInDB.MYVCF.vcf")+" (with variant absent from 1kG/GnomAD)"
-            });    
+            .addItemize(Description.bold("inDB.MYVCF.vcf")+" (with variants present in 1kG/GnomAD)",
+                Description.bold("notInDB.MYVCF.vcf")+" (with variant absent from 1kG/GnomAD)");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return "If at least one alternate allele satisfy all the conditions, the whole variant line is kept in \"inDB.MYVCF.vcf\".";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -57,20 +57,21 @@ public class SplitFromDB extends VCFFunction { //TODO parallelize
     return OUT_NONE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
-    String basename = this.vcffile.getBasename();
-    this.outIn = getPrintWriter(dir.getDirectory() + "inDB." + basename);
-    this.outNot = getPrintWriter(dir.getDirectory() + "notInDB." + basename);
+    String basename = this.vcfFile.getBasename();
+    PrintWriter outIn = getPrintWriter(dir.getDirectory() + "inDB." + basename);
+    PrintWriter outNot = getPrintWriter(dir.getDirectory() + "notInDB." + basename);
 
-    VCF vcf = this.vcffile.getVCF();
+    VCF vcf = this.vcfFile.getVCF();
     vcf.getReaderAndStart();
     
     vcf.printHeaders(outIn);
     vcf.printHeaders(outNot);
 
     Variant variant;
-    while ((variant = vcf.getNextVariant()) != null) {
+    while ((variant = vcf.getUnparallelizedNextVariant()) != null) {
       boolean in = false;
 
       for (int a = 1; a < variant.getAlleles().length; a++)
@@ -85,8 +86,8 @@ public class SplitFromDB extends VCFFunction { //TODO parallelize
         outNot.println(variant);
     }
 
-    this.outIn.close();
-    this.outNot.close();
+    outIn.close();
+    outNot.close();
   }
 
   @Override

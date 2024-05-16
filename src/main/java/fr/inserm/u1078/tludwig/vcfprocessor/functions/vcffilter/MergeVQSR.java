@@ -3,7 +3,6 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
@@ -37,6 +36,7 @@ public class MergeVQSR extends Function {
     return OUT_VCF;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
     UniversalReader sin = snpFile.getReader();
@@ -127,7 +127,7 @@ public class MergeVQSR extends Function {
     return new TestingScript[0];
   }
 
-  public class ShortVariant {
+  public static class ShortVariant {
     private final String chr;
     private final String pos;
     private final String id;
@@ -190,7 +190,6 @@ public class MergeVQSR extends Function {
         i++;
         buffer.append(c);
       }
-      i++;
       filter = buffer.toString();
     }
 

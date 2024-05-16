@@ -21,9 +21,7 @@ public class QualityFilter extends LineFilter {
     double qual = 0;
     try {
       qual = new Double(t[5]);
-    } catch (NumberFormatException e) {
-    }
-    
+    } catch (NumberFormatException ignore) { }
     return minQ <= qual && qual <= maxQ;
   }
   

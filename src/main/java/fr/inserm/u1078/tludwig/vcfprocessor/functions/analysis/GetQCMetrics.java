@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Unit Test defined on   XXXX-XX-XX
  */
 public class GetQCMetrics extends ParallelVCFVariantFunction {
-  StringParameter filename = new StringParameter(OPT_FILE, "metrics.my.project", "output filename prefix");
+  private final StringParameter filename = new StringParameter(OPT_FILE, "metrics.my.project", "output filename prefix");
 
   AtomicInteger gt0;
   AtomicInteger gt1;
@@ -50,6 +50,7 @@ public class GetQCMetrics extends ParallelVCFVariantFunction {
     return "Gets all the Metrics used by the QC function";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(getSummary());
@@ -60,16 +61,19 @@ public class GetQCMetrics extends ParallelVCFVariantFunction {
     return OUT_TXT;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return "VCF Requires the following annotations QUAL_BY_DEPTH,INBREEDING_COEF,FS,SOR,MQ,READPOSRANKSUM,AD,PL,GT";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_DROP;
@@ -83,6 +87,7 @@ public class GetQCMetrics extends ParallelVCFVariantFunction {
     return NO_OUTPUT;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     Values v = (Values)analysis;
@@ -121,6 +126,7 @@ public class GetQCMetrics extends ParallelVCFVariantFunction {
     return true;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     gt0 = new AtomicInteger(0);
@@ -143,10 +149,11 @@ public class GetQCMetrics extends ParallelVCFVariantFunction {
       mq = new PrintWriter(new FileWriter(filename.getStringValue() + "MQ" + ".txt"));
       readPosRankSum = new PrintWriter(new FileWriter(filename.getStringValue() + "ReadPosRankSum" + ".txt"));
     } catch(IOException e){
-      Message.die("Error in init", e);
+      fatalAndQuit("Error in init", e);
     }
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void end() {
     super.end();
@@ -165,30 +172,11 @@ public class GetQCMetrics extends ParallelVCFVariantFunction {
     readPosRankSum.close();
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return new String[]{};
   }
-
-  /*@Override
-  public String[] getFooters() {
-    return new String[]{
-            gtProportion.toString(),
-            "GT012M\t"+gt0+","+gt1+","+gt2+","+gtM,
-            ad0.toString(),
-            ad1.toString(),
-            ad2.toString(),
-            pl0.toString(),
-            pl1.toString(),
-            pl2.toString(),
-            qual.toString(),
-            inbreedingCoef.toString(),
-            fs.toString(),
-            sor.toString(),
-            mq.toString(),
-            readPosRankSum.toString()
-    };
-  }*/
 
   @Override
   public TestingScript[] getScripts() {
@@ -210,6 +198,7 @@ public class GetQCMetrics extends ParallelVCFVariantFunction {
     private final double mq;
     private final double readPosRankSum;
 
+    @SuppressWarnings("unchecked")
     Values(Variant variant){
       this.variant = variant;
       gt = new int[4];

@@ -3,8 +3,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.Input;
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.SaveInput;
 
 /**
  *
@@ -68,20 +66,15 @@ public class OutputParameter extends Parameter {
   }
 
   @Override
-  public void parseParameter(String[] args) throws ParameterException {
+  public void parseParameter(String[] args) {
       try {
         parseParameter(this.getArgument(args, this.getKey()));
-      } catch (ParameterException e) {
-      }
+      } catch (ParameterException ignore) { }
   }
 
   @Override
-  public void parseParameter(String value) throws ParameterException {
+  public void parseParameter(String value) {
     this.value = value;
   }
 
-  @Override
-  public Input getInputForm() {
-    return new SaveInput(this);
-  }
 }

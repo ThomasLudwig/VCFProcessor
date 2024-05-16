@@ -4,7 +4,6 @@ import fr.inserm.u1078.tludwig.maok.Point;
 import fr.inserm.u1078.tludwig.maok.SVG;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.ColorTools;
-import fr.inserm.u1078.tludwig.maok.tools.Message;
 import java.awt.Color;
 import java.io.IOException;
 
@@ -37,8 +36,7 @@ private int[][] f2;
             String line = in.readLine();
             String[] f = line.split("\\s+");
             this.groups = new String[f.length - 2];
-            for(int i = 0; i < this.groups.length; i++)
-                this.groups[i] = f[i+1];
+            System.arraycopy(f, 1, this.groups, 0, this.groups.length);
             this.f2 = new int[this.groups.length][f.length-1];
             
             for(int i = 0 ; i < this.groups.length; i++){
@@ -52,14 +50,7 @@ private int[][] f2;
         } catch(IOException e){
             throw new GraphException("Unable to load Data from "+this.filename, e);
         }
-        
-       /* for(int i = 0; i < this.groups.length; i++){
-            String out = this.groups[i];
-            for(int j = 0 ; j <= this.groups.length; j++)
-                out += T + this.f2[i][j];
-            
-            System.out.println(out);
-        }*/
+
     }
 
     @Override
@@ -141,10 +132,8 @@ private int[][] f2;
 
     private void drawLeftLegendLine(int i, double x, double y, double width, double height) {
         double offset = 0.15 * height;
-        double newY = y + offset;
+        //double newY = y + offset;
         double newHeight = height - 2 * offset;
-        //out.println(SVG.rectangle(x, y, width, height, 1, Color.yellow, Color.black));
-        //out.println(SVG.rectangle(x, newY, width, newHeight, 1, Color.pink, Color.black));
         String group = this.groups[i];
         int nbLetter = getMaxLetter(this.groups);
         double size = (width * 5) / (nbLetter * 3);
@@ -152,7 +141,7 @@ private int[][] f2;
         if (th > newHeight) {
             size = (size * newHeight) / th;
         }
-        double space = (newHeight - th) / 2;
+        //double space = (newHeight - th) / 2;
         svg.text(new Point(x + width - 1, y + height - 1), size, true, false, "end", ColorTools.getColor(group), group);
     }
 
@@ -178,8 +167,6 @@ private int[][] f2;
         double offset = 0.15 * width;
         double newX = x + offset;
         double newWidth = width - 2 * offset;
-        //out.add(SVG.rectangle(x, y, width, height, 1, Color.yellow, Color.black));
-        //out.add(SVG.rectangle(newX, y, newWidth, height, 1, Color.pink, Color.black));
         String group = this.groups[i];//.substring(0,3);
         int nbLetter = getMaxLetter(this.groups);
         double size = (height * 5) / (nbLetter * 3);
@@ -197,9 +184,7 @@ private int[][] f2;
         double offset = 0.15 * width;
         double newX = x + offset;
         double newWidth = width - 2 * offset;
-        //out.println(SVG.rectangle(x, y, width, height, 1, Color.yellow, Color.black));
-        //out.println(SVG.rectangle(newX, y, newWidth, height, 1, Color.pink, Color.black));
-        //String text = "f\u2082 variants";
+        //String text = "f₂ variants";
         String text = "variants";
         int nbLetter = text.length();
         double size = (height * 5) / (nbLetter * 3);
@@ -212,7 +197,6 @@ private int[][] f2;
     }
 
     private void drawMainF2(double x, double y, double width, double height) {
-        //out.println(SVG.rectangle(x, y, width, height, L, Color.blue, Color.black));
         double line = height / this.groups.length;
         double col = width / this.groups.length;
         for (int l = 0; l < this.groups.length; l++) { //lines
@@ -239,11 +223,10 @@ private int[][] f2;
     
     private static int getMaxTable(int[][] f2){
         int max = 0;
-        int s = f2.length;
-        for(int i = 0; i < s; i++)
-            for(int j = 0; j < s; j++)
-                if(f2[i][j] > max)
-                    max = f2[i][j];
+        for(int[] l :f2)
+            for(int v : l)
+                if(v > max)
+                    max = v;
         return max;
     }
 
@@ -272,9 +255,9 @@ private int[][] f2;
     
     private int getMaxTotal(int[][] f2){
         int max = 0;
-        for(int i = 0; i < f2.length; i++)
-            if(f2[i][this.groups.length] > max)
-                max = f2[i][this.groups.length];
+        for (int[] row : f2)
+            if (row[this.groups.length] > max)
+              max = row[this.groups.length];
         return max;
     }
 

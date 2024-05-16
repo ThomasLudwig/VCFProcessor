@@ -1,5 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 
+import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectoryParameter;
@@ -34,22 +35,26 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction {
     return "returns a series of matrices [individuals/individuals] with the number of shared alleles.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
             .addLine("Matrices are newSNP, SNP.f&lt;0.005, SNP.f&lt;0.01, SNP.f&lt;0.05"); //TODO remove and let user apply his own filters inline
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -60,6 +65,7 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction {
     return OUT_NONE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     samples = getVCF().getSamples();
@@ -88,6 +94,7 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction {
     return NO_OUTPUT;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     if(analysis instanceof Analysis){
@@ -105,7 +112,7 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction {
     return false;
   }
   
-  private class Analysis {
+  private static class Analysis {
     private final int s1;
     private final int s2;
     private final boolean isNew;
@@ -124,21 +131,23 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction {
   }
          
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return null;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void end() {
     try {
       String directory = this.dir.getDirectory();
 
-      String header = "X";
+      StringBuilder header = new StringBuilder("X");
       for (Sample s : samples)
-        header += T + s.getId();
+        header.append(T).append(s.getId());
 
-      String prefix = this.vcffile.getBasename();
+      String prefix = this.vcfFile.getBasename();
 
       PrintWriter outNew = getPrintWriter(directory + prefix + ".snp.new.tsv");
       PrintWriter out05 = getPrintWriter(directory + prefix + ".snp.0.005.tsv");
@@ -153,16 +162,16 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction {
       int l = 0;
       for(Sample sample : samples) {
       //for (int l = 0; l < samples.size(); l++) {
-        String lNew = sample.getId();
-        String l05 = lNew;
-        String l1 = lNew;
-        String l5 = lNew;
+        StringBuilder lNew = new StringBuilder(sample.getId());
+        StringBuilder l05 = new StringBuilder(lNew.toString());
+        StringBuilder l1 = new StringBuilder(lNew.toString());
+        StringBuilder l5 = new StringBuilder(lNew.toString());
 
         for (int c = 0; c < samples.size(); c++) {
-          lNew += T + snpNew[l][c];
-          l05 += T + snp05[l][c];
-          l1 += T + snp1[l][c];
-          l5 += T + snp5[l][c];
+          lNew.append(T).append(snpNew[l][c]);
+          l05.append(T).append(snp05[l][c]);
+          l1.append(T).append(snp1[l][c]);
+          l5.append(T).append(snp5[l][c]);
         }
         outNew.println(lNew);
         out05.println(l05);
@@ -176,7 +185,7 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction {
       out1.close();
       out5.close();
     } catch (IOException e) {
-      e.printStackTrace();
+      Message.error("Error while writing results to file", e);
     }
   }
   

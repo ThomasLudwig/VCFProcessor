@@ -39,22 +39,26 @@ public class NumberOfCsqPerGene extends ParallelVCFVariantFunction {
     return "Given a VCF file and a list of genes, prints the number of variants per gene for each consequence";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
             .addLine("Multiallelic sites are considered for each alternate allele");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -65,6 +69,7 @@ public class NumberOfCsqPerGene extends ParallelVCFVariantFunction {
     return OUT_TSV;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     table = new TreeMap<>();
@@ -80,10 +85,11 @@ public class NumberOfCsqPerGene extends ParallelVCFVariantFunction {
       }
       in.close();
     } catch (IOException e) {
-      this.fatalAndDie("Could not read from gene list "+this.geneFile.getFilename(), e);
+      this.fatalAndQuit("Could not read from gene list "+this.geneFile.getFilename(), e);
     }
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getFooters() {
     ArrayList<String> out = new ArrayList<>();
@@ -96,6 +102,7 @@ public class NumberOfCsqPerGene extends ParallelVCFVariantFunction {
     return out.toArray(new String[0]);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     LineBuilder sb = new LineBuilder("Gene");
@@ -124,6 +131,7 @@ public class NumberOfCsqPerGene extends ParallelVCFVariantFunction {
     return NO_OUTPUT;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     try {

@@ -75,6 +75,7 @@ public class PropertyArguments {
   public static final String KEY_STRICT_KEEP_FILTERED_ANY = "--strict-keep-filtered-any";
   public static final String KEY_STRICT_REMOVE_FILTERED_ALL = "--strict-remove-filtered-all";
   public static final String KEY_STRICT_REMOVE_FILTERED_ANY = "--strict-remove-filtered-any";
+  @SuppressWarnings("SpellCheckingInspection")
 
   public static final Argument KEEP_FILTERED_ALL = Argument.newArgument(KEY_KEEP_FILTERED_ALL,
           TYPE,
@@ -172,115 +173,56 @@ public class PropertyArguments {
           new String[][]{{"3", "Keep variants with at most 3 alleles (1 reference and 2 alternates)"}},
           new Description("Keep variants with at most the number of specified alleles (reference plus alternates")
   );
-  /*public static final Argument REMOVE_MIN_ALLELES = Argument.newArgument("--remove-min-alleles",
-          TYPE,
-          "number of alleles",
-          new String[][]{{"3", "Remove variants with at least 3 alleles (1 reference and 2 alternates)"}},
-          new Description("Keep variants with at least the number of specified alleles (reference plus alternates")
-  );
-  public static final Argument REMOVE_MAX_ALLELES = Argument.newArgument("--remove-max-alleles",
-          TYPE,
-          "number of alleles",
-          new String[][]{{"3", "Keep variants with at most 3 alleles (1 reference and 2 alternates)"}},
-          new Description("Remove variants with at most the number of specified alleles (reference plus alternates")
-  );*/
 
-  public static final Argument MIN_MEANDP = Argument.newArgument("--min-meanDP",
+  public static final Argument MIN_MEAN_DP = Argument.newArgument("--min-meanDP",
           TYPE,
           "depth-of-coverage (integer)",
-          new String[][]{{"10", "Keep variants with a mean DP accross samples at least equal to 10"}},
-          new Description("Keep variants with a mean Depth of coverage accross samples at least equal to the given value")
+          new String[][]{{"10", "Keep variants with a mean DP across samples at least equal to 10"}},
+          new Description("Keep variants with a mean Depth of coverage across samples at least equal to the given value")
   );
-  public static final Argument MIN_MEDIANDP = Argument.newArgument("--min-medianDP",
+  public static final Argument MIN_MEDIAN_DP = Argument.newArgument("--min-medianDP",
           TYPE,
           "depth-of-coverage (integer)",
-          new String[][]{{"10", "Keep variants with a median DP accross samples at least equal to 10"}},
-          new Description("Keep variants with a median Depth of coverage accross samples at least equal to the given value")
+          new String[][]{{"10", "Keep variants with a median DP across samples at least equal to 10"}},
+          new Description("Keep variants with a median Depth of coverage across samples at least equal to the given value")
   );
-  public static final Argument MAX_MEANDP = Argument.newArgument("--max-meanDP",
+  public static final Argument MAX_MEAN_DP = Argument.newArgument("--max-meanDP",
           TYPE,
           "depth-of-coverage (integer)",
-          new String[][]{{"10", "Keep variants with a mean DP accross samples at most equal to 10"}},
-          new Description("Keep variants with a mean Depth of coverage accross samples at most equal to the given value")
+          new String[][]{{"10", "Keep variants with a mean DP across samples at most equal to 10"}},
+          new Description("Keep variants with a mean Depth of coverage across samples at most equal to the given value")
   );
-  public static final Argument MAX_MEDIANDP = Argument.newArgument("--max-medianDP",
+  public static final Argument MAX_MEDIAN_DP = Argument.newArgument("--max-medianDP",
           TYPE,
           "depth-of-coverage (integer)",
-          new String[][]{{"10", "Keep variants with a median DP accross samples at most equal to 10"}},
-          new Description("Keep variants with a median Depth of coverage accross samples at most equal to the given value")
+          new String[][]{{"10", "Keep variants with a median DP across samples at most equal to 10"}},
+          new Description("Keep variants with a median Depth of coverage across samples at most equal to the given value")
   );
-  /*public static final Argument REMOVE_MIN_MEANDP = Argument.newArgument("--remove-min-meanDP",
-          TYPE,
-          "depth-of-coverage (integer)",
-          new String[][]{{"10", "Remove variants with a mean DP accross samples at least equal to 10"}},
-          new Description("Remove variants with a mean Depth of coverage accross samples at least equal to the given value")
-  );
-  public static final Argument REMOVE_MIN_MEDIANDP = Argument.newArgument("--remove-min-medianDP",
-          TYPE,
-          "depth-of-coverage (integer)",
-          new String[][]{{"10", "Remove variants with a median DP accross samples at least equal to 10"}},
-          new Description("Remove variants with a median Depth of coverage accross samples at least equal to the given value")
-  );
-  public static final Argument REMOVE_MAX_MEANDP = Argument.newArgument("--remove-max-meanDP",
-          TYPE,
-          "depth-of-coverage (integer)",
-          new String[][]{{"10", "Remove variants with a mean DP accross samples at most equal to 10"}},
-          new Description("Remove variants with a mean Depth of coverage accross samples at most equal to the given value")
-  );
-  public static final Argument REMOVE_MAX_MEDIANDP = Argument.newArgument("--remove-max-medianDP",
-          TYPE,
-          "depth-of-coverage (integer)",
-          new String[][]{{"10", "Remove variants with a median DP accross samples at most equal to 10"}},
-          new Description("Remove variants with a median Depth of coverage accross samples at most equal to the given value")
-  );*/
-  public static final Argument MIN_MEANGQ = Argument.newArgument("--min-meanGQ",
+
+  public static final Argument MIN_MEAN_GQ = Argument.newArgument("--min-meanGQ",
           TYPE,
           "genotype-quality (integer)",
-          new String[][]{{"10", "Keep variants with a mean GQ accross samples at least equal to 10"}},
-          new Description("Keep variants with a mean Genotype Quality accross samples at least equal to the given value")
+          new String[][]{{"10", "Keep variants with a mean GQ across samples at least equal to 10"}},
+          new Description("Keep variants with a mean Genotype Quality across samples at least equal to the given value")
   );
-  public static final Argument MIN_MEDIANGQ = Argument.newArgument("--min-medianGQ",
+  public static final Argument MIN_MEDIAN_GQ = Argument.newArgument("--min-medianGQ",
           TYPE,
           "genotype-quality (integer)",
-          new String[][]{{"10", "Keep variants with a median GQ accross samples at least equal to 10"}},
-          new Description("Keep variants with a median Genotype Quality accross samples at least equal to the given value")
+          new String[][]{{"10", "Keep variants with a median GQ across samples at least equal to 10"}},
+          new Description("Keep variants with a median Genotype Quality across samples at least equal to the given value")
   );
-  public static final Argument MAX_MEANGQ = Argument.newArgument("--max-meanGQ",
+  public static final Argument MAX_MEAN_GQ = Argument.newArgument("--max-meanGQ",
           TYPE,
           "genotype-quality (integer)",
-          new String[][]{{"10", "Keep variants with a mean GQ accross samples at most equal to 10"}},
-          new Description("Keep variants with a mean Genotype Quality accross samples at most equal to the given value")
+          new String[][]{{"10", "Keep variants with a mean GQ across samples at most equal to 10"}},
+          new Description("Keep variants with a mean Genotype Quality across samples at most equal to the given value")
   );
-  public static final Argument MAX_MEDIANGQ = Argument.newArgument("--max-medianGQ",
+  public static final Argument MAX_MEDIAN_GQ = Argument.newArgument("--max-medianGQ",
           TYPE,
           "genotype-quality (integer)",
-          new String[][]{{"10", "Keep variants with a median GQ accross samples at most equal to 10"}},
-          new Description("Keep variants with a median Genotype Quality accross samples at most equal to the given value")
+          new String[][]{{"10", "Keep variants with a median GQ across samples at most equal to 10"}},
+          new Description("Keep variants with a median Genotype Quality across samples at most equal to the given value")
   );
-  /*public static final Argument REMOVE_MIN_MEANGQ = Argument.newArgument("--remove-min-meanGQ",
-          TYPE,
-          "genotype-quality (integer)",
-          new String[][]{{"10", "Remove variants with a mean GQ accross samples at least equal to 10"}},
-          new Description("Remove variants with a mean Genotype Quality accross samples at least equal to the given value")
-  );
-  public static final Argument REMOVE_MIN_MEDIANGQ = Argument.newArgument("--remove-min-medianGQ",
-          TYPE,
-          "genotype-quality (integer)",
-          new String[][]{{"10", "Remove variants with a median GQ accross samples at least equal to 10"}},
-          new Description("Remove variants with a median Genotype Quality accross samples at least equal to the given value")
-  );
-  public static final Argument REMOVE_MAX_MEANGQ = Argument.newArgument("--remove-max-meanGQ",
-          TYPE,
-          "genotype-quality (integer)",
-          new String[][]{{"10", "Remove variants with a mean GQ accross samples at most equal to 10"}},
-          new Description("Remove variants with a mean Genotype Quality accross samples at most equal to the given value")
-  );
-  public static final Argument REMOVE_MAX_MEDIANGQ = Argument.newArgument("--remove-max-medianGQ",
-          TYPE,
-          "genotype-quality (integer)",
-          new String[][]{{"10", "Remove variants with a median GQ accross samples at most equal to 10"}},
-          new Description("Remove variants with a median Genotype Quality accross samples at most equal to the given value")
-  );*/
 
   public static final Argument HWE = Argument.newArgument("--hwe",
           TYPE,
@@ -333,13 +275,13 @@ public class PropertyArguments {
           new Description("Remove variant without unphased genotypes") //TODO useful ? find the dual operation
   );
 
-  public static final Argument MINQ = Argument.newArgument("--minQ",
+  public static final Argument MIN_Q = Argument.newArgument("--minQ",
           TYPE,
           "quality (double)",
           new String[][]{{"500", "Keep variants with QUALITY >= 500"}},
           new Description("Keep variants with a quality (VCF column QUALITY) at least equal to the given value")
   );
-  public static final Argument MAXQ = Argument.newArgument("--maxQ",
+  public static final Argument MAX_Q = Argument.newArgument("--maxQ",
           TYPE,
           "quality (double)",
           new String[][]{{"500", "Keep variants with QUALITY <= 500"}},

@@ -33,7 +33,7 @@ public class FrequencyArguments {
           "frequency ("+FORMAT_GROUP_AF+")",
           new String[][]{{"GRP1:0.05,GRP2:0.07", "Keep only variants with AF of the rarest reference/alternate allele above 5% in GRP1 and 7% in GRP2"}},
           new Description("Keep only variants with AF of the rarest reference/alternate allele above the threshold in every group")
-                  .addWarning("has to be combined to " + Description.code(KEY_PED) + "")
+                  .addWarning("has to be combined to " + Description.code(KEY_PED))
                   .addWarning("Diploid variants expected")
   );
   public static final Argument MAX_GROUP_MAF = Argument.newArgument("--max-group-maf",
@@ -41,7 +41,7 @@ public class FrequencyArguments {
           "frequency ("+FORMAT_GROUP_AF+")",
           new String[][]{{"GRP1:0.05,GRP2:0.07", "Keep only variants with AF of the rarest reference/alternate allele below 5% in GRP1 and 7% in GRP2"}},
           new Description("Keep only variants with AF of the rarest reference/alternate allele below the threshold in every group")
-                  .addWarning("has to be combined to " + Description.code(KEY_PED) + "")
+                  .addWarning("has to be combined to " + Description.code(KEY_PED))
                   .addWarning("Diploid variants expected")
   );
 
@@ -64,7 +64,7 @@ public class FrequencyArguments {
           "frequency ("+FORMAT_GROUP_AF+")",
           new String[][]{{"GRP1:0.05,GRP2:0.07", "Keep only variants with AF of the reference allele above 5% in GRP1 and 7% in GRP2"}},
           new Description("Keep only variants with AF of the reference allele above the threshold in every group")
-                  .addWarning("has to be combined to " + Description.code(KEY_PED) + "")
+                  .addWarning("has to be combined to " + Description.code(KEY_PED))
                   .addWarning("Diploid variants expected")
   );
   public static final Argument MAX_GROUP_REF_AF = Argument.newArgument("--max-group-ref-af",
@@ -72,7 +72,7 @@ public class FrequencyArguments {
           "frequency ("+FORMAT_GROUP_AF+")",
           new String[][]{{"GRP1:0.05,GRP2:0.07", "Keep only variants with AF of the reference allele below 5% in GRP1 and 7% in GRP2"}},
           new Description("Keep only variants with AF of the reference allele below the threshold in every group")
-                  .addWarning("has to be combined to " + Description.code(KEY_PED) + "")
+                  .addWarning("has to be combined to " + Description.code(KEY_PED))
                   .addWarning("Diploid variants expected")
   );
  
@@ -96,7 +96,7 @@ public class FrequencyArguments {
           "frequency ("+FORMAT_GROUP_AF+")",
           new String[][]{{"GRP1:0.05,GRP2:0.07", "Keep only variants with AF of all the alternate allele above 5% in GRP1 and 7% in GRP2"}},
           new Description("Keep only variants with AF of all the alternate allele above the threshold in every group")
-                  .addWarning("has to be combined to " + Description.code(KEY_PED) + "")
+                  .addWarning("has to be combined to " + Description.code(KEY_PED))
                   .addWarning("Diploid variants expected")
   );
   public static final Argument MAX_GROUP_ALL_NON_REF_AF = Argument.newArgument("--max-group-all-non-ref-af",
@@ -104,7 +104,7 @@ public class FrequencyArguments {
           "frequency ("+FORMAT_GROUP_AF+")",
           new String[][]{{"GRP1:0.05,GRP2:0.07", "Keep only variants with AF of all the alternate allele below 5% in GRP1 and 7% in GRP2"}},
           new Description("Keep only variants with AF of all the alternate allele below the threshold in every group")
-                  .addWarning("has to be combined to " + Description.code(KEY_PED) + "")
+                  .addWarning("has to be combined to " + Description.code(KEY_PED))
                   .addWarning("Diploid variants expected")
   );
 
@@ -127,14 +127,14 @@ public class FrequencyArguments {
           "frequency ("+FORMAT_GROUP_AF+")",
           new String[][]{{"GRP1:0.05,GRP2:0.07", "Keep only variants with AF of any alternate allele above 5% in GRP1 and 7% in GRP2"}},
           new Description("Keep only variants with AF of any alternate allele above the threshold in every group")
-                  .addWarning("has to be combined to " + Description.code(KEY_PED) + "")
+                  .addWarning("has to be combined to " + Description.code(KEY_PED))
   );
   public static final Argument MAX_GROUP_ANY_NON_REF_AF = Argument.newArgument("--max-group-any-non-ref-af",
           TYPE,
           "frequency ("+FORMAT_GROUP_AF+")",
           new String[][]{{"GRP1:0.05,GRP2:0.07", "Keep only variants with AF of any alternate allele below 5% in GRP1 and 7% in GRP2"}},
           new Description("Keep only variants with AF of any alternate allele below the threshold in every group")
-                  .addWarning("has to be combined to " + Description.code(KEY_PED) + "")
+                  .addWarning("has to be combined to " + Description.code(KEY_PED))
   );
   
   public static final Argument MIN_REF_AC = Argument.newArgument("--min-ref-ac",
@@ -154,14 +154,14 @@ public class FrequencyArguments {
           "allele-count ("+FORMAT_GROUP_AC+")",
           new String[][]{{"GRP1:8,GRP2:6", "Keep only variants with AC of the reference allele above 8 in GRP1 and 6 in GRP2"}},
           new Description("Keep only variants with AC of the reference allele above the threshold in every group")
-                  .addWarning("has to be combined to " + Description.code(KEY_PED) + "")
+                  .addWarning("has to be combined to " + Description.code(KEY_PED))
   );
   public static final Argument MAX_GROUP_REF_AC = Argument.newArgument("--max-group-ref-ac",
           TYPE,
           "allele-count ("+FORMAT_GROUP_AC+")",
           new String[][]{{"GRP1:8,GRP2:6", "Keep only variants with AC of the reference allele below 8 in GRP1 and 6 in GRP2"}},
           new Description("Keep only variants with AC of the reference allele below the threshold in every group")
-                  .addWarning("has to be combined to " + Description.code(KEY_PED) + "")
+                  .addWarning("has to be combined to " + Description.code(KEY_PED))
   );
 
   
@@ -183,14 +183,14 @@ public class FrequencyArguments {
           "allele-count ("+FORMAT_GROUP_AC+")",
           new String[][]{{"GRP1:8,GRP2:6", "Keep only variants with AC of all the alternate allele above 8 in GRP1 and 6 in GRP2"}},
           new Description("Keep only variants with AC of all the alternate allele above the threshold in every group")
-                  .addWarning("has to be combined to " + Description.code(KEY_PED) + "")
+                  .addWarning("has to be combined to " + Description.code(KEY_PED))
   );
   public static final Argument MAX_GROUP_ALL_NON_REF_AC = Argument.newArgument("--max-group-all-non-ref-ac",
           TYPE,
           "allele-count ("+FORMAT_GROUP_AC+")",
           new String[][]{{"GRP1:8,GRP2:6", "Keep only variants with AC of all the alternate allele below 8 in GRP1 and 6 in GRP2"}},
           new Description("Keep only variants with AC of all the alternate allele below the threshold in every group")
-                  .addWarning("has to be combined to " + Description.code(KEY_PED) + "")
+                  .addWarning("has to be combined to " + Description.code(KEY_PED))
   );
 
   
@@ -211,14 +211,14 @@ public class FrequencyArguments {
           "allele-count ("+FORMAT_GROUP_AC+")",
           new String[][]{{"GRP1:8,GRP2:6", "Keep only variants with AC of the rarest reference/alternate allele above 8 in GRP1 and 6 in GRP2"}},
           new Description("Keep only variants with AC of the rarest reference/alternate allele above the threshold in every group")
-                  .addWarning("has to be combined to " + Description.code(KEY_PED) + "")
+                  .addWarning("has to be combined to " + Description.code(KEY_PED))
   );
   public static final Argument MAX_GROUP_MAC = Argument.newArgument("--max-group-mac",
           TYPE,
           "allele-count ("+FORMAT_GROUP_AC+")",
           new String[][]{{"GRP1:8,GRP2:6", "Keep only variants with AC of the rarest reference/alternate allele below 8 in GRP1 and 6 in GRP2"}},
           new Description("Keep only variants with AC of the rarest reference/alternate allele below the threshold in every group")
-                  .addWarning("has to be combined to " + Description.code(KEY_PED) + "")
+                  .addWarning("has to be combined to " + Description.code(KEY_PED))
   );
   
   public static final Argument MIN_ANY_NON_REF_AC = Argument.newArgument("--min-any-non-ref-ac",
@@ -238,13 +238,13 @@ public class FrequencyArguments {
           "allele-count ("+FORMAT_GROUP_AC+")",
           new String[][]{{"GRP1:8,GRP2:6", "Keep only variants with AC of any alternate allele above 8 in GRP1 and 6 in GRP2"}},
           new Description("Keep only variants with AC of any alternate allele above the threshold in every group")
-                  .addWarning("has to be combined to " + Description.code(KEY_PED) + "")
+                  .addWarning("has to be combined to " + Description.code(KEY_PED))
   );
   public static final Argument MAX_GROUP_ANY_NON_REF_AC = Argument.newArgument("--max-group-any-non-ref-ac",
           TYPE,
           "allele-count ("+FORMAT_GROUP_AC+")",
           new String[][]{{"GRP1:8,GRP2:6", "Keep only variants with AC of any alternate allele below 8 in GRP1 and 6 in GRP2"}},
           new Description("Keep only variants with AC of any alternate allele below the threshold in every group")
-                  .addWarning("has to be combined to " + Description.code(KEY_PED) + "")
+                  .addWarning("has to be combined to " + Description.code(KEY_PED))
   );
 }

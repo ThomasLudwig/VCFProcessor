@@ -19,21 +19,25 @@ public class ClearInfoField extends ParallelVCFFunction {
     return "Replaces the Info column by \".\"";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("Removes all annotation from the VCF file by replacing the content of the Info column by \".\"");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -46,11 +50,12 @@ public class ClearInfoField extends ParallelVCFFunction {
 
   @Override
   public String[] processInputLine(String line) {
-    String f[] = line.split(T);
+    String[] f = line.split(T);
     f[7] = ".";
     return new String[]{String.join(T, f)};
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

@@ -1,8 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.Input;
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.SaveDirectoryInput;
 import java.io.File;
 
 /**
@@ -27,7 +25,7 @@ public class OutputDirectoryParameter extends Parameter {
     this.value = v;
     if (this.value == null)
       this.value = ".";
-    if (this.value.length() == 0)
+    if (this.value.isEmpty())
       this.value = ".";
     if (!this.value.endsWith(File.separator))
       this.value += File.separator;
@@ -47,11 +45,6 @@ public class OutputDirectoryParameter extends Parameter {
   @Override
   public String showAllowedValues() {
     return "Directory name";
-  }
-
-  @Override
-  public Input getInputForm() {
-    return new SaveDirectoryInput(this);
   }
 
   public String getDirectory() {

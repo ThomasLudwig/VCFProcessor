@@ -9,7 +9,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
 
 /**
- * Slides a 1kb window over the genome and outputs a list of regions orderer by the proportion of multi-allelic variations (desc.)
+ * Slides a 1kb window over the genome and outputs a list of regions ordered by the proportion of multi-allelic variations (desc.)
  * 
  * @author Thomas E. Ludwig (INSERM - U1078) 
  * Started on             2017-08-10
@@ -18,13 +18,14 @@ import java.util.ArrayList;
  */
 public class MultiAllelicProportion extends ParallelVCFFunction { 
   private static final String[] HEADER = {"Chr","pos_n","pos_n+Window_size","nb_multialleleic variants"};
-  ArrayList<Integer[]>[] keysvalues;
+  ArrayList<Integer[]>[] keyValues;
 
   @Override
   public String getSummary() {
-    return "Slides a 1kb window over the genome and outputs a list of regions orderer by the proportion of multi-allelic variations (desc.)";
+    return "Slides a 1kb window over the genome and outputs a list of regions ordered by the proportion of multi-allelic variations (desc.)";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
@@ -32,16 +33,19 @@ public class MultiAllelicProportion extends ParallelVCFFunction {
             .addColumns(HEADER);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -51,12 +55,13 @@ public class MultiAllelicProportion extends ParallelVCFFunction {
   public String getOutputExtension() {
     return OUT_TSV;
   }
-  
+
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
-    keysvalues = new ArrayList[22];
+    keyValues = new ArrayList[22];
     for (int i = 0; i < 22; i++) 
-      keysvalues[i] = new ArrayList<>();
+      keyValues[i] = new ArrayList<>();
       
   }
 
@@ -73,23 +78,26 @@ public class MultiAllelicProportion extends ParallelVCFFunction {
     return NO_OUTPUT;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     try {
       Integer[] ckv = (Integer[])analysis;
-      keysvalues[ckv[0]].add(ckv);
+      keyValues[ckv[0]].add(ckv);
       return true;
     } catch (Exception e) {
-      e.printStackTrace();
+      Message.error("Error while checking analysis results", e);
     }
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return new String[]{String.join(T, HEADER)};
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String[] getFooters() {  
     Message.info("VCF file parsed, begin sliding windows");
@@ -97,13 +105,12 @@ public class MultiAllelicProportion extends ParallelVCFFunction {
     
     for (int chr = 0; chr < 22; chr++) {
       Message.info("Chromosome " + (chr + 1));
-      ArrayList<Integer[]> ckvs = keysvalues[chr];
+      ArrayList<Integer[]> ckvs = keyValues[chr];
       int[] chrom = new int[ckvs.get(ckvs.size() - 1)[1]];
 
       Message.info("Building Window");
-      for (int i = 0; i < ckvs.size(); i++)
-        //chrom[ks.get(i)-1] = vs.get(i);
-        chrom[ckvs.get(i)[1] - 1] = 1;
+      for (Integer[] ckv : ckvs)
+        chrom[ckv[1] - 1] = 1;
 
       Message.info("Sliding Window");
       
@@ -121,7 +128,7 @@ public class MultiAllelicProportion extends ParallelVCFFunction {
         }
       }
     }
-    return out.toArray(new String[out.size()]);
+    return out.toArray(new String[0]);
   }
   
   @Override

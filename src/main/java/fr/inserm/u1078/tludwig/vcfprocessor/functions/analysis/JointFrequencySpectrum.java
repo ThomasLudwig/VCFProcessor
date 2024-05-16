@@ -36,6 +36,7 @@ public class JointFrequencySpectrum extends ParallelVCFVariantPedFunction {
     return "Creates a JointFrequencySpectrum result file for each group defined in the ped file.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
@@ -44,21 +45,24 @@ public class JointFrequencySpectrum extends ParallelVCFVariantPedFunction {
             .addLine("Example : GroupA1 GroupA2 GroupB1 GroupB2 GroupC1 GroupC2")
             .addLine("each group MUST HAVE the same number of samples.")
             .addLine("The format of the output is :")
-            .addLine("G*G output files (where G is the number of groups). Each file is name VCFINPUTFILE.group1.group2.tsv")
+            .addLine("G*G output files (where G is the number of groups). Each file is named VCF_INPUT_FILE.group1.group2.tsv")
             .addLine("Each of these files contains a (2n+1)x(2n+1) matrix, where n is the number of samples in each population. The number at matrix[A][B], is the number of variants for which the first group has A variant alleles and the second group has B variant alleles")
             .addLine("Output file must then be processed with the function " + JFSSummary.class.getSimpleName());
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -69,6 +73,7 @@ public class JointFrequencySpectrum extends ParallelVCFVariantPedFunction {
     return OUT_NONE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     groups = new ArrayList<>();
@@ -86,22 +91,24 @@ public class JointFrequencySpectrum extends ParallelVCFVariantPedFunction {
     count = new int[nb][nb][size][size];
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return null;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void end() {
-    String suffix = this.vcffile.getBasename();
+    String suffix = this.vcfFile.getBasename();
 
     for (int ga = 0; ga < nb; ga++) {
-      String groupa = groups.get(ga);
+      String groupA = groups.get(ga);
       for (int gb = ga; gb < nb; gb++) {
-        String groupb = groups.get(gb);
-        String outname = outdir.getDirectory() + groupa + "." + groupb + "." + suffix+ ".tsv";
+        String groupB = groups.get(gb);
+        String outFilename = outdir.getDirectory() + groupA + "." + groupB + "." + suffix+ ".tsv";
         try {
-          PrintWriter out = getPrintWriter(outname);
+          PrintWriter out = getPrintWriter(outFilename);
           for (int ca = 0; ca < size; ca++) {
             LineBuilder line = new LineBuilder();
             for (int cb = 0; cb < size; cb++)
@@ -110,7 +117,7 @@ public class JointFrequencySpectrum extends ParallelVCFVariantPedFunction {
           }
           out.close();
         } catch (IOException e) {
-          Message.error("Unable to write results to "+outname);
+          Message.error("Unable to write results to "+outFilename);
         }
       }
     }
@@ -139,19 +146,19 @@ public class JointFrequencySpectrum extends ParallelVCFVariantPedFunction {
     ArrayList<String> pedGroups = getPed().getGroups();
     for (int ga = 0; ga < nb; ga++)
       for (int gb = ga; gb < nb; gb++) {
-        String groupa = groups.get(ga);
-        String groupb = groups.get(gb);
+        String groupA = groups.get(ga);
+        String groupB = groups.get(gb);
 
         if (gb == ga)
-          groupb += 2;
+          groupB += 2;
 
-        int ia = pedGroups.indexOf(groupa);
-        int ib = pedGroups.indexOf(groupb);
+        int ia = pedGroups.indexOf(groupA);
+        int ib = pedGroups.indexOf(groupB);
         
         if(ia == -1)
-          ia = pedGroups.indexOf(groupa.substring(0,groupa.length()-1));        
+          ia = pedGroups.indexOf(groupA.substring(0,groupA.length()-1));
         if(ib == -1)
-          ib = pedGroups.indexOf(groupb.substring(0,groupb.length()-1));
+          ib = pedGroups.indexOf(groupB.substring(0,groupB.length()-1));
 
         try {
           for (int a = 0; a < alts; a++) {
@@ -160,14 +167,15 @@ public class JointFrequencySpectrum extends ParallelVCFVariantPedFunction {
             this.pushAnalysis(new Integer[]{ga, gb, ca, cb});
           }
         } catch (Exception e) {
-          Message.error("Group A " + groupa + " (" + ia + ")");
-          Message.error("Group B " + groupb + " (" + ib + ")");
-          this.fatalAndDie("error", e);
+          Message.error("Group A " + groupA + " (" + ia + ")");
+          Message.error("Group B " + groupB + " (" + ib + ")");
+          this.fatalAndQuit("error", e);
         }
       }
     return NO_OUTPUT;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     try {
@@ -175,7 +183,7 @@ public class JointFrequencySpectrum extends ParallelVCFVariantPedFunction {
       count[n[0]][n[1]][n[2]][n[3]]++;
       return true;
     } catch (Exception e) {
-      e.printStackTrace();
+      Message.error("Error while checking analysis results", e);
     }
     return false;
   }  

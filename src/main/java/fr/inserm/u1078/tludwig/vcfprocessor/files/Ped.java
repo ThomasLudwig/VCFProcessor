@@ -8,22 +8,33 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * Object Representing the containt of a PED File
+ * Object Representing the content of a PED File
  *
  * @author Thomas E. Ludwig (INSERM - U1078)
- * Started : 17 mars 2015
+ * Started : 2015/03/17
  */
 public class Ped {
-  public static final String NOGROUP = "NOGROUP";
+  public static final String NO_GROUP = "NO_GROUP";
   public static final int SEX_MALE = 1;
   public static final int SEX_FEMALE = 2;
   public static final int PHENO_UNAFFECTED = 1;
   public static final int PHENO_AFFECTED = 2;
 
-
+  //TODO ped file data are overwritten by default ped ?
+  //15:19:19 INFO  Information about this PED File
+  //15:19:19 INFO  3 samples
+  //15:19:19 INFO  1 groups
+  //15:19:19 INFO  Group fam - 3 samples
+  //15:19:19 INFO  Parsing of PED File ended.
+  //15:19:19 INFO  Information about this PED File
+  //15:19:19 INFO  3 samples
+  //15:19:19 INFO  1 groups
+  //15:19:19 INFO  Group NO_GROUP - 3 samples
+  //15:19:19 INFO  Parsing of PED File ended.
+  //15:19:19 INFO  Sample kept : 3/3
 
   private final String filename;
-  private ArrayList<Sample> samples;
+  private final ArrayList<Sample> samples;
   private ArrayList<Sample>[] samplesByGroup;
   private final ArrayList<String> groups;
 
@@ -31,7 +42,7 @@ public class Ped {
    * Creates a Ped object from a PED file
    *
    * @param filename - the name of the PED file
-   * @throws fr.inserm.u1078.tludwig.vcfprocessor.files.PedException
+   * @throws PedException if there is a problem with the ped file
    */
   public Ped(String filename) throws PedException {
     this.filename = filename;
@@ -61,7 +72,7 @@ public class Ped {
     samples = new ArrayList<>();
     
     for(int i = 9; i < vcfHeaders.length; i++)
-      samples.add(new Sample(vcfHeaders[i], vcfHeaders[i], null, null, 0, 0, NOGROUP));
+      samples.add(new Sample(vcfHeaders[i], vcfHeaders[i], null, null, 0, 0, NO_GROUP));
    
     groups = new ArrayList<>();
     for (Sample sample : samples)
@@ -79,7 +90,7 @@ public class Ped {
   /**
    * Keep only samples common to Ped and the list
    *
-   * @param extSamples
+   * @param extSamples the external list of samples
    */
   public void keepOnly(Collection<Sample> extSamples) {
     //get common list of samples, ordered as target (VCF)
@@ -100,7 +111,7 @@ public class Ped {
       this.samplesByGroup[group].add(sample);
     }
   }
-
+  @SuppressWarnings("unchecked")
   private void updateSampleByGroup() {
     this.samplesByGroup = new ArrayList[this.groups.size()];
 
@@ -187,7 +198,7 @@ public class Ped {
   public static Sample createSample(String line) {
     String[] fields = line.split("\\s+");
     if(fields.length == 6)
-      return new Sample(fields[0], fields[1], fields[2], fields[3], Integer.parseInt(fields[4]), Integer.parseInt(fields[5]), NOGROUP);
+      return new Sample(fields[0], fields[1], fields[2], fields[3], Integer.parseInt(fields[4]), Integer.parseInt(fields[5]), NO_GROUP);
     return new Sample(fields[0], fields[1], fields[2], fields[3], Integer.parseInt(fields[4]), Integer.parseInt(fields[5]), fields[6]);
   }
 
@@ -213,6 +224,28 @@ public class Ped {
     return ret;
   }
 
+  public ArrayList<String> getIDs() {
+    ArrayList<String> ret = new ArrayList<>();
+    for (Sample s : this.samples) {
+      String id = s.getId();
+      boolean added = false;
+      for (int i = 0; i < ret.size(); i++) {
+        String current = ret.get(i);
+        int comp = id.compareTo(current);
+        if (comp <= 0) {
+          added = true;
+          if (comp < 0)
+            ret.add(i, id);
+          break;
+        }
+      }
+
+      if (!added)
+        ret.add(id);
+    }
+    return ret;
+  }
+
   public ArrayList<Sample> getCases() {
     ArrayList<Sample> ret0 = new ArrayList<>();
     ArrayList<Sample> ret1 = new ArrayList<>();
@@ -227,7 +260,7 @@ public class Ped {
         ret2.add(s);
     }
 
-    //Cases should be 2 and Controles 1, but we allow Cases to be 1 and controles to be 0
+    //Cases should be 2 and Controls 1, but we allow Cases to be 1 and controls to be 0
     if (!ret0.isEmpty() && !ret1.isEmpty() && ret2.isEmpty())
       return ret1;
 
@@ -248,7 +281,7 @@ public class Ped {
         ret2.add(s);
     }
 
-    //Cases should be 2 and Controles 1, but we allow Cases to be 1 and controles to be 0
+    //Cases should be 2 and Controls 1, but we allow Cases to be 1 and controls to be 0
     if (!ret0.isEmpty() && !ret1.isEmpty() && ret2.isEmpty())
       return ret0;
 

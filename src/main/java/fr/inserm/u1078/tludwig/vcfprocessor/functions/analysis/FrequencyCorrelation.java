@@ -1,7 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
-import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectoryParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
@@ -22,7 +21,7 @@ import java.util.HashMap;
  */
 public class FrequencyCorrelation extends ParallelVCFVariantFunction { //TODO really similar to CompareToGnomAD, but uses annotation instead of second VCF, GnomadAD should appears in title
 
-  String[] HEADER = {"CHR", "POS", "REF", "ALT", "Local", "GnomAD"};
+  final String[] HEADER = {"CHR", "POS", "REF", "ALT", "Local", "GnomAD"};
 
   private final OutputDirectoryParameter dir = new OutputDirectoryParameter();
   HashMap<VEPConsequence, PrintWriter> out;
@@ -32,6 +31,7 @@ public class FrequencyCorrelation extends ParallelVCFVariantFunction { //TODO re
     return "Prints the frequency correlation of variants between local samples and GnomAD";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
@@ -40,11 +40,13 @@ public class FrequencyCorrelation extends ParallelVCFVariantFunction { //TODO re
             .addLine("Outputs one line per VEP Consequence");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -55,15 +57,17 @@ public class FrequencyCorrelation extends ParallelVCFVariantFunction { //TODO re
     return OUT_NONE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return null;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     out = new HashMap<>();
-    String basename = this.vcffile.getBasename();
+    String basename = this.vcfFile.getBasename();
     for (VEPConsequence csq : VEPConsequence.values()) {
       String name = dir.getDirectory() + "freq." + basename + "." + csq.getLevel() + "." + csq.getName() + ".tsv";
       try {
@@ -71,17 +75,19 @@ public class FrequencyCorrelation extends ParallelVCFVariantFunction { //TODO re
         tmp.println(String.join(T, HEADER));
         out.put(csq, tmp);
       } catch (IOException e) {
-        this.fatalAndDie("Unable to write to output file " + name);
+        this.fatalAndQuit("Unable to write to output file " + name);
       }
     }
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void end() {
     for (PrintWriter pw : out.values())
       pw.close();
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
@@ -104,7 +110,7 @@ public class FrequencyCorrelation extends ParallelVCFVariantFunction { //TODO re
             ret.add(level+"¤"+line);
         }
       }
-    return ret.toArray(new String[ret.size()]);
+    return ret.toArray(new String[0]);
     //return NO_OUTPUT;
   }
 
@@ -115,6 +121,7 @@ public class FrequencyCorrelation extends ParallelVCFVariantFunction { //TODO re
       out.get(VEPConsequence.getConsequence(new Integer(level))).println(ol[1]);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

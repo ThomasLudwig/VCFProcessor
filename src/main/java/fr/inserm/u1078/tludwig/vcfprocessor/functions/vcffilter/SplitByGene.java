@@ -33,36 +33,41 @@ public class SplitByGene extends VCFFunction { //TODO parallelize
     return "Creates an output VCF file for each gene.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
             .addLine("Some variants can be in several output files, if they impact several genes.");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_FILTER_ONE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
-    VCF vcf = this.vcffile.getVCF();
+    VCF vcf = this.vcfFile.getVCF();
     vcf.getReaderAndStart();
     //ArrayList<String> allGenes = new ArrayList<>();
     TreeMap<String, ArrayList<String>> variantsByGenes = new TreeMap<>();
 
     Variant variant;
-    while ((variant = vcf.getNextVariant()) != null) {
+    while ((variant = vcf.getUnparallelizedNextVariant()) != null) {
       ArrayList<String> localGenes = new ArrayList<>();
       for (String gene : variant.getGeneList())
         if (!localGenes.contains(gene)) {

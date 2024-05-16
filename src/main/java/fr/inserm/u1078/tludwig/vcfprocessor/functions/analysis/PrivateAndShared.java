@@ -8,7 +8,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
 
 /**
- * For the given VCF, gives the number of variants private to each group and shared amoung all groups.
+ * For the given VCF, gives the number of variants private to each group and shared among all groups.
  * 
  * @author Thomas E. Ludwig (INSERM - U1078) 
  * Started on             xxxx-xx-xx
@@ -24,29 +24,32 @@ public class PrivateAndShared extends ParallelVCFVariantPedFunction {
 
   @Override
   public String getSummary() {
-    return "For the given VCF, gives the number of variants private to each group and shared amoung all groups.";
+    return "For the given VCF, gives the number of variants private to each group and shared among all groups.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
             .addLine("Output :")
-            .addItemize(new String[]{
-              "The total number of variants in the file",
-              "The number of variants present in ALL the groups defined in the the Ped file",
-              "The number of variants private to each group"});
+            .addItemize("The total number of variants in the file",
+                "The number of variants present in ALL the groups defined in the the Ped file",
+                "The number of variants private to each group");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -57,23 +60,26 @@ public class PrivateAndShared extends ParallelVCFVariantPedFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     groups = getPed().getGroups();
     priv = new int[groups.size()];
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getFooters() {
     ArrayList<String> out = new ArrayList<>();
     out.add("Total Number of Variants " + total);
-    out.add("Variants shared amoung all groups " + shared);
+    out.add("Variants shared among all groups " + shared);
     for (int g = 0; g < groups.size(); g++)
       out.add("Private to " + groups.get(g) + " " + priv[g]);
     
-    return out.toArray(new String[out.size()]);
+    return out.toArray(new String[0]);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return null;
@@ -85,9 +91,7 @@ public class PrivateAndShared extends ParallelVCFVariantPedFunction {
       if (!variant.getInfo().isInDBSNPVEP(a)) {
         ArrayList<Integer> gps = new ArrayList<>();
         boolean isShared = false;
-        boolean[] found = new boolean[groups.size()];
-        for (int i = 0; i < found.length; i++)
-          found[i] = false;
+        boolean[] found = new boolean[groups.size()]; //initialized to false
         int nbG = 0;
 
         for (Genotype g : variant.getGenotypes())
@@ -111,19 +115,19 @@ public class PrivateAndShared extends ParallelVCFVariantPedFunction {
     return NO_OUTPUT;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     try {
       boolean isShared = (Boolean)((Object[])analysis)[0];
-      ArrayList<Integer> gps  = (ArrayList)((Object[])analysis)[1];
+      ArrayList<Integer> gps  = (ArrayList<Integer>)((Object[])analysis)[1];
       total++;
       if(isShared)
         shared++;
       for(int i : gps)
         priv[i]++;
       return true;
-    } catch (Exception e) {
-    }
+    } catch (Exception ignore) { }
     return false;
   }
   

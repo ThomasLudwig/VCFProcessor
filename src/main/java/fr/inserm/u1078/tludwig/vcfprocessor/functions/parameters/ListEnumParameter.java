@@ -3,8 +3,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.StartUpException;
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.DefaultInput;
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.Input;
 
 /**
  *
@@ -32,11 +30,7 @@ public class ListEnumParameter extends Parameter {
 
   @Override
   public String showAllowedValues() {
-    String ret = "";
-    for (String v : this.allowedValues)
-      ret += "|" + v;
-    if (ret.length() > 0)
-      ret = ret.substring(1);
+    String ret = String.join("|", this.allowedValues);
     return "List form the following : " + ret;
   }
 
@@ -62,10 +56,5 @@ public class ListEnumParameter extends Parameter {
     } catch (NullPointerException e) {
       throw new StartUpException("Value is null for Parameter "+this.getKey(), e);
     }
-  }
-
-  @Override
-  public Input getInputForm() {
-    return new DefaultInput(this);
   }
 }

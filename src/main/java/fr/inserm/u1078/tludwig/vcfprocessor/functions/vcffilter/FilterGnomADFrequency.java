@@ -23,22 +23,26 @@ public class FilterGnomADFrequency extends ParallelVCFVariantFilterFunction {
     return "Filters out variants with frequencies above threshold in GnomAD";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
             .addLine("In case of multiallelic variant, if any alternate allele passes the filter, the variant is kept");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_FILTER_ONE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;

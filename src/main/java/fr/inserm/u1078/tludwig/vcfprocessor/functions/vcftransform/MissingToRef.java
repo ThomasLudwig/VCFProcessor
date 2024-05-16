@@ -22,22 +22,26 @@ public class MissingToRef extends ParallelVCFVariantFunction {
     return "Replaces every missing genotype by "+Description.code("0/0:0:0:0....");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("Replaces every missing genotype by "+Description.code("0/0:0:0:0...."))
             .addLine("Updates AC/AN/AF annotations");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -50,34 +54,35 @@ public class MissingToRef extends ParallelVCFVariantFunction {
 
   @Override
   public String[] processInputVariant(Variant variant) {
-    String dflt = 0 + "/" + 0;
+    StringBuilder dflt = new StringBuilder(0 + "/" + 0);
     String format = variant.getFormat().toString();
     String[] keys = format.split(":");
     for (int i = 1; i < keys.length; i++)
       switch (keys[i]) {
         case "AD":
-          dflt += ":0";
+          dflt.append(":0");
           for(int a = 0 ; a < variant.getAlleleCount() - 1; a++)
-            dflt += ",0";
+            dflt.append(",0");
           break;
         case "PL":
-          dflt += ":0";
+          dflt.append(":0");
           for(int a = 0 ; a < MathTools.triangularNumber(variant.getAlleleCount()+1) - 1; a++)
-            dflt += ",0";
+            dflt.append(",0");
           break;
         default:
-          dflt += ":0";
+          dflt.append(":0");
           break;
       }
 
     for(Genotype g : variant.getGenotypes())
       if(g.isMissing())
-        g.setTo(dflt);
+        g.setTo(dflt.toString());
 
     variant.recomputeACAN();
     return asOutput(variant);
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

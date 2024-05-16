@@ -11,6 +11,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Check how many of the variants from the input file are filtered as Already_existing when adding samples from the reference file
@@ -23,10 +24,11 @@ import java.util.ArrayList;
 public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading of the largest file (probably the panel)
   //TODO develop a Graph for these results
 
-  private final VCFFileParameter reffile = new VCFFileParameter(OPT_REF, "reference.vcf", "the panel VCF File (can be gzipped)");
+  private final VCFFileParameter refFile = new VCFFileParameter(OPT_REF, "reference.vcf", "the panel VCF File (can be gzipped)");
   
   private static final int C = VEPConsequence.values().length;
   private static final int CHROM_NB = 26;
+  @SuppressWarnings("unchecked")
   private final ArrayList<MiniVariant>[] variants = new ArrayList[CHROM_NB];
   private final ArrayList<Integer> sampleIndices = new ArrayList<>();
   private int[][] count;
@@ -38,24 +40,28 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
     return "Check how many of the variants from the input file are filtered as Already_existing when adding samples from the reference file.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
-            .addLine("Takes all the variants in the given vcffile")
-            .addLine("Compares to each samples from the reffile")
+            .addLine("Takes all the variants in the given vcfFile")
+            .addLine("Compares to each samples from the refFile")
             .addLine("Gives a count of remaining (new) variants (by consequence) each time we add a sample.");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -66,6 +72,7 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
     for (int i = 0; i < CHROM_NB; i++)
@@ -77,11 +84,11 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
   }
 
   private void loadVariants() throws Exception {    
-    VCF vcf = this.vcffile.getVCF(VCF.MODE_QUICK_GENOTYPING, 10000);
+    VCF vcf = this.vcfFile.getVCF(VCF.MODE_QUICK_GENOTYPING, 10000);
     vcf.getReaderAndStart();
     Message.info("Loading VCF");
     Variant variant;
-    while ((variant = vcf.getNextVariant()) != null) {
+    while ((variant = vcf.getUnparallelizedNextVariant()) != null) {
       int chrom = variant.getChromNumber();
       for (int a = 1; a < variant.getAlleleCount(); a++) {
         this.variants[chrom].add(new MiniVariant(variant, a));
@@ -95,20 +102,20 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
   private void printResults() {
     Message.info("Exporting results");
     for (int c = 0; c < C; c++) {
-      String line = VEPConsequence.getConsequence(c).getName();
+      StringBuilder line = new StringBuilder(Objects.requireNonNull(VEPConsequence.getConsequence(c)).getName());
       int remaining = total[c];
-      line += T + remaining;
+      line.append(T).append(remaining);
       for (int n = 0; n < N; n++) {
         remaining -= count[c][n];
-        line += T + remaining;
+        line.append(T).append(remaining);
       }
-      println(line);
+      println(line.toString());
     }
 
   }
 
   private void browseReference() throws Exception {    
-    VCF ref = this.reffile.getVCF(VCF.MODE_QUICK_GENOTYPING, 10000);
+    VCF ref = this.refFile.getVCF(VCF.MODE_QUICK_GENOTYPING, 10000);
     N = ref.getPed().getSampleSize();
     this.count = new int[C][N];
     
@@ -126,7 +133,7 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
     Message.info("Processing  Ref VCF for " + N + " samples");
 
     Variant variant;
-    while ((variant = ref.getNextVariant()) != null) {
+    while ((variant = ref.getUnparallelizedNextVariant()) != null) {
       int chrom = variant.getChromNumber();
 
       for (int a = 1; a < variant.getAlleleCount(); a++) {
@@ -150,7 +157,7 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
     ref.close();
   }
 
-  private class MiniVariant {
+  private static class MiniVariant {
 
     private final int chrom;
     private final int position;

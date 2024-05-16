@@ -18,8 +18,8 @@ import java.util.ArrayList;
  * Unit Test defined on 2020-08-07
  */
 public class DeNovo extends ParallelVCFVariantFilterFunction {
+  public final PedFileParameter pedFile = new PedFileParameter();
 
-  public final PedFileParameter pedfile = new PedFileParameter();
   private final BooleanParameter missing = new BooleanParameter(OPT_MISSING, "Missing genotypes allowed ?");
 
   @Override
@@ -27,26 +27,28 @@ public class DeNovo extends ParallelVCFVariantFilterFunction {
     return "Keeps only variants that are compatible with a De Novo pattern of inheritance.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
-            .addItemize(new String[]{
-              "present in every Case",
-              "absent in every Controle"
-            })
+            .addItemize("present in every Case",
+                "absent in every Control")
             .addWarning("Father/Mother/Child(ren) Trios are expected");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_FILTER_ONE;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -55,11 +57,6 @@ public class DeNovo extends ParallelVCFVariantFilterFunction {
   @Override
   public String getOutputExtension() {
     return OUT_VCF;
-  }
-
-  @Override
-  public void begin() {
-    super.begin();
   }
 
   @Override
@@ -90,15 +87,15 @@ public class DeNovo extends ParallelVCFVariantFilterFunction {
   @Override
   public TestingScript[] getScripts() {
     ArrayList<TestingScript> scripts = new ArrayList<>();
-    for (String setname : new String[]{"2trios", "trio"})
+    for (String setName : new String[]{"2trios", "trio"})
       for (String missingP : new String[]{"false", "true"}) {
         TestingScript scr = TestingScript.newFileTransform();
-        scr.addNamingFilename("vcf", setname + ".vcf");
-        scr.addAnonymousFilename("ped", setname + ".ped");
+        scr.addNamingFilename("vcf", setName + ".vcf");
+        scr.addAnonymousFilename("ped", setName + ".ped");
         scr.addNamingValue("missing", missingP);
         scripts.add(scr);
       }
 
-    return scripts.toArray(new TestingScript[scripts.size()]);
+    return scripts.toArray(new TestingScript[0]);
   }
 }

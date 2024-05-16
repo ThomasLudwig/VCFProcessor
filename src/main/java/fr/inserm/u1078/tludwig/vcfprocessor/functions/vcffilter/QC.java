@@ -33,9 +33,9 @@ import java.util.HashMap;
 public class QC extends ParallelVCFVariantFunction {
 
   //TODO the disabled option doesn't work for missing values. Is this still true ?
-  public final PedFileParameter pedfile = new PedFileParameter();
+  public final PedFileParameter pedFile = new PedFileParameter();
   public final FileParameter parameters = new FileParameter(OPT_OPT, "custom.parameters.tsv", "file containing the various thresholds for the QC (see Documentation)");
-  public final TSVFileParameter report = new TSVFileParameter(OPT_REPORT, "fiteredVariant.tsv", "output file listing all the variants that were filtered, and why");
+  public final TSVFileParameter report = new TSVFileParameter(OPT_REPORT, "filteredVariant.tsv", "output file listing all the variants that were filtered, and why");
 
   public static final String FILTER_CALLRATE = "LOW_CALLRATE";
   public static final String FILTER_CALLRATE_DISTRIBUTION = "LOW_CALLRATE_DISTRIBUTION";
@@ -47,7 +47,7 @@ public class QC extends ParallelVCFVariantFunction {
   public static final String FILTER_MQ = "LOW_MQ";
   public static final String FILTER_READPOSRANKSUM = "LOW_READPOSRANKSUM";
   //public static final String FILTER_LOWQUAL = "LOW_DPGQ_RATIO";
-  public static final String FILTER_ALTLOWQUAL = "LOW_ALT_DPGQ";
+  public static final String FILTER_ALT_LOWQUAL = "LOW_ALT_DPGQ";
   public static final String FILTER_ABHET = "ABHET_OFFSET";
   public static final String FILTER_AB_GENO = "AB_GENO_OFFSET";
   public static final String FILTER_AC0 = "AC0";
@@ -118,7 +118,7 @@ public class QC extends ParallelVCFVariantFunction {
   private static final int IDX_MQ = 8;
   private static final int IDX_READPOSRANKSUM = 9;
   //private static final int IDX_LOWQUAL = 10;
-  private static final int IDX_ALTLOWQUAL = 10;
+  private static final int IDX_ALT_LOWQUAL = 10;
   private static final int IDX_ABHET = 11;
   private static final int IDX_AC0 = 12;
   private static final int IDX_AF1 = 13;
@@ -134,14 +134,14 @@ public class QC extends ParallelVCFVariantFunction {
   private double maxABGenoDev = MAX_AB_GENO_DEV;
   private double minInbreeding = MIN_INBREEDING;
   private double minMQRankSum = MIN_MQRANKSUM;
-  private double maxFSIndel = MAX_FS_INDEL;
-  private double maxFSSNP = MAX_FS_SNP;
-  private double maxSORIndel = MAX_SOR_INDEL;
-  private double maxSORSNP = MAX_SOR_SNP;
-  private double minMQIndel = MIN_MQ_INDEL;
-  private double minMQSNP = MIN_MQ_SNP;
-  private double minRPRSIndel = MIN_RPRS_INDEL;
-  private double minRPRSSNP = MIN_RPRS_SNP;
+  private double maxFS_Indel = MAX_FS_INDEL;
+  private double maxFS_SNP = MAX_FS_SNP;
+  private double maxSOR_Indel = MAX_SOR_INDEL;
+  private double maxSOR_SNP = MAX_SOR_SNP;
+  private double minMQ_Indel = MIN_MQ_INDEL;
+  private double minMQ_SNP = MIN_MQ_SNP;
+  private double minRPRS_Indel = MIN_RPRS_INDEL;
+  private double minRPRS_SNP = MIN_RPRS_SNP;
   private int minGQ = MIN_GQ;
   private int minDP = MIN_DP;
   private int maxDP = MAX_DP;
@@ -173,7 +173,7 @@ public class QC extends ParallelVCFVariantFunction {
   private boolean enableAC0 = true;
   private boolean enableAF1 = true;
 
-  private final String missing = ".";
+  public static final String MISSING = ".";
   private PrintWriter out;
 
   private SortedList<Export> reportLines;
@@ -183,29 +183,31 @@ public class QC extends ParallelVCFVariantFunction {
     return "Run a Quality Control on VCF Variants";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
             .addLine("A report file gives the reason(s) each variant has been filtered")
             .addLine("For more Details, see https://gitlab.com/gmarenne/ravaq")
             .addLine("For each group G, the info field has new annotations")
-            .addItemize(new String[]{
-      "G_AN: AlleleNumber for this group",
-      "G_AC: AlleleCounts for this group",
-      "G_AF: AlleleFrequencies for this group"
-    });
+            .addItemize("G_AN: AlleleNumber for this group",
+                "G_AC: AlleleCounts for this group",
+                "G_AF: AlleleFrequencies for this group");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return "The VCF File must contain the following INFO : " + String.join(",", KEYS);
@@ -225,12 +227,10 @@ public class QC extends ParallelVCFVariantFunction {
         String line;
         while ((line = in.readLine()) != null) {
           line = line.trim();
-          if (line.isEmpty() || line.startsWith("#")) {
-            //Ignore
-          } else {
+          if (!line.isEmpty() && !line.startsWith("#")) {
             String theLine = line.split("#")[0];
             String[] f = theLine.split("\\s+");
-            boolean enabled = isEnabled(f[1]);
+            boolean enabled = !isDisabled(f[1]);
             switch (f[0].toUpperCase()) { //Process each no empty no comment line
               case KW_AC0 :
                 enableAC0 = enabled;
@@ -260,35 +260,35 @@ public class QC extends ParallelVCFVariantFunction {
                 break;
               case KW_MAX_FS_INDEL:
                 enableMaxFSIndel = enabled;
-                maxFSIndel = parseMaxDouble(filename, f, maxFSIndel);
+                maxFS_Indel = parseMaxDouble(filename, f, maxFS_Indel);
                 break;
               case KW_MAX_FS_SNP:
                 enableMaxFSSNP = enabled;
-                maxFSSNP = parseMaxDouble(filename, f, maxFSSNP);
+                maxFS_SNP = parseMaxDouble(filename, f, maxFS_SNP);
                 break;
               case KW_MAX_SOR_INDEL:
                 enableMaxSORIndel = enabled;
-                maxSORIndel = parseMaxDouble(filename, f, maxSORIndel);
+                maxSOR_Indel = parseMaxDouble(filename, f, maxSOR_Indel);
                 break;
               case KW_MAX_SOR_SNP:
                 enableMaxSORSNP = enabled;
-                maxSORSNP = parseMaxDouble(filename, f, maxSORSNP);
+                maxSOR_SNP = parseMaxDouble(filename, f, maxSOR_SNP);
                 break;
               case KW_MIN_MQ_INDEL:
                 enableMinMQIndel = enabled;
-                minMQIndel = parseMinDouble(filename, f, minMQIndel);
+                minMQ_Indel = parseMinDouble(filename, f, minMQ_Indel);
                 break;
               case KW_MIN_MQ_SNP:
                 enableMinMQSNP = enabled;
-                minMQSNP = parseMinDouble(filename, f, minMQSNP);
+                minMQ_SNP = parseMinDouble(filename, f, minMQ_SNP);
                 break;
               case KW_MIN_RPRS_INDEL:
                 enableMinRPRSIndel = enabled;
-                minRPRSIndel = parseMinDouble(filename, f, minRPRSIndel);
+                minRPRS_Indel = parseMinDouble(filename, f, minRPRS_Indel);
                 break;
               case KW_MIN_RPRS_SNP:
                 enableMinRPRSSNP = enabled;
-                minRPRSSNP = parseMinDouble(filename, f, minRPRSSNP);
+                minRPRS_SNP = parseMinDouble(filename, f, minRPRS_SNP);
                 break;
               case KW_MIN_GQ:
                 enableMinGQ = enabled;
@@ -307,8 +307,6 @@ public class QC extends ParallelVCFVariantFunction {
                 minCallRate = parseMinDouble(filename, f, minCallRate);
                 break;
               case KW_MIN_HQ_RATIO:
-                /*enableMinHQRatio = enabled;
-                minHQRatio = parseMinDouble(filename, f, minHQRatio);*/
                 Message.warning("QC Parameter ["+KW_MIN_HQ_RATIO+"] is obsolete and will be ignored. ["+KW_MIN_HQ_RATIO+"] has been merge with ["+KW_MIN_CALLRATE+"].");
                 break;
               case KW_MIN_ALT_HQ:
@@ -320,89 +318,78 @@ public class QC extends ParallelVCFVariantFunction {
                 minFisherCallRate = parseMinDouble(filename, f, minFisherCallRate);
                 break;
               default:
-                this.fatalAndDie("Unknown parameter keyword [" + f[0] + "] in file [" + filename + "]");
+                this.fatalAndQuit("Unknown parameter keyword [" + f[0] + "] in file [" + filename + "]");
             }
           }
         }
         in.close();
       } catch (IOException e) {
-        this.fatalAndDie("Unable to parse file [" + filename + "] to set the parameter value. Provide a valid file name, or \"null\" to use defaults parameters", e);
+        this.fatalAndQuit("Unable to parse file [" + filename + "] to set the parameter value. Provide a valid file name, or \"null\" to use defaults parameters", e);
       }
     }
   }
 
-  public static boolean isEnabled(String s) {
-    return !(s == null || s.isEmpty() || s.toLowerCase().startsWith("disab"));
+  public static boolean isDisabled(String s) {
+    if(s == null)
+      return true;
+    return s.toLowerCase().startsWith("dis");
   }
 
-  public double parseMinDouble(String filename, String[] f, double defau) {
-    if (f.length == 1 || f[1].toLowerCase().startsWith("disab"))
+  public double parseMinDouble(String filename, String[] f, double defaultValue) {
+    if (f.length == 1 || isDisabled(f[1])) {
+      Message.info("Parameter ["+f[0]+"] : disabled");
       return Double.NEGATIVE_INFINITY;
-    return parseElseDouble(filename, f, defau);
+    }
+    return parseElseDouble(filename, f, defaultValue);
   }
 
-  public double parseMaxDouble(String filename, String[] f, double defau) {
-    if (f.length == 1 || f[1].toLowerCase().startsWith("disab"))
+  public double parseMaxDouble(String filename, String[] f, double defaultValue) {
+    if (f.length == 1 || isDisabled(f[1])) {
+      Message.info("Parameter ["+f[0]+"] : disabled");
       return Double.POSITIVE_INFINITY;
-    return parseElseDouble(filename, f, defau);
+    }
+    return parseElseDouble(filename, f, defaultValue);
   }
 
-  public double parseElseDouble(String filename, String[] f, double defau) {
+  public double parseElseDouble(String filename, String[] f, double defaultValue) {
     if (!"default".equalsIgnoreCase(f[1]))
       try {
+        Message.info("Parameter ["+f[0]+"] : "+f[1]);
         return new Double(f[1]);
       } catch (NumberFormatException e) {
-        this.fatalAndDie("Unable to set value [" + f[1] + "] to parameter [" + f[0] + "], from file [" + filename + "]. Decimal value expected");
+        this.fatalAndQuit("Unable to set value [" + f[1] + "] to parameter [" + f[0] + "], from file [" + filename + "]. Decimal value expected");
       }
-    return defau;
+    Message.info("Parameter ["+f[0]+"] : "+defaultValue+" (default Value)");
+    return defaultValue;
   }
 
-/*  public double parseDouble(String filename, String[] f, boolean min, double defau) {
-    if (f.length == 1 || f[1].toLowerCase().startsWith("disab"))
-      return min ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
-    else if (!"default".equalsIgnoreCase(f[1]))
-      try {
-        return new Double(f[1]);
-      } catch (NumberFormatException e) {
-        this.fatalAndDie("Unable to set value [" + f[1] + "] to parameter [" + f[0] + "], from file [" + filename + "]. Decimal value expected");
-      }
-    return defau;
-  }*/
-
-  public int parseMinInteger(String filename, String[] f, int defau) {
-    if (f.length == 1 || f[1].toLowerCase().startsWith("disab"))
+  public int parseMinInteger(String filename, String[] f, int defaultValue) {
+    if (f.length == 1 || isDisabled(f[1])) {
+      Message.info("Parameter ["+f[0]+"] : disabled");
       return Integer.MIN_VALUE;
-    return parseElseInteger(filename, f, defau);
+    }
+    return parseElseInteger(filename, f, defaultValue);
   }
 
-  public int parseMaxInteger(String filename, String[] f, int defau) {
-    if (f.length == 1 || f[1].toLowerCase().startsWith("disab"))
+  public int parseMaxInteger(String filename, String[] f, int defaultValue) {
+    if (f.length == 1 || isDisabled(f[1])) {
+      Message.info("Parameter ["+f[0]+"] : disabled");
       return Integer.MAX_VALUE;
-    return parseElseInteger(filename, f, defau);
+    }
+    return parseElseInteger(filename, f, defaultValue);
   }
 
-  public int parseElseInteger(String filename, String[] f, int defau) {
+  public int parseElseInteger(String filename, String[] f, int defaultValue) {
     if (!"default".equalsIgnoreCase(f[1]))
       try {
+        Message.info("Parameter ["+f[0]+"] : "+f[1]);
         return new Integer(f[1]);
       } catch (NumberFormatException e) {
-        this.fatalAndDie("Unable to set value [" + f[1] + "] to parameter [" + f[0] + "], from file [" + filename + "]. Integer value expected");
+        this.fatalAndQuit("Unable to set value [" + f[1] + "] to parameter [" + f[0] + "], from file [" + filename + "]. Integer value expected");
       }
-    return defau;
+    Message.info("Parameter ["+f[0]+"] : "+defaultValue+" (default Value)");
+    return defaultValue;
   }
-
-  /*
-  public int parseInteger(String filename, String[] f, boolean min, int defau) {
-    if (f.length == 1 || f[1].toLowerCase().startsWith("disab"))
-      return min ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-    else if (!"default".equalsIgnoreCase(f[1]))
-      try {
-        return new Integer(f[1]);
-      } catch (NumberFormatException e) {
-        this.fatalAndDie("Unable to set value [" + f[1] + "] to parameter [" + f[0] + "], from file [" + filename + "]. Integer value expected");
-      }
-    return defau;
-  }*/
 
   private String getHeader() {
     String[] headers = {
@@ -416,10 +403,10 @@ public class QC extends ParallelVCFVariantFunction {
       "QualByDepth<" + this.minQD,
       "InbreedingCoef<" + this.minInbreeding,
       "MQRankSum<" + this.minMQRankSum,
-      "FS>[" + this.maxFSIndel + ";" + this.maxFSSNP + "]",
-      "SOR>[" + this.maxSORIndel + ";" + this.maxSORSNP + "]",
-      "MQ<[" + this.minMQIndel + ";" + this.minMQSNP + "]",
-      "ReadPosRankSum<[" + this.minRPRSIndel + ";" + this.minRPRSSNP + "]",
+      "FS>[" + this.maxFS_Indel + ";" + this.maxFS_SNP + "]",
+      "SOR>[" + this.maxSOR_Indel + ";" + this.maxSOR_SNP + "]",
+      "MQ<[" + this.minMQ_Indel + ";" + this.minMQ_SNP + "]",
+      "ReadPosRankSum<[" + this.minRPRS_Indel + ";" + this.minRPRS_SNP + "]",
       //"HQRatio<" + this.minHQRatio,
       "AltHQ<" + this.minAltHQ,
       "AbHetDev(0.5)>" + this.maxABHetDev,
@@ -428,6 +415,7 @@ public class QC extends ParallelVCFVariantFunction {
     return String.join(T, headers);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getExtraHeaders() {
     if (ped == null)
@@ -471,6 +459,7 @@ public class QC extends ParallelVCFVariantFunction {
     return ret;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void end() {
     Message.info("Number of Variants [Unfiltered] " + count[IDX_UNFILTERED]);
@@ -484,7 +473,7 @@ public class QC extends ParallelVCFVariantFunction {
     Message.info("Number of Variants [" + FILTER_MQ + "] " + count[IDX_MQ]);
     Message.info("Number of Variants [" + FILTER_READPOSRANKSUM + "] " + count[IDX_READPOSRANKSUM]);
     //Message.info("Number of Variants [" + FILTER_LOWQUAL + "] " + count[IDX_LOWQUAL]);
-    Message.info("Number of Variants [" + FILTER_ALTLOWQUAL + "] " + count[IDX_ALTLOWQUAL]);
+    Message.info("Number of Variants [" + FILTER_ALT_LOWQUAL + "] " + count[IDX_ALT_LOWQUAL]);
     Message.info("Number of Variants [" + FILTER_ABHET + "] " + count[IDX_ABHET]);
     Message.info("Number of Variants [" + FILTER_AC0 + "] " + count[IDX_AC0]);
     Message.info("Number of Variants [" + FILTER_AF1 + "] " + count[IDX_AF1]);
@@ -495,6 +484,7 @@ public class QC extends ParallelVCFVariantFunction {
     out.close();
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
@@ -506,7 +496,7 @@ public class QC extends ParallelVCFVariantFunction {
       out.println(getHeader());
       reportLines = new SortedList<>(new ArrayList<>(), SortedList.Strategy.ADD_FROM_END);
     } catch (IOException e) {
-      this.fatalAndDie("Unable to open report file [" + this.report.getFilename() + "]");
+      this.fatalAndQuit("Unable to open report file [" + this.report.getFilename() + "]");
     }
 
     count[IDX_UNFILTERED] = 0;
@@ -520,24 +510,24 @@ public class QC extends ParallelVCFVariantFunction {
     count[IDX_MQ] = 0;
     count[IDX_READPOSRANKSUM] = 0;
     //count[IDX_LOWQUAL] = 0;
-    count[IDX_ALTLOWQUAL] = 0;
+    count[IDX_ALT_LOWQUAL] = 0;
     count[IDX_ABHET] = 0;
     count[IDX_AC0] = 0;
     count[IDX_AF1] = 0;
 
     this.samples = new HashMap<>();
-    if ("null".equals(this.pedfile.getFilename())) {
-      String group = "NOGROUP";
+    if ("null".equals(this.pedFile.getFilename())) {
+      String group = "NO_GROUP";
       ArrayList<String> ss = new ArrayList<>();
       for (Sample sample : getVCF().getSamples())
         ss.add(sample.getId());
       this.samples.put(group, ss);
     } else {
       try {
-        ped = this.pedfile.getPed();
+        ped = this.pedFile.getPed();
         this.getVCF().bindToPed(ped);
         for (Sample sample : getVCF().getSamples()) {
-          String group = "" + sample.getGroup()/* + sample.getPhenotype()*/;
+          String group = sample.getGroup()/* + sample.getPhenotype()*/;
           sample.setGroup(group);
           ped.getSample(sample.getId()).setGroup(group);
           if (!samples.containsKey(group))
@@ -545,7 +535,7 @@ public class QC extends ParallelVCFVariantFunction {
           samples.get(group).add(sample.getId());
         }
       } catch (PedException ex) {
-        this.fatalAndDie("Could not read ped file", ex);
+        this.fatalAndQuit("Could not read ped file", ex);
       }
     }
 
@@ -567,12 +557,12 @@ public class QC extends ParallelVCFVariantFunction {
     getVCF().addFilter(FILTER_QUAL_BY_DEPTH, "Qual by depth (" + KEY_QD + ") < " + this.minQD + " or missing");
     getVCF().addFilter(FILTER_INBREEDING_COEF, "Inbreeding coefficient (" + KEY_INBREEDING + ") < " + this.minInbreeding);
     getVCF().addFilter(FILTER_MQRANKSUM, KEY_MQRANKSUM + " (Z-score From Wilcoxon rank sum test of Alt vs. Ref read mapping qualities) either < " + this.minMQRankSum + " or missing");
-    getVCF().addFilter(FILTER_FS, KEY_FS + " (phred-scaled p-value using Fisher's exact test to detect strand bias) > " + this.maxFSSNP + " for SNPs or > " + this.maxFSIndel + " for indels or missing");
-    getVCF().addFilter(FILTER_SOR, KEY_SOR + " (Symmetric Odds Ratio of 2x2 contingency table to detect strand bias) > " + this.maxSORSNP + " for SNPs or > " + this.maxSORIndel + " for indels or missing");
-    getVCF().addFilter(FILTER_MQ, KEY_MQ + " (overall mapping quality of reads supporting a variant call) < " + this.minMQSNP + " for SNPs or < " + this.minMQIndel + " for indels or missing");
-    getVCF().addFilter(FILTER_READPOSRANKSUM, KEY_READPOSRANKSUM + " (Z-score from Wilcoxon rank sum test of Alt vs. Ref read position bias) either < " + this.minRPRSSNP + " for SNP or < " + this.minRPRSIndel + " for indels");
+    getVCF().addFilter(FILTER_FS, KEY_FS + " (phred-scaled p-value using Fisher's exact test to detect strand bias) > " + this.maxFS_SNP + " for SNPs or > " + this.maxFS_Indel + " for indels or missing");
+    getVCF().addFilter(FILTER_SOR, KEY_SOR + " (Symmetric Odds Ratio of 2x2 contingency table to detect strand bias) > " + this.maxSOR_SNP + " for SNPs or > " + this.maxSOR_Indel + " for indels or missing");
+    getVCF().addFilter(FILTER_MQ, KEY_MQ + " (overall mapping quality of reads supporting a variant call) < " + this.minMQ_SNP + " for SNPs or < " + this.minMQ_Indel + " for indels or missing");
+    getVCF().addFilter(FILTER_READPOSRANKSUM, KEY_READPOSRANKSUM + " (Z-score from Wilcoxon rank sum test of Alt vs. Ref read position bias) either < " + this.minRPRS_SNP + " for SNP or < " + this.minRPRS_Indel + " for indels");
     //getVCF().addFilter(FILTER_LOWQUAL, "Proportion of genotypes with (" + this.minDP + " <= SUM(AD) <= " + this.maxDP + " and a genotype quality (GQ) >= " + this.minGQ + ") < " + this.minHQRatio);
-    getVCF().addFilter(FILTER_ALTLOWQUAL, "Number of genotypes carrying an alternative allele with (" + this.minDP + " <= SUM(AD) <= " + this.maxDP + " and a genotype quality (GQ) >= " + this.minGQ + ") < " + this.minAltHQ);
+    getVCF().addFilter(FILTER_ALT_LOWQUAL, "Number of genotypes carrying an alternative allele with (" + this.minDP + " <= SUM(AD) <= " + this.maxDP + " and a genotype quality (GQ) >= " + this.minGQ + ") < " + this.minAltHQ);
     getVCF().addFilter(FILTER_ABHET, "Mean allelic balance calculated over heterozygous genotypes was within [" + (0.5 - this.maxABHetDev) + "-" + (0.5 + this.maxABHetDev) + "] in each group (if heterozygous genotypes called)");
     getVCF().addFilter(FILTER_AC0, "AC is equals to 0, genotype with " + this.maxDP + "<SUM(AD) or SUM(AD)<" + this.minDP + " or QC<" + this.minGQ + " or "+this.maxABGenoDev+" < AB dev" + " are set to missing");
     getVCF().addFilter(FILTER_AF1, "AF is equals to 1 (monomorphic site), genotype with " + this.maxDP + "<SUM(AD) or SUM(AD)<" + this.minDP + " or QC<" + this.minGQ + " or "+this.maxABGenoDev+" < AB dev" + " are set to missing");
@@ -597,6 +587,7 @@ public class QC extends ParallelVCFVariantFunction {
   public String[] processInputVariant(Variant variant) {
     Export export = new Export(variant);
     Info info = variant.getInfo();
+    StringBuilder theAB = new StringBuilder();
 
     //DONE Qual by depth (QD) ≥ 2
     if (this.enableMinQD)
@@ -605,7 +596,7 @@ public class QC extends ParallelVCFVariantFunction {
         if (d < this.minQD)
           export.qualByDepth = d + "";
       } catch (NullPointerException | NumberFormatException e) {
-        export.qualByDepth = missing;
+        export.qualByDepth = MISSING;
       }
 
     //DONE Inbreeding coefficient (InbreedingCoeff) either ≥(-0.8) or not calculated
@@ -636,34 +627,34 @@ public class QC extends ParallelVCFVariantFunction {
       if (enableMaxFSSNP)
         try {
           double d = new Double(info.getAnnot(KEY_FS));
-          if (d > this.maxFSSNP)
+          if (d > this.maxFS_SNP)
             export.fs = d + "";
         } catch (NullPointerException | NumberFormatException e) {
-          export.fs = missing;
+          export.fs = MISSING;
         }
       //SOR (Symmetric Odds Ratio of 2x2 contingency table to detect strand bias) ≤3 for SNPs or ≤10 for indels
       if (enableMaxSORSNP)
         try {
           double d = new Double(info.getAnnot(KEY_SOR));
-          if (d > this.maxSORSNP)
+          if (d > this.maxSOR_SNP)
             export.sor = d + "";
         } catch (NullPointerException | NumberFormatException e) {
-          export.sor = missing;
+          export.sor = MISSING;
         }
       //MQ (overall mapping quality of reads supporting a variant call) ≥40 for SNPs or ≥10 for indels
       if (enableMinMQSNP)
         try {
           double d = new Double(info.getAnnot(KEY_MQ));
-          if (d < minMQSNP)
+          if (d < minMQ_SNP)
             export.mq = d + "";
         } catch (NullPointerException | NumberFormatException e) {
-          export.mq = missing;
+          export.mq = MISSING;
         }
       //ReadPosRankSum (Z-score from Wilcoxon rank sum test of Alt vs. Ref read position bias) either ≥(-8) for SNP or ≥(-20) for indels, or not calculated
       if (enableMinRPRSSNP)
         try {
           double d = new Double(info.getAnnot(KEY_READPOSRANKSUM));
-          if (d < minRPRSSNP)
+          if (d < minRPRS_SNP)
             export.readPosRankSum = d + "";
         } catch (NullPointerException | NumberFormatException e) {
           //Nothing
@@ -673,34 +664,34 @@ public class QC extends ParallelVCFVariantFunction {
       if (enableMaxFSIndel)
         try {
           double d = new Double(info.getAnnot(KEY_FS));
-          if (d > maxFSIndel)
+          if (d > maxFS_Indel)
             export.fs = d + "";
         } catch (NullPointerException | NumberFormatException e) {
-          export.fs = missing;
+          export.fs = MISSING;
         }
       //SOR (Symmetric Odds Ratio of 2x2 contingency table to detect strand bias) ≤3 for SNPs or ≤10 for indels
       if (enableMaxSORIndel)
         try {
           double d = new Double(info.getAnnot(KEY_SOR));
-          if (d > maxSORIndel)
+          if (d > maxSOR_Indel)
             export.sor = d + "";
         } catch (NullPointerException | NumberFormatException e) {
-          export.sor = missing;
+          export.sor = MISSING;
         }
       //MQ (overall mapping quality of reads supporting a variant call) ≥40 for SNPs or ≥10 for indels
       if (enableMinMQIndel)
         try {
           double d = new Double(info.getAnnot(KEY_MQ));
-          if (d < minMQIndel)
+          if (d < minMQ_Indel)
             export.mq = d + "";
         } catch (NullPointerException | NumberFormatException e) {
-          export.mq = missing;
+          export.mq = MISSING;
         }
       //ReadPosRankSum (Z-score from Wilcoxon rank sum test of Alt vs. Ref read position bias) either ≥(-8) for SNP or ≥(-20) for indels, or not calculated
       if (enableMinRPRSIndel)
         try {
           double d = new Double(info.getAnnot(KEY_READPOSRANKSUM));
-          if (d < minRPRSIndel)
+          if (d < minRPRS_Indel)
             export.readPosRankSum = d + "";
         } catch (NullPointerException | NumberFormatException e) {
           //Nothing
@@ -710,12 +701,12 @@ public class QC extends ParallelVCFVariantFunction {
     //FS (phred-scaled p-value using Fisher's exact test to detect strand bias) ≤60 for SNPs or ≤200 for indels
     //DONE Call rate ≥ 0.9 in every group
     //DONE Fisher’s exact test comparing number of missing genotypes between groups not significant at 0.1% (p>0.001)
-    //DONE Proportion of genotypes with a depth ≥10 and a genotype quality (gq) ≥20 ≥ 0.8 //global or per group ?, what about mising ? 
+    //DONE Proportion of genotypes with a depth ≥10 and a genotype quality (gq) ≥20 ≥ 0.8 //global or per group ?, what about missing ?
     //DONE At least one of the genotypes carrying an alternative allele with a depth ≥10 and a gq ≥20
     //DONE Mean allelic balance calculated over heterozygous genotypes was within [25%-75%] in each group (not relevant if no heterozygous genotypes called)
     //doesn't match description :
     //must only take into account heterozygous genotypes
-    //mean of AB, and not ABhet
+    //mean of AB, and not ABHET
     //results per groups
     //a) either mean over (AB)
     //b) or recompute with AD/DP, per group : no need for annotation, more accurate
@@ -738,8 +729,8 @@ public class QC extends ParallelVCFVariantFunction {
     //measure callrate for each groups
     int altHQ = 0;
     //double nbHQ = 0;
-    double called[] = new double[this.samples.keySet().size()];
-    double total[] = new double[this.samples.keySet().size()];
+    double[] called = new double[this.samples.keySet().size()];
+    double[] total = new double[this.samples.keySet().size()];
     int i = 0;
     for (String group : this.samples.keySet()) {
       total[i] = this.samples.get(group).size();
@@ -774,16 +765,18 @@ public class QC extends ParallelVCFVariantFunction {
           }
         }
       }
-      if (this.enableMaxABHetDev)
+      if (this.enableMaxABHetDev){
         for (int h = 0; h < variant.getAlleleCount(); h++) {
           double val = Math.abs(0.5 - (numHets[h] / denomHets[h]));
           if (denomHets[h] != 0 && val > this.maxABHetDev) {
-            if (export.abHet.isEmpty())
-              export.abHet = val + "";
+            if (theAB.length() < 1)
+              theAB.append(val);
             else
-              export.abHet += "," + val;
+              theAB.append(",").append(val);
           }
         }
+        export.abHet = theAB.toString();
+      }
       i++;
     }
 
@@ -801,39 +794,39 @@ public class QC extends ParallelVCFVariantFunction {
     export.af1 = "";
     if(enableAF1){
       for (double af : variant.getAF())
-        if (af == 1D)
+        if (af == 1D) {
           export.af1 = "1";
+          break;
+        }
     }
 
+    ArrayList<String> tmpAF = new ArrayList<>();
     if (this.enableMinCallRate)
       for (i = 0; i < total.length; i++)
         if (total[i] == 0)
-          export.callRate += "," + 0;
+          tmpAF.add("0");
         else {
           double af = called[i] / total[i];
           if (af < this.minCallRate)
-            export.callRate += "," + af;
+            tmpAF.add(af+"");
         }
 
-    if (!export.callRate.isEmpty())
-      export.callRate = export.callRate.substring(1);
+    if (!tmpAF.isEmpty())
+      export.callRate = String.join(",", tmpAF);
     else
       if (this.enableMinFisherCallRate) {
+        ArrayList<String> tmpFisher = new ArrayList<>();
         //if(!export.callRate.isEmpty())
         for (i = 0; i < total.length - 1; i++)
           for (int j = i + 1; j < total.length; j++) {
             double fisher = fisherET.twoTailed((int) called[i], (int) called[j], (int) (total[i] - called[i]), (int) (total[j] - called[j]));
             if (fisher <= this.minFisherCallRate)
-              export.fisherCallRate += "," + fisher;
+              tmpFisher.add(fisher+"");
           }
-        if (!export.fisherCallRate.isEmpty())
-          export.fisherCallRate = export.fisherCallRate.substring(1);
+        if (!tmpFisher.isEmpty())
+          export.fisherCallRate = String.join(",", tmpFisher);
       }
 
-    /*double lowQual = nbHQ / variant.getGenotypes().length;
-    if (this.enableMinHQRatio)
-      if (lowQual < this.minHQRatio)
-        export.lowQual = lowQual + "";*/
     if (this.enableMinAltHQ)
       if (altHQ < this.minAltHQ)
         export.altLowQual = altHQ + "";
@@ -865,6 +858,7 @@ public class QC extends ParallelVCFVariantFunction {
     return true;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) { //TODO unsorted output
     try {
@@ -890,10 +884,8 @@ public class QC extends ParallelVCFVariantFunction {
           count[IDX_MQ]++;
         if (!export.readPosRankSum.isEmpty())
           count[IDX_READPOSRANKSUM]++;
-   /*     if (!export.lowQual.isEmpty())
-          count[IDX_LOWQUAL]++;*/
         if (!export.altLowQual.isEmpty())
-          count[IDX_ALTLOWQUAL]++;
+          count[IDX_ALT_LOWQUAL]++;
         if (!export.abHet.isEmpty())
           count[IDX_ABHET]++;
         if (!export.ac0.isEmpty())
@@ -910,7 +902,7 @@ public class QC extends ParallelVCFVariantFunction {
     return false;
   }
 
-  private class Export implements Comparable<Export> {
+  private static class Export implements Comparable<Export> {
 
     private final String chrom;
     private final String pos;
@@ -998,6 +990,7 @@ public class QC extends ParallelVCFVariantFunction {
     }
   }
 
+  @SuppressWarnings("SpellCheckingInspection")
   @Override
   public TestingScript[] getScripts() {
     return new TestingScript[]{
@@ -1007,18 +1000,18 @@ public class QC extends ParallelVCFVariantFunction {
     };
   }
 
-  class CustomScript extends TestingScript {
+  private static class CustomScript extends TestingScript {
 
     private final String datedReportFilename;
     private final String undatedReportFilename;
 
-    CustomScript(String vcf, String ped, String paramfile) {
+    CustomScript(String vcf, String ped, String paramFile) {
       super(TestingScript.FILE, 1);
       this.addAnonymousFilename("vcf", vcf);
       this.addAnonymousFilename("ped", ped);
-      this.addNamingFilename("opt", paramfile);
+      this.addNamingFilename("opt", paramFile);
       
-      String tmpParam = (paramfile.endsWith(".tsv")) ? paramfile.substring(0, paramfile.length() - 4) : paramfile;
+      String tmpParam = (paramFile.endsWith(".tsv")) ? paramFile.substring(0, paramFile.length() - 4) : paramFile;
       this.undatedReportFilename  = "$DIR/report." + tmpParam;
       this.datedReportFilename = this.undatedReportFilename + ".$r";
     }

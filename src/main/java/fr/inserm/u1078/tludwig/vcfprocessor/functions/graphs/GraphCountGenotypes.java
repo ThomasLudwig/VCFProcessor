@@ -35,6 +35,7 @@ public class GraphCountGenotypes extends GraphFunction {
     return new Description(this.getSummary());
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
     ArrayList<Graph> graphs = this.createGraph();

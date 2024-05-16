@@ -1,8 +1,5 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.test;
 
-import java.util.ArrayList;
-import java.util.TreeMap;
-
 /**
  * XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  *
@@ -13,7 +10,17 @@ import java.util.TreeMap;
  */
 public class Sandbox {
 
-  public static final void main(String[] args){
+  public static void main(String[] args) {
+
+    for(int i = 0 ; i < 10; i++)
+      System.out.println("i = "+i);
+
+    System.out.println("*********************");
+
+    for(int i = 0 ; i < 10; ++i)
+      System.out.println("i = "+i);
+
+    /*
     ArrayList<String> list = new ArrayList<>();
     TreeMap<String, ArrayList<String>> map = new TreeMap<>();
     list.add("a");
@@ -27,5 +34,33 @@ public class Sandbox {
       for(String element : map.get(key))
         System.out.println("   "+element);
     }
+
+     */
+
+
+    /*String s = "0/1";
+    String[] f = s.split("/");
+    System.out.println("f length "+f.length);
+    for(String st : f)
+      System.out.println("--> "+st);*/
+    testClass();
+  }
+
+  private static void testAssert(int i){
+    assert i > 0 : i+" is not positive !" ;
+    System.out.println("Yeah ! "+i+"> 0");
+  }
+
+  public static void testClass() {
+    checkClass(Sandbox.class);
+    checkClass(String.class);
+  }
+
+  public static void checkClass(Class<?> c){
+    if(c.equals(Sandbox.class))
+      System.out.println("yes");
+    else
+      System.out.println("no");
+
   }
 }

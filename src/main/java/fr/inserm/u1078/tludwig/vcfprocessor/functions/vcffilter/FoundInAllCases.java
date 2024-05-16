@@ -18,7 +18,7 @@ import java.util.ArrayList;
  * Unit Test defined on   2020-08-03
  */
 public class FoundInAllCases extends ParallelVCFVariantFilterFunction {
-  public final PedFileParameter pedfile = new PedFileParameter();
+  public final PedFileParameter pedFile = new PedFileParameter();
   private ArrayList<Sample> cases;
 
   @Override
@@ -26,23 +26,27 @@ public class FoundInAllCases extends ParallelVCFVariantFilterFunction {
     return "Keeps Variants found in every \"Case\" samples";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
-            .addLine("Case samples are defined by a \"1\" in the 6th field of the " + Description.code(this.pedfile.getKey()) + " file.")
+            .addLine("Case samples are defined by a \"1\" in the 6th field of the " + Description.code(this.pedFile.getKey()) + " file.")
             .addLine("In case of a multiallelic variant, if any variant allele is found or missing, the whole variant is kept.");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_FILTER_ONE;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -53,6 +57,7 @@ public class FoundInAllCases extends ParallelVCFVariantFilterFunction {
     return OUT_VCF;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();

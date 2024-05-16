@@ -1,7 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcfannotate;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.AnnotationException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Info;
@@ -9,7 +8,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPAnnotation;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 /**
- * For each variant, add the most severe consequence from vep and add the consequence from vep for the annotation marked as Canonical.
+ * For each variant, add the most severe VEP consequence and add the VEP consequence for the annotation marked as Canonical.
  * 
  * @author Thomas E. Ludwig (INSERM - U1078) 
  * Started on             2018-03-13
@@ -18,10 +17,10 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
  */
 public class AddWorstAndCanonicalConsequence extends ParallelVCFFunction {
 
-  public static final String KEY_WORST_CSQ = "WORSTCSQ";
-  public static final String KEY_WORST_GENE = "WORSTGENE";
-  public static final String KEY_CANONICAL_CSQ = "CANONICALCSQ";
-  public static final String KEY_CANONICAL_GENE = "CANONICALGENE";
+  public static final String KEY_WORST_CSQ = "WORST_CSQ";
+  public static final String KEY_WORST_GENE = "WORST_GENE";
+  public static final String KEY_CANONICAL_CSQ = "CANONICAL_CSQ";
+  public static final String KEY_CANONICAL_GENE = "CANONICAL_GENE";
 
   public static final String HEADER_WORST_CSQ = "##INFO=<ID=" + KEY_WORST_CSQ + ",Number=A,Type=String,Description=\"Most Severe vep Consequence for the variant\">";
   public static final String HEADER_WORST_GENE = "##INFO=<ID=" + KEY_WORST_GENE + ",Number=A,Type=String,Description=\"Gene affected by Most Severe vep Consequence for the variant\">";
@@ -33,6 +32,7 @@ public class AddWorstAndCanonicalConsequence extends ParallelVCFFunction {
     return "For each variant, add the most severe consequence from vep and add the consequence from vep for the annotation marked as Canonical.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
@@ -44,16 +44,19 @@ public class AddWorstAndCanonicalConsequence extends ParallelVCFFunction {
             .addLine("If no annotation is marked as canonical, the most severe consequence is kept");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ANNOTATION_FOR_ALL;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -68,40 +71,37 @@ public class AddWorstAndCanonicalConsequence extends ParallelVCFFunction {
   public String[] processInputLine(String line) {
     String[] f = line.split("\t");
     int nbAllele = 1 + f[VCF.IDX_ALT].split(",").length;
-    try {
-      Info info = new Info(f[VCF.IDX_INFO], getVCF());
-      String worstCsq = "";
-      String canonicalCsq = "";
-      String worstGene = "";
-      String canonicalGene = "";
-      for (int a = 1; a < nbAllele; a++) {
-        VEPAnnotation worst = info.getWorstVEPAnnotation(a);
-        VEPAnnotation canon = info.getCanonicalVEPAnnotation(a);
-        worstCsq += "," + worst.getConsequence();
-        worstGene += "," + worst.getSYMBOL();
-        canonicalCsq += "," + canon.getConsequence();
-        canonicalGene += "," + canon.getSYMBOL();
-      }
-      if (worstCsq.length() == 0)
-        worstCsq = ",";
-      if (worstGene.length() == 0)
-        worstGene = ",";
-      if (canonicalCsq.length() == 0)
-        canonicalCsq = ",";
-      if (canonicalGene.length() == 0)
-        canonicalGene = ",";
-      return new String[]{VCF.addInfo(line, new String[]{KEY_WORST_CSQ + "=" + worstCsq.substring(1), KEY_WORST_GENE + "=" + worstGene.substring(1), KEY_CANONICAL_CSQ + "=" + canonicalCsq.substring(1), KEY_CANONICAL_GENE + "=" + canonicalGene.substring(1)})};
-    } catch (AnnotationException e) {
-      e.printStackTrace();
+    Info info = new Info(f[VCF.IDX_INFO], getVCF());
+    StringBuilder worstCsq = new StringBuilder();
+    StringBuilder canonicalCsq = new StringBuilder();
+    StringBuilder worstGene = new StringBuilder();
+    StringBuilder canonicalGene = new StringBuilder();
+    for (int a = 1; a < nbAllele; a++) {
+      VEPAnnotation worst = info.getWorstVEPAnnotation(a);
+      VEPAnnotation canon = info.getCanonicalVEPAnnotation(a);
+      worstCsq.append(",").append(worst.getConsequence());
+      worstGene.append(",").append(worst.getSYMBOL());
+      canonicalCsq.append(",").append(canon.getConsequence());
+      canonicalGene.append(",").append(canon.getSYMBOL());
     }
-    return NO_OUTPUT;
+    if (worstCsq.length() == 0)
+      worstCsq = new StringBuilder(",");
+    if (worstGene.length() == 0)
+      worstGene = new StringBuilder(",");
+    if (canonicalCsq.length() == 0)
+      canonicalCsq = new StringBuilder(",");
+    if (canonicalGene.length() == 0)
+      canonicalGene = new StringBuilder(",");
+    return new String[]{VCF.addInfo(line, new String[]{KEY_WORST_CSQ + "=" + worstCsq.substring(1), KEY_WORST_GENE + "=" + worstGene.substring(1), KEY_CANONICAL_CSQ + "=" + canonicalCsq.substring(1), KEY_CANONICAL_GENE + "=" + canonicalGene.substring(1)})};
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String[] getExtraHeaders(){
     return new String[]{HEADER_WORST_CSQ, HEADER_WORST_GENE, HEADER_CANONICAL_CSQ, HEADER_CANONICAL_GENE};
   } 
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

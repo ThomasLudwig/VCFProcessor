@@ -16,13 +16,14 @@ import java.util.ArrayList;
  */
 public class VCF2TSV extends ParallelVCFFunction { 
 
-  String[] hvep;
+  String[] vepHeaders;
 
   @Override
   public String getSummary() {
     return "Creates a TSV file, readable in Excel.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("Creates a TSV file, that can be opened in Excel.")
@@ -30,16 +31,19 @@ public class VCF2TSV extends ParallelVCFFunction {
             .addLine("All vep annotation are formatted and shown.");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -50,6 +54,7 @@ public class VCF2TSV extends ParallelVCFFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders(){
     String[] vh = getVCF().getSampleHeader().split(T);
@@ -57,8 +62,8 @@ public class VCF2TSV extends ParallelVCFFunction {
     for (int i = 1; i < 8; i++)
       header.addColumn(vh[i]);
 
-    if (hvep != null)
-      for (String v : hvep)
+    if (vepHeaders != null)
+      for (String v : vepHeaders)
         header.addColumn(v);
 
     for (int i = 8; i < vh.length; i++)
@@ -67,16 +72,17 @@ public class VCF2TSV extends ParallelVCFFunction {
     return new String[]{header.toString()};
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
-    hvep = null;
+    vepHeaders = null;
     for (String header : getVCF().getHeadersWithoutSamples())
       if (header.startsWith("##INFO=<ID=CSQ")) {
         String[] f = header.split("\\s+");
         String s = f[f.length - 1];
         s = s.substring(0, s.length() - 2);
-        hvep = s.split("\\|");
+        vepHeaders = s.split("\\|");
         break;
       }
   }
@@ -103,7 +109,7 @@ public class VCF2TSV extends ParallelVCFFunction {
     //ArrayList<String[]> frexs = new ArrayList<>();
 
     /*
-      if (inf.startsWith("FREX=")) {//TODO bug adding FrEx in reccords but not in the header
+      if (inf.startsWith("FREX=")) {//TODO bug adding FrEx in records but not in the header
         String[] frex = inf.substring(5).split(",");
         //skip ref allele
         for (int ifr = 1; ifr < frex.length; ifr++) {
@@ -127,8 +133,8 @@ public class VCF2TSV extends ParallelVCFFunction {
           out.append(fields[c]);
       }
 
-      if (hvep != null)
-        for (int s = 0; s < hvep.length; s++) {
+      if (vepHeaders != null)
+        for (int s = 0; s < vepHeaders.length; s++) {
           out.addColumn();
           if (l < veps.size())
             if (veps.get(l)[s] != null)
@@ -146,6 +152,7 @@ public class VCF2TSV extends ParallelVCFFunction {
     return outs;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;

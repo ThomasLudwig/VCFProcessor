@@ -8,7 +8,6 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
-import java.util.ArrayList;
 import java.util.NavigableSet;
 
 /**
@@ -29,24 +28,28 @@ public class ExtractNeighbours extends VCFFunction {
     return "Creates a bed file of the positions where at least one sample has 2 SNVs that could be in the same triplet (regardless of the reading frame)";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("Scans the whole VCF file, for each successive variants V1 and V2")
             .addLine("if at least one sample has the variants V1 and V2 then a bed regions if printed. The region is defined as :")
-            .addColumns(new String[]{"chr", "V1_pos", "V2_pos"})
+            .addColumns("chr", "V1_pos", "V2_pos")
             .addLine("V1 and V2 must be on the same chromosome and V2_pos-V1_pos = 1 or V2_pos-V1_pos = 2");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return "chr V1_pos V2_pos is printed if, at least one alternate allele of V1_pos and V2_pos is a SNP, and if one sample has a variant of both side (not necessarily the SNP one)."; //TODO change implementation
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -57,9 +60,10 @@ public class ExtractNeighbours extends VCFFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
-    VCF vcf = this.vcffile.getVCF(VCF.STEP10000);
+    VCF vcf = this.vcfFile.getVCF(VCF.STEP10000);
     Reader reader = vcf.getReaderAndStart();
     samples = vcf.getSamples();
     Wrapper previous = reader.nextLine();
@@ -73,8 +77,8 @@ public class ExtractNeighbours extends VCFFunction {
 
   private void compare(Wrapper previousW, Wrapper currentW, VCF vcf) {
 
-    String p[] = previousW.line.split(T);
-    String c[] = currentW.line.split(T);
+    String[] p = previousW.line.split(T);
+    String[] c = currentW.line.split(T);
     if (!p[0].equals(c[0]))
       return;
     int posP = new Integer(p[1]);
@@ -90,8 +94,7 @@ public class ExtractNeighbours extends VCFFunction {
               println(previous.getChrom() + T + previous.getPos() + T + current.getPos());
               return;
             }
-      } catch (Exception e) {
-      }
+      } catch (Exception ignore) { }
   }
   
   @Override

@@ -27,12 +27,12 @@ public class PositionFilter extends LineFilter {
   /**
    * This method is called from the pos and position command line, that handles commandline arguments and file
    *
-   * @param position
-   * @throws java.lang.Exception
+   * @param position the position to add
+   * @throws java.lang.Exception if something went wrong
    */
   public void addPosition(String position) throws Exception {
     //check if line is empty, trim removes #
-    //check if line is multi column
+    //check if line is multi-column
     //check if multi position
     
     String trimmed = position.trim().split("#")[0].trim();
@@ -80,20 +80,20 @@ public class PositionFilter extends LineFilter {
   /**
    * This method is called from the bed command line, that handles bed file arguments
    *
-   * @param position
-   * @throws java.lang.Exception
+   * @param position the Bed position to add
+   * @throws java.lang.Exception if something went wrong
    */
   public void addBedPosition(String position) throws Exception {
     //check if line is empty, trim removes #
-    //line is multi column
+    //line is multi-column
     
     String trimmed = position.trim().split("#")[0].trim();
     if (trimmed.isEmpty())
       return;
     String[] f = trimmed.split("\\s+");
     String chr = f[0];
-    int start = 1;
-    int end = Integer.MAX_VALUE;
+    int start;
+    int end;
     
     if(f.length > 2) {
       start = new Integer(f[1]);

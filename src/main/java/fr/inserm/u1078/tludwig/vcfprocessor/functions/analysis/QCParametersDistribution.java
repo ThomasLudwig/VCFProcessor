@@ -39,7 +39,7 @@ import java.util.HashMap;
  * Last Tested on         2020-08-14
  */
 public class QCParametersDistribution extends ParallelVCFVariantFunction {
-  public final PedFileParameter pedfile = new PedFileParameter();
+  public final PedFileParameter pedFile = new PedFileParameter();
 
   HashMap<String, ArrayList<String>> samples;
   private FisherExactTest fisherET;
@@ -48,41 +48,45 @@ public class QCParametersDistribution extends ParallelVCFVariantFunction {
   private NumberSeries fisherCallrateSB;
   private NumberSeries qualByDepthSB;
   private NumberSeries inbreedingCoefSB;
-  private NumberSeries mqrsSB;
-  private NumberSeries fssnpSB;
-  private NumberSeries sorsnpSB;
-  private NumberSeries mqsnpSB;
-  private NumberSeries rprssnpSB;
-  private NumberSeries fsindelSB;
-  private NumberSeries sorindelSB;
-  private NumberSeries mqindelSB;
-  private NumberSeries rprsindelSB;
+  private NumberSeries mq_rsSB;
+  private NumberSeries fs_snpSB;
+  private NumberSeries sor_snpSB;
+  private NumberSeries mq_snpSB;
+  private NumberSeries rprs_snpSB;
+  private NumberSeries fs_indelSB;
+  private NumberSeries sor_indelSB;
+  private NumberSeries mq_indelSB;
+  private NumberSeries rprs_indelSB;
   private NumberSeries hqPercentSB;
   private NumberSeries gqSB;
   private NumberSeries sumADSB;
-  private NumberSeries abHetdistSB;
+  private NumberSeries abHetDistSB;
 
   @Override
   public String getSummary() {
     return "Reports the distributions of each parameter used by " + QC.class.getSimpleName();
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
             .addLine("One parameter per line, sorted values");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return "The VCF File must contain the following INFO : " + String.join(",", KEYS);
@@ -93,83 +97,83 @@ public class QCParametersDistribution extends ParallelVCFVariantFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     try {
       Analysis a = (Analysis)analysis;
-      if(a.callrates != null)
-        for(double callrate : a.callrates)
-          callrateSB.add(callrate);
-      if(a.fishers != null)
-        for(double fisher : a.fishers)
-          fisherCallrateSB.add(fisher);
+      for(double callrate : a.callrates)
+        callrateSB.add(callrate);
+      for(double fisher : a.fishers)
+        fisherCallrateSB.add(fisher);
       if(a.qd != null)
         qualByDepthSB.add(a.qd);
       if(a.inbreeding != null)
         inbreedingCoefSB.add(a.inbreeding);
       if(a.mqranksum != null)
-        mqrsSB.add(a.mqranksum);
-      if(a.fssnp != null)
-        fssnpSB.add(a.fssnp);
-      if(a.sorsnp != null)
-        sorsnpSB.add(a.sorsnp);
-      if(a.mqsnp != null)
-        mqsnpSB.add(a.mqsnp);
-      if(a.rprssnp != null)
-        rprssnpSB.add(a.rprssnp);
-      if(a.fsindel != null)
-        fsindelSB.add(a.fsindel);
-      if(a.sorindel != null)
-        sorindelSB.add(a.sorindel);
-      if(a.mqindel != null)
-        mqindelSB.add(a.mqindel);
-      if(a.rprsindel != null)
-        rprsindelSB.add(a.rprsindel);
+        mq_rsSB.add(a.mqranksum);
+      if(a.fs_snp != null)
+        fs_snpSB.add(a.fs_snp);
+      if(a.sor_snp != null)
+        sor_snpSB.add(a.sor_snp);
+      if(a.mq_snp != null)
+        mq_snpSB.add(a.mq_snp);
+      if(a.rprs_snp != null)
+        rprs_snpSB.add(a.rprs_snp);
+      if(a.fs_indel != null)
+        fs_indelSB.add(a.fs_indel);
+      if(a.sor_indel != null)
+        sor_indelSB.add(a.sor_indel);
+      if(a.mq_indel != null)
+        mq_indelSB.add(a.mq_indel);
+      if(a.rprs_indel != null)
+        rprs_indelSB.add(a.rprs_indel);
       if(a.hqPercent != null)
         hqPercentSB.add(a.hqPercent);
-      if(a.gqs != null)
-        for(int gq : a.gqs)
-          gqSB.add(gq);
-      if(a.sumADs != null)
-        for(int sumAD : a.sumADs)
-          sumADSB.add(sumAD);
-      if(a.distABHets != null)
-        for(double distABHet : a.distABHets)
-          abHetdistSB.add(distABHet);
+      for(int gq : a.gqs)
+        gqSB.add(gq);
+      for(int sumAD : a.sumADs)
+        sumADSB.add(sumAD);
+      for(double distABHet : a.distABHets)
+        abHetDistSB.add(distABHet);
       return true;
     } catch (Exception e) {
-      e.printStackTrace();
+      Message.error("Error while checking analysis results", e);
     }
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
-  public void end() {
-    super.end();
-      println(callrateSB.getAllValuesAsString());
-      println(fisherCallrateSB.getAllValuesAsString());
-      println(qualByDepthSB.getAllValuesAsString());
-      println(inbreedingCoefSB.getAllValuesAsString());
-      println(mqrsSB.getAllValuesAsString());
-      println(fssnpSB.getAllValuesAsString());
-      println(sorsnpSB.getAllValuesAsString());
-      println(mqsnpSB.getAllValuesAsString());
-      println(rprssnpSB.getAllValuesAsString());
-      println(fsindelSB.getAllValuesAsString());
-      println(sorindelSB.getAllValuesAsString());
-      println(mqindelSB.getAllValuesAsString());
-      println(rprsindelSB.getAllValuesAsString());
-      println(hqPercentSB.getAllValuesAsString());
-      println(gqSB.getAllValuesAsString());
-      println(sumADSB.getAllValuesAsString());
-      println(abHetdistSB.getAllValuesAsString());
+  public String[] getFooters() {
+    ArrayList<String> out = new ArrayList<>();
+    out.add(callrateSB.getAllValuesAsString());
+    out.add(fisherCallrateSB.getAllValuesAsString());
+    out.add(qualByDepthSB.getAllValuesAsString());
+    out.add(inbreedingCoefSB.getAllValuesAsString());
+    out.add(mq_rsSB.getAllValuesAsString());
+    out.add(fs_snpSB.getAllValuesAsString());
+    out.add(sor_snpSB.getAllValuesAsString());
+    out.add(mq_snpSB.getAllValuesAsString());
+    out.add(rprs_snpSB.getAllValuesAsString());
+    out.add(fs_indelSB.getAllValuesAsString());
+    out.add(sor_indelSB.getAllValuesAsString());
+    out.add(mq_indelSB.getAllValuesAsString());
+    out.add(rprs_indelSB.getAllValuesAsString());
+    out.add(hqPercentSB.getAllValuesAsString());
+    out.add(gqSB.getAllValuesAsString());
+    out.add(sumADSB.getAllValuesAsString());
+    out.add(abHetDistSB.getAllValuesAsString());
+    return out.toArray(new String[0]);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return null;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
@@ -177,43 +181,44 @@ public class QCParametersDistribution extends ParallelVCFVariantFunction {
     fisherCallrateSB = new NumberSeries("Fisher(CallRate)", SortedList.Strategy.SORT_AFTERWARDS);
     qualByDepthSB = new NumberSeries("QualByDepth", SortedList.Strategy.SORT_AFTERWARDS);
     inbreedingCoefSB = new NumberSeries("InbreedingCoef", SortedList.Strategy.SORT_AFTERWARDS);
-    mqrsSB = new NumberSeries("MQRankSum", SortedList.Strategy.SORT_AFTERWARDS);
-    fssnpSB = new NumberSeries("FS-snp", SortedList.Strategy.SORT_AFTERWARDS);
-    sorsnpSB = new NumberSeries("SOR-snp", SortedList.Strategy.SORT_AFTERWARDS);
-    mqsnpSB = new NumberSeries("MQ-snp", SortedList.Strategy.SORT_AFTERWARDS);
-    rprssnpSB = new NumberSeries("RPRS-snp", SortedList.Strategy.SORT_AFTERWARDS);
-    fsindelSB = new NumberSeries("FS-indel", SortedList.Strategy.SORT_AFTERWARDS);
-    sorindelSB = new NumberSeries("SOR-indel", SortedList.Strategy.SORT_AFTERWARDS);
-    mqindelSB = new NumberSeries("MQ-indel", SortedList.Strategy.SORT_AFTERWARDS);
-    rprsindelSB = new NumberSeries("RPRS-indel", SortedList.Strategy.SORT_AFTERWARDS);
+    mq_rsSB = new NumberSeries("MQRankSum", SortedList.Strategy.SORT_AFTERWARDS);
+    fs_snpSB = new NumberSeries("FS-snp", SortedList.Strategy.SORT_AFTERWARDS);
+    sor_snpSB = new NumberSeries("SOR-snp", SortedList.Strategy.SORT_AFTERWARDS);
+    mq_snpSB = new NumberSeries("MQ-snp", SortedList.Strategy.SORT_AFTERWARDS);
+    rprs_snpSB = new NumberSeries("RPRS-snp", SortedList.Strategy.SORT_AFTERWARDS);
+    fs_indelSB = new NumberSeries("FS-indel", SortedList.Strategy.SORT_AFTERWARDS);
+    sor_indelSB = new NumberSeries("SOR-indel", SortedList.Strategy.SORT_AFTERWARDS);
+    mq_indelSB = new NumberSeries("MQ-indel", SortedList.Strategy.SORT_AFTERWARDS);
+    rprs_indelSB = new NumberSeries("RPRS-indel", SortedList.Strategy.SORT_AFTERWARDS);
     hqPercentSB = new NumberSeries("HQ%", SortedList.Strategy.SORT_AFTERWARDS);
     gqSB = new NumberSeries("GQ", SortedList.Strategy.SORT_AFTERWARDS);
     sumADSB = new NumberSeries("SUM(AD)", SortedList.Strategy.SORT_AFTERWARDS);
-    abHetdistSB = new NumberSeries("ABHetDistanceFrom0.5", SortedList.Strategy.SORT_AFTERWARDS);
+    abHetDistSB = new NumberSeries("ABHetDistanceFrom0.5", SortedList.Strategy.SORT_AFTERWARDS);
 
     this.samples = new HashMap<>();
-    if ("null".equals(this.pedfile.getFilename())) {
-      String group = "NOGROUP";
+    if ("null".equals(this.pedFile.getFilename())) {
+      String group = "NO_GROUP";
       ArrayList<String> ss = new ArrayList<>();
       for (Sample sample : getVCF().getSamples())
         ss.add(sample.getId());
       this.samples.put(group, ss);
     } else {
       try {
-        Ped ped = this.pedfile.getPed();
+        Ped ped = this.pedFile.getPed();
         for (Sample s : getVCF().getSamples()) {
           String id = s.getId();
           Sample sample = ped.getSample(id);
           if (sample == null)
-            this.fatalAndDie("Sample not found [" + id + "]");
-          
-          String group = "" + sample.getGroup() + sample.getPhenotype();
+            this.fatalAndQuit("Sample not found [" + id + "]");
+
+          assert sample != null : "Sample is null";
+          String group = sample.getGroup() + sample.getPhenotype();
           if (!samples.containsKey(group))
             samples.put(group, new ArrayList<>());
           samples.get(group).add(id);
         }
       } catch (PedException ex) {
-        this.fatalAndDie("Could not read Ped file", ex);
+        this.fatalAndQuit("Could not read Ped file", ex);
       }
     }
 
@@ -238,62 +243,45 @@ public class QCParametersDistribution extends ParallelVCFVariantFunction {
 
     try {
       a.qd = new Double(info.getAnnot(KEY_QD));
-    } catch (Exception e) {
-    }
+    } catch (Exception ignore) { }
     try {
       a.inbreeding = new Double(info.getAnnot(KEY_INBREEDING));
-    } catch (Exception e) {
-      //Nothing
-    }
+    } catch (Exception ignore) { }
     try {
       a.mqranksum = new Double(info.getAnnot(KEY_MQRANKSUM));
-    } catch (Exception e) {
-      //Nothing
-    }
+    } catch (Exception ignore) { }
 
     if (variant.hasSNP()) {
       try {
-        a.fssnp = new Double(info.getAnnot(KEY_FS));
-      } catch (Exception e) {
-
-      }
+        a.fs_snp = new Double(info.getAnnot(KEY_FS));
+      } catch (Exception ignore) { }
       try {
-        a.sorsnp = new Double(info.getAnnot(KEY_SOR));
-      } catch (Exception e) {
-      }
+        a.sor_snp = new Double(info.getAnnot(KEY_SOR));
+      } catch (Exception ignore) { }
       try {
-        a.mqsnp = new Double(info.getAnnot(KEY_MQ));
-      } catch (Exception e) {
-      }
+        a.mq_snp = new Double(info.getAnnot(KEY_MQ));
+      } catch (Exception ignore) { }
       try {
-        a.rprssnp = new Double(info.getAnnot(KEY_READPOSRANKSUM));
-      } catch (Exception e) {
-        //Nothing
-      }
+        a.rprs_snp = new Double(info.getAnnot(KEY_READPOSRANKSUM));
+      } catch (Exception ignore) { }
     } else {
       try {
-        a.fsindel = new Double(info.getAnnot(KEY_FS));
-      } catch (Exception e) {
-
-      }
+        a.fs_indel = new Double(info.getAnnot(KEY_FS));
+      } catch (Exception ignore) { }
       try {
-        a.sorindel = new Double(info.getAnnot(KEY_SOR));
-      } catch (Exception e) {
-      }
+        a.sor_indel = new Double(info.getAnnot(KEY_SOR));
+      } catch (Exception ignore) { }
       try {
-        a.mqindel = new Double(info.getAnnot(KEY_MQ));
-      } catch (Exception e) {
-      }
+        a.mq_indel = new Double(info.getAnnot(KEY_MQ));
+      } catch (Exception ignore) { }
       try {
-        a.rprsindel = new Double(info.getAnnot(KEY_READPOSRANKSUM));
-      } catch (Exception e) {
-        //Nothing
-      }
+        a.rprs_indel = new Double(info.getAnnot(KEY_READPOSRANKSUM));
+      } catch (Exception ignore) { }
     }
 
     double nbHQ = 0;
-    double called[] = new double[this.samples.keySet().size()];
-    double total[] = new double[this.samples.keySet().size()];
+    double[] called = new double[this.samples.keySet().size()];
+    double[] total = new double[this.samples.keySet().size()];
     int i = 0;
     for (String group : this.samples.keySet()) {
       total[i] = this.samples.get(group).size();
@@ -361,25 +349,25 @@ public class QCParametersDistribution extends ParallelVCFVariantFunction {
     return TestingScript.getSimpleVCFPedAnalysisScript();
   }
 
-  private class Analysis {
+  private static class Analysis {
 
     Double qd = null;
     Double inbreeding = null;
     Double mqranksum = null;
-    Double fssnp = null;
-    Double sorsnp = null;
-    Double mqsnp = null;
-    Double rprssnp = null;
-    Double fsindel = null;
-    Double sorindel = null;
-    Double mqindel = null;
-    Double rprsindel = null;
+    Double fs_snp = null;
+    Double sor_snp = null;
+    Double mq_snp = null;
+    Double rprs_snp = null;
+    Double fs_indel = null;
+    Double sor_indel = null;
+    Double mq_indel = null;
+    Double rprs_indel = null;
     int altHQ = 0;
-    ArrayList<Double> distABHets = new ArrayList<>();
-    ArrayList<Double> callrates = new ArrayList<>();
-    ArrayList<Double> fishers = new ArrayList<>();
-    ArrayList<Integer> sumADs = new ArrayList<>();
-    ArrayList<Integer> gqs = new ArrayList<>();
+    final ArrayList<Double> distABHets = new ArrayList<>();
+    final ArrayList<Double> callrates = new ArrayList<>();
+    final ArrayList<Double> fishers = new ArrayList<>();
+    final ArrayList<Integer> sumADs = new ArrayList<>();
+    final ArrayList<Integer> gqs = new ArrayList<>();
     Double hqPercent = 0d;
   }
 }

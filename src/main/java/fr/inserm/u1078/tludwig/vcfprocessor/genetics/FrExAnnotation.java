@@ -8,14 +8,14 @@ import fr.inserm.u1078.tludwig.maok.tools.ArrayTools;
  */
 public class FrExAnnotation {
 
-  private final String alleles[];
-  private final double frexFreq[];
-  private final double bordeauxFreq[];
-  private final double brestFreq[];
-  private final double dijonFreq[];
-  private final double lilleFreq[];
-  private final double nantesFreq[];
-  private final double rouenFreq[];
+  private final String[] alleles;
+  private final double[] frexFreq;
+  private final double[] bordeauxFreq;
+  private final double[] brestFreq;
+  private final double[] dijonFreq;
+  private final double[] lilleFreq;
+  private final double[] nantesFreq;
+  private final double[] rouenFreq;
 
   FrExAnnotation() {
     this.alleles = new String[]{" "};
@@ -56,9 +56,7 @@ public class FrExAnnotation {
   private double convertFrequency(String string) {
     try {
       return Double.parseDouble(string);
-    } catch (NumberFormatException e) {
-
-    }
+    } catch (NumberFormatException ignore) { }
     return 0;
   }
 

@@ -37,7 +37,7 @@ public class Description {
     return "<tt>" + text.trim() + "</tt>";
   }
 
-  public static String function(Class clazz) {
+  public static String function(Class<?> clazz) {
     return "<ref>" + clazz.getSimpleName() + "</ref>";
   }
 
@@ -47,8 +47,7 @@ public class Description {
   }
   
   public Description addLine(Description d){
-    for(Element e : d.elements)
-      this.elements.add(e);
+    this.elements.addAll(d.elements);
     return this;
   }
 
@@ -88,8 +87,7 @@ public class Description {
   }
   
   public Description addDescription(Description d){
-    for(Element e : d.elements)
-      this.elements.add(e);
+    this.elements.addAll(d.elements);
     return this;
   }
 

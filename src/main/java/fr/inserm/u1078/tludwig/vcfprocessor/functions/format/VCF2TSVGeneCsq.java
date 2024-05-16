@@ -2,7 +2,6 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.format;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
-import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.ConsequenceParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
@@ -33,6 +32,7 @@ public class VCF2TSVGeneCsq extends VCF2TSV { //TODO should not exist, use genes
     return "Creates a TSV file, readable in Excel, keeps only annotations for given genes and consequences";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description("Creates a TSV file, that can be opened in Excel.")
@@ -42,11 +42,13 @@ public class VCF2TSVGeneCsq extends VCF2TSV { //TODO should not exist, use genes
             .addLine("Only the variants with consequence at least as severe as the one given are displayed.");
   }
   
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
@@ -57,16 +59,16 @@ public class VCF2TSVGeneCsq extends VCF2TSV { //TODO should not exist, use genes
       while ((line = in.readLine()) != null)
         genes.add(line.toLowerCase());
     } catch (IOException e) {
-      this.fatalAndDie("Could not read gene list from file "+this.geneFile.getFilename(), e);
+      this.fatalAndQuit("Could not read gene list from file "+this.geneFile.getFilename(), e);
     }    
 
     symbolCol = -1;
     csqCol = -1;
 
-    for (int i = 0; i < hvep.length; i++) {
-      if (hvep[i].equalsIgnoreCase("consequence"))
+    for (int i = 0; i < vepHeaders.length; i++) {
+      if (vepHeaders[i].equalsIgnoreCase("consequence"))
         csqCol = i;
-      if (hvep[i].equalsIgnoreCase("symbol"))
+      if (vepHeaders[i].equalsIgnoreCase("symbol"))
         symbolCol = i;
     }
   }

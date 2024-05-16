@@ -20,27 +20,30 @@ public class HQ extends ParallelVCFVariantFilterFunction {
     return "Extract HQ variants.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
-    return new Description("Extract HQ variants. Defined in 1.12 of the supllementary information of PubMedID=27535533 as")
-            .addEnumerate(new String[]{
-              "VQSR PASS",
-              "At least 80% of the genotypes have DP above 10 and GQ above 20",
-              "at least one variant genotype has DP above 10 and GQ above 20"
-            /*+ "<li>Not in the 10 1kb regions with the highest levels of multi-allelic variation</li>"*/ //will be managed later //TODO get definition of these regions
-            });
+    return new Description("Extract HQ variants. Defined in 1.12 of the supplementary information of PubMedID=27535533 as")
+            .addEnumerate("VQSR PASS",
+                "At least 80% of the genotypes have DP above 10 and GQ above 20",
+                "at least one variant genotype has DP above 10 and GQ above 20"
+                /*+ "<li>Not in the 10 1kb regions with the highest levels of multi-allelic variation</li>"*/ //will be managed later //TODO get definition of these regions
+            );
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -53,7 +56,7 @@ public class HQ extends ParallelVCFVariantFilterFunction {
 
   @Override
   public String[] processInputVariantForFilter(Variant variant) {
-    return variant.isHQ() ? asOutput(variant) : NO_OUTPUT;
+    return variant.isHQ(true, 10, 20, .8, "PASS") ? asOutput(variant) : NO_OUTPUT;
   }
   
   @Override

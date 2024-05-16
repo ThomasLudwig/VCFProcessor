@@ -1,8 +1,5 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters;
 
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.BooleanInput;
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.Input;
-
 /**
  *
  * @author Thomas E. Ludwig (INSERM - U1078) 2018-08-24
@@ -39,8 +36,4 @@ public class BooleanParameter extends Parameter {
       throw new ParameterException("Value for " + this.getKey() + " must be true|false or 0|1, found [" + s + "]");
   }
 
-  @Override
-  public Input getInputForm() {
-    return new BooleanInput(this);
-  }
 }

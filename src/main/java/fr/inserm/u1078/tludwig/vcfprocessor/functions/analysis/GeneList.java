@@ -5,6 +5,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.TreeSet;
 
 /**
@@ -24,16 +25,19 @@ public class GeneList extends ParallelVCFVariantFunction {
     return "Prints the list of all gene covered by the VCF file";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary()).addLine("The genes are extracted from the SYMBOL annotation from VEP.");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return true;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -44,25 +48,28 @@ public class GeneList extends ParallelVCFVariantFunction {
     return OUT_TXT;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     genes = new TreeSet<>();
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getFooters() {
     ArrayList<String> out = new ArrayList<>();
     out.add(genes.size() + " genes found");
-    for (String gene : genes)
-      out.add(gene);
-    return out.toArray(new String[out.size()]);
+    out.addAll(genes);
+    return out.toArray(new String[0]);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return null;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
@@ -74,11 +81,11 @@ public class GeneList extends ParallelVCFVariantFunction {
     return NO_OUTPUT;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     if(analysis instanceof String[]){
-      for(String gene : (String[])analysis)
-        genes.add(gene);
+      Collections.addAll(genes, (String[]) analysis);
       return true;
     }
     return false;

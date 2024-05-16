@@ -15,7 +15,7 @@ import java.util.ArrayList;
  */
 public class RandomPed extends Function {
 
-  private final PedFileParameter pedfile = new PedFileParameter(OPT_PED, "samples.ped", "The input PED file to process");
+  private final PedFileParameter pedFile = new PedFileParameter(OPT_PED, "samples.ped", "The input PED file to process");
   private final PositiveIntegerParameter number = new PositiveIntegerParameter(OPT_THRESHOLD, "Number Of Samples");
 
   @Override
@@ -33,10 +33,11 @@ public class RandomPed extends Function {
     return OUT_PED;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
     int nbLine = 0;
-    UniversalReader in = this.pedfile.getReader();
+    UniversalReader in = this.pedFile.getReader();
     String line;
     ArrayList<Integer> total = new ArrayList<>();
     while (in.readLine() != null) {
@@ -50,7 +51,7 @@ public class RandomPed extends Function {
       keep.add(total.remove(index));
     }
     nbLine = 0;
-    in = this.pedfile.getReader();
+    in = this.pedFile.getReader();
     while ((line = in.readLine()) != null) {
       nbLine++;
       if (keep.contains(nbLine))

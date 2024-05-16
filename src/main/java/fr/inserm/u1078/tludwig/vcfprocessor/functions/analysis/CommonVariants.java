@@ -32,6 +32,7 @@ public class CommonVariants extends ParallelVCFFunction {
     return "Displays the list of variants that are common to two VCF files";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
@@ -39,11 +40,13 @@ public class CommonVariants extends ParallelVCFFunction {
             .addWarning("For faster execution, use --vcf with the largest file and --file with the smallest one");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -54,11 +57,13 @@ public class CommonVariants extends ParallelVCFFunction {
     return OUT_TXT;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
@@ -73,18 +78,20 @@ public class CommonVariants extends ParallelVCFFunction {
         wrapper = reader.nextLine();
       }
     } catch (VCFException e) {
-      this.fatalAndDie("Unable to read variants from "+this.file.getFilename(), e);
+      this.fatalAndQuit("Unable to read variants from "+this.file.getFilename(), e);
     } catch (PedException ex) {    
-      this.fatalAndDie("Unable to read ped file", ex);
+      this.fatalAndQuit("Unable to read ped file", ex);
     }
     Message.info((this.file.getFilename()+" variants loaded"));
   }  
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return new String[]{};
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
@@ -98,7 +105,7 @@ public class CommonVariants extends ParallelVCFFunction {
         ret.add(c.toString());
     if(ret.isEmpty())
       return NO_OUTPUT;
-    return ret.toArray(new String[ret.size()]);
+    return ret.toArray(new String[0]);
   }
 
   @Override

@@ -45,6 +45,7 @@ public class CoverageStats extends Function {
         return OUT_TSV;
     }
 
+    @SuppressWarnings("unused")
     @Override
     public void executeFunction() throws Exception {
         UniversalReader in = tsv.getReader();
@@ -65,9 +66,9 @@ public class CoverageStats extends Function {
             int i = 0;
             for(int depth : DEPTHS){
                 while (i < l) {
-                    if (v.get(i) >= depth) {
+                    if (v.get(i) >= depth)
                         break;
-                    }
+
                     i++;
                 }
                 lb.addColumn(l - i);

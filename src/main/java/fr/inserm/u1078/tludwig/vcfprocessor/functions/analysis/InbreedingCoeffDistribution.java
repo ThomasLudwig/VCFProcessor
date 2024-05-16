@@ -24,22 +24,26 @@ public class InbreedingCoeffDistribution extends ParallelVCFVariantFunction {
     return "Outputs a sorted list of all Inbreeding Coeff from a VCF File.";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
             .addLine("The output file has no header, the values are sorted ascendingly");
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_NA;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return "Input file must contains Inbreeding Coeff. annotation";
@@ -50,17 +54,20 @@ public class InbreedingCoeffDistribution extends ParallelVCFVariantFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     super.begin();
     coeffs = new NumberSeries("Coeffs", SortedList.Strategy.SORT_AFTERWARDS);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return null;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String[] getFooters() {
     if(coeffs.isEmpty())
@@ -68,7 +75,7 @@ public class InbreedingCoeffDistribution extends ParallelVCFVariantFunction {
     ArrayList<String> out = new ArrayList<>();
     for (Double coeff : coeffs.getAllValues())
       out.add(""+coeff);
-    return out.toArray(new String[out.size()]);
+    return out.toArray(new String[0]);
   }
 
   @Override
@@ -79,6 +86,7 @@ public class InbreedingCoeffDistribution extends ParallelVCFVariantFunction {
     return NO_OUTPUT;
   }  
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     if(analysis instanceof Double){

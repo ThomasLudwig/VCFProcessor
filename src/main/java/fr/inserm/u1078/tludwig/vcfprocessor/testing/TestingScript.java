@@ -19,7 +19,7 @@ public class TestingScript {
   public static final boolean FILE = true;
   public static final boolean DIR = false;
   public static final int TAB = 1;
-  public static final int TABTAB = 2;
+  public static final int TAB2 = TAB+TAB;
 
   private final ArrayList<Parameter> parameters;
   private final boolean singleFile;
@@ -73,12 +73,11 @@ public class TestingScript {
 
   public String getScriptName() {
     String filename = "generated.test";
-    end = "";
-    for (Parameter p : parameters) {
-      filename += p.getResults();
-      end += p.getResults();
-    }
-    filename += ".sh";
+    StringBuilder theEnd = new StringBuilder();
+    for (Parameter p : parameters)
+      theEnd.append(p.getResults());
+    end = theEnd.toString();
+    filename += end+".sh";
     return filename;
   }
 
@@ -96,7 +95,7 @@ public class TestingScript {
   public LineBuilder getParameterDeclaration() {
     LineBuilder out = new LineBuilder();
     for (Parameter p : parameters)
-      out.newLine(p.getDefintion());
+      out.newLine(p.getDefinition());
     out.newLine();
     if (this.singleFile)
       out.newLine("out=$DIR/results" + end + ".$r;");
@@ -109,10 +108,10 @@ public class TestingScript {
   }
 
   public String getArguments() {
-    String ret = "";
+    StringBuilder ret = new StringBuilder();
     for (Parameter p : parameters)
-      ret += " " + p.getArgument();
-    return ret;
+      ret.append(" ").append(p.getArgument());
+    return ret.toString();
   }
 
   public LineBuilder getCommand() {
@@ -152,13 +151,9 @@ public class TestingScript {
     out.newLine(this.getFooter());
     return out;
   }
-  
-  public int getIndentNumber(){
-    return 2;
-  }
 
   public LineBuilder testSingleFile() {
-    LineBuilder out = new LineBuilder(getIndentNumber());
+    LineBuilder out = new LineBuilder(TAB2);
     out.newLine("if [ ! -f \"$out\" ];");
     out.newLine("then");
     out.newLine(TAB, ">&2 echo \"${BASH_SOURCE[0]} KO missing output $out\";");
@@ -180,22 +175,22 @@ public class TestingScript {
   }
 
   public LineBuilder testDirectory() { //TODO force LineBuilder as return object everywhere
-    LineBuilder out = new LineBuilder(getIndentNumber());
+    LineBuilder out = new LineBuilder(TAB2);
     out.newLine("for f in $exp/*;");
     out.newLine("do");
     out.newLine(TAB, "base=`basename $f`");
     out.newLine(TAB, "if [ ! -f \"$outdir/$base\" ];");
     out.newLine(TAB, "then");
-    out.newLine(TABTAB, ">&2 echo \"${BASH_SOURCE[0]} KO missing output $outdir/$base\";");
-    out.newLine(TABTAB, "mv $outdir $outdir.KO;");
-    out.newLine(TABTAB, "exit 0;");
+    out.newLine(TAB2, ">&2 echo \"${BASH_SOURCE[0]} KO missing output $outdir/$base\";");
+    out.newLine(TAB2, "mv $outdir $outdir.KO;");
+    out.newLine(TAB2, "exit 0;");
     out.newLine(TAB, "fi");
     out.newLine(TAB, "dif=`diff $exp/$base $outdir/$base | wc -l`;");
     out.newLine(TAB, "if [ \"$dif\" -ne \"" + (4 * this.mismatchingLines) + "\" ]");
     out.newLine(TAB, "then");
-    out.newLine(TABTAB, ">&2 echo \"${BASH_SOURCE[0]} KO\";");
-    out.newLine(TABTAB, "mv $outdir $outdir.KO;");
-    out.newLine(TABTAB, "exit 0;");
+    out.newLine(TAB2, ">&2 echo \"${BASH_SOURCE[0]} KO\";");
+    out.newLine(TAB2, "mv $outdir $outdir.KO;");
+    out.newLine(TAB2, "exit 0;");
     out.newLine(TAB, "fi");
     out.newLine("done");
     out.newLine();
@@ -245,14 +240,14 @@ public class TestingScript {
     return new TestingScript[]{def};
   }
 
-  public static enum Type {
+  public enum Type {
     ANONYMOUS_VALUE,
     NAMING_VALUE,
     ANONYMOUS_FILENAME,
     NAMING_FILENAME,
   }
 
-  private class Parameter {
+  private static class Parameter {
 
     private final String name;
     private final String value;
@@ -282,7 +277,7 @@ public class TestingScript {
       return false;
     }
 
-    String getDefintion() {
+    String getDefinition() {
       if (isFilename())
         return name + "=$DIR/" + value + ";";
       else

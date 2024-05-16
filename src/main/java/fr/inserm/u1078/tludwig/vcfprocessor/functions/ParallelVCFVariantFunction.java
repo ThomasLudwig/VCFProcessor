@@ -18,7 +18,7 @@ public abstract class ParallelVCFVariantFunction extends ParallelVCFFunction {
       if(variant != null)
         return this.processInputVariant(variant);
     } catch(VCFException e){
-      this.fatalAndDie("Unable to parse line \n"+line, e);
+      this.fatalAndQuit("Unable to parse line \n"+line, e);
     }
     return null;
   }

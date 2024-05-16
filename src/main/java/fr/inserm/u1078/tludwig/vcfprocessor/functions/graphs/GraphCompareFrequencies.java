@@ -69,7 +69,7 @@ public class GraphCompareFrequencies extends GraphFunction {
         double x = getValue(f[abs]);
         double y = getValue(f[ord]);
         if (Double.isNaN(x) || Double.isNaN(y))
-          this.fatalAndDie("Nan in line [" + line + "]");
+          this.fatalAndQuit("Nan in line [" + line + "]");
         points.add(new Point(x, y));
         if (x > 0 && x < minX)
           minX = x;
@@ -85,7 +85,7 @@ public class GraphCompareFrequencies extends GraphFunction {
 
       in.close();
     } catch (Exception e) {
-      this.fatalAndDie("Could not parse file from [" + tsv.getFilename() + "]", e);
+      this.fatalAndQuit("Could not parse file from [" + tsv.getFilename() + "]", e);
     }
 
     return graphs;
@@ -96,6 +96,7 @@ public class GraphCompareFrequencies extends GraphFunction {
     return "Compares the frequencies of common variants in 2 populations (output of "+FrequencyCorrelation.class.getSimpleName()+" / "+CompareToGnomAD.class.getSimpleName()+")";
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
     ArrayList<Graph> graphs = this.createGraph();

@@ -2,9 +2,6 @@
  */
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters;
 
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.EnumInput;
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.Input;
-
 /**
  *
  * @author Thomas E. Ludwig (INSERM - U1078) 2018-09-03
@@ -53,8 +50,4 @@ public class EnumParameter extends StringParameter {
       throw new ParameterException("Value " + this.getStringValue() + " is not valid. Must be "+this.showAllowedValues());
   }
 
-  @Override
-  public Input getInputForm() {
-    return new EnumInput(this);
-  }
 }

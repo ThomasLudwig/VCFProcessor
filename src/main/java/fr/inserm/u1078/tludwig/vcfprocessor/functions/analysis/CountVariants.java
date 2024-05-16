@@ -11,7 +11,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
 
 /**
- * Counts the number of variants for each Samples and print a summary for each group
+ * Counts the number of variants for each Sample and print a summary for each group
  * 
  * @author Thomas E. Ludwig (INSERM - U1078) 
  * Started on             2015-12-02
@@ -24,13 +24,14 @@ public class CountVariants extends ParallelVCFVariantPedFunction {
   private ArrayList<Sample>[] samples;
   private ArrayList<int[]> counts; //TODO, a single tab for the counts int[] and in HashMap<,Integer> to get the index of the samples ?
 
-  String[] HEADER = {"FamilyID","ID","MotherID","FatherID","Sex","Phenotype","Group","NbVariants"};
+  final String[] HEADER = {"FamilyID","ID","MotherID","FatherID","Sex","Phenotype","Group","NbVariants"};
   
   @Override
   public String getSummary() {
     return "Counts the number of variants for each Samples and print a summary for each group";
   }
   
+  @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
@@ -38,11 +39,13 @@ public class CountVariants extends ParallelVCFVariantPedFunction {
             .addColumns(HEADER);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean needVEP() {
     return false;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String getCustomRequirement() {
     return null;
@@ -53,6 +56,7 @@ public class CountVariants extends ParallelVCFVariantPedFunction {
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void begin() {
     groups = getPed().getGroups();
@@ -62,6 +66,7 @@ public class CountVariants extends ParallelVCFVariantPedFunction {
       counts.add(new int[getPed().getGroupSize(group)]);
   }
 
+  @SuppressWarnings("unused")
   @Override
   public String[] getFooters() {
     ArrayList<String> out = new ArrayList<>();
@@ -72,7 +77,7 @@ public class CountVariants extends ParallelVCFVariantPedFunction {
       series.add(cGroup);
       for (int is = 0; is < this.samples[ig].size(); is++) {
         int value = this.counts.get(ig)[is];
-        println(this.samples[ig].get(is) + T + value);
+        out.add(this.samples[ig].get(is) + T + value);
         total.add(value);
         cGroup.add(value);
       }
@@ -81,9 +86,10 @@ public class CountVariants extends ParallelVCFVariantPedFunction {
     for (NumberSeries serie : series)
       out.add(serie.getQuartileStats());
     out.add(total.getQuartileStats());
-    return out.toArray(new String[out.size()]);
+    return out.toArray(new String[0]);
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
     return MULTIALLELIC_ALLELE_AS_LINE;
@@ -104,17 +110,18 @@ public class CountVariants extends ParallelVCFVariantPedFunction {
     return NO_OUTPUT;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public boolean checkAndProcessAnalysis(Object analysis) {
     try {
       int[] idx = (int[])analysis;
       this.counts.get(idx[0])[idx[1]]++;
       return true;
-    } catch (Exception e) {
-    }
+    } catch (Exception ignore) { }
     return false;
   }
   
+  @SuppressWarnings("unused")
   @Override
   public String[] getHeaders() {
     return new String[]{String.join(T, HEADER)};

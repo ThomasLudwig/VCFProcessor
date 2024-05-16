@@ -19,7 +19,9 @@ public class TextElement extends Element {
 
   @Override
   public String asRST() {
-    return "| " + text;
+    if(text.startsWith("<tt>"))
+      return "| " + text;
+    return text;
   }
 
   @Override

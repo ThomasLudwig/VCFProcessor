@@ -6,7 +6,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.StartUpException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.PedException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.genotype.GenotypeISKSVAFFilter;
+import fr.inserm.u1078.tludwig.vcfprocessor.filters.genotype.*;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.AlleleCountFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.AlleleNumberFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.DPVariantFilter;
@@ -18,9 +18,6 @@ import fr.inserm.u1078.tludwig.vcfprocessor.filters.SampleFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.VariantFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.FlagFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.GQVariantFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.genotype.GenotypeDPFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.genotype.GenotypeFlagFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.genotype.GenotypeGQFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.HWEFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.IDFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.SNPIndelFilter;
@@ -41,6 +38,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.FunctionFactory;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 
 /**
@@ -50,12 +48,12 @@ import java.util.HashMap;
 public class CommandParser {
   //TODO every command line filters must be listed as INFO lines
   //TODO case insensitive
-  //TODO famfilter must be created before filters that depends on it
+  //TODO famFilter must be created before filters that depends on it
   //TODO if there are args that start with - or -- but are unknown ==> WARNING
 
   private final String[] args;
   private final ArrayList<String> keys;
-  private final ArrayList<Filter> filters;
+  private final ArrayList<Filter<?>> filters;
   private final ArrayList<SampleFilter> sampleFilters;
   private final ArrayList<LineFilter> lineFilters;
   private final ArrayList<VariantFilter> variantFilters;
@@ -80,18 +78,18 @@ public class CommandParser {
     this.keys = this.initKeys();
   }
   
-  public static ArrayList<String> getAllowedKeys(String args[]){
+  public static ArrayList<String> getAllowedKeys(String[] args){
     ArrayList<String> ret = new ArrayList<>();
-    for(String k : Main.ALLOWED_KEYS)
-      ret.add(k);
+    Collections.addAll(ret, Main.ALLOWED_KEYS);
     //Get function arguments
-    Function f = FunctionFactory.getFunction(args); 
-    for(Parameter param : f.getParameters()){
-      String key = param.getKey().toLowerCase();
-      if(ret.contains(key))
-        throw new StartUpException("Function ["+args[0]+"] uses the key ["+param.getKey()+"] which is already used by a Filtering Argument");
-      ret.add(key);
-    }        
+    Function f = FunctionFactory.getFunction(args);
+    if(f != null)
+      for(Parameter param : f.getParameters()){
+        String key = param.getKey().toLowerCase();
+        if(ret.contains(key))
+          throw new StartUpException("Function ["+args[0]+"] uses the key ["+param.getKey()+"] which is already used by a Filtering Argument");
+        ret.add(key);
+      }
 
     //Get all authorized filter arguments
     ret.addAll(Argument.getAllowedKeys());
@@ -216,23 +214,28 @@ public class CommandParser {
       this.addFilter(removeGenotypeFlag);
     }
 
-    //GenotypeArguments.MINDP
-    //GenotypeArguments.MAXDP
-    MinMaxParser keepDP = new MinMaxParser(GenotypeArguments.MINDP, GenotypeArguments.MAXDP, MinMaxParser.TYPE_UNBOUNDED, "DP (integer)");
+    //GenotypeArguments.MIN_DP
+    //GenotypeArguments.MAX_DP
+    MinMaxParser keepDP = new MinMaxParser(GenotypeArguments.MIN_DP, GenotypeArguments.MAX_DP, MinMaxParser.TYPE_UNBOUNDED, "DP (integer)");
     if (keepDP.isValid())
       addFilter(new GenotypeDPFilter(keepDP.getMinInt(), keepDP.getMaxInt(Integer.MAX_VALUE)));
     
-    //GenotypeArguments.MINGQ
-    //GenotypeArguments.MAXGQ
-    MinMaxParser keepGQ = new MinMaxParser(GenotypeArguments.MINGQ, GenotypeArguments.MAXGQ, MinMaxParser.TYPE_UNBOUNDED, "GQ (integer)");
+    //GenotypeArguments.MIN_GQ
+    //GenotypeArguments.MAX_GQ
+    MinMaxParser keepGQ = new MinMaxParser(GenotypeArguments.MIN_GQ, GenotypeArguments.MAX_GQ, MinMaxParser.TYPE_UNBOUNDED, "GQ (integer)");
     if (keepGQ.isValid())
       addFilter(new GenotypeGQFilter(keepGQ.getMinInt(), keepGQ.getMaxInt(99)));
 
-    //GenotypeArguments.MINVAF
-    //GenotypeArguments.MAXVAF
-    MinMaxParser keepVAF = new MinMaxParser(GenotypeArguments.MINVAF, GenotypeArguments.MAXVAF, MinMaxParser.TYPE_RATIO, "VAF (ratio)");
+    //GenotypeArguments.MIN_VAF
+    //GenotypeArguments.MAX_VAF
+    MinMaxParser keepVAF = new MinMaxParser(GenotypeArguments.MIN_VAF, GenotypeArguments.MAX_VAF, MinMaxParser.TYPE_RATIO, "VAF (ratio)");
     if(keepVAF.isValid())
       addFilter(new GenotypeISKSVAFFilter(keepVAF.getMinDouble(), keepVAF.getMaxDouble()));
+
+    //GenotypeArguments.ABHET_DEV
+    MinMaxParser abhet = new MinMaxParser(GenotypeArguments.ABHET_DEV, GenotypeArguments.ABHET_DEV, MinMaxParser.TYPE_DEVIATION, "ABHet deviation from 0.5 [0;0.5]");
+    if(abhet.isValid())
+      addFilter(new ABHetMismatch(abhet.getMinDouble()));
   }
 
   /**
@@ -347,24 +350,24 @@ public class CommandParser {
       addFilter(removeAll);
     }
     
-    //PropertyArguments.MIN_MEANDP
-    //PropertyArguments.MAX_MEANDP
-    MinMaxParser keepMeanDP = new MinMaxParser(PropertyArguments.MIN_MEANDP, PropertyArguments.MAX_MEANDP, MinMaxParser.TYPE_UNBOUNDED, "float");
+    //PropertyArguments.MIN_MEAN_DP
+    //PropertyArguments.MAX_MEAN_DP
+    MinMaxParser keepMeanDP = new MinMaxParser(PropertyArguments.MIN_MEAN_DP, PropertyArguments.MAX_MEAN_DP, MinMaxParser.TYPE_UNBOUNDED, "float");
     if (keepMeanDP.isValid())
       addFilter(new DPVariantFilter(keepMeanDP.getMinDouble(), keepMeanDP.getMaxDouble(), DPVariantFilter.TYPE_MEAN));
-    //PropertyArguments.MIN_MEDIANDP
-    //PropertyArguments.MAX_MEDIANDP
-    MinMaxParser keepMedianDP = new MinMaxParser(PropertyArguments.MIN_MEDIANDP, PropertyArguments.MAX_MEDIANDP, MinMaxParser.TYPE_UNBOUNDED, "float");
+    //PropertyArguments.MIN_MEDIAN_DP
+    //PropertyArguments.MAX_MEDIAN_DP
+    MinMaxParser keepMedianDP = new MinMaxParser(PropertyArguments.MIN_MEDIAN_DP, PropertyArguments.MAX_MEDIAN_DP, MinMaxParser.TYPE_UNBOUNDED, "float");
     if (keepMedianDP.isValid())
       addFilter(new DPVariantFilter(keepMedianDP.getMinDouble(), keepMedianDP.getMaxDouble(), DPVariantFilter.TYPE_MEDIAN));
-    //PropertyArguments.MIN_MEANGQ
-    //PropertyArguments.MAX_MEANGQ
-    MinMaxParser keepMeanGQ = new MinMaxParser(PropertyArguments.MIN_MEANGQ, PropertyArguments.MAX_MEANGQ, MinMaxParser.TYPE_UNBOUNDED, "float");
+    //PropertyArguments.MIN_MEAN_GQ
+    //PropertyArguments.MAX_MEAN_GQ
+    MinMaxParser keepMeanGQ = new MinMaxParser(PropertyArguments.MIN_MEAN_GQ, PropertyArguments.MAX_MEAN_GQ, MinMaxParser.TYPE_UNBOUNDED, "float");
     if (keepMeanGQ.isValid())
       addFilter(new GQVariantFilter(keepMeanGQ.getMinDouble(), keepMeanGQ.getMaxDouble(), GQVariantFilter.TYPE_MEAN));
-    //PropertyArguments.MIN_MEDIANGQ
-    //PropertyArguments.MAX_MEDIANGQ
-    MinMaxParser keepMedianGQ = new MinMaxParser(PropertyArguments.MIN_MEDIANGQ, PropertyArguments.MAX_MEDIANGQ, MinMaxParser.TYPE_UNBOUNDED, "float");
+    //PropertyArguments.MIN_MEDIAN_GQ
+    //PropertyArguments.MAX_MEDIAN_GQ
+    MinMaxParser keepMedianGQ = new MinMaxParser(PropertyArguments.MIN_MEDIAN_GQ, PropertyArguments.MAX_MEDIAN_GQ, MinMaxParser.TYPE_UNBOUNDED, "float");
     if (keepMedianGQ.isValid())
       addFilter(new GQVariantFilter(keepMedianGQ.getMinDouble(), keepMedianGQ.getMaxDouble(), GQVariantFilter.TYPE_MEDIAN));
 
@@ -390,9 +393,9 @@ public class CommandParser {
     if (hasArgument(PropertyArguments.REMOVE_PHASED))
       addFilter(new PhaseFilter(REMOVE));
 
-    //PropertyArguments.MINQ
-    //PropertyArguments.MAXQ
-    MinMaxParser minmaxQ = new MinMaxParser(PropertyArguments.MINQ, PropertyArguments.MAXQ, MinMaxParser.TYPE_UNBOUNDED, "variant quality");
+    //PropertyArguments.MIN_Q
+    //PropertyArguments.MAX_Q
+    MinMaxParser minmaxQ = new MinMaxParser(PropertyArguments.MIN_Q, PropertyArguments.MAX_Q, MinMaxParser.TYPE_UNBOUNDED, "variant quality");
     if (minmaxQ.isValid())
       addFilter(new QualityFilter(minmaxQ.getMinDouble(), minmaxQ.getMaxDouble()));
   }
@@ -401,12 +404,12 @@ public class CommandParser {
    * Filters on Missing rate AF/AC.Rate and AF depends on the number of samples.Thus :
    * This method HAS TO BE called AFTER the vcf/ped bind
    *
-   * @param vcf
-   * @param ped
+   * @param vcf the vcf object
+   * @param ped the ped object
    */
   public void processSampleDependantArguments(final VCF vcf, final Ped ped) {
     int size = ped.getSamples().size();
-    //difference betweek AF and AC, is the AF depends on missing... think about this
+    //difference between AF and AC, is the AF depends on missing... think about this
     //Still need to check presence of ped for some filters
     
     //PropertyArguments.MIN_MISSING
@@ -646,16 +649,16 @@ public class CommandParser {
   public void printSummary() {
     Message.verbose("Total Filters [" + this.filters.size() + "]");
     Message.verbose("\tSample Filters [" + this.sampleFilters.size() + "]");
-    for (Filter f : this.sampleFilters)
+    for (Filter<?> f : this.sampleFilters)
       Message.verbose("\t\t" + f.getSummary());
     Message.verbose("\tLine Filters [" + this.lineFilters.size() + "]");
-    for (Filter f : this.lineFilters)
+    for (Filter<?> f : this.lineFilters)
       Message.verbose("\t\t" + f.getSummary());
     Message.verbose("\tGenotype Filters [" + this.genotypeFilters.size() + "]");
-    for (Filter f : this.genotypeFilters)
+    for (Filter<?> f : this.genotypeFilters)
       Message.verbose("\t\t" + f.getSummary());
     Message.verbose("\tVariant Filters [" + this.variantFilters.size() + "]");
-    for (Filter f : this.variantFilters)
+    for (Filter<?> f : this.variantFilters)
       Message.verbose("\t\t" + f.getSummary());
   }
 
@@ -688,7 +691,7 @@ public class CommandParser {
       num = num.substring(0, num.length() - 1);
       return 1000 * new Integer(num);
     }
-    return new Integer(num.replaceAll("b", "b"));
+    return new Integer(num.replaceAll("b", "b"));//TODO ???
 
   }
 
@@ -724,7 +727,7 @@ public class CommandParser {
     try {
       return op[0];
     } catch (Exception e) {
-      throw new StartUpException("Double not found for argument " + arg + " value [" + Arrays.deepToString(op) + "]", e);
+      throw new StartUpException("Double not found for argument " + arg + " value is null", e);
     }
   }
 
@@ -732,7 +735,7 @@ public class CommandParser {
     return options.get(arg.getKey().toLowerCase());
   }
 
-  private void addFilter(Filter filter) {
+  private void addFilter(Filter<?> filter) {
     if (filter != null) {
       this.filters.add(filter);
       if (filter instanceof SampleFilter)
@@ -747,13 +750,10 @@ public class CommandParser {
   }
 
   public String getCommandLine() {
-    String ret = "";
-    for (String arg : args)
-      ret += " " + arg;
-    return ret;
+    return " " + String.join(" ", args);
   }
 
-  public ArrayList<Filter> getFilters() {
+  public ArrayList<Filter<?>> getFilters() {
     return filters;
   }
 
@@ -779,8 +779,7 @@ public class CommandParser {
         try {
           if (!args[i + 1].startsWith("--"))
             return args[i + 1].split(",");
-        } catch (Exception e) {
-        }
+        } catch (Exception ignore) { }
         break;
       }
     return null;
@@ -790,6 +789,7 @@ public class CommandParser {
 
     public static final int TYPE_RATIO = 1;
     public static final int TYPE_UNBOUNDED = 2;
+    public static final int TYPE_DEVIATION = 3;
 
     private double min = 0;
     private double max = Double.MAX_VALUE;
@@ -800,6 +800,11 @@ public class CommandParser {
       if (type == TYPE_RATIO) {
         min = 0;
         max = 1;
+      }
+
+      if (type == TYPE_DEVIATION) {
+        min = 0;
+        max = 0.5;
       }
 
       boolean isValid = false;

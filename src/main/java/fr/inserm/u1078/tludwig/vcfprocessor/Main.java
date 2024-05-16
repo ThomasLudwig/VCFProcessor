@@ -6,20 +6,12 @@ import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.commandline.Argument;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.FunctionFactory;
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.LookAndFeel;
-import fr.inserm.u1078.tludwig.vcfprocessor.gui.MainWindow;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+
+import java.io.*;
 import java.net.URLDecoder;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -30,7 +22,7 @@ public class Main {
 
   //DONE replace all method[Blablabla[] args) with method[Blablabla... args) and with a suitable way to apply them to ArrayList<Blablabla> 
   //DONE force the doc to explicitly state what happens in case of multiallelic variants 
-  //DONE replace ArrayList<XXXX> with Collection<XXXXX> in method arguments
+  //DONE replace ArrayList<XXXXX> with Collection<XXXXX> in method arguments
   //TODO put assert wherever it should
   //TODO everywhere, return empty List instead of null (what about tables ?)
   //TODO use LineBuilder/Columns everywhere
@@ -39,7 +31,6 @@ public class Main {
   //TODO Leaking this in constructor --> deport constructor to factory createNewObject()...
   //DONE other versioning system than just a date/build number : VERSION.MAJOR.MINOR VERSION (change of paradigm, change in structure, isolated changes) with real tracking
   public static final String TITLE = "VCFProcessor";
-  public static final String KEY_GUI = "--gui";
   public static final String KEY_DOC = "--generatedoc";
   public static final String KEY_VERSION = "--version";
   public static final String KEY_TEST = "--test";
@@ -64,9 +55,9 @@ public class Main {
       doStart(args);
     } catch (StartUpException e) {
       if (e.getCause() == null)
-        Message.dieWithoutException("VCFProcessor could not be started : " + e.getMessage());
+        die("VCFProcessor could not be started : " + e.getMessage());
       else
-        Message.die("VCFProcessor could not be started : " + e.getMessage(), e.getCause());
+        die("VCFProcessor could not be started : " + e.getMessage(), e.getCause());
     }
   }
   
@@ -78,40 +69,31 @@ public class Main {
     Message.setVerboseActive(true);
     Message.setDebugActive(true);
     if (args.length < 3)
-      Message.fatal("Usage : --test input.vcf output.vcf.gz");
+      die("Usage : --test input.vcf output.vcf.gz");
+
   }
 
-  private static void launchGUI() {
-    Message.setVerboseActive(true);
-    Message.setDebugActive(true);
-    try {
-      LookAndFeel.setup();
-    } catch(Exception e) {
-      Message.error("Failed to apply Look&Fell");
-    }
-    MainWindow gui = new MainWindow();
-  }
+  public static final String CHANGELOG = "CHANGELOG.md";
+  public static final String OVERVIEW = "overview.md";
+  @SuppressWarnings("SpellCheckingInspection")
+  public static final String File_FORMATS = "fileformats.md";
+  public static final String DOWNLOAD = "download.md";
+  public static final String CONF = "conf.py";
 
   private static void launchGenerateDoc(String[] args) {
-    Message.setVerboseActive(true);
-    Message.setDebugActive(true);
-    if (args.length < 2)
-      throw new StartUpException("Option [" + args[0] + "] must be followed be a directory.");
-    String targetdir = args[1];
-    if (targetdir.startsWith("-"))
-      throw new StartUpException("Option [" + args[0] + "] must be followed be a directory. Invalid value {" + targetdir + "}");
+    String targetDir = getValueFromCommandLine(args, "Directory");
 
     Message.info("Generating documentation");
 
     //TODO doc versioning
-    writeDocumentation(targetdir + File.separator + "index.rst", getIndexDocumentation());
-    writeDocumentation(targetdir + File.separator + "filters.rst", Argument.getDocumentation());
-    writeDocumentation(targetdir + File.separator + "functions.rst", FunctionFactory.getFunctionsDocumentation());
+    writeDocumentation(targetDir + File.separator + "index.rst", getIndexDocumentation());
+    writeDocumentation(targetDir + File.separator + "filters.rst", Argument.getDocumentation());
+    writeDocumentation(targetDir + File.separator + "functions.rst", FunctionFactory.getFunctionsDocumentation());
 
-    for(String page : new String[]{"CHANGELOG.md", "gui.md", "overview.md", "fileformats.md", "download.md", "conf.py"})
-      writeDocumentation(targetdir + File.separator + page.toLowerCase(), getStringFromResource(page));
+    for(String page : new String[]{CHANGELOG, OVERVIEW, File_FORMATS, DOWNLOAD, CONF})
+      writeDocumentation(targetDir + File.separator + page.toLowerCase(), getStringFromResource(page));
 
-    copyImages(targetdir);
+    copyImages(targetDir);
   }
   
   private static String getIndexDocumentation(){
@@ -123,14 +105,16 @@ public class Main {
   }
   
   private static void copyImages(String dir){
-    for(String image : new String[]{"logo.vcfprocessor.png"})
+    for(String image : new String[]{"logo.vcfprocessorbig.png"})
       copyImageToDir(image, dir);
   }
   
   private static void copyImageToDir(String image, String dir){
-    try {
+    try (
       InputStream is = Main.class.getResourceAsStream("/"+image);
-      OutputStream os = new FileOutputStream(dir+File.separator+image);
+      OutputStream os = Files.newOutputStream(Paths.get(dir + File.separator + image))){
+      if(is == null)
+        throw new FileNotFoundException("Image ["+image+"] not found");
       int length;
       byte[] bytes = new byte[1024];
       while ((length = is.read(bytes)) != -1) {
@@ -144,6 +128,7 @@ public class Main {
   private static String getStringFromResource(String resource){
     LineBuilder out = new LineBuilder();
     InputStream is = Main.class.getResourceAsStream("/"+resource);
+    assert is != null : "Resource not found ["+resource+"]";
     BufferedReader in = new BufferedReader(new InputStreamReader(is));
     String line;
     try {
@@ -166,26 +151,27 @@ public class Main {
     }
   }
 
+  private static String getValueFromCommandLine(String[] args, String needle) {
+    if (args.length < 2)
+      throw new StartUpException("Option [" + args[0] + "] must be followed be a "+needle+".");
+    String targetDirectory = args[1];
+    if (targetDirectory.startsWith("-"))
+      throw new StartUpException("Option [" + args[0] + "] must be followed be a "+needle+". Invalid value {" + targetDirectory + "}");
+    return targetDirectory;
+  }
+
   private static void launchAllTestingScripts(String[] args) {
     Message.setVerboseActive(true);
     Message.setDebugActive(true);
-    if (args.length < 2)
-      throw new StartUpException("Option [" + args[0] + "] must be followed be a directory.");
-    String val = args[1];
-    if (val.startsWith("-"))
-      throw new StartUpException("Option [" + args[0] + "] must be followed be a directory. Invalid value {" + val + "}");
-    FunctionFactory.generateTestingScripts(val);
+    String targetDirectory = getValueFromCommandLine(args, "Directory");
+    FunctionFactory.generateTestingScripts(targetDirectory);
   }
 
   private static void launchScriptsForFunction(String[] args) {
     Message.setVerboseActive(true);
     Message.setDebugActive(true);
-    if (args.length < 2)
-      throw new StartUpException("Option [" + args[0] + "] must be followed be a Function name.");
-    String val = args[1];
-    if (val.startsWith("-"))
-      throw new StartUpException("Option [" + args[0] + "] must be followed be a Function name. Invalid value {" + val + "}");
-    FunctionFactory.generateTestingScriptForFunction(val);
+    String functionName = getValueFromCommandLine(args, "Function Name");
+    FunctionFactory.generateTestingScriptForFunction(functionName);
   }
 
   private static void doStart(String[] args) throws StartUpException {
@@ -222,9 +208,6 @@ public class Main {
           case KEY_VERSION:
             Main.printVersion(args);
             return;
-          case KEY_GUI:
-            Main.launchGUI();
-            return;
           case KEY_DOC:
             Main.launchGenerateDoc(args);
             return;
@@ -240,9 +223,7 @@ public class Main {
     //check for extra arguments
     for (int i = 0; i < args.length; i++) {
       String arg = args[i];
-      String val = null;
-      if (i < args.length - 1)
-        val = args[i + 1];
+      assert arg != null : "Argument "+i+" is null";
       switch (arg) {
         case KEY_VERBOSE:
           Message.setVerboseActive(true);
@@ -258,6 +239,7 @@ public class Main {
 
     Main.args = args;
     Function f = FunctionFactory.getFunction(args);
+    assert f != null : "Function is null for ["+ Arrays.toString(args) +"]";
     if (f.start(args))
       f.execute();
   }
@@ -266,7 +248,7 @@ public class Main {
     return getJar(Main.class);
   }
 
-  public static String getJar(Class clazz) throws StartUpException {
+  public static String getJar(Class<?> clazz) throws StartUpException {
     try {
       String path = clazz.getProtectionDomain().getCodeSource().getLocation().getPath();
       String decoded = URLDecoder.decode(path, "UTF-8");
@@ -285,8 +267,7 @@ public class Main {
     String jar = getJar();
     int index = jar.lastIndexOf(File.separator);
     if (index > -1) {
-      String pDir = jar.substring(0, index + 1) + dir;
-      return pDir;
+      return jar.substring(0, index + 1) + dir;
     }
 
     return ".";
@@ -303,9 +284,11 @@ public class Main {
   }
 
   public static String getVersion() {
+    final String filename = "/CHANGELOG.md";
     try {
       String line;
-      InputStream is = Main.class.getResourceAsStream("/CHANGELOG.md");
+      InputStream is = Main.class.getResourceAsStream(filename);
+      assert is != null : filename + " not found";
       BufferedReader in = new BufferedReader(new InputStreamReader(is));
       while ((line = in.readLine()) != null) {
         if (line.toLowerCase().startsWith("## "))
@@ -316,4 +299,15 @@ public class Main {
     }
     return "v?.?.?(????-??-??)";
   }
+
+  public static void die(String fatalMessage){
+    Message.fatal(fatalMessage);
+    System.exit(-1);
+  }
+
+  public static void die(String fatalMessage, Throwable throwable){
+    Message.fatal(fatalMessage, throwable);
+    System.exit(-1);
+  }
+
 }

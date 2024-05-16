@@ -15,7 +15,7 @@ import java.util.ArrayList;
  */
 public class NormalizePed extends Function {
 
-  private final PedFileParameter pedfile = new PedFileParameter(OPT_PED, "samples.ped", "The input PED file to process");
+  private final PedFileParameter pedFile = new PedFileParameter(OPT_PED, "samples.ped", "The input PED file to process");
   private final PositiveIntegerParameter nbGroups = new PositiveIntegerParameter(OPT_NUMBER, "Number Of subgroups for each group");
   private final PositiveIntegerParameter groupSize = new PositiveIntegerParameter(OPT_SIZE, "Group Size");
 
@@ -29,7 +29,7 @@ public class NormalizePed extends Function {
     return new Description(this.getSummary())
             .addLine("If the input ped file has three groups A,B,C of 50 individuals each. Using the command with " + Description.code(nbGroups.getKey() + " 3 " + groupSize.getKey() + " 10")+" will create 9 group :")
             .addLine("A A2 A3 B B2 B3 C C2 C3, with 10 individuals in each, randomly picked from groups A B and C.")
-            .addLine("This function is usefull to dived groups, for instance to have 1 learning set and several computing sets.");
+            .addLine("This function is useful to dived groups, for instance to have 1 learning set and several computing sets.");
   }
 
   @Override
@@ -37,9 +37,10 @@ public class NormalizePed extends Function {
     return OUT_PED;
   }
 
+  @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
-    Ped ped = this.pedfile.getPed();
+    Ped ped = this.pedFile.getPed();
     ArrayList<String> groups = ped.getGroups();
 
     for (String group : groups)
