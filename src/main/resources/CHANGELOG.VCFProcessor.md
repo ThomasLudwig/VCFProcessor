@@ -1,4 +1,10 @@
 # Changelog
+## 1.2.1 (2024-07-15)
+Minor revisions
+### core
+### functions
+### filters
+
 ## 1.2.0 (2024-07-15)
 ### core
 - `BCF` : **added** possibility to process BCF file (through a call to VCF)
