@@ -1,6 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.filters.line;
 
 import fr.inserm.u1078.tludwig.maok.tools.StringTools;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,8 +63,8 @@ public class FlagFilter extends LineFilter {
   
 
   @Override
-  public boolean pass(String[] f) {
-    ArrayList<String> presents = new ArrayList<>(Arrays.asList(f[6].split(";")));
+  public boolean pass(VariantRecord record) {
+    ArrayList<String> presents = new ArrayList<>(Arrays.asList(record.getFiltersString().split(";")));
     
     if(strict){
       //if not all are found --> isFilter()
@@ -90,7 +91,12 @@ public class FlagFilter extends LineFilter {
       }  
     }
   }
-  
+
+  @Override
+  public boolean leftColumnsOnly() {
+    return true;
+  }
+
   @Override
   public String getDetails() {
     return (this.isKeep() ? "Keep" : "Remove") +(strict ? "strict" : "")+(matchesAll? "all":"any")+" "+StringTools.startOf(5, flags);

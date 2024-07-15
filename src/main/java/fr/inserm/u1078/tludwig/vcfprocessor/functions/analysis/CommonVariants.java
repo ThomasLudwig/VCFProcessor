@@ -6,7 +6,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.PedException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCFException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF.Reader;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF.Wrapper;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Canonical;
@@ -59,12 +59,6 @@ public class CommonVariants extends ParallelVCFFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
   public void begin() {
     super.begin();
     this.variants = new TreeSet<>();
@@ -72,15 +66,14 @@ public class CommonVariants extends ParallelVCFFunction {
     try {
       VCF ref = this.file.getVCF(VCF.STEP10000);
       Reader reader = ref.getReaderAndStart();      
-      Wrapper wrapper = reader.nextLine();
-      while((wrapper.line) != null){
-        this.variants.addAll(Arrays.asList(Canonical.getCanonicals(wrapper.line)));
-        wrapper = reader.nextLine();
+      VariantRecord record;
+      while((record = reader.nextIndexedRecord().getRecord()) != null){
+        this.variants.addAll(Arrays.asList(Canonical.getCanonicals(record)));
       }
     } catch (VCFException e) {
-      this.fatalAndQuit("Unable to read variants from "+this.file.getFilename(), e);
-    } catch (PedException ex) {    
-      this.fatalAndQuit("Unable to read ped file", ex);
+      Message.fatal("Unable to read variants from "+this.file.getFilename(), e, true);
+    } catch (PedException ex) {
+      Message.fatal("Unable to read ped file", ex, true);
     }
     Message.info((this.file.getFilename()+" variants loaded"));
   }  
@@ -98,9 +91,9 @@ public class CommonVariants extends ParallelVCFFunction {
   }
   
   @Override
-  public String[] processInputLine(String line) {
+  public String[] processInputRecord(VariantRecord record) {
     ArrayList<String> ret = new ArrayList<>();
-    for(Canonical c :Canonical.getCanonicals(line))
+    for(Canonical c :Canonical.getCanonicals(record))
       if(this.variants.contains(c))
         ret.add(c.toString());
     if(ret.isEmpty())

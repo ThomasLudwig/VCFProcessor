@@ -132,12 +132,6 @@ public class MaleFemale extends ParallelVCFVariantPedFunction {
     return ret;
   }
 
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
-  }
-
   @Override
   public TestingScript[] getScripts() {
     return TestingScript.getEmpty();

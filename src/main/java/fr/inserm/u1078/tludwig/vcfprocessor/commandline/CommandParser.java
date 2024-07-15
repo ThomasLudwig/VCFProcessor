@@ -36,10 +36,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.ThinFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.FunctionFactory;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.Parameter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
+
+import java.util.*;
 
 /**
  *
@@ -637,6 +635,25 @@ public class CommandParser {
       addFilter(maxSampleFilter);
     }
   }
+
+  /**
+   * Retunrs a Key/Values Map of BCFArguents
+   * @return
+   */
+  public HashMap<String, String[]> getBCFArguments() {
+    HashMap<String, String[]> ret = new HashMap<>();
+    addBCFArgument(ret, BCFArguments.CONSERVE_FORMAT);
+    addBCFArgument(ret, BCFArguments.IGNORE_FORMAT);
+    addBCFArgument(ret, BCFArguments.CONSERVE_INFO);
+    addBCFArgument(ret, BCFArguments.IGNORE_INFO);
+    return ret;
+  }
+
+  private void addBCFArgument(HashMap<String, String[]>ret, Argument arg) {
+    String key = arg.getKey().toLowerCase();
+    if (options.containsKey(key))
+      ret.put(key, options.get(key));
+  }
   
   private void missingPedWarning(Argument arg){
     Message.warning("Argument [" + arg + "] cannot be used without [" + SampleArguments.PED + "]");
@@ -764,7 +781,6 @@ public class CommandParser {
   public ArrayList<LineFilter> getLineFilters() {
     return lineFilters;
   }
-
   public ArrayList<VariantFilter> getVariantFilters() {
     return variantFilters;
   }

@@ -31,11 +31,11 @@ public class GenotypeDPFilter extends GenotypeFilter {
   }
 
   @Override
-  public boolean pass(String t) {
+  public boolean pass(String[] f) {
     int dp = 0;
     try {
-      dp = new Integer(t.split(":")[this.dpPos]);      
-    } catch (Exception e) { //ArrayIndex
+      dp = Integer.parseInt(f[this.dpPos]);
+    } catch (Exception ignore) { //ArrayIndex
       //Ignore
     }
     return (min <= dp && dp <= max);

@@ -38,7 +38,7 @@ public class GraphCompareFrequencies extends GraphFunction {
     if ("NaN".equals(s) || s == null || s.isEmpty())
       return 0;
     try {
-      return new Double(s);
+      return Double.parseDouble(s);
     } catch (NumberFormatException e) {
       return -1;
     }
@@ -54,8 +54,7 @@ public class GraphCompareFrequencies extends GraphFunction {
     Message.info("Parsing Data");
     int abs = xCol.getIntegerValue();
     int ord = yCol.getIntegerValue();
-    try {
-      UniversalReader in = tsv.getReader();
+    try (UniversalReader in = tsv.getReader()){
       String line = in.readLine();
       String[] f = line.split(T);
       xTitle = f[abs];
@@ -69,7 +68,7 @@ public class GraphCompareFrequencies extends GraphFunction {
         double x = getValue(f[abs]);
         double y = getValue(f[ord]);
         if (Double.isNaN(x) || Double.isNaN(y))
-          this.fatalAndQuit("Nan in line [" + line + "]");
+          Message.die("Nan in line [" + line + "]");
         points.add(new Point(x, y));
         if (x > 0 && x < minX)
           minX = x;
@@ -82,10 +81,8 @@ public class GraphCompareFrequencies extends GraphFunction {
 
       graphs.add(new CompareFrequenciesAreaGraph(points, this.title.getStringValue(), xTitle, yTitle, minX, minY));
       graphs.add(new CompareFrequenciesGraph(points, this.title.getStringValue(), xTitle, yTitle, minX, minY));
-
-      in.close();
     } catch (Exception e) {
-      this.fatalAndQuit("Could not parse file from [" + tsv.getFilename() + "]", e);
+      Message.fatal("Could not parse file from [" + tsv.getFilename() + "]", e, true);
     }
 
     return graphs;

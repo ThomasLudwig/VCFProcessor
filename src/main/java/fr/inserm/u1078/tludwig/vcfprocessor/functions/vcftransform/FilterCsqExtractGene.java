@@ -91,13 +91,7 @@ public class FilterCsqExtractGene extends ParallelVCFVariantFunction {
     }
     return NO_OUTPUT;
   }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
-  }  
-  
+
   @Override
   public TestingScript[] getScripts() {
     TestingScript scr = TestingScript.newFileTransform();

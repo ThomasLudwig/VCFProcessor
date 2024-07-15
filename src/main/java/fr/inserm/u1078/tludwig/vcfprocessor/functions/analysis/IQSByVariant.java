@@ -1,15 +1,16 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 
 import fr.inserm.u1078.tludwig.maok.LineBuilder;
-import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.maok.tools.DateTools;
 import fr.inserm.u1078.tludwig.maok.tools.MathTools;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.maok.tools.StringTools;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCFException;
+import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.MultiVCFReader;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.MultiVCFReader.LinesPair;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.MultiVCFReader.RecordPair;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VCFException;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction.Output;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.IntegerParameter;
@@ -18,10 +19,13 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPAnnotation;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThread;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Computes the IQS score for each variant between sequences data and data imputed from genotyping.
@@ -119,15 +123,15 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
     println(String.join(T, HEADERS));
 
     Consumer consumer = new Consumer();
-    new Thread(consumer).start();
+    consumer.start();
 
     Worker[] workers = new Worker[cpu.getIntegerValue()];
     for (int i = 0; i < workers.length; i++) {
       workers[i] = new Worker();
-      new Thread(workers[i]).start();
+    workers[i].start();
     }
 
-    LinesPair lines = reader.getNextLines();
+    RecordPair lines = reader.getNextLines();
     while (lines.getFirst() != null) {
       workers[nb % cpu.getIntegerValue()].put(new IQSData(lines, nb++)); //TODO check : objet must be build in thread ???
       lines = reader.getNextLines();
@@ -139,20 +143,20 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
     Message.info("All variants have been loaded");
     //Wait for consumers end
     while (consumer.isRunning())
-      Thread.sleep(DELAY);
+      TimeUnit.MILLISECONDS.sleep(DELAY);
   }
 
   private static class IQSData {
-    private final LinesPair lines;
+    private final RecordPair lines;
     private final int nb;
 
-    IQSData(LinesPair lines, int nb) {
+    IQSData(RecordPair lines, int nb) {
       this.lines = lines;
       this.nb = nb;
     }
   }
 
-  private class Worker implements Runnable {
+  private class Worker extends WellBehavedThread {
 
     private final LinkedBlockingQueue<IQSData> queue = new LinkedBlockingQueue<>(1000);
 
@@ -163,13 +167,11 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
     public void put(IQSData iqsdata) {
       try {
         this.queue.put(iqsdata);
-      } catch (InterruptedException e) {
-        //Ignore
-      }
+      } catch (InterruptedException ignore) { }
     }
 
     @Override
-    public void run() {
+    public void doRun() {
       boolean run = true;
       while (run) {
         IQSData data;
@@ -178,20 +180,20 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
 
           if (data.lines != null && data.lines.getFirst() != null) {
             ArrayList<String> outputs = new ArrayList<>();
-            for (String actLine : data.lines.getFirst()) {
+            for (VariantRecord actLine : data.lines.getFirst()) {
               Variant actual = null;
               try {
                 actual = act.createVariant(actLine);
               } catch (VCFException e) {
-                fatalAndQuit("Unable to create variant from following line in " + act.getFilename() + "\n" + actLine, e);
+                Message.fatal("Unable to create variant from following line in " + act.getFilename() + "\n" + actLine, e, true);
               }
               if (actual != null) //Not filtered
-                for (String impLine : data.lines.getSecond()) {
+                for (VariantRecord impLine : data.lines.getSecond()) {
                   Variant imputed = null;
                   try {
                     imputed = imputedVCF.createVariant(impLine);
                   } catch (VCFException e) {
-                    fatalAndQuit("Unable to create variant from following line in " + imputedVCF.getFilename() + "\n" + impLine, e);
+                    Message.fatal("Unable to create variant from following line in " + imputedVCF.getFilename() + "\n" + impLine, e, true);
                   }
 
                   if (imputed != null)//Not filtered
@@ -215,9 +217,7 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
             run = false;
             pushOutput(data.nb, new String[]{END_MESSAGE});
           }
-        } catch (InterruptedException ex) {
-          //Ignore
-        }
+        } catch (InterruptedException ignore) { }
       }
     }
   }
@@ -321,12 +321,10 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
   public void pushOutput(int n, String[] lines) {
     try {
       this.outputLines.put(new Output(n, lines));
-    } catch (InterruptedException e) {
-      this.fatalAndQuit("Producer interrupted");
-    }
+    } catch (InterruptedException ignore) { }
   }
 
-  public class Consumer implements Runnable {
+  public class Consumer extends WellBehavedThread {
 
     private final ArrayList<Output> dequeuedOutput;
     private long start;
@@ -375,7 +373,7 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
     }
 
     @Override
-    public void run() {
+    public void doRun() {
       start = new Date().getTime();
 
       int nb = 1;
@@ -397,7 +395,7 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
             }
           }
         } catch (Exception e) {
-          fatalAndQuit("Consumer interrupted", e);
+          Message.fatal("Consumer interrupted", e, true);
         }
     }
   }

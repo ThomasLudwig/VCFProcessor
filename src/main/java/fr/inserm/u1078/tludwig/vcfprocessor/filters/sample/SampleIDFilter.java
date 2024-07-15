@@ -37,15 +37,13 @@ public class SampleIDFilter extends SampleFilter {
 
   public void addFilenames(String... filenames) {
     for (String filename : filenames)
-      try {
-        UniversalReader in = new UniversalReader(filename);
+      try (UniversalReader in = new UniversalReader(filename)){
         String line;
         while ((line = in.readLine()) != null)
-          if (!line.startsWith("#")) {
+          if (!line.startsWith("#")) {//TODO check how it turns out with BCF
             String[] f = line.split("\\s+");
             this.add(f[0]);
           }
-        in.close();
       } catch (IOException ioe) {
         Message.warning("Problem while file [" + filename + "] : " + ioe.getMessage());
       }

@@ -16,7 +16,7 @@ import java.util.ArrayList;
  * Checked for release on 2020-05-12
  * Unit Test defined on   2020-07-07
  */
-public class InbreedingCoeffDistribution extends ParallelVCFVariantFunction {
+public class InbreedingCoeffDistribution extends ParallelVCFVariantFunction<Double> {
   NumberSeries coeffs;
   
   @Override
@@ -88,12 +88,8 @@ public class InbreedingCoeffDistribution extends ParallelVCFVariantFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    if(analysis instanceof Double){
-      coeffs.add((Double)analysis);
-      return true;
-    }
-    return false;
+  public void processAnalysis(Double analysis) {
+    coeffs.add(analysis);
   }
   
   @Override

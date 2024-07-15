@@ -2,8 +2,10 @@ package fr.inserm.u1078.tludwig.vcfprocessor.filters.line;
 
 import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.commandline.MinMaxGroupParser;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
+
 import java.util.ArrayList;
 
 /**
@@ -40,17 +42,9 @@ public class AlleleCountFilter extends LineFilter {
   }
 
   @Override
-  public boolean pass(String[] t) {
+  public boolean pass(VariantRecord record) {
     if (this.parser == null) { //non group mode
-      int[] acs = new int[t[VCF.IDX_ALT].split(",").length + 1];
-
-      for (int i = VCF.IDX_SAMPLE; i < t.length; i++) {
-        String geno = t[i].split(":")[0]; //genotype from sample field
-        for (String gt : geno.split("[/\\|]")) //split by / or | 
-          try {
-            acs[new Integer(gt)]++;
-          } catch (NumberFormatException ignore) {}
-      }
+      int[] acs = record.getAllACs();
 
       switch (type) {
         case TYPE_MINOR://look at minor among ref,alt1,alt2...,altN
@@ -77,20 +71,19 @@ public class AlleleCountFilter extends LineFilter {
         case TYPE_MINOR:
           //First identify the minor, then reject if one group is not within bound for the minor
 
-          int[] tacs = new int[t[VCF.IDX_ALT].split(",").length + 1];
+          int[] tacs = new int[record.getAltString().split(",").length + 1];
           int[][] gacs = new int[parser.getGroups().size()][tacs.length];
           for (int g = 0; g < groups.size(); g++) {
             String group = groups.get(g);
             ArrayList<Integer> indices = parser.getIndices(group);
 
             for (int i : indices) {
-              String geno = t[i].split(":")[0]; //genotype from sample field
-              for (String gt : geno.split("[/\\|]")) //split by / or | 
-                try {
-                  int a = new Integer(gt);
+              int[] alleles = Genotype.getAlleles(record.getGT(i));
+              if(alleles != null)
+                for(int a : alleles) {
                   tacs[a]++;
                   gacs[g][a]++;
-                } catch (NumberFormatException ignore) { }
+                }
             }
           }
 
@@ -118,12 +111,11 @@ public class AlleleCountFilter extends LineFilter {
             int gMaxAC = parser.getMax(group);
             int ac = 0;
             for (int i : indices) {
-              String geno = t[i].split(":")[0]; //genotype from sample field
-              for (String gt : geno.split("[/\\|]")) //split by / or | 
-                try {
-                  if (0 == new Integer(gt))
+              int[] alleles = Genotype.getAlleles(record.getGT(i));
+              if(alleles != null)
+                for(int a : alleles)
+                  if(a == 0)
                     ac++;
-                } catch (NumberFormatException ignore) { }
             }
             if (!(gMinAC <= ac && ac <= gMaxAC))
               return false;
@@ -134,14 +126,13 @@ public class AlleleCountFilter extends LineFilter {
             ArrayList<Integer> indices = parser.getIndices(group);
             int gMinAC = parser.getMin(group);
             int gMaxAC = parser.getMax(group);
-            int[] acs = new int[t[VCF.IDX_ALT].split(",").length + 1];
+            int[] acs = new int[record.getAltString().split(",").length + 1];
 
             for (int i : indices) {
-              String geno = t[i].split(":")[0]; //genotype from sample field
-              for (String gt : geno.split("[/\\|]")) //split by / or | 
-                try {
-                  acs[new Integer(gt)]++;
-                } catch (NumberFormatException ignore) { }
+              int[] alleles = Genotype.getAlleles(record.getGT(i));
+              if(alleles != null)
+                for(int a : alleles)
+                  acs[a]++;
             }
 
             for (int a = 1; a < acs.length; a++)
@@ -150,7 +141,7 @@ public class AlleleCountFilter extends LineFilter {
           }
           return true;
         case TYPE_NON_REF_ANY:
-          boolean[] any = new boolean[t[VCF.IDX_ALT].split(",").length + 1];
+          boolean[] any = new boolean[record.getAltString().split(",").length + 1];
           for (int a = 1; a < any.length; a++)
             any[a] = true;
 
@@ -161,11 +152,10 @@ public class AlleleCountFilter extends LineFilter {
             int[] acs = new int[any.length];
 
             for (int i : indices) {
-              String geno = t[i].split(":")[0]; //genotype from sample field
-              for (String gt : geno.split("[/\\|]")) //split by / or | 
-                try {
-                  acs[new Integer(gt)]++;
-                } catch (NumberFormatException ignore) { }
+              int[] alleles = Genotype.getAlleles(record.getGT(i));
+              if(alleles != null)
+                for(int a : alleles)
+                  acs[a]++;
             }
 
             for (int a = 1; a < acs.length; a++)
@@ -178,6 +168,11 @@ public class AlleleCountFilter extends LineFilter {
           return false;
       }
     }
+    return false;
+  }
+
+  @Override
+  public boolean leftColumnsOnly() {
     return false;
   }
 

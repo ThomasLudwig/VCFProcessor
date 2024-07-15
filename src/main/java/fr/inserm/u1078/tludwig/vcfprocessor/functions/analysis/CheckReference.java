@@ -4,7 +4,7 @@ import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.FastaException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Fasta;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FastaFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
@@ -16,7 +16,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
  * Checked for release on 2020-05-06
  * Unit Test defined on   2020-09-22 
  */
-public class CheckReference extends ParallelVCFFunction {  
+public class CheckReference extends ParallelVCFFunction {
   private Fasta fasta;
 
   private final FastaFileParameter refFile = new FastaFileParameter();
@@ -64,7 +64,7 @@ public class CheckReference extends ParallelVCFFunction {
     try {
       fasta = this.refFile.getFasta();
     } catch (FastaException e) {
-      this.fatalAndQuit("Unable to open fasta file " + this.refFile.getFilename(), e);
+      Message.fatal("Unable to open fasta file " + this.refFile.getFilename(), e, true);
     }
   }
 
@@ -81,14 +81,13 @@ public class CheckReference extends ParallelVCFFunction {
   }
 
   @Override
-  public String[] processInputLine(String line) {
-    String[] fields = line.split(T);
-    String chrom = fields[VCF.IDX_CHROM];
-    int pos = Integer.parseInt(fields[VCF.IDX_POS]);
-    String ref = fields[VCF.IDX_REF];
+  public String[] processInputRecord(VariantRecord record) {
+    String chrom = record.getChrom();
+    int pos = record.getPos();
+    String ref = record.getRef();
     boolean onlySNVs = ref.length() == 1;
     if(onlySNVs){
-      for(String alt : fields[VCF.IDX_ALT].split(","))
+      for(String alt : record.getAlts())
         if(alt.length() != 1){
           onlySNVs = false;
           break;
@@ -106,7 +105,7 @@ public class CheckReference extends ParallelVCFFunction {
         if (vcfRef != fastaRef)
           return new String[]{chrom + T + pos + T + vcfRef + T + fastaRef};
       } catch (FastaException ex) {
-        this.fatalAndQuit("Unable to process line\n"+line, ex);
+        Message.fatal("Unable to process line\n"+record, ex, true);
       }
     }
     return NO_OUTPUT;
@@ -128,12 +127,6 @@ public class CheckReference extends ParallelVCFFunction {
     }
   }
   
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
-  }
-
   @Override
   public TestingScript[] getScripts() {
     TestingScript def = TestingScript.newFileAnalysis();

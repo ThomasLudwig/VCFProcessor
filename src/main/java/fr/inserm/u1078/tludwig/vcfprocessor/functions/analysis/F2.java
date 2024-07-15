@@ -20,7 +20,7 @@ import java.util.ArrayList;
  * Checked for release on 2020-05-06
  * Unit Test defined on 2020-05-15
  */
-public class F2 extends ParallelVCFVariantPedFunction {
+public class F2 extends ParallelVCFVariantPedFunction<F2.F2Analysis> {
 
   private final StringParameter prefix = new StringParameter(OPT_PREFIX, "prefix", "prefix of the output files");
   private final OutputDirectoryParameter dir = new OutputDirectoryParameter();
@@ -115,36 +115,28 @@ public class F2 extends ParallelVCFVariantPedFunction {
       return;
 
     //Ok so we have exactly 2 allele
-    this.pushAnalysis(new Analysis(variant, a, first, second));
+    this.pushAnalysis(new F2Analysis(variant, a, first, second));
   }
 
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    try {
-      Analysis an = (Analysis)analysis;
+  public void processAnalysis(F2Analysis an) {
+    increment(this.f2all, an);
+    if (an.isOld)
+      increment(this.f2old, an);
+    else
+      increment(this.f2new, an);
 
-      increment(this.f2all, an);
+    if (an.isSnp) {
+      increment(this.f2snpAll, an);
       if (an.isOld)
-        increment(this.f2old, an);
+        increment(this.f2snpOld, an);
       else
-        increment(this.f2new, an);
-
-      if (an.isSnp) {
-        increment(this.f2snpAll, an);
-        if (an.isOld)
-          increment(this.f2snpOld, an);
-        else
-          increment(this.f2snpNew, an);
-      }
-
-      
-      return true;
-    } catch (Exception ignore) { }
-    return false;
+        increment(this.f2snpNew, an);
+    }
   }
   
-  private void increment(int[][] f2, Analysis analysis){
+  private void increment(int[][] f2, F2Analysis analysis){
     //now, either they are in the same group, or they aren't, if they are, we must only add them once
     f2[analysis.firstGroup][analysis.secondGroup]++;
     f2[analysis.firstGroup][total]++;
@@ -197,14 +189,14 @@ public class F2 extends ParallelVCFVariantPedFunction {
     return null;
   }
 
-  private static class Analysis{
+  public static class F2Analysis {
     private final boolean isOld;
     private final boolean isSnp;
     private final int firstGroup;
     private final int secondGroup;
     //private final String comment;
 
-     Analysis(Variant variant, int a, int firstGroup, int secondGroup) {
+     F2Analysis(Variant variant, int a, int firstGroup, int secondGroup) {
       this.isOld = variant.getInfo().isInDBSNPVEP(a);
       this.isSnp = variant.isSNP(a);
       this.firstGroup = firstGroup;

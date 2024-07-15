@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.filters.line;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.maok.tools.StringTools;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,8 +26,13 @@ public class IDFilter extends LineFilter {
   }
 
   @Override
-  public boolean pass(String[] f) {
-    return ids.contains(f[2]) == isKeep();
+  public boolean pass(VariantRecord record) {
+    return ids.contains(record.getID()) == isKeep();
+  }
+
+  @Override
+  public boolean leftColumnsOnly() {
+    return true;
   }
 
   public void addIDs(String... ids) {
@@ -36,15 +42,13 @@ public class IDFilter extends LineFilter {
 
   public void addFilenames(String... filenames) {
     for (String filename : filenames)
-      try {
-        UniversalReader in = new UniversalReader(filename);
+      try (UniversalReader in = new UniversalReader(filename)){
         String line;
         while ((line = in.readLine()) != null)
           if (!line.startsWith("#")) {
             String[] f = line.split("\\s+");
             this.addID(f[0]);
           }
-        in.close();
       } catch (IOException ioe) {
         Message.warning("Problem while file [" + filename + "] : " + ioe.getMessage());
       }

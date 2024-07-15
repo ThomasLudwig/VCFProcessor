@@ -107,12 +107,6 @@ public class FrequencyForPrivate extends ParallelVCFVariantPedFunction {
     return outs.toArray(new String[0]);
   }
 
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
-  }
-  
   @Override
   public TestingScript[] getScripts() {
     return TestingScript.getSimpleVCFPedAnalysisScript();

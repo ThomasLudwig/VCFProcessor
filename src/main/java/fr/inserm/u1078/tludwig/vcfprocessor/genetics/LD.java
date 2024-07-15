@@ -1,5 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 
+import java.util.Objects;
+
 /**
  *
  * @author Thomas E. Ludwig (INSERM - U1078)
@@ -90,7 +92,7 @@ public class LD {
         Root gammaLD = new Root(gamma);
         root = getValidLD(alphaLD, betaLD, gammaLD);
       }
-      assert root != null : "Root is null";
+      Objects.requireNonNull(root,"Root is null");
       this.d = root.getD();
       this.dPrime = root.getDPrime();
       this.r2 = root.getR2();

@@ -1,12 +1,14 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 
+import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFPedFunction;
-import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.StringParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectoryParameter;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.StringParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.TreeMap;
@@ -19,7 +21,7 @@ import java.util.TreeMap;
  * Checked for release on 2020-08-06
  * Unit Test defined on 2020-08-06
  */
-public class FilterF2 extends ParallelVCFPedFunction {
+public class FilterF2 extends ParallelVCFPedFunction<FilterF2.Analysis> {
 
   private final StringParameter prefix = new StringParameter(OPT_PREFIX, "prefix", "Output filename prefix");
   private final OutputDirectoryParameter dir = new OutputDirectoryParameter();
@@ -103,7 +105,7 @@ public class FilterF2 extends ParallelVCFPedFunction {
       this.f2snpOld = getPrintWriter(filename + ".snp.old.vcf");
       this.f2snpNew = getPrintWriter(filename + ".snp.new.vcf");
     } catch (IOException e) {
-      this.fatalAndQuit("Unable to create result files", e);
+      Message.fatal("Unable to create result files", e, true);
     }
     this.getVCF().printHeaders(this.f2all);
     this.getVCF().printHeaders(this.f2old);
@@ -162,7 +164,7 @@ public class FilterF2 extends ParallelVCFPedFunction {
           isF2[NEW_IND] = true;
     }
     if (isF2[OVERALL])
-      this.pushAnalysis(new Object[]{variant, isF2});
+      this.pushAnalysis(new Analysis(variant, isF2));
 
     return NO_OUTPUT;
   }
@@ -185,16 +187,28 @@ public class FilterF2 extends ParallelVCFPedFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    try {
-      Object[] objects = (Object[]) analysis;
-      Variant variant = (Variant) objects[0];
-      boolean[] isF2 = (boolean[]) objects[1];
-      storeF2.put(variant, isF2);
-    } catch (Exception e) {
-      return false;
+  public void processAnalysis(Analysis analysis) {
+    Variant variant = analysis.getVariant();
+    boolean[] isF2 = analysis.getIsF2();
+    storeF2.put(variant, isF2);
+  }
+
+  public static class Analysis {
+    private final Variant variant;
+    private final boolean[] isF2;
+
+    public Analysis(Variant variant, boolean[] isF2) {
+      this.variant = variant;
+      this.isF2 = isF2;
     }
-    return true;
+
+    public Variant getVariant() {
+      return variant;
+    }
+
+    public boolean[] getIsF2() {
+      return isF2;
+    }
   }
   
   @Override

@@ -1,11 +1,11 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 
-import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
-import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.PedFileParameter;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFilterPedFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+
 import java.util.ArrayList;
 
 /**
@@ -16,8 +16,7 @@ import java.util.ArrayList;
  * Checked for release on 2020-08-07
  * Unit Test defined on   2020-08-07
  */
-public class NotFoundInAnyControl extends ParallelVCFVariantFilterFunction {
-  public final PedFileParameter pedFile = new PedFileParameter();
+public class NotFoundInAnyControl extends ParallelVCFVariantFilterPedFunction {
   private ArrayList<Sample> controls;
 
   @Override

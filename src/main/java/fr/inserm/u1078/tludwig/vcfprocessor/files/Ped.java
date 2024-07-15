@@ -4,6 +4,7 @@ import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -20,7 +21,7 @@ public class Ped {
   public static final int PHENO_UNAFFECTED = 1;
   public static final int PHENO_AFFECTED = 2;
 
-  //TODO ped file data are overwritten by default ped ?
+  //ped file data are overwritten by default ped ?
   //15:19:19 INFO  Information about this PED File
   //15:19:19 INFO  3 samples
   //15:19:19 INFO  1 groups
@@ -32,6 +33,11 @@ public class Ped {
   //15:19:19 INFO  Group NO_GROUP - 3 samples
   //15:19:19 INFO  Parsing of PED File ended.
   //15:19:19 INFO  Sample kept : 3/3
+
+  //2024-06-25 No :
+  //1. Loading the Ped Samples (mssage 1)
+  //2. Loading the VCF Samples (message 2)
+  //3. Binding the Ped to the VCF
 
   private final String filename;
   private final ArrayList<Sample> samples;
@@ -54,7 +60,7 @@ public class Ped {
       while ((line = in.readLine()) != null)
         samples.add(Ped.createSample(line));
       in.close();
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new PedException("Error while reading Ped File " + filename, e);
     }
 

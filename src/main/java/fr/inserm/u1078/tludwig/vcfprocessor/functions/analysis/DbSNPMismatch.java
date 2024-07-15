@@ -15,7 +15,7 @@ import java.util.ArrayList;
  * Checked for release on 2020-08-17
  * Unit Test defined on 2020-08-17
  */
-public class DbSNPMismatch extends ParallelVCFVariantFunction {
+public class DbSNPMismatch extends ParallelVCFVariantFunction<DbSNPMismatch.MiniVar> {
   public static final String[] HEADERS = {"CHR","POS","ID","REF","ALT", "VEP_Annotation"};
   SortedList<MiniVar> outputs;
 
@@ -87,13 +87,8 @@ public class DbSNPMismatch extends ParallelVCFVariantFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    try {
-      MiniVar mini = (MiniVar)analysis;
-      this.outputs.add(mini);
-      return true;
-    } catch (Exception ignore) { }
-    return false;
+  public void processAnalysis(DbSNPMismatch.MiniVar mini) {
+    this.outputs.add(mini);
   }
 
   @SuppressWarnings("unused")
@@ -105,7 +100,7 @@ public class DbSNPMismatch extends ParallelVCFVariantFunction {
     return out.toArray(new String[0]);
   }
   
-  private static class MiniVar implements Comparable<MiniVar>{
+  public static class MiniVar implements Comparable<MiniVar>{
     private final String chr;
     private final int pos;
     private final String id;

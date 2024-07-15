@@ -1,5 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.filters.line;
 
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
 
 /**
@@ -13,13 +14,18 @@ public class PhaseFilter extends LineFilter {
   }
 
   @Override
-  public boolean pass(String[] t) { //TODO untested filter
-    for (int i = 9; i < t.length; i++) {
-      String gt = t[i].split(":")[0];
+  public boolean pass(VariantRecord record) { //TODO untested filter
+    for(int s = 0 ; s < record.getNumberOfSamples(); s++) {
+      String gt = record.getGT(s);
       if (gt.contains("/"))
         return !this.isKeep();
     }
     return this.isKeep();
+  }
+
+  @Override
+  public boolean leftColumnsOnly() {
+    return false;
   }
 
   @Override

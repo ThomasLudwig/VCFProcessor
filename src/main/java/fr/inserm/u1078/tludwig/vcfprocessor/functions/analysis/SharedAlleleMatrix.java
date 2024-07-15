@@ -20,7 +20,7 @@ import java.util.NavigableSet;
  * Checked for release on 2020-05-12
  * Unit Test defined on   2020-07-08
  */
-public class SharedAlleleMatrix extends ParallelVCFVariantFunction {
+public class SharedAlleleMatrix extends ParallelVCFVariantFunction<SharedAlleleMatrix.Analysis> {
 
   private final OutputDirectoryParameter dir = new OutputDirectoryParameter();
 
@@ -96,23 +96,18 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction {
   
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    if(analysis instanceof Analysis){
-      Analysis a = (Analysis)analysis;
-      if (a.isNew)
-        this.snpNew[a.s1][a.s2]++;
-      if (a.is5)
-        this.snp5[a.s1][a.s2]++;
-      if (a.is1)
-        this.snp1[a.s1][a.s2]++;
-      if (a.is05)
-        this.snp05[a.s1][a.s2]++;
-      return true;
-    }
-    return false;
+  public void processAnalysis(Analysis a) {
+    if (a.isNew)
+      this.snpNew[a.s1][a.s2]++;
+    if (a.is5)
+      this.snp5[a.s1][a.s2]++;
+    if (a.is1)
+      this.snp1[a.s1][a.s2]++;
+    if (a.is05)
+      this.snp05[a.s1][a.s2]++;
   }
   
-  private static class Analysis {
+  public static class Analysis {
     private final int s1;
     private final int s2;
     private final boolean isNew;

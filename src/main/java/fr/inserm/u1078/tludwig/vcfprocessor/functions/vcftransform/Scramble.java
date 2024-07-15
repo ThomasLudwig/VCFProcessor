@@ -2,9 +2,11 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcftransform;
 
 import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Outputs the same VCF same but randomly reassigns the genotypes among the samples
@@ -53,25 +55,23 @@ public class Scramble extends ParallelVCFFunction {
   }
 
   @Override
-  public String[] processInputLine(String line) {
-    String[] f = line.split(T);
-    LineBuilder out = new LineBuilder(f[0]);
-    for (int i = 1; i < 9; i++)
-      out.addColumn(f[i]);
+  public String[] processInputRecord(VariantRecord record) {
+    LineBuilder out = new LineBuilder(record.getChrom());
+    out.addColumn(record.getPos());
+    out.addColumn(record.getID());
+    out.addColumn(record.getRef());
+    out.addColumn(record.getAltString());
+    out.addColumn(record.getQual());
+    out.addColumn(record.getFiltersString());
+    out.addColumn(record.getInfoString());
+    out.addColumn(record.getFormatString());
 
-    ArrayList<Integer> genos = new ArrayList<>();
-    for (int i = 9; i < f.length; i++)
-      genos.add(i);
+    ArrayList<String> genos = new ArrayList<>();
+    Collections.addAll(genos, record.getGenotypeStrings());
 
     while (!genos.isEmpty())
-      out.addColumn(f[genos.remove((int) (genos.size() * Math.random()))]);
+      out.addColumn(genos.remove((int) (genos.size() * Math.random())));
     return new String[]{out.toString()};
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
   }
 
   @Override
@@ -86,7 +86,6 @@ public class Scramble extends ParallelVCFFunction {
       this.addAnonymousFilename("vcf", "vcf");
     }
 
-    @SuppressWarnings("SpellCheckingInspection")
     @Override
     public LineBuilder testSingleFile() {
       LineBuilder out = new LineBuilder(TAB2);

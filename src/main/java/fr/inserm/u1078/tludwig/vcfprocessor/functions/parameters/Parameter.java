@@ -31,7 +31,7 @@ public abstract class Parameter {
   }
   
   public String getCommandLine() {
-    return " " + Message.cyan(this.getKey()) + " " + Message.red(this.example);
+    return " " + Message.Color.cyan(this.getKey()) + " " + Message.Color.red(this.example);
   }
   
   public String getCommandLineDescription(int keyLength, int exampleLength){
@@ -42,7 +42,7 @@ public abstract class Parameter {
     while(theExample.length() < exampleLength)
       theExample.append(" ");
     
-    return Message.cyan(theKey.toString()) + " " + Message.red(theExample.toString()) + " : " + this.getDescription();
+    return Message.Color.cyan(theKey.toString()) + " " + Message.Color.red(theExample.toString()) + " : " + this.getDescription();
   }
   
   public String getRSTCommandLine() {

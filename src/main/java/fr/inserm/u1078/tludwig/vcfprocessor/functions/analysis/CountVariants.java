@@ -18,7 +18,7 @@ import java.util.ArrayList;
  * Checked for release on 2020-05-06
  * Unit Test defined on   2020-05-14
  */
-public class CountVariants extends ParallelVCFVariantPedFunction {
+public class CountVariants extends ParallelVCFVariantPedFunction<int[]> {
 
   private ArrayList<String> groups;
   private ArrayList<Sample>[] samples;
@@ -112,13 +112,8 @@ public class CountVariants extends ParallelVCFVariantPedFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    try {
-      int[] idx = (int[])analysis;
-      this.counts.get(idx[0])[idx[1]]++;
-      return true;
-    } catch (Exception ignore) { }
-    return false;
+  public void processAnalysis(int[] idx) {
+    this.counts.get(idx[0])[idx[1]]++;
   }
   
   @SuppressWarnings("unused")

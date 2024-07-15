@@ -1,5 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor;
 
+import fr.inserm.u1078.tludwig.maok.tools.Message;
+
 /**
  * Program entry point (deported from Main, to enforce "assert"
  *
@@ -10,7 +12,11 @@ package fr.inserm.u1078.tludwig.vcfprocessor;
  */
 
 public class Run {
-  public static void main(String[] args){
-    Main.start(args);
+  public static void main(String[] args) {
+    try {
+      Main.start(args);
+    } catch(Exception e){
+      Message.fatal("Unexcpected problem", e , true);
+    }
   }
 }

@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.filters.line;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.maok.tools.StringTools;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Region;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
@@ -46,12 +47,12 @@ public class PositionFilter extends LineFilter {
     switch (f.length) {
       default:
       case 3:
-        start = new Integer(f[1]);
-        end = new Integer(f[2]);
+        start = Integer.parseInt(f[1]);
+        end = Integer.parseInt(f[2]);
         break;
       case 2:
-        start = new Integer(f[1]);
-        end = new Integer(f[1]);
+        start = Integer.parseInt(f[1]);
+        end = Integer.parseInt(f[1]);
         break;
       case 1:
         String[] g = f[0].split(":");
@@ -60,12 +61,12 @@ public class PositionFilter extends LineFilter {
           String[] p = g[1].split("-", -1);
           switch (p.length) {
             case 2:
-              start = new Integer(p[0]);
-              end = new Integer(p[1]);
+              start = Integer.parseInt(p[0]);
+              end = Integer.parseInt(p[1]);
               break;
             case 1:
-              start = new Integer(p[0]);
-              end = new Integer(p[0]);
+              start = Integer.parseInt(p[0]);
+              end = Integer.parseInt(p[0]);
               break;
             default:
               throw new Exception("Invalid for [" + trimmed + "]");
@@ -135,8 +136,7 @@ public class PositionFilter extends LineFilter {
   public void addPositionFilenames(String... filenames) {
     for (String filename : filenames) {
       String error = null;
-      try {
-        UniversalReader in = new UniversalReader(filename);
+      try (UniversalReader in = new UniversalReader(filename)){
         String line;
         while ((line = in.readLine()) != null)
           try {
@@ -145,8 +145,6 @@ public class PositionFilter extends LineFilter {
             if(error == null)
               error = e.getMessage();
           }
-
-        in.close();
         if (error != null)
           Message.warning("Some lines could not be read in file [" + filename + "]. Valid line formats are " + String.join("|", POSITION_FILE_FORMATS)+"\nFirst Error :"+error);
       } catch (IOException ioe) {
@@ -158,8 +156,7 @@ public class PositionFilter extends LineFilter {
   public void addBedFilename(String... beds) {
     for (String filename : beds) {
       String error = null;
-      try {
-        UniversalReader in = new UniversalReader(filename);
+      try (UniversalReader in = new UniversalReader(filename)){
         String line;
         while ((line = in.readLine()) != null)
           try {
@@ -168,7 +165,6 @@ public class PositionFilter extends LineFilter {
             if(error == null)
               error = e.getMessage();
           }
-        in.close();
         if (error != null)
           Message.warning("Some lines could not be read in bed file [" + filename + "]. Line format is chr[tab]start[tab]end"+"\nFirst Error :"+error);
       } catch (IOException ioe) {
@@ -182,13 +178,13 @@ public class PositionFilter extends LineFilter {
   }
 
   @Override
-  public boolean pass(String[] f) {
+  public boolean pass(VariantRecord record) {
     if (overlap) {
-      int start = new Integer(f[1]);
-      int length = f[3].replace("-", "").length();
-      for (String alt : f[4].split(","))
+      int start = record.getPos();
+      int length = record.getRef().replace("-", "").length();
+      for (String alt : record.getAlts())
         length = Math.max(length, alt.replace("-", "").length());
-      Region target = new Region(f[0], start, start + length - 1, Region.FORMAT_BASE_1);
+      Region target = new Region(record.getChrom(), start, start + length - 1, Region.FORMAT_BASE_1);
       if (isKeep()) {
         for (Region r : regions)
           if (target.overlap(r))
@@ -201,8 +197,8 @@ public class PositionFilter extends LineFilter {
         return true;
       }
     } else {
-      int chr = Variant.chromToNumber(f[0]);
-      int pos = new Integer(f[1]);
+      int chr = Variant.chromToNumber(record.getChrom());
+      int pos = record.getPos();
       if (isKeep()) {
         for (Region r : regions)
           if (r.contains(chr, pos))
@@ -216,7 +212,12 @@ public class PositionFilter extends LineFilter {
       }
     }
   }
-  
+
+  @Override
+  public boolean leftColumnsOnly() {
+    return true;
+  }
+
   @Override
   public String getDetails() {
     return (this.isKeep() ? "Keep" : "Remove")+" positions"+(this.overlap ? " Overlapping" : "")+" : "+StringTools.startOf(5, regions);

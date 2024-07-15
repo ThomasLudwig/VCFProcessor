@@ -174,7 +174,12 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
     }
 
     @Override
-    public boolean equals(Object obj) { //TODO override hashCode
+    public int hashCode() {
+      return Objects.hash(this.chrom, this.position, this.ref, this.alt, this.consequences);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
       if (obj instanceof MiniVariant) {
         MiniVariant var = (MiniVariant) obj;
         return this.chrom == var.chrom

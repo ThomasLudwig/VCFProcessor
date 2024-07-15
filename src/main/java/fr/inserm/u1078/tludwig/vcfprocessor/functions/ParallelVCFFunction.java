@@ -6,7 +6,11 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.PedException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCFException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF.Reader;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThread;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThreadFactory;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
@@ -18,12 +22,11 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Thomas E. Ludwig (INSERM - U1078) 2019-09-09
  */
-public abstract class ParallelVCFFunction extends VCFFunction {
+public abstract class ParallelVCFFunction<T> extends VCFFunction {
 
   public static final int QUEUE_DEPTH = 200;
   public static final int STEP = 10000;
-  public static final String END_MESSAGE = "XXX_NO_MORE_LINES_XXX";
-  public static final String EMPTY = "ZZZ_EMPTY_ZZZ";
+
   public static final String[] NO_OUTPUT = new String[]{};
   public static final int WORKERS = Math.max(1, Math.min(8, Runtime.getRuntime().availableProcessors() - 3));//Number of workers, there must be one consumer and one reader
 
@@ -52,7 +55,7 @@ public abstract class ParallelVCFFunction extends VCFFunction {
     return getVCF().getFullHeaders().toArray(new String[0]);
   }
 
-  public final void printHeaders() { //TODO can't begin/headers/execute/end/footers be moved to Function ?
+  public final void printHeaders() { //can't move begin/headers/execute/end/footers be moved to Function, getHeaders might need to production differents headers for different output
     String[] headers = this.getHeaders();
     if (headers != null)
       for (String header : headers)
@@ -101,15 +104,14 @@ public abstract class ParallelVCFFunction extends VCFFunction {
     this.printHeaders();
     this.outputLines = new LinkedBlockingQueue<>(20 * WORKERS);
 
-    ExecutorService threadPool = Executors.newFixedThreadPool(WORKERS + 2);
+    ExecutorService threadPool = Executors.newFixedThreadPool(WORKERS + 2, new WellBehavedThreadFactory());
+
 
     analyzer = new Analyzer();
     analyzer.start();
 
     try {
-      Reader reader = getVCF().getReaderWithoutStarting();
-      threadPool.submit(reader);
-
+      Reader reader = getVCF().getReaderAndStart();
       threadPool.submit(new Consumer());
 
       for (int i = 0; i < WORKERS; i++)
@@ -117,20 +119,15 @@ public abstract class ParallelVCFFunction extends VCFFunction {
 
       threadPool.shutdown();
 
-      if(!threadPool.awaitTermination(100, TimeUnit.DAYS))
+      if(!threadPool.awaitTermination(300, TimeUnit.DAYS))
         Message.error("Thread reached its timeout");
-    } catch (InterruptedException e) {
-      Message.error("Thread was interrupted", e);
-    }
+    } catch (InterruptedException ignore) { }
 
     analyzer.willEnd();
     //Wait for analyzer to finish consuming
     while(this.isStillConsuming())
-      try{
-        Thread.sleep(10);
-      } catch(Exception e){
-        //Nothing
-      }
+      TimeUnit.MILLISECONDS.sleep(10);
+
     this.vcf.printVariantKept();
     end();
     this.printFooters();
@@ -139,27 +136,46 @@ public abstract class ParallelVCFFunction extends VCFFunction {
   public void putOutput(int n, String[] lines) {
     try {
       this.outputLines.put(new Output(n, lines));
-    } catch (InterruptedException e) {
-      this.fatalAndQuit("Synchronisation Exception", e);
+    } catch (InterruptedException ignore) { }
+  }
+
+  public void putEOFOutput(Output output) {
+    try {
+      this.outputLines.put(output);
+    } catch (InterruptedException ignore) { }
+  }
+
+
+  /**
+   * Gets an indexedRecord and return an indexOutput (the output is the result of the processedinput)
+   * @param indexedRecord the input to process
+   * return false if InputRecord is EOF
+   */
+  public boolean processInputAndPushOutput(VCF.IndexedRecord indexedRecord) {
+    int index = indexedRecord.index;
+
+    if (indexedRecord.isEOF()) {
+      this.putEOFOutput(Output.eofOutput(index));
+      return false;
     }
+    VariantRecord record = indexedRecord.getRecord();
+    try {
+      String[] output =
+           record.isFiltered()
+           ? new String[0]
+           : this.processInputRecord(indexedRecord.getRecord());
+      if(output == null)
+        throw new RuntimeException("Trying to push an empty output for "+index+"th Record");
+      this.putOutput(indexedRecord.index, output);
+    } catch (Exception e) {
+      Message.fatal("Unable to process record \n" + indexedRecord.getRecord(), e, true);
+    }
+    return true;
   }
 
-  public void pushOutput(int n, String line) {
-    if (END_MESSAGE.equals(line))
-      this.putOutput(n, new String[]{END_MESSAGE});
-    else if (VCF.FILTERED_LINE.equals(line))
-      this.putOutput(n, new String[]{});
-    else
-      try {
-        this.putOutput(n, this.processInputLine(line));
-      } catch (Exception e) {
-        this.fatalAndQuit("Unable to process line \n" + line, e);
-      }
-  }
+  public abstract String[] processInputRecord(VariantRecord record);
 
-  public abstract String[] processInputLine(String line);
-
-  public class Worker implements Runnable {
+  public class Worker extends WellBehavedThread {
 
     private final VCF.Reader reader;
 
@@ -168,31 +184,21 @@ public abstract class ParallelVCFFunction extends VCFFunction {
     }
 
     @Override
-    public void run() {
-      try {
-        VCF.Wrapper wrapper = reader.nextLine();
-        while (wrapper.line != null) {
-          pushOutput(wrapper.index, wrapper.line);
-          wrapper = getVCF().getNextLineWrapper();
-        }
-        pushOutput(wrapper.index, END_MESSAGE);
-      } catch(VCFException e){
-        fatalAndQuit("There was a problem while reading the VCF file", e);
-      }
+    public void doRun() {
+        while (processInputAndPushOutput(reader.nextIndexedRecord()));
     }
   }
 
   /**
    * Process the analysis
    * @param analysis the analysis result to process
-   * @return false if the analysis object is on an unexpected type
    */
 
   @SuppressWarnings("unused")
-  public abstract boolean checkAndProcessAnalysis(Object analysis);
+  public void processAnalysis(T analysis) {}
 
-  public final void pushAnalysis(Object analysis) {
-    this.analyzer.push(analysis);
+  public final void pushAnalysis(T analysis) {
+    this.analyzer.push(new AnalysisWrapper<>(analysis));
   }
 
   /**
@@ -201,9 +207,9 @@ public abstract class ParallelVCFFunction extends VCFFunction {
    * One workaround would be to use AtomicInteger, but it is not applicable to Double and other datatypes
    * So the modification, are pushed into a Queue, and Collected be this Thread
    */
-  public class Analyzer extends Thread {
+  public class Analyzer extends WellBehavedThread {
 
-    private final LinkedBlockingQueue<Object> analyzes;
+    private final LinkedBlockingQueue<AnalysisWrapper<T>> analyzes;
     private boolean stillRunning = true;
 
     public Analyzer() {
@@ -211,45 +217,82 @@ public abstract class ParallelVCFFunction extends VCFFunction {
     }
 
     @Override
-    public void run() {
+    public void doRun() {
       while (stillRunning)
         try {
-          Object analysis = analyzes.take();
-          if (END_MESSAGE.equals(analysis))
+          AnalysisWrapper<T> analysis = analyzes.take();
+          if (analysis.isEOF())
             stillRunning = false;
-          else if (!checkAndProcessAnalysis(analysis))
-            Message.warning("Unexpected Analysis [" + analysis + "]");
-        } catch (InterruptedException ex) {
-          //Ignore ?
-        }
+          else
+            processAnalysis(analysis.value);
+        } catch (InterruptedException ignore) { }
     }
 
-    public void push(Object analysis) {
+    public void push(AnalysisWrapper<T> analysis) {
       try {
         analyzes.put(analysis);
-      } catch (InterruptedException ex) {
-        //Ignores ?
-      }
+      } catch (InterruptedException ignore) { }
     }
 
     private void willEnd() {
-      this.push(END_MESSAGE);
+      this.push(new AnalysisWrapper<>(true));
+    }
+  }
+
+  public static class AnalysisWrapper<T> {
+    private final T value;
+    private final boolean eof;
+
+    public AnalysisWrapper(T value) {
+      this.value = value;
+      this.eof = false;
+    }
+
+    public AnalysisWrapper(boolean eof) {
+      this.value = null;
+      this.eof = eof;
+    }
+
+    public T getValue() {
+      return value;
+    }
+
+    public boolean isEOF() {
+      return eof;
     }
   }
 
   public static class Output {
-
     public final int n;
     public final String[] lines;
 
+    /**
+     * Ouput
+     * @param n the order ?
+     * @param lines the output lines
+     */
     public Output(int n, String[] lines) {
       this.n = n;
+      if(lines == null)
+        throw new RuntimeException("Trying to create a null Output");
       this.lines = lines;
+    }
+
+    private Output(int n) {
+      this.n = n;
+      this.lines = null;
+    }
+
+    public static Output eofOutput(int n){
+      return new Output(n);
+    }
+
+    public boolean isEOF() {
+      return lines == null;
     }
   }
 
-  public class Consumer extends Thread {
-
+  public class Consumer extends WellBehavedThread {
     private final ArrayList<Output> dequeuedOutput;
     private long start;
 
@@ -258,29 +301,24 @@ public abstract class ParallelVCFFunction extends VCFFunction {
     }
 
     private boolean process(Output out) {
-      boolean run = true;
       if (out.n % STEP == 0) {
         double dur = DateTools.duration(start);
         int rate = (int)(out.n / dur);
         Message.info(out.n + " variants processed from " + vcfFile.getFilename() + " in " + dur + "s (" + rate + " variants/s)");
       }
 
+      if(out.isEOF()){
+        double dur = DateTools.duration(start);
+        int rate = (int) (out.n / dur);
+        Message.info(out.n - 1 + " variants processed from " + vcfFile.getFilename() + " in " + dur + "s (" + rate + " variants/s)");
+        return false;
+      }
+
       //Process output
       for (String line : out.lines)
-        switch (line) {
-          case END_MESSAGE:
-            double dur = DateTools.duration(start);
-            int rate = (int)(out.n / dur);
-            Message.info(out.n - 1 + " variants processed from " + vcfFile.getFilename() + " in " + dur + "s (" + rate + " variants/s)");
-            run = false;
-            break;
-          case EMPTY:
-            //Ignore
-            break;
-          default:
-            processOutput(line);
-        }
-      return run;
+        processOutput(line);
+
+      return true;
     }
 
     private Output remove(int nb) {
@@ -292,31 +330,30 @@ public abstract class ParallelVCFFunction extends VCFFunction {
     }
 
     @Override
-    public void run() {
+    public void doRun() {
       start = new Date().getTime();
       boolean running = true;
-
       int nb = 1;
-      while (running)
-        try {
+      try {
+        while (running) {
           Output out = outputLines.take();
           if (out.n == nb) {
-            if (!process(out))
-              running = false;
+            if (!process(out)) {
+              running = false;//Don't simplify with running = !process(), reactivation
+            }
             nb++;
-          } else { //out.n > nb 
+          } else { //out.n > nb
             this.dequeuedOutput.add(out);
-
             Output lines;// = this.dequeuedOutput.remove(nb);
             while ((lines = remove(nb)) != null) {
-              if (!process(lines))
-                running = false;
+              if (!process(lines)) {
+                running = false;//Don't simplify with running = !process(), reactivation
+              }
               nb++;
             }
           }
-        } catch (InterruptedException e) {
-          fatalAndQuit("Consumer interrupted", e);
         }
+      } catch (InterruptedException ignore) { }
     }
   }
   

@@ -7,7 +7,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
  *
  * @author Thomas E. Ludwig (INSERM - U1078) 2020-08-05
  */
-public abstract class ParallelVCFVariantFilterFunction extends ParallelVCFVariantFunction {
+public abstract class ParallelVCFVariantFilterFunction extends ParallelVCFVariantFunction<Integer> {
   private int inputLines = 0;
   private int outputLines = 0;
 
@@ -23,14 +23,9 @@ public abstract class ParallelVCFVariantFilterFunction extends ParallelVCFVarian
 
   @SuppressWarnings("unused")
   @Override
-  public final boolean checkAndProcessAnalysis(Object analysis) {
-    try {
-      int add = (Integer)analysis;
-      this.inputLines++;
-      this.outputLines+=add;
-      return true;
-    } catch (Exception ignore) { }
-    return false;
+  public final void processAnalysis(Integer add) {
+    this.inputLines++;
+    this.outputLines+=add;
   }
 
   @SuppressWarnings("unused")

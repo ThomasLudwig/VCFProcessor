@@ -4,6 +4,7 @@ import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFHandling;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
@@ -17,7 +18,7 @@ import java.util.Date;
  * Checked for release on XXXX-XX-XX
  * Unit Test defined on   XXXX-XX-XX
  */
-public class MergeVQSR extends Function {
+public class MergeVQSR extends Function implements VCFHandling {
   public final VCFFileParameter snpFile = new VCFFileParameter(OPT_SNP, "snp.vcf", "File containing SNP output from VQSR");
   public final VCFFileParameter indelFile = new VCFFileParameter(OPT_INDEL, "indel.vcf", "File containing INDEL output from VQSR");
 
@@ -27,8 +28,17 @@ public class MergeVQSR extends Function {
   }
 
   @Override
-  public Description getDescription() {
-    return new Description(this.getSummary());
+  public final Description getDescription() {
+    Description desc = this.getDesc();
+    if (this.needVEP())
+      desc.addWarning("The input VCF File must have been previously annotated with vep.");
+    String custom = this.getCustomRequirement();
+    if (custom != null)
+      desc.addWarning(custom);
+    String multi = this.getMultiallelicPolicy();
+    if(!MULTIALLELIC_NA.equals(multi))
+      desc.addNote(PREFIX_MULTIALLELIC+multi);
+    return desc;
   }
 
   @Override
@@ -36,39 +46,60 @@ public class MergeVQSR extends Function {
     return OUT_VCF;
   }
 
+  @Override
+  public Description getDesc() {
+    return new Description(this.getSummary());
+  }
+
+  @Override
+  public boolean needVEP() {
+    return false;
+  }
+
+  @Override
+  public String getMultiallelicPolicy() {
+    return MULTIALLELIC_FILTER_ONE;
+  }
+
+  @Override
+  public String getCustomRequirement() {
+    return null;
+  }
+
   @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
-    UniversalReader sin = snpFile.getReader();
-    UniversalReader iin = indelFile.getReader();
+    try(
+        UniversalReader sin = snpFile.getReader();
+        UniversalReader iin = indelFile.getReader()
+    ) {
+      String snp;
+      String indel;
 
-    String snp;
-    String indel;
+      boolean run = true;
+      int count = 0;
+      long start = new Date().getTime();
 
-    boolean run = true;
-    int count = 0;
-    long start = new Date().getTime();
+      while (run) {
+        snp = sin.readLine();
+        indel = iin.readLine();
 
-    while(run){
-      snp = sin.readLine();
-      indel = iin.readLine();
-
-      if(snp != null && indel != null) {
-        count++;
-        if(count%10000 == 0){
-          progress(start, new Date().getTime(), count);
+        if (snp != null && indel != null) {
+          count++;
+          if (count % 10000 == 0) {
+            progress(start, new Date().getTime(), count);
+          }
+          process(snp, indel);
+        } else {
+          run = false;
+          if (snp != null)
+            Message.error("Reached end of INDEL file before reaching end of SNP file");
+          if (indel != null)
+            Message.error("Reached end of SNP file before reaching end of INDEL file");
         }
-        process(snp, indel);
       }
-      else {
-        run = false;
-        if(snp != null)
-          Message.error("Reached end of INDEL file before reaching end of SNP file");
-        if(indel != null)
-          Message.error("Reached end of SNP file before reaching end of INDEL file");
-      }
+      progress(start, new Date().getTime(), count);
     }
-    progress(start, new Date().getTime(), count);
   }
 
   public void progress(long start, long now, int count){

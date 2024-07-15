@@ -15,7 +15,7 @@ import java.util.ArrayList;
  * Checked for release on 2020-05-12
  * Unit Test defined on   2020-07-08
  */
-public class PrivateAndShared extends ParallelVCFVariantPedFunction {
+public class PrivateAndShared extends ParallelVCFVariantPedFunction<PrivateAndShared.Analysis> {
 
   private ArrayList<String> groups;
   private int total = 0;
@@ -110,25 +110,39 @@ public class PrivateAndShared extends ParallelVCFVariantPedFunction {
           for (int i = 0; i < groups.size(); i++)
             if (found[i])
               gps.add(i);
-        this.pushAnalysis(new Object[]{isShared, gps});
+        this.pushAnalysis(new Analysis(isShared, gps));
       }
     return NO_OUTPUT;
   }
   
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    try {
-      boolean isShared = (Boolean)((Object[])analysis)[0];
-      ArrayList<Integer> gps  = (ArrayList<Integer>)((Object[])analysis)[1];
-      total++;
-      if(isShared)
-        shared++;
-      for(int i : gps)
-        priv[i]++;
-      return true;
-    } catch (Exception ignore) { }
-    return false;
+  public void processAnalysis(Analysis analysis) {
+    boolean isShared = analysis.isShared();
+    ArrayList<Integer> gps  = analysis.getGps();
+    total++;
+    if(isShared)
+      shared++;
+    for(int i : gps)
+      priv[i]++;
+  }
+
+  public static class Analysis {
+    private final boolean shared;
+    private final ArrayList<Integer> gps;
+
+    public Analysis(boolean shared, ArrayList<Integer> gps) {
+      this.shared = shared;
+      this.gps = gps;
+    }
+
+    public boolean isShared() {
+      return shared;
+    }
+
+    public ArrayList<Integer> getGps() {
+      return gps;
+    }
   }
   
   @Override

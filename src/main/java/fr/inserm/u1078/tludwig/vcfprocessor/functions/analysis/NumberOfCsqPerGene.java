@@ -1,14 +1,16 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 
 import fr.inserm.u1078.tludwig.maok.LineBuilder;
-import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
+import fr.inserm.u1078.tludwig.maok.tools.Message;
+import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPAnnotation;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
@@ -22,7 +24,7 @@ import java.util.TreeMap;
  * Checked for release on 2020-05-12
  * Unit Test defined on   2020-07-09
  */
-public class NumberOfCsqPerGene extends ParallelVCFVariantFunction {
+public class NumberOfCsqPerGene extends ParallelVCFVariantFunction<NumberOfCsqPerGene.Analysis> {
 
   /**
    * Index Genes (lines), Key (columns)
@@ -75,17 +77,15 @@ public class NumberOfCsqPerGene extends ParallelVCFVariantFunction {
     table = new TreeMap<>();
 
     String gene;
-    try {
-      UniversalReader in = this.geneFile.getReader();
+    try (UniversalReader in = this.geneFile.getReader()){
       while ((gene = in.readLine()) != null) {
         TreeMap<VEPConsequence, Integer> columns = new TreeMap<>();
         for(VEPConsequence v : VEPConsequence.values())
           columns.put(v, 0);
         table.put(gene, columns);
       }
-      in.close();
     } catch (IOException e) {
-      this.fatalAndQuit("Could not read from gene list "+this.geneFile.getFilename(), e);
+      Message.fatal("Could not read from gene list "+this.geneFile.getFilename(), e, true);
     }
   }
 
@@ -124,7 +124,7 @@ public class NumberOfCsqPerGene extends ParallelVCFVariantFunction {
       for (String gene : worsts.keySet()) {
         if(table.containsKey(gene)){
           VEPConsequence csq = VEPConsequence.getWorstConsequence(worsts.get(gene));
-          this.pushAnalysis(new Object[]{gene, csq});
+          this.pushAnalysis(new Analysis(gene, csq));
         }
       }
     }
@@ -133,19 +133,31 @@ public class NumberOfCsqPerGene extends ParallelVCFVariantFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    try {
-      String gene = (String)((Object[])analysis)[0];
-      VEPConsequence v = (VEPConsequence)((Object[])analysis)[1];
-      if(v.getLevel() > VEPConsequence.EMPTY.getLevel()){
-        TreeMap<VEPConsequence, Integer> columns = table.get(gene);
-        columns.put(v, 1 + columns.get(v));
-      }
-      return true;
-    } catch (Exception e) {
-      //Ignore
+  public void processAnalysis(NumberOfCsqPerGene.Analysis analysis) {
+    String gene = analysis.getGene();
+    VEPConsequence v = analysis.getVep();
+    if(v.getLevel() > VEPConsequence.EMPTY.getLevel()){
+      TreeMap<VEPConsequence, Integer> columns = table.get(gene);
+      columns.put(v, 1 + columns.get(v));
     }
-    return false;
+  }
+
+  public static class Analysis {
+    private final String gene;
+    private final VEPConsequence vep;
+
+    public Analysis(String gene, VEPConsequence vep) {
+      this.gene = gene;
+      this.vep = vep;
+    }
+
+    public String getGene() {
+      return gene;
+    }
+
+    public VEPConsequence getVep() {
+      return vep;
+    }
   }
   
   @Override

@@ -2,6 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
@@ -13,9 +14,9 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
  * Checked for release on 2020-08-05
  * Unit Test defined on   2020-08-05
  */
-public class Recode extends ParallelVCFFunction {
+public class Recode extends ParallelVCFFunction<Object> {
 
-  private int read=0;
+  private int read = 0;
 
   @Override
   public String getSummary() {
@@ -55,23 +56,19 @@ public class Recode extends ParallelVCFFunction {
   @SuppressWarnings("unused")
   @Override
   public void end() {
-    Message.info("Lines processes : " + read);
+    Message.info("Lines processed : " + read);
   }
 
   @Override
-  public String[] processInputLine(String line) {
-    pushAnalysis(Boolean.TRUE);
-    return new String[]{line};
+  public String[] processInputRecord(VariantRecord record) {
+    pushAnalysis(null);
+    return new String[]{record.toString()};
   }
   
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis){
-    if(Boolean.TRUE.equals(analysis)){
-      read++;
-      return true;
-    }
-    return false;
+  public void processAnalysis(Object o){
+    read++;
   }
 
   @Override

@@ -35,11 +35,11 @@ public class Info {
   private final TreeMap<String, String> infoMap;
   private final VCF vcfFile;
 
-  public Info(String infoField, VCF vcfFile) {
+  public Info(String[][] infoFields, VCF vcfFile){
+    this.vcfFile = vcfFile;
     this.vepAnnotations = new HashMap<>();
     infoMap = new TreeMap<>();
-    for (String kvString : infoField.split(";")) {
-      String[] kv = kvString.split("=");
+    for (String[] kv : infoFields) {
       String key = kv[0];
       String value = null;
       if (kv.length == 2)
@@ -47,9 +47,9 @@ public class Info {
       if (!infoMap.containsKey(key)) {
         infoMap.put(key, value);
       } else
-        Message.warning("Duplicate key [" + kv[0] + "] found for info [" + infoField + "]");
+        Message.warning("Duplicate key [" + kv[0] + "] found for info [" + merge(infoFields) + "]");
 
-      if (kv[0].equals(CSQ_PREFIX))
+      if (kv[0].equals(CSQ_PREFIX) && kv.length > 1 && kv[1] != null)
         for (String annot : kv[1].split(",")) {
           VEPAnnotation vepAnnotation = new VEPAnnotation(annot, vcfFile.getVepFormat());
           int allele = vepAnnotation.getAlleleNumber();
@@ -58,7 +58,19 @@ public class Info {
           //this.vepAnnotations.add(); //Message.debug("Allele "+this.vepAnnotations.get(this.vepAnnotations.size()-1).getAllele());
         }
     }
-    this.vcfFile = vcfFile;
+  }
+
+  public static String merge(String[][] fields) {
+    StringBuilder ret = new StringBuilder();
+    for(String[] kv : fields){
+      ret.append(";").append(kv[0]);
+      if(kv[1] != null)
+        ret.append("=").append(kv[1]);
+    }
+    if(ret.length() > 0)
+      return ret.substring(1);
+    else
+      return "";
   }
 
   public final String getAnnot(String key) {

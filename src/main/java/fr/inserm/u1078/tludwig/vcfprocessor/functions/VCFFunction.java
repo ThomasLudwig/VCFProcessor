@@ -8,10 +8,9 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParamete
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 20 nov. 2015
  */
 public abstract class VCFFunction extends Function implements VCFHandling {
-  //public static final String MULTIALLELIC_ALL_PROCESSED  =  PREFIX_MULTIALLELIC+"All alternate alleles are processed";
-
   public final VCFFileParameter vcfFile = new VCFFileParameter(OPT_VCF, "input.vcf(.gz)", "VCF file to use as an input. Can be bgzipped");
 
+  //TODO also in Functions using --vcf but that do not extend VCFFunction (ie MergeVQSR)
   @Override
   public final Description getDescription() {
     Description desc = this.getDesc();
@@ -21,7 +20,7 @@ public abstract class VCFFunction extends Function implements VCFHandling {
     if (custom != null)
       desc.addWarning(custom);
     String multi = this.getMultiallelicPolicy();
-    if(!MULTIALLELIC_NA.equals(multi)) //TODO also in function using --vcf but not extending VCFFunction
+    if(!MULTIALLELIC_NA.equals(multi))
       desc.addNote(PREFIX_MULTIALLELIC+multi);
     return desc;
   }

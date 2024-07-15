@@ -52,8 +52,7 @@ public class CompareGenotypesGraph  extends XYLineGraph {
     @Override
     protected void loadData() throws GraphException {
         String line = "";
-        try{
-            UniversalReader in = new UniversalReader(this.filename);
+        try (UniversalReader in = new UniversalReader(this.filename)){
             line = in.readLine();
             String[] f = line.split(T);
           int total = 0;
@@ -93,7 +92,6 @@ public class CompareGenotypesGraph  extends XYLineGraph {
                 }
             }
             Message.info(read+" processed");
-            in.close();
         } catch(IOException | NumberFormatException e){
             throw new GraphException("Could not load data from "+this.filename+" line :\n"+line, e);
         }

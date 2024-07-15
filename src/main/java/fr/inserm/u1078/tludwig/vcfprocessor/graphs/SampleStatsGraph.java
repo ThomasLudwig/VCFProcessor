@@ -64,8 +64,7 @@ public class SampleStatsGraph extends XYLineGraph {
 
   @Override
   protected void loadData() throws GraphException {
-    try {
-      UniversalReader in = new UniversalReader(this.filename);
+    try (UniversalReader in = new UniversalReader(this.filename)){
       in.readLine();
       String line;
       while ((line = in.readLine()) != null) {
@@ -83,7 +82,6 @@ public class SampleStatsGraph extends XYLineGraph {
 
         this.valuesForGroups.get(group).add(value);
       }
-      in.close();
     } catch (Exception e) {
       throw new GraphException("Could not load data from " + this.filename, e);
     }

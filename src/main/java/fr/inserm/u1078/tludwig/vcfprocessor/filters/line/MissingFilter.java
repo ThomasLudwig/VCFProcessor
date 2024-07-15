@@ -1,6 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.filters.line;
 
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
 
 /**
@@ -19,19 +19,25 @@ public class MissingFilter extends LineFilter {
   }
 
   @Override
-  public boolean pass(String[] t) {
+  public boolean pass(VariantRecord record) {
     int missing = 0;
 
-    for (int i = VCF.IDX_SAMPLE; i < t.length; i++)
-      if (t[i].charAt(0) == '.') {
+    for(int s = 0 ; s < record.getNumberOfSamples(); s++)
+      if (record.getGT(s).startsWith(".")) {
         missing++;
         if (missing > this.maxNb)
           return !isKeep();
       }
+
     if(missing < this.minNb)
       return !isKeep();
 
     return isKeep();
+  }
+
+  @Override
+  public boolean leftColumnsOnly() {
+    return false;
   }
 
   @Override

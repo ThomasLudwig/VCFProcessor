@@ -1,9 +1,9 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 
+import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
-import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFilterFunction;
-import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.PedFileParameter;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFilterPedFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
@@ -17,8 +17,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
  * Checked for release on 2020-08-07
  * Unit Test defined on   2020-08-07
   */
-public class DeNovoRecessive extends ParallelVCFVariantFilterFunction {
-  public final PedFileParameter pedFile = new PedFileParameter();
+public class DeNovoRecessive extends ParallelVCFVariantFilterPedFunction {
   private Sample p1;
   private Sample p2;
   private Sample child;
@@ -65,9 +64,9 @@ public class DeNovoRecessive extends ParallelVCFVariantFilterFunction {
     Ped ped = this.getVCF().getPed();
     super.begin();
     if (ped.getCases().size() != 1)
-      this.fatalAndQuit("There should be exactly 1 case (child of 2 controls)");
+      Message.die("There should be exactly 1 case (child of 2 controls)");
     if (ped.getControls().size() != 2)
-      this.fatalAndQuit("There should be exactly 2 controls (parent of the case)");
+      Message.die("There should be exactly 2 controls (parents of the case)");
 
     p1 = ped.getControls().get(0);
     p2 = ped.getControls().get(1);

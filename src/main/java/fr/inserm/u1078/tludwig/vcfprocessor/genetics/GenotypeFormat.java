@@ -2,6 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Genotype Format from VCF File
@@ -27,7 +28,12 @@ public class GenotypeFormat {
    */
   public GenotypeFormat(String format) {
     this.format = format;
-    keys = new ArrayList<>(Arrays.asList(format.split(":")));
+    this.keys = new ArrayList<>(Arrays.asList(format.split(":")));
+  }
+
+  public GenotypeFormat(String[] keys){
+    this.keys = new ArrayList<>(Arrays.asList(keys));
+    this.format = String.join(":", keys);
   }
 
   public int getDP(String genotype) {

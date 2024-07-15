@@ -22,7 +22,7 @@ import java.util.ArrayList;
  * Checked for release on 2020-05-06
  * Unit Test defined on   2020-05-15
  */
-public class F2Individuals extends ParallelVCFVariantPedFunction {
+public class F2Individuals extends ParallelVCFVariantPedFunction<F2Individuals.F2IAnalysis> {
 
   private final StringParameter prefix = new StringParameter(OPT_PREFIX, "prefix", "prefix of the output files");
   private final OutputDirectoryParameter dir = new OutputDirectoryParameter();
@@ -121,7 +121,7 @@ public class F2Individuals extends ParallelVCFVariantPedFunction {
       return;
 
     //Ok so we have exactly 2 allele
-    this.pushAnalysis(new Object[]{variant.getInfo().isInDBSNPVEP(a), variant.isSNP(a), first, second});
+    this.pushAnalysis(new F2IAnalysis(variant.getInfo().isInDBSNPVEP(a), variant.isSNP(a), first, second));
   }
 
   @Override
@@ -133,31 +133,55 @@ public class F2Individuals extends ParallelVCFVariantPedFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    try {
-      boolean old = (boolean) ((Object[]) analysis)[0];
-      boolean snp = (boolean) ((Object[]) analysis)[1];
-      int first = (int) ((Object[]) analysis)[2];
-      int second = (int) ((Object[]) analysis)[3];
+  public void processAnalysis(F2IAnalysis analysis) {
+    boolean old = analysis.isOld();
+    boolean snp = analysis.isSnp();
+    int first = analysis.getFirst();
+    int second = analysis.getSecond();
 
-      increment(this.f2all, first, second);
+    increment(this.f2all, first, second);
+    if (old)
+      increment(this.f2old, first, second);
+    else
+      increment(this.f2new, first, second);
+
+    if (snp) {
+      increment(this.f2snpAll, first, second);
       if (old)
-        increment(this.f2old, first, second);
+        increment(this.f2snpOld, first, second);
       else
-        increment(this.f2new, first, second);
+        increment(this.f2snpNew, first, second);
+    }
+  }
 
-      if (snp) {
-        increment(this.f2snpAll, first, second);
-        if (old)
-          increment(this.f2snpOld, first, second);
-        else
-          increment(this.f2snpNew, first, second);
-      }
+  public static class F2IAnalysis {
+    private final boolean old;
+    private final boolean snp;
+    private final int first;
+    private final int second;
 
-      
-      return true;
-    } catch (Exception ignore) { }
-    return false;
+    public F2IAnalysis(boolean old, boolean snp, int first, int second) {
+      this.old = old;
+      this.snp = snp;
+      this.first = first;
+      this.second = second;
+    }
+
+    public boolean isOld() {
+      return old;
+    }
+
+    public boolean isSnp() {
+      return snp;
+    }
+
+    public int getFirst() {
+      return first;
+    }
+
+    public int getSecond() {
+      return second;
+    }
   }
   
   private void increment(int[][] f2, int f, int s){

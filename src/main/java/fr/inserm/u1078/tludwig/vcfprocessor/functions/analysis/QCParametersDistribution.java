@@ -4,30 +4,22 @@ import fr.inserm.u1078.tludwig.maok.FisherExactTest;
 import fr.inserm.u1078.tludwig.maok.NumberSeries;
 import fr.inserm.u1078.tludwig.maok.SortedList;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.PedException;
-import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
-import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.PedFileParameter;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.KEYS;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.KEY_FS;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.KEY_INBREEDING;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.KEY_MQ;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.KEY_MQRANKSUM;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.KEY_QD;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.KEY_READPOSRANKSUM;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.KEY_SOR;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.MIN_DP;
-import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.MIN_GQ;
-
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Info;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
+
+import static fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC.*;
 
 /**
  * Reports the distributions of each parameter used by the class QC1078
@@ -38,8 +30,7 @@ import java.util.HashMap;
  * Unit Test defined on   2020-07-08
  * Last Tested on         2020-08-14
  */
-public class QCParametersDistribution extends ParallelVCFVariantFunction {
-  public final PedFileParameter pedFile = new PedFileParameter();
+public class QCParametersDistribution extends ParallelVCFVariantPedFunction<QCParametersDistribution.Analysis> {
 
   HashMap<String, ArrayList<String>> samples;
   private FisherExactTest fisherET;
@@ -99,48 +90,41 @@ public class QCParametersDistribution extends ParallelVCFVariantFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    try {
-      Analysis a = (Analysis)analysis;
-      for(double callrate : a.callrates)
-        callrateSB.add(callrate);
-      for(double fisher : a.fishers)
-        fisherCallrateSB.add(fisher);
-      if(a.qd != null)
-        qualByDepthSB.add(a.qd);
-      if(a.inbreeding != null)
-        inbreedingCoefSB.add(a.inbreeding);
-      if(a.mqranksum != null)
-        mq_rsSB.add(a.mqranksum);
-      if(a.fs_snp != null)
-        fs_snpSB.add(a.fs_snp);
-      if(a.sor_snp != null)
-        sor_snpSB.add(a.sor_snp);
-      if(a.mq_snp != null)
-        mq_snpSB.add(a.mq_snp);
-      if(a.rprs_snp != null)
-        rprs_snpSB.add(a.rprs_snp);
-      if(a.fs_indel != null)
-        fs_indelSB.add(a.fs_indel);
-      if(a.sor_indel != null)
-        sor_indelSB.add(a.sor_indel);
-      if(a.mq_indel != null)
-        mq_indelSB.add(a.mq_indel);
-      if(a.rprs_indel != null)
-        rprs_indelSB.add(a.rprs_indel);
-      if(a.hqPercent != null)
-        hqPercentSB.add(a.hqPercent);
-      for(int gq : a.gqs)
-        gqSB.add(gq);
-      for(int sumAD : a.sumADs)
-        sumADSB.add(sumAD);
-      for(double distABHet : a.distABHets)
-        abHetDistSB.add(distABHet);
-      return true;
-    } catch (Exception e) {
-      Message.error("Error while checking analysis results", e);
-    }
-    return false;
+  public void processAnalysis(Analysis a) {
+    for(double callrate : a.callrates)
+      callrateSB.add(callrate);
+    for(double fisher : a.fishers)
+      fisherCallrateSB.add(fisher);
+    if(a.qd != null)
+      qualByDepthSB.add(a.qd);
+    if(a.inbreeding != null)
+      inbreedingCoefSB.add(a.inbreeding);
+    if(a.mqranksum != null)
+      mq_rsSB.add(a.mqranksum);
+    if(a.fs_snp != null)
+      fs_snpSB.add(a.fs_snp);
+    if(a.sor_snp != null)
+      sor_snpSB.add(a.sor_snp);
+    if(a.mq_snp != null)
+      mq_snpSB.add(a.mq_snp);
+    if(a.rprs_snp != null)
+      rprs_snpSB.add(a.rprs_snp);
+    if(a.fs_indel != null)
+      fs_indelSB.add(a.fs_indel);
+    if(a.sor_indel != null)
+      sor_indelSB.add(a.sor_indel);
+    if(a.mq_indel != null)
+      mq_indelSB.add(a.mq_indel);
+    if(a.rprs_indel != null)
+      rprs_indelSB.add(a.rprs_indel);
+    if(a.hqPercent != null)
+      hqPercentSB.add(a.hqPercent);
+    for(int gq : a.gqs)
+      gqSB.add(gq);
+    for(int sumAD : a.sumADs)
+      sumADSB.add(sumAD);
+    for(double distABHet : a.distABHets)
+      abHetDistSB.add(distABHet);
   }
 
   @SuppressWarnings("unused")
@@ -207,18 +191,16 @@ public class QCParametersDistribution extends ParallelVCFVariantFunction {
         Ped ped = this.pedFile.getPed();
         for (Sample s : getVCF().getSamples()) {
           String id = s.getId();
-          Sample sample = ped.getSample(id);
-          if (sample == null)
-            this.fatalAndQuit("Sample not found [" + id + "]");
-
-          assert sample != null : "Sample is null";
+          Sample sample = Objects.requireNonNull(ped.getSample(id), "Sample not found [" + id + "]");
           String group = sample.getGroup() + sample.getPhenotype();
           if (!samples.containsKey(group))
             samples.put(group, new ArrayList<>());
           samples.get(group).add(id);
         }
       } catch (PedException ex) {
-        this.fatalAndQuit("Could not read Ped file", ex);
+        Message.fatal("Could not read Ped file", ex, true);
+      } catch (NullPointerException npe) {
+        Message.fatal(npe.getMessage(), npe, true);
       }
     }
 
@@ -242,40 +224,40 @@ public class QCParametersDistribution extends ParallelVCFVariantFunction {
     Analysis a = new Analysis();
 
     try {
-      a.qd = new Double(info.getAnnot(KEY_QD));
+      a.qd = Double.parseDouble(info.getAnnot(KEY_QD));
     } catch (Exception ignore) { }
     try {
-      a.inbreeding = new Double(info.getAnnot(KEY_INBREEDING));
+      a.inbreeding = Double.parseDouble(info.getAnnot(KEY_INBREEDING));
     } catch (Exception ignore) { }
     try {
-      a.mqranksum = new Double(info.getAnnot(KEY_MQRANKSUM));
+      a.mqranksum = Double.parseDouble(info.getAnnot(KEY_MQRANKSUM));
     } catch (Exception ignore) { }
 
     if (variant.hasSNP()) {
       try {
-        a.fs_snp = new Double(info.getAnnot(KEY_FS));
+        a.fs_snp = Double.parseDouble(info.getAnnot(KEY_FS));
       } catch (Exception ignore) { }
       try {
-        a.sor_snp = new Double(info.getAnnot(KEY_SOR));
+        a.sor_snp = Double.parseDouble(info.getAnnot(KEY_SOR));
       } catch (Exception ignore) { }
       try {
-        a.mq_snp = new Double(info.getAnnot(KEY_MQ));
+        a.mq_snp = Double.parseDouble(info.getAnnot(KEY_MQ));
       } catch (Exception ignore) { }
       try {
-        a.rprs_snp = new Double(info.getAnnot(KEY_READPOSRANKSUM));
+        a.rprs_snp = Double.parseDouble(info.getAnnot(KEY_READPOSRANKSUM));
       } catch (Exception ignore) { }
     } else {
       try {
-        a.fs_indel = new Double(info.getAnnot(KEY_FS));
+        a.fs_indel = Double.parseDouble(info.getAnnot(KEY_FS));
       } catch (Exception ignore) { }
       try {
-        a.sor_indel = new Double(info.getAnnot(KEY_SOR));
+        a.sor_indel = Double.parseDouble(info.getAnnot(KEY_SOR));
       } catch (Exception ignore) { }
       try {
-        a.mq_indel = new Double(info.getAnnot(KEY_MQ));
+        a.mq_indel = Double.parseDouble(info.getAnnot(KEY_MQ));
       } catch (Exception ignore) { }
       try {
-        a.rprs_indel = new Double(info.getAnnot(KEY_READPOSRANKSUM));
+        a.rprs_indel = Double.parseDouble(info.getAnnot(KEY_READPOSRANKSUM));
       } catch (Exception ignore) { }
     }
 
@@ -349,7 +331,7 @@ public class QCParametersDistribution extends ParallelVCFVariantFunction {
     return TestingScript.getSimpleVCFPedAnalysisScript();
   }
 
-  private static class Analysis {
+  public static class Analysis {
 
     Double qd = null;
     Double inbreeding = null;

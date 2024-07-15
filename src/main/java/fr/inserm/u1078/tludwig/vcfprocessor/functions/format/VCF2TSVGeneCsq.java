@@ -1,11 +1,14 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.format;
 
-import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
+import fr.inserm.u1078.tludwig.maok.tools.Message;
+import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.ConsequenceParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -53,13 +56,12 @@ public class VCF2TSVGeneCsq extends VCF2TSV { //TODO should not exist, use genes
   public void begin() {
     super.begin();
     genes = new ArrayList<>();
-    try {
-      UniversalReader in = this.geneFile.getReader();
+    try (UniversalReader in = this.geneFile.getReader()){
       String line;
       while ((line = in.readLine()) != null)
         genes.add(line.toLowerCase());
     } catch (IOException e) {
-      this.fatalAndQuit("Could not read gene list from file "+this.geneFile.getFilename(), e);
+      Message.fatal("Could not read gene list from file "+this.geneFile.getFilename(), e, true);
     }    
 
     symbolCol = -1;
@@ -74,7 +76,7 @@ public class VCF2TSVGeneCsq extends VCF2TSV { //TODO should not exist, use genes
   }
 
   @Override
-  public ArrayList<String[]> getVEPs(String info) {
+  public ArrayList<String[]> getVEPs(String[][] info) {
     ArrayList<String[]> veps = super.getVEPs(info);
     int i = 0;
     while (i < veps.size())
@@ -86,7 +88,7 @@ public class VCF2TSVGeneCsq extends VCF2TSV { //TODO should not exist, use genes
   }
 
   @Override
-  public boolean keep(String[] fields, ArrayList<String[]> veps) {
+  public boolean keep(VariantRecord ignore, ArrayList<String[]> veps) {
     return !veps.isEmpty();
   }
 

@@ -24,7 +24,7 @@ public class SamplePhenotypeFilter extends SampleFilter {
 
     for (String pheno : phenotypes)
       try {
-        this.add(new Integer(pheno));
+        this.add(Integer.parseInt(pheno));
       } catch (Exception e) {
         Message.warning("Unrecognized phenotype [" + pheno + "], must be an integer");
       }

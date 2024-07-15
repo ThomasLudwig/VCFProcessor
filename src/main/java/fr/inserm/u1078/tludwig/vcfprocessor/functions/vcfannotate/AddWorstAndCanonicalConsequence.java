@@ -1,7 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcfannotate;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Info;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPAnnotation;
@@ -15,7 +15,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
  * Checked for release on 2020-05-25
  * Unit Test defined on   2020-08-05
  */
-public class AddWorstAndCanonicalConsequence extends ParallelVCFFunction {
+public class AddWorstAndCanonicalConsequence extends ParallelVCFFunction<Object> {
 
   public static final String KEY_WORST_CSQ = "WORST_CSQ";
   public static final String KEY_WORST_GENE = "WORST_GENE";
@@ -68,10 +68,9 @@ public class AddWorstAndCanonicalConsequence extends ParallelVCFFunction {
   }
 
   @Override
-  public String[] processInputLine(String line) {
-    String[] f = line.split("\t");
-    int nbAllele = 1 + f[VCF.IDX_ALT].split(",").length;
-    Info info = new Info(f[VCF.IDX_INFO], getVCF());
+  public String[] processInputRecord(VariantRecord record) {
+    int nbAllele = 1 + record.getAlts().length;
+    Info info = new Info(record.getInfo(), getVCF());
     StringBuilder worstCsq = new StringBuilder();
     StringBuilder canonicalCsq = new StringBuilder();
     StringBuilder worstGene = new StringBuilder();
@@ -92,7 +91,12 @@ public class AddWorstAndCanonicalConsequence extends ParallelVCFFunction {
       canonicalCsq = new StringBuilder(",");
     if (canonicalGene.length() == 0)
       canonicalGene = new StringBuilder(",");
-    return new String[]{VCF.addInfo(line, new String[]{KEY_WORST_CSQ + "=" + worstCsq.substring(1), KEY_WORST_GENE + "=" + worstGene.substring(1), KEY_CANONICAL_CSQ + "=" + canonicalCsq.substring(1), KEY_CANONICAL_GENE + "=" + canonicalGene.substring(1)})};
+
+    record.addInfo(KEY_WORST_CSQ, worstCsq.substring(1));
+    record.addInfo(KEY_WORST_GENE, worstGene.substring(1));
+    record.addInfo(KEY_CANONICAL_CSQ, canonicalCsq.substring(1));
+    record.addInfo(KEY_CANONICAL_GENE, canonicalGene.substring(1));
+    return new String[]{record.toString()};
   }
   
   @SuppressWarnings("unused")
@@ -100,13 +104,7 @@ public class AddWorstAndCanonicalConsequence extends ParallelVCFFunction {
   public String[] getExtraHeaders(){
     return new String[]{HEADER_WORST_CSQ, HEADER_WORST_GENE, HEADER_CANONICAL_CSQ, HEADER_CANONICAL_GENE};
   } 
-  
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
-  }
-  
+
   @Override
   public TestingScript[] getScripts() {
     return TestingScript.getSimpleVCFTransformScript();

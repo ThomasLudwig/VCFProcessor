@@ -1,5 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 
+import fr.inserm.u1078.tludwig.maok.tools.Message;
+
 import java.util.ArrayList;
 
 /**
@@ -23,24 +25,46 @@ public class Genotype {
     this.setTo(genotype);
   }
   
-  public final void setTo(String genotype){
+  public final void setTo(String genotype) {
     this.genotype = genotype;
     if (genotype.charAt(0) == '.') {//missing
       this.nbChrom = 0;
       this.alleles = null;
     } else {
       String gts = this.genotype.split(":")[0];
-      String[] genos = gts.split("\\|",-1);
-      if(genos.length == 1)
-        genos = gts.split("/",-1);
-      else
-        phased = true;
-      
-      this.nbChrom = genos.length;
-      this.alleles = new int[this.nbChrom];
-      for(int c = 0 ; c < this.nbChrom; c++)
-        this.alleles[c] = Integer.parseInt(genos[c]);
+      this.phased = isPhased(gts);
+      this.alleles = getAlleles(gts);
+      this.nbChrom = this.alleles == null ? 0 : alleles.length;
     }
+  }
+
+  /**
+   * Checks if a genotype String is phased
+   * @param geno the String representing the genotype
+   * @return true if the genotype is phased
+   */
+  public static boolean isPhased(String geno) {
+    return geno.contains("|");
+  }
+
+  /**
+   * Gets the alleles for a genotype String
+   * @param geno the String representing the genotype
+   * @return a array of allele number (one per chromosome)
+   */
+  public static int[] getAlleles(String geno) {
+    if(geno.startsWith("."))
+      return null;
+    String[] genos = geno.split("[/\\|]"); //split by / or |
+    int[] all = new int[genos.length];
+    for(int i = 0 ; i < all.length; i++) {
+      try {
+        all[i] = Integer.parseInt(genos[i]);
+      } catch(NumberFormatException e){
+        Message.error("Could not get alleles from the genotype ["+geno+"]");
+      }
+    }
+    return all;
   }
 
   public final void setTo(Genotype replacement) {
@@ -65,10 +89,7 @@ public class Genotype {
   }
 
   public String createMissingGenotype() {
-    StringBuilder ret = new StringBuilder(".");
-    for (int i = 1; i < this.getFormatSize(); i++)
-      ret.append(":.");
-    return ret.toString();
+    return "."+":.".repeat(Math.max(0, this.getFormatSize() - 1));
   }
 
   public String getValue(String key/*, GenotypeFormat format*/) { //TODO possible bug source, don't understand why we had to provide format

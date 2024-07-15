@@ -17,7 +17,7 @@ import java.util.ArrayList;
  * Checked for release on 2020-05-06
  * Unit Test defined on   2020-05-14
  */
-public class Chi2 extends ParallelVCFVariantPedFunction {
+public class Chi2 extends ParallelVCFVariantPedFunction<Chi2.Chi2Analysis> {
   
   private int[] allelesCases;
   private int[] allelesControls;
@@ -151,7 +151,7 @@ public class Chi2 extends ParallelVCFVariantPedFunction {
       if(alleles != null)
         for(int a : alleles)
           if(a > 0)
-            this.pushAnalysis(new Object[]{i, true});
+            this.pushAnalysis(new Chi2Analysis(i, true));
       i++;
     }
     i = 0;
@@ -160,7 +160,7 @@ public class Chi2 extends ParallelVCFVariantPedFunction {
       if(alleles != null)
         for(int a : alleles)
           if(a > 0)
-            this.pushAnalysis(new Object[]{i, false});
+            this.pushAnalysis(new Chi2Analysis(i, false));
       i++;
     }
     return NO_OUTPUT;
@@ -168,18 +168,32 @@ public class Chi2 extends ParallelVCFVariantPedFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    try {
-      int i = (int)((Object[])analysis)[0];
-      boolean cas = (boolean)((Object[])analysis)[1];
-      if(cas)
-        allelesCases[i]++;
-      else
-        allelesControls[i]++;
-      return true;
-    } catch (Exception ignore) { }
-    return false;
-  } 
+  public void processAnalysis(Chi2Analysis analysis) {
+    int i = analysis.getI();
+    boolean cas = analysis.isCas();
+    if(cas)
+      allelesCases[i]++;
+    else
+      allelesControls[i]++;
+  }
+
+  public static class Chi2Analysis {
+    private final int i;
+    private final boolean cas;
+
+    public Chi2Analysis(int i, boolean cas) {
+      this.i = i;
+      this.cas = cas;
+    }
+
+    public int getI() {
+      return i;
+    }
+
+    public boolean isCas() {
+      return cas;
+    }
+  }
   
   @Override
   public TestingScript[] getScripts() {

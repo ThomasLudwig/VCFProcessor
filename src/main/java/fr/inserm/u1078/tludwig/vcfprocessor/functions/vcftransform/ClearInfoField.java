@@ -1,6 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcftransform;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
@@ -49,16 +50,9 @@ public class ClearInfoField extends ParallelVCFFunction {
   }
 
   @Override
-  public String[] processInputLine(String line) {
-    String[] f = line.split(T);
-    f[7] = ".";
-    return new String[]{String.join(T, f)};
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
+  public String[] processInputRecord(VariantRecord record) {
+    record.clearInfo();
+    return new String[]{record.toString()};
   }
   
   @Override

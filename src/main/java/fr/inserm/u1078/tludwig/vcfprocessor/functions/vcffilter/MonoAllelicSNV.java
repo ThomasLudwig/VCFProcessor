@@ -1,6 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
@@ -49,11 +50,12 @@ public class MonoAllelicSNV extends ParallelVCFFilterFunction {
   }
 
   @Override
-  public String[] processInputLineForFilter(String line) {
-    String[] f = line.split(T);
-    if (f[3].length() != 1 || f[3].charAt(0) == '.' || f[4].length() != 1 || f[4].charAt(0) == '.')
+  public String[] processInputRecordForFilter(VariantRecord record) {
+    String ref = record.getRef();
+    String alt = record.getAltString();
+    if (ref.length() != 1 || ref.charAt(0) == '.' || alt.length() != 1 || alt.charAt(0) == '.')
       return NO_OUTPUT;    
-    return new String[]{line};
+    return new String[]{record.toString()};
   }
   
   @Override

@@ -1,5 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 
+import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFilterFunction;
@@ -67,14 +68,13 @@ public class FilterGeneCsqList extends ParallelVCFVariantFilterFunction {
   @Override
   public void begin() {
     super.begin();
-    try {
+    try (UniversalReader in = this.geneFile.getReader()){
       this.genes = new ArrayList<>();
-      UniversalReader in = this.geneFile.getReader();
       String gene;
       while ((gene = in.readLine()) != null)
         this.genes.add(gene);
     } catch (IOException e) {
-      this.fatalAndQuit("Could not read gene file : "+this.geneFile.getFilename());
+      Message.die("Could not read gene file : "+this.geneFile.getFilename());
     }
   }
 

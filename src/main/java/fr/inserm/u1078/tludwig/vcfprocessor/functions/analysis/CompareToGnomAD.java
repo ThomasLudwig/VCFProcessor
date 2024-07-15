@@ -74,9 +74,8 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
   @Override
   public void begin() {
     gnomadData = new HashMap<>();
-    try {
+    try(UniversalReader in = this.gnomad.getReader();) {
       Message.info("Loading data from GnomAD");
-      UniversalReader in = this.gnomad.getReader();
       String line;
       long start = new Date().getTime();
       int read = 0;
@@ -88,8 +87,8 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
             Message.progressInfo(read + " variants in " + dur + "s. (" + (int)(read / dur) + " variant/s)");
           }
           String[] f = line.split(T);
-          int chr = Variant.chromToNumber(f[VCF.IDX_CHROM]);
-          int pos = new Integer(f[VCF.IDX_POS]);
+          int chr = Variant.chromToNumber(f[VCF.IDX_CHROM]);//TODO convert to VCF
+          int pos = Integer.parseInt(f[VCF.IDX_POS]);
           String ref = f[VCF.IDX_REF];
           String[] alts = f[VCF.IDX_ALT].split(",");
           String[] infos = f[VCF.IDX_INFO].split(";");
@@ -105,9 +104,8 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
       double dur = (new Date().getTime() - start) / 1000.0;
       Message.info(read + " variants in " + dur + "s. (" + (int)(read / dur) + " variant/s)");
       Message.info("GnomAD data loaded (" + gnomadData.size() + " variants). Start reading VCF file");
-      in.close();
     } catch (IOException | NumberFormatException e) {
-      this.fatalAndQuit("Unable to read gnomAD file "+this.gnomad.getFilename(), e);
+      Message.fatal("Unable to read gnomAD file "+this.gnomad.getFilename(), e, true);
     }
   }
 
@@ -168,12 +166,6 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
       if(info.startsWith("AN="))
         return new Integer(info.substring(3));    
     return -1;
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
   }
   
   @Override

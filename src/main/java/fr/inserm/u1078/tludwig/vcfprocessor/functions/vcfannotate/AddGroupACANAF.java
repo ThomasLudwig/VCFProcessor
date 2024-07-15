@@ -15,7 +15,7 @@ import java.util.ArrayList;
  * Checked for release on 2020-05-25
  * Unit Test defined on   2020-08-05
  */
-public class AddGroupACANAF extends ParallelVCFVariantPedFunction {
+public class AddGroupACANAF extends ParallelVCFVariantPedFunction<Object> {
 
   @Override
   public String getSummary() {
@@ -101,13 +101,7 @@ public class AddGroupACANAF extends ParallelVCFVariantPedFunction {
     variant.addInfo(getAnnotation(getPed().getGroups(), variant));
     return asOutput(variant);
   }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
-  }
-  
+
   @Override
   public TestingScript[] getScripts() {
     return TestingScript.getSimpleVCFPedTransformScript();

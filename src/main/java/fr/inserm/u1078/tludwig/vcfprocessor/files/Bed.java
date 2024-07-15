@@ -28,13 +28,11 @@ public class Bed {
 
   private void parse() {
     regions.clear();
-    try {
-      UniversalReader in = new UniversalReader(this.filename);
+      try(UniversalReader in = new UniversalReader(this.filename)){
       String line;
       while ((line = in.readLine()) != null)
         if (line.charAt(0) != '#')
           this.addRegion(new Region(line, Region.FORMAT_BED));
-      in.close();
     } catch (Exception e) {
       Message.error("Could not parse BED file " + this.filename + "\n" + e.getMessage());
     }

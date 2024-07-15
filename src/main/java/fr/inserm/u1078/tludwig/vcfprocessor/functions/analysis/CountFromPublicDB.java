@@ -15,7 +15,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
  * Unit Test defined on   2020-07-07
  * Last Tested on         2020-08-14
  */
-public class CountFromPublicDB extends ParallelVCFVariantFunction {
+public class CountFromPublicDB extends ParallelVCFVariantFunction<CountFromPublicDB.CountAnalysis> {
 
   private int snp = 0;
   private int indel = 0;
@@ -109,44 +109,39 @@ public class CountFromPublicDB extends ParallelVCFVariantFunction {
   @Override
   public String[] processInputVariant(Variant variant) {
     for (int a = 1; a < variant.getAlleleCount(); a++)
-      this.pushAnalysis(new Analysis(variant.isSNP(a), variant.getInfo().isInDBSNPVEP(a), variant.getInfo().isIn1KgVEP(a), variant.getInfo().isInGnomADVEP(a)));
+      this.pushAnalysis(new CountAnalysis(variant.isSNP(a), variant.getInfo().isInDBSNPVEP(a), variant.getInfo().isIn1KgVEP(a), variant.getInfo().isInGnomADVEP(a)));
     return NO_OUTPUT;
   }
   
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    if(analysis instanceof Analysis){
-      Analysis a = (Analysis)analysis;
-      if (a.isSNP) {
-        snp++;
-        if (a.isInDBSNP)
-          snp_db++;
-        if (a.isIn1KG)
-          snp_1kg++;
-        if (a.isInGnomAD)
-          snp_gnomad++;
-      } else {
-        indel++;
-        if (a.isInDBSNP)
-          indel_db++;
-        if (a.isIn1KG)
-          indel_1kg++;
-        if (a.isInGnomAD)
-          indel_gnomad++;
-      }
-      return true;
-    } 
-    return false;
+  public void processAnalysis(CountFromPublicDB.CountAnalysis a) {
+    if (a.isSNP) {
+      snp++;
+      if (a.isInDBSNP)
+        snp_db++;
+      if (a.isIn1KG)
+        snp_1kg++;
+      if (a.isInGnomAD)
+        snp_gnomad++;
+    } else {
+      indel++;
+      if (a.isInDBSNP)
+        indel_db++;
+      if (a.isIn1KG)
+        indel_1kg++;
+      if (a.isInGnomAD)
+        indel_gnomad++;
+    }
   }
   
-  private static class Analysis{
+  public static class CountAnalysis{
     private final boolean isSNP;
     private final boolean isInDBSNP;
     private final boolean isIn1KG;
     private final boolean isInGnomAD;
 
-    Analysis(boolean isSNP, boolean isInDBSNP, boolean isIn1KG, boolean isInGnomAD) {
+    CountAnalysis(boolean isSNP, boolean isInDBSNP, boolean isIn1KG, boolean isInGnomAD) {
       this.isSNP = isSNP;
       this.isInDBSNP = isInDBSNP;
       this.isIn1KG = isIn1KG;

@@ -1,5 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 
+import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectoryParameter;
@@ -75,7 +76,7 @@ public class FrequencyCorrelation extends ParallelVCFVariantFunction { //TODO re
         tmp.println(String.join(T, HEADER));
         out.put(csq, tmp);
       } catch (IOException e) {
-        this.fatalAndQuit("Unable to write to output file " + name);
+        Message.die("Unable to write to output file " + name);
       }
     }
   }
@@ -118,15 +119,9 @@ public class FrequencyCorrelation extends ParallelVCFVariantFunction { //TODO re
   public void processOutput(String line) {
     String[] ol = line.split(("¤"));
     for (String level : ol[0].split(","))
-      out.get(VEPConsequence.getConsequence(new Integer(level))).println(ol[1]);
+      out.get(VEPConsequence.getConsequence(Integer.parseInt(level))).println(ol[1]);
   }
 
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
-  }
-  
   @Override
   public TestingScript[] getScripts() {
     TestingScript scr = TestingScript.newDirectoryAnalysis();

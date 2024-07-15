@@ -1,5 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
@@ -7,6 +8,7 @@ import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectoryParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.io.PrintWriter;
+import java.util.Objects;
 
 /**
  * Splits a given vcf file by chromosome.
@@ -63,9 +65,9 @@ public class SplitByChromosome extends VCFFunction { //TODO parallelize
     String current = "current";
     PrintWriter out = null;
 
-    String line;
-    while ((line = vcf.getUnparallelizedNextLine()) != null) {
-      String chrom = line.substring(0,40).split(T)[VCF.IDX_CHROM];
+    VariantRecord record;
+    while ((record = vcf.getUnparallelizedNextRecord()) != null) {
+      String chrom = record.getChrom();
       if (!current.equals(chrom)) {
         current = chrom;
         if (out != null)
@@ -75,8 +77,8 @@ public class SplitByChromosome extends VCFFunction { //TODO parallelize
         out = getPrintWriter(filename);
         vcf.printHeaders(out);
       }
-      assert out != null : "PrintWriter is null";
-      out.println(line);
+      Objects.requireNonNull(out,"PrintWriter is null");
+      out.println(record.toString());
     }
     if (out != null)
       out.close();

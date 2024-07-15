@@ -35,20 +35,20 @@ public class GenotypeFlagFilter extends GenotypeFilter {
   }
 
   @Override
-  public boolean pass(String t) {
+  public boolean pass(String[] f) {
     String flag = ".";
 
     try {
-      flag = t.split(":")[this.filterPos];
+      flag = f[this.filterPos];
     } catch (Exception ignore) { }
 
     if(flag.isEmpty() || flag.equals("."))
       return true;
     
-    for(String f : flag.split(",")){
-      if(f.equalsIgnoreCase("PASS"))
+    for(String fl : flag.split(",")){
+      if(fl.equalsIgnoreCase("PASS"))
         return true;
-      if(this.flags.contains(f))
+      if(this.flags.contains(fl))
         return this.isKeep();
     }
     return !this.isKeep();

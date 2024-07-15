@@ -1,5 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.filters.line;
 
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
 
 /**
@@ -17,14 +18,19 @@ public class QualityFilter extends LineFilter {
   }
 
   @Override
-  public boolean pass(String[] t) {
+  public boolean pass(VariantRecord record) {
     double qual = 0;
     try {
-      qual = new Double(t[5]);
+      qual = Double.parseDouble(record.getQual());
     } catch (NumberFormatException ignore) { }
     return minQ <= qual && qual <= maxQ;
   }
-  
+
+  @Override
+  public boolean leftColumnsOnly() {
+    return true;
+  }
+
   @Override
   public String getDetails() {
     return this.minQ+" <= Quality <= "+this.maxQ;

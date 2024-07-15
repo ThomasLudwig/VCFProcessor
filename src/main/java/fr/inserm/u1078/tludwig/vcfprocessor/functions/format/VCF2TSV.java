@@ -2,6 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.format;
 
 import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
  * Checked for release on 2020-08-20
  * Unit Test defined on 2020-20-20
  */
-public class VCF2TSV extends ParallelVCFFunction { 
+public class VCF2TSV extends ParallelVCFFunction {
 
   String[] vepHeaders;
 
@@ -87,15 +88,15 @@ public class VCF2TSV extends ParallelVCFFunction {
       }
   }
 
-  public boolean keep(String[] fields, ArrayList<String[]> veps) {
-    return true; //TODO ????
+  public boolean keep(VariantRecord record, ArrayList<String[]> veps) {
+    return true; //TODO always kept ? Method is overriden
   }
   
-  public ArrayList<String[]> getVEPs(String info){
+  public ArrayList<String[]> getVEPs(String[][] info){
     ArrayList<String[]> veps = new ArrayList<>();
-    for (String inf : info.split(";"))
-      if (inf.startsWith("CSQ=")) {
-        String[] vep = inf.substring(4).split(",");
+    for (String[] inf : info)
+      if (inf[0].equals("CSQ")) {
+        String[] vep = inf[1].split(",");
         for (String v : vep)
           veps.add(v.split("\\|", -1));
       }
@@ -103,9 +104,8 @@ public class VCF2TSV extends ParallelVCFFunction {
   }
 
   @Override
-  public String[] processInputLine(String line) {
-    String[] fields = line.split(T);
-    ArrayList<String[]> veps = getVEPs(fields[7]);
+  public String[] processInputRecord(VariantRecord record) {
+    ArrayList<String[]> veps = getVEPs(record.getInfo());
     //ArrayList<String[]> frexs = new ArrayList<>();
 
     /*
@@ -119,7 +119,7 @@ public class VCF2TSV extends ParallelVCFFunction {
       }
      */
     
-    if(!keep(fields, veps))
+    if(!keep(record, veps))
       return NO_OUTPUT;
     //Some columns (general ones) are only valued once, other are valued once per line, for multiple vep annotations)
     int size = Math.max(1, veps.size());
@@ -127,10 +127,16 @@ public class VCF2TSV extends ParallelVCFFunction {
     String[] outs = new String[size];
     for (int l = 0; l < size; l++) {
       LineBuilder out = new LineBuilder();
-      for (int c = 0; c < 8; c++) {
-        out.addColumn();
-        if (l == 0)
-          out.append(fields[c]);
+      if(l != 0)
+        out.addColumn().addColumn().addColumn().addColumn().addColumn().addColumn().addColumn();
+      else {
+        out.addColumn(record.getChrom());
+        out.addColumn(record.getPos());
+        out.addColumn(record.getID() );
+        out.addColumn(record.getRef());
+        out.addColumn(record.getAltString());
+        out.addColumn(record.getQual());
+        out.addColumn(record.getFilters());
       }
 
       if (vepHeaders != null)
@@ -140,22 +146,16 @@ public class VCF2TSV extends ParallelVCFFunction {
             if (veps.get(l)[s] != null)
               out.append(veps.get(l)[s]);
         }
-
-      for (int j = 8; j < fields.length; j++) {
-        out.addColumn();
-        if (l == 0)
-          out.append(fields[j]);
+      if(l != 0){
+        out.addColumn();//info
+        out.addColumn();//format
       }
+      for(String geno : record.getGenotypeStrings())
+        out.addColumn(l == 0 ? geno : "");
 
       outs[l] = out.substring(1);
     }
     return outs;
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
   }
 
   @Override

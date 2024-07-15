@@ -56,11 +56,11 @@ public class JFSSummary extends Function {
   public void executeFunction() throws Exception {
     ArrayList<String> lines = new ArrayList<>();
 
-    UniversalReader in = this.infile.getReader();
-    String line;
-    while ((line = in.readLine()) != null)
-      lines.add(line);
-    in.close();
+    try(UniversalReader in = this.infile.getReader()){
+      String line;
+      while ((line = in.readLine()) != null)
+        lines.add(line);
+    }
 
     N = lines.size() - 1;
     threshold = (int) (2 * N * THRESHOLD);

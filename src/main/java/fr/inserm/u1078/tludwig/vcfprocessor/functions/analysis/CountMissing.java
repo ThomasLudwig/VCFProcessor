@@ -17,7 +17,7 @@ import java.util.ArrayList;
  * Checked for release on 2020-05-06
  * Unit Test defined on   2020-05-13
  */
-public class CountMissing extends ParallelVCFVariantPedFunction {
+public class CountMissing extends ParallelVCFVariantPedFunction<boolean[][]> {
   
   ArrayList<Sample> samples;
   int total;
@@ -107,46 +107,39 @@ public class CountMissing extends ParallelVCFVariantPedFunction {
   @Override
   public String[] processInputVariant(Variant variant) {
     //total++;
-    boolean[] sRef = new boolean[samples.size()];
-    boolean[] sAlt = new boolean[samples.size()];
+    boolean[][] sRefAlt = new boolean[samples.size()][2];
     if (variant.getPercentMissing() <= maxInd.getFloatValue()) {
       //kept++;
       for (int s = 0; s < samples.size(); s++) {
         Genotype g = variant.getGenotype(samples.get(s));
         if (!g.isMissing())
           if (!g.hasAlternate())
-            sRef[s] = true;
+            sRefAlt[s][0] = true;
           else
-            sAlt[s] = true;
+            sRefAlt[s][1] = true;
       }
     }
-    this.pushAnalysis(new Object[]{sRef, sAlt});
+    this.pushAnalysis(sRefAlt);
     return NO_OUTPUT;
   }
 
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    try {
-      boolean[] sRef = (boolean[])((Object[])analysis)[0];
-      boolean[] sAlt = (boolean[])((Object[])analysis)[1];
-      boolean keep = false;
-      for(int s = 0; s < sRef.length; s++){
-        if(sRef[s]){
-          ref[s]++;
-          keep = true;
-        }
-        if(sAlt[s]){
-          alt[s]++;
-          keep = true;
-        }
+  public void processAnalysis(boolean[][] sRefAlt) {
+    boolean keep = false;
+    for(int s = 0; s < sRefAlt.length; s++){
+      if(sRefAlt[s][0]){
+        ref[s]++;
+        keep = true;
       }
-      if(keep)
-        kept++;
-      total++;
-      return true;
-    } catch (Exception ignore) { }
-    return false;
+      if(sRefAlt[s][1]){
+        alt[s]++;
+        keep = true;
+      }
+    }
+    if(keep)
+      kept++;
+    total++;
   }
   
   @Override
