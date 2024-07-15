@@ -246,7 +246,7 @@ public class FunctionFactory {
         }
         Message.info("Jar file ["+filename+"] contains no class extending "+Function.class.getSimpleName());
       } catch (IOException e) {//TODO ignore or StartUpException
-        Message.error("file ["+filename+"] could not be loaded as Plugin", e);
+        Message.error("file ["+filename+"] could not be loaded as a Plugin", e);
       }
     else
       Message.info("File ["+filename+"] is not a .jar file");
@@ -256,10 +256,10 @@ public class FunctionFactory {
   private static void usage() throws StartUpException {
     LineBuilder msg = new LineBuilder("Usage :")
             .addSpace(JavaTools.command(Function.class))
-            .addSpace(Message.yellow("FUNCTION")).addSpace("param1...paramN")
-            .addSpace("[").append(Message.cyan("--gz")).append("]")
-            .addSpace("[").append(Message.cyan("--out")).addSpace(Message.red("results.file")).append("]")
-            .addSpace("[").append(Message.cyan("--log")).addSpace(Message.red("LogFile.log")).append("]");
+            .addSpace(Message.Color.yellow("FUNCTION")).addSpace("param1...paramN")
+            .addSpace("[").append(Message.Color.cyan("--gz")).append("]")
+            .addSpace("[").append(Message.Color.cyan("--out")).addSpace(Message.Color.red("results.file")).append("]")
+            .addSpace("[").append(Message.Color.cyan("--log")).addSpace(Message.Color.red("LogFile.log")).append("]");
 
     for (String type : Function.TYPES) {
       ArrayList<Class<?>> functions = getFunctionsFromType(type);
@@ -267,7 +267,7 @@ public class FunctionFactory {
       if (!functions.isEmpty()) {
         msg.newLine();
         msg.newLine();
-        msg.newLine(Message.green(type));
+        msg.newLine(Message.Color.green(type));
         for (Class<?> clazz : functions) {
           Function f = getFunction(clazz);
           msg.newLine("  ").append(f.getShortUsage());
@@ -277,14 +277,14 @@ public class FunctionFactory {
 
     if (!PLUGINS.isEmpty()) {
       msg.newLine();
-      msg.newLine(Message.red("ExternalFunction :"));
+      msg.newLine(Message.Color.red("ExternalFunction :"));
 
       for (String plugin : PLUGINS) {
         ArrayList<Class<?>> functions = getFunctionsFromType(plugin);
 
         if (!functions.isEmpty()) {
           msg.newLine();
-          msg.newLine(Message.green(plugin));
+          msg.newLine(Message.Color.green(plugin));
           for (Class<?> clazz : functions) {
             Function f = getFunction(clazz);
             msg.newLine("  ").append(f.getShortUsage());
@@ -293,7 +293,7 @@ public class FunctionFactory {
       }
     }
 
-    Message.endWithoutException(msg.toString());
+    Message.fatal(msg.toString(), true);
   }
 
   private static ArrayList<Class<?>> getFunctionsFromPlugin(String filename) throws IOException {

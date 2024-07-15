@@ -15,7 +15,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
  * Checked for release on 2020-05-25
  * Unit Test defined on   2020-08-05
  */
-public class ReaffectdbSNP extends ParallelVCFVariantFunction {
+public class ReaffectdbSNP extends ParallelVCFVariantFunction<Object> {
 
   @Override
   public String getSummary() {
@@ -61,13 +61,7 @@ public class ReaffectdbSNP extends ParallelVCFVariantFunction {
     f[VCF.IDX_ID] = rs;
     return new String[]{String.join(T, f)};
   }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
-  }
-  
+
   @Override
   public TestingScript[] getScripts() {
     return TestingScript.getSimpleVCFTransformScript();

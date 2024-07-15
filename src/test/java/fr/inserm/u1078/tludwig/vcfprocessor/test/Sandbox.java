@@ -1,5 +1,12 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.test;
 
+import fr.inserm.u1078.tludwig.maok.tools.Message;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.BCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.BCFRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Canonical;
+
+import java.util.Date;
+
 /**
  * XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  *
@@ -10,15 +17,15 @@ package fr.inserm.u1078.tludwig.vcfprocessor.test;
  */
 public class Sandbox {
 
-  public static void main(String[] args) {
-
+  public static void main(String[] args) throws Exception {
+/*
     for(int i = 0 ; i < 10; i++)
       System.out.println("i = "+i);
 
     System.out.println("*********************");
 
     for(int i = 0 ; i < 10; ++i)
-      System.out.println("i = "+i);
+      System.out.println("i = "+i);*/
 
     /*
     ArrayList<String> list = new ArrayList<>();
@@ -43,7 +50,19 @@ public class Sandbox {
     System.out.println("f length "+f.length);
     for(String st : f)
       System.out.println("--> "+st);*/
-    testClass();
+    /*testClass();*/
+    testCanonical();
+  }
+
+  public static void testCanonical(){
+    String[] variants = {"1\t100\t.\tCT\tCA,CCT,C"};
+    for(String variant : variants){
+      Message.info("For ["+variant+"]");
+      Canonical[] canonicals = Canonical.getCanonicals(variant);
+      for(Canonical canonical : canonicals)
+        Message.info("\t--> "+canonical.toString());
+    }
+
   }
 
   private static void testAssert(int i){

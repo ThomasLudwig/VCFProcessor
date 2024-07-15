@@ -56,16 +56,16 @@ public class StrictCompoundHeterozygous extends AbstractCompoundFunction {
     this.cases = new int[ped.getCases().size()];
     this.parents = new int[ped.getCases().size()][2];
     if (this.cases.length == 0)
-      this.fatalAndQuit("No case sample present");
+      Message.die("No case sample present");
     int i = 0;
     for (Sample cas : ped.getCases()) {
       int c = this.getVCF().indexOfSample(cas);
       int mid = this.getVCF().indexOfSample(cas.getMid());
       int pid = this.getVCF().indexOfSample(cas.getPid());
       if (mid == -1)
-        this.fatalAndQuit("No mother found for case [" + cas + "]");
+        Message.die("No mother found for case [" + cas + "]");
       if (pid == -1)
-        this.fatalAndQuit("No father found for case [" + cas + "]");
+        Message.die("No father found for case [" + cas + "]");
       cases[i] = c;
       parents[i] = new int[]{mid, pid};
       Message.verbose("Added trio : " + cas.getFid() + " " + cas.getId() + " [" + cas.getMid() + "|" + cas.getPid() + "]");
@@ -120,7 +120,6 @@ public class StrictCompoundHeterozygous extends AbstractCompoundFunction {
     return true;
   }
 
-  @SuppressWarnings("SpellCheckingInspection")
   @Override
   public TestingScript[] getScripts() {
     ArrayList<TestingScript> scripts = new ArrayList<>();

@@ -31,8 +31,7 @@ private int[][] f2;
 
     @Override
     protected void loadData() throws GraphException {
-        try{
-            UniversalReader in = new UniversalReader(this.filename);
+        try(UniversalReader in = new UniversalReader(this.filename)){
             String line = in.readLine();
             String[] f = line.split("\\s+");
             this.groups = new String[f.length - 2];
@@ -45,8 +44,6 @@ private int[][] f2;
                 for(int j = 0 ; j < f.length-1; j++)
                     this.f2[i][j] = Integer.parseInt(f[j+1]);
             }
-            
-            in.close();
         } catch(IOException e){
             throw new GraphException("Unable to load Data from "+this.filename, e);
         }

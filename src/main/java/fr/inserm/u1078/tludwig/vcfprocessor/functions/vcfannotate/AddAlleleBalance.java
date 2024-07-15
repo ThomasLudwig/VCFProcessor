@@ -16,7 +16,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
   * Checked for release on 2020-05-25
   * Unit Test defined on   2020-08-05
  */
-public class AddAlleleBalance extends ParallelVCFVariantFunction {
+public class AddAlleleBalance extends ParallelVCFVariantFunction<Object> {
 
   public static final String ABHET = "ABHet";
   public static final String ABHOM = "ABHom";
@@ -39,7 +39,6 @@ public class AddAlleleBalance extends ParallelVCFVariantFunction {
     return HEADERS;
   }
 
-  @SuppressWarnings("SpellCheckingInspection")
   @Override
   public String getSummary() {
     return "Adds the annotations : AB, ABhet, ABhom, OND to a VCF file";
@@ -156,12 +155,6 @@ public class AddAlleleBalance extends ParallelVCFVariantFunction {
     for(int i = 0 ; i < variant.getAlleleCount(); i++)
       ret.append(",").append((denom[i] == 0) ? "." : StringTools.formatDouble(num[i] / denom[i], 3));
     return ret.substring(1);
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
   }
 
   @Override

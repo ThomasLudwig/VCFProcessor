@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Checked for release on XXXX-XX-XX
  * Unit Test defined on   XXXX-XX-XX
  */
-public class GetQCMetrics extends ParallelVCFVariantFunction {
+public class GetQCMetrics extends ParallelVCFVariantFunction<GetQCMetrics.Values> {
   private final StringParameter filename = new StringParameter(OPT_FILE, "metrics.my.project", "output filename prefix");
 
   AtomicInteger gt0;
@@ -89,8 +89,7 @@ public class GetQCMetrics extends ParallelVCFVariantFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    Values v = (Values)analysis;
+  public void processAnalysis(Values v) {
     gt0.addAndGet(v.getGT()[0]);
     gt1.addAndGet(v.getGT()[1]);
     gt2.addAndGet(v.getGT()[2]);
@@ -123,7 +122,6 @@ public class GetQCMetrics extends ParallelVCFVariantFunction {
       mq.println(v.getMq());
     if(v.getReadPosRankSum() != Double.NEGATIVE_INFINITY)
       readPosRankSum.println(v.getReadPosRankSum());
-    return true;
   }
 
   @SuppressWarnings("unused")
@@ -149,7 +147,7 @@ public class GetQCMetrics extends ParallelVCFVariantFunction {
       mq = new PrintWriter(new FileWriter(filename.getStringValue() + "MQ" + ".txt"));
       readPosRankSum = new PrintWriter(new FileWriter(filename.getStringValue() + "ReadPosRankSum" + ".txt"));
     } catch(IOException e){
-      fatalAndQuit("Error in init", e);
+      Message.fatal("Error in init", e, true);
     }
   }
 
@@ -183,7 +181,7 @@ public class GetQCMetrics extends ParallelVCFVariantFunction {
     return new TestingScript[0];
   }
 
-  private static class Values {
+  public static class Values {
     // Genotype values
     private final Variant variant;
     private final int[] gt;

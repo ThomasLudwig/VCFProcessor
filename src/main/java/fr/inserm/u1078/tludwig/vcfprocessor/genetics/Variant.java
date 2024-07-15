@@ -58,7 +58,11 @@ public class Variant implements Comparable<Variant> {
     this.ac = new int[alleles.length];
     
     this.an = 0;
-    for (Genotype g : genotypes) {
+
+    for (int i = 0 ; i < genotypes.length; i++) {
+      Genotype g = genotypes[i];
+      if(g == null)
+        throw new VariantException("At least one genotype is null ["+i+"th sample]");
       if (g.getNbChrom() > 0)
         for (int a : g.getAlleles())
           if (a > -1) {
@@ -105,7 +109,7 @@ public class Variant implements Comparable<Variant> {
         }
       }
     else { //alternative alleles are different between both variants
-      int[] indices = new int[this.alleles.length];
+      int[] indices = new int[this.alleles.length];//TODO WTF?
       indices[0] = 0;
       for (int i = 1; i < indices.length; i++)
         indices[i] = ArrayTools.indexOf(v.getAlleles(), this.alleles[i]);
@@ -380,6 +384,10 @@ public class Variant implements Comparable<Variant> {
     return 3;
   }
 
+  /**
+   * Gets the total number of alleles
+   * @return (REF + ALTS = ALT.length + 1)
+   */
   public int getAlleleCount() {
     return alleles.length;
   }

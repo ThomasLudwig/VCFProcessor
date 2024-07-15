@@ -4,6 +4,7 @@ import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF.InfoFormatHeader;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.HashMap;
@@ -60,7 +61,7 @@ public class SplitMultiAllelic extends ParallelVCFFunction {
     super.begin();
     pls = new HashMap<>();
     int n = 0;
-    for(int i = 0; i <= 10; i++){
+    for(int i = 0; i <= 100; i++){
       for(int j = 0; j <= i; j++){
         pls.put(j+"/"+i, n);
         n++;
@@ -68,46 +69,44 @@ public class SplitMultiAllelic extends ParallelVCFFunction {
     }
   }
 
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
-  }
 
   @Override
-  public String[] processInputLine(String line) {
-    String[] f = line.split(T);
+  public String[] processInputRecord(VariantRecord record) {
+    //not a multi allelic variant --> jobs done
+    if(record.getAlts().length == 1)
+      return new String[]{record.toString()};
 
-    String als = f[VCF.IDX_ALT];
-    if (als.contains(",")) {
-      String ref = f[VCF.IDX_REF];
-      String[] alts = als.split(",");
-      String[] infos = f[VCF.IDX_INFO].split(";");
-      String[][] out = new String[alts.length][f.length];
-      
-      String[] ret = new String[out.length];
-      for (int a = 0; a < alts.length; a++) {
-        System.arraycopy(f, 0, out[a], 0, f.length);
-        //produce new ref/alt couples
-        String[] newPosRefAlt = getNewPosRefAlt(f[VCF.IDX_POS], ref, alts[a]);
-        out[a][VCF.IDX_POS] = newPosRefAlt[0];
-        out[a][VCF.IDX_REF] = newPosRefAlt[1];
-        out[a][VCF.IDX_ALT] = newPosRefAlt[2];
-        String[] outInfos = new String[infos.length];
-        for (int i = 0; i < outInfos.length; i++)
-          outInfos[i] = convertInfo(infos[i], a);
 
-        out[a][VCF.IDX_INFO] = String.join(";", outInfos);
+    String[] f = record.asFields();
 
-        for (int i = VCF.IDX_SAMPLE; i < out[a].length; i++)
-          out[a][i] = convertGenotype(out[a][i], f[VCF.IDX_FORMAT], a);
 
-        ret[a] = String.join(T, out[a]);
-      }
-      
-      return ret;
+    String ref = record.getRef();
+    String[] alts = record.getAlts();
+    String[] infos = f[VCF.IDX_INFO].split(";");
+
+    String[] ret = new String[alts.length];
+    for (int a = 0; a < alts.length; a++) {
+      String[] out = new String[f.length];
+      System.arraycopy(f, 0, out, 0, f.length);
+      //produce new ref/alt couples
+      String[] newPosRefAlt = getNewPosRefAlt(f[VCF.IDX_POS], ref, alts[a]);
+      out[VCF.IDX_POS] = newPosRefAlt[0];
+      out[VCF.IDX_REF] = newPosRefAlt[1];
+      out[VCF.IDX_ALT] = newPosRefAlt[2];
+      String[] outInfos = new String[infos.length];
+      for (int i = 0; i < outInfos.length; i++)
+        outInfos[i] = convertInfo(infos[i], a);
+
+      out[VCF.IDX_INFO] = String.join(";", outInfos);
+
+      for (int i = VCF.IDX_SAMPLE; i < out.length; i++)
+        out[i] = convertGenotype(out[i], f[VCF.IDX_FORMAT], a);
+
+      ret[a] = String.join(T, out[a]);
     }
-    return new String[]{line};
+
+    return ret;
+
   }
 
   private String convertInfo(String info, int allele) {

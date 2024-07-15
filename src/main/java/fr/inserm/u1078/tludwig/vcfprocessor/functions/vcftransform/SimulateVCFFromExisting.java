@@ -23,10 +23,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Checked for release on XXXX-XX-XX
  * Unit Test defined on   XXXX-XX-XX
  */
-public class SimulateVCFFromExisting extends ParallelVCFPedFunction {
+public class SimulateVCFFromExisting extends ParallelVCFPedFunction<Boolean> {
 
   //Parameters
-  @SuppressWarnings("SpellCheckingInspection")
   final TSVFileParameter variantFile = new TSVFileParameter(OPT_TSV, "variantlist.tsv", "File containing the list of biallelic variants with affected gene");
   //Global data
   private final HashMap<String, String> variants2Genes = new HashMap<>();
@@ -34,9 +33,6 @@ public class SimulateVCFFromExisting extends ParallelVCFPedFunction {
   private final HashMap<String, Integer> replacementsPerGenes = new HashMap<>();
   private final HashMap<Sample, Sample> replacements = new HashMap<>();
   private final ArrayList<Sample> replacementOrder = new ArrayList<>();
-
-  public static final String KEPT = "KEPT";
-  public static final String DROPPED = "DROPPED";
 
   final AtomicInteger nbKept = new AtomicInteger(0);
   final AtomicInteger nbDropped = new AtomicInteger(0);
@@ -73,14 +69,10 @@ public class SimulateVCFFromExisting extends ParallelVCFPedFunction {
   @Override
   public void begin() {
     super.begin();
-    try {
-      loadReplacements();
-      loadGenes();
-      computeReplacementsPerGenes();
-      Message.info("End of Preparation");
-    } catch(IOException e){
-      fatalAndQuit("Could not load variant list", e);
-    }
+    loadReplacements();
+    loadGenes();
+    computeReplacementsPerGenes();
+    Message.info("End of Preparation");
   }
   private void computeReplacementsPerGenes() {
     Message.info("Computing number of replacement Samples for each gene");
@@ -124,14 +116,14 @@ public class SimulateVCFFromExisting extends ParallelVCFPedFunction {
         replace.put(index, sample);
     }
     if(cases.size() != replace.size()){
-      fatalAndQuit("Number of case samples ["+cases.size()+"] and replacement samples ["+replace.size()+"] mismatch");
+      Message.die("Number of case samples ["+cases.size()+"] and replacement samples ["+replace.size()+"] mismatch");
     }
 
     for(String index : cases.keySet()){
       final Sample c = cases.get(index);
       final Sample r = replace.get(index);
       if(r == null)
-        fatalAndQuit("Cannot find a replacement Samples for case ["+c.toString()+"]");
+        Message.die("Cannot find a replacement Samples for case ["+c.toString()+"]");
       replacements.put(c, r);
 
       //Sort Replacements
@@ -157,24 +149,25 @@ public class SimulateVCFFromExisting extends ParallelVCFPedFunction {
 
   /**
    * Loads each Variant and affect its associated gene. Update the number of a variants per gene.
-   * @throws IOException If variant file cannot be read
    */
-  private void loadGenes() throws IOException {
+  private void loadGenes() {
     Message.info("Loading variants/genes.");
-    final UniversalReader in = variantFile.getReader();
-    String line;
-    while((line = in.readLine()) != null){
-      final String[] f = line.split("\t");
-      if(f.length < 5)
-        Message.warning("Problem with line ["+line+"]");
-      else {
-        final String key = new Canonical(f[0], Integer.parseInt(f[1]), f[2], f[3]).toString();
-        final String gene = f[4];
-        this.variants2Genes.put(key, gene);
-        geneSizes.put(gene, geneSizes.getOrDefault(gene, 0) + 1);
+    try(final UniversalReader in = variantFile.getReader()) {
+      String line;
+      while ((line = in.readLine()) != null) {
+        final String[] f = line.split("\t");
+        if (f.length < 5)
+          Message.warning("Problem with line [" + line + "]");
+        else {
+          final String key = new Canonical(f[0], Integer.parseInt(f[1]), f[2], f[3]).toString();
+          final String gene = f[4];
+          this.variants2Genes.put(key, gene);
+          geneSizes.put(gene, geneSizes.getOrDefault(gene, 0) + 1);
+        }
       }
+    } catch(IOException e){
+      Message.die("Could not load variant list from ["+variantFile.getFilename()+"]");
     }
-    in.close();
     Message.info("Loaded "+variants2Genes.size()+" variants for "+geneSizes.size()+" genes.");
   }
 
@@ -200,26 +193,21 @@ public class SimulateVCFFromExisting extends ParallelVCFPedFunction {
       variant.recomputeACAN();
       //push KEPT/DROPPED
       if (variant.getAC()[1] > 0) {
-        this.pushAnalysis(KEPT);
+        this.pushAnalysis(true);
         return new String[]{variant.toString()};
       }
     }
-    this.pushAnalysis(DROPPED);
+    this.pushAnalysis(false);
     return NO_OUTPUT;
   }
 
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    if(KEPT == analysis) {
+  public void processAnalysis(Boolean kept) {
+    if(kept)
       this.nbKept.incrementAndGet();
-      return true;
-    }
-    if(DROPPED == analysis) {
+    else
       this.nbDropped.incrementAndGet();
-      return true;
-    }
-    return false;
   }
 
   @SuppressWarnings("unused")

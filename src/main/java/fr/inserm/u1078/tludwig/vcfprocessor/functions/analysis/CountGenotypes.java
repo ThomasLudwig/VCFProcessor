@@ -105,12 +105,6 @@ public class CountGenotypes extends ParallelVCFVariantPedFunction {
     return outs;
   }
 
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
-  }
-  
   @Override
   public TestingScript[] getScripts() {
     return TestingScript.getSimpleVCFPedAnalysisScript();

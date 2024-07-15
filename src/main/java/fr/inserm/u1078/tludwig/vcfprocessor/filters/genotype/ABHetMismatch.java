@@ -1,6 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.filters.genotype;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.GenotypeFilter;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 
 /**
  * Filters heterozygous genotypes that do not have 0.5-dev <= AB <= 0.5+dev <br/>
@@ -38,26 +39,22 @@ public class ABHetMismatch extends GenotypeFilter {
   }
 
   @Override
-  public boolean pass(String s) {
+  public boolean pass(String[] f) {
     try{
-      String[] f = s.split(":");
-      if(f[0].startsWith("."))
+      int[] alleles = Genotype.getAlleles(f[0]);
+      if(alleles == null)
         return true;
-      String[] geno = f[0].replace("|","/").split("/");
-      int g1 = Integer.parseInt(geno[0]);
-      int g2 = Integer.parseInt(geno[1]);
-      if(g1 == g2)
+      if(alleles[0] == alleles[1])
         return true;
       String[] ads = f[this.adPos].split(",");
-      int ad1 = Integer.parseInt(ads[g1]);
-      int ad2 = Integer.parseInt(ads[g2]);
+      int ad1 = Integer.parseInt(ads[alleles[0]]);
+      int ad2 = Integer.parseInt(ads[alleles[1]]);
       double sum = ad1 + ad2;
       double ab = ad2 / sum;
       return min <= ab && ab <= max;
-    } catch (Exception e){
+    } catch (Exception ignore){
       //Ignore
     }
-
     return true;
   }
 

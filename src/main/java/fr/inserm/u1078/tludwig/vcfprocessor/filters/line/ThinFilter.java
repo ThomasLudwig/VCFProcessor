@@ -1,5 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.filters.line;
 
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
 
 /**
@@ -19,9 +20,9 @@ public class ThinFilter extends LineFilter { //TODO bugs due to parallelism
   }
 
   @Override
-  public boolean pass(String[] t) {
-    String chr = t[0];
-    int pos = new Integer(t[1]);
+  public boolean pass(VariantRecord record) {
+    String chr = record.getChrom();
+    int pos = record.getPos();
     
     if (chr.equals(this.lastChrom) && (pos - this.lastPos < this.distance))
       return false;
@@ -29,6 +30,11 @@ public class ThinFilter extends LineFilter { //TODO bugs due to parallelism
 
     this.lastChrom = chr;
     this.lastPos = pos;
+    return true;
+  }
+
+  @Override
+  public boolean leftColumnsOnly() {
     return true;
   }
 

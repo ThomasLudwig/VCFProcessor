@@ -21,7 +21,7 @@ import java.util.ArrayList;
  * Checked for release on 2020-05-12
  * Unit Test defined on   2020-09-10 //TODO completly KO, rewrite everything !!
  */
-public class JointFrequencySpectrum extends ParallelVCFVariantPedFunction {
+public class JointFrequencySpectrum extends ParallelVCFVariantPedFunction<int[]> {
 
   ArrayList<Sample>[] samples;
   ArrayList<String> groups;
@@ -164,12 +164,12 @@ public class JointFrequencySpectrum extends ParallelVCFVariantPedFunction {
           for (int a = 0; a < alts; a++) {
             int ca = tmpCount[ia][a];
             int cb = tmpCount[ib][a];
-            this.pushAnalysis(new Integer[]{ga, gb, ca, cb});
+            this.pushAnalysis(new int[]{ga, gb, ca, cb});
           }
         } catch (Exception e) {
           Message.error("Group A " + groupA + " (" + ia + ")");
           Message.error("Group B " + groupB + " (" + ib + ")");
-          this.fatalAndQuit("error", e);
+          Message.fatal("error", e, true);
         }
       }
     return NO_OUTPUT;
@@ -177,16 +177,9 @@ public class JointFrequencySpectrum extends ParallelVCFVariantPedFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    try {
-      Integer[] n = (Integer[])analysis;
-      count[n[0]][n[1]][n[2]][n[3]]++;
-      return true;
-    } catch (Exception e) {
-      Message.error("Error while checking analysis results", e);
-    }
-    return false;
-  }  
+  public void processAnalysis(int[] n) {
+    count[n[0]][n[1]][n[2]][n[3]]++;
+  }
   
   @Override
   public TestingScript[] getScripts() {

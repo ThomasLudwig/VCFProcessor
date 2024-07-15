@@ -1,6 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.format;
 
 import fr.inserm.u1078.tludwig.maok.LineBuilder;
+import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.StringParameter;
@@ -101,19 +102,13 @@ public class ShowFields extends ParallelVCFVariantFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
   public void begin() {
     super.begin();
     this.fields = new ArrayList<>();
     String q = this.query.getStringValue();
 
     if (q.isEmpty())
-      this.fatalAndQuit("Your query is empty");
+      Message.die("Your query is empty");
 
     for (String key : q.split(","))
       if (key.toLowerCase().startsWith(PREFIX_INFO)) {

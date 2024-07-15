@@ -19,7 +19,7 @@ import java.util.Objects;
  * Checked for release on 2020-08-13
  * Unit Test defined on 2020-08-13
  */
-public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunction {
+public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunction<AbstractCompoundFunction.Analysis> {
 
   public final BooleanParameter noHomo = new BooleanParameter(OPT_NO_HOMO, "Reject if a case is homozygous to alternate allele or if a control has none of the allele ?");
   public static final String FIELD = "COMPOUND";
@@ -93,31 +93,42 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
         genesByAllele.put(a, variant.getGeneList(a));
 
     if (!genesByAllele.isEmpty())
-      this.pushAnalysis(new Object[]{variant, genesByAllele});
+      this.pushAnalysis(new Analysis(variant, genesByAllele));
     return NO_OUTPUT;
   }
 
   @SuppressWarnings("unused")
   @Override
-  public final boolean checkAndProcessAnalysis(Object analysis) {
-    try {
-      Object[] objects = (Object[]) analysis;
-      Variant variant = (Variant) objects[0];
-      @SuppressWarnings("unchecked")
-      HashMap<Integer, String[]> genesByAllele = (HashMap<Integer, String[]>) objects[1];
-      kept++;
+  public final void processAnalysis(Analysis analysis) {
+    Variant variant = analysis.getVariant();
+    HashMap<Integer, String[]> genesByAllele = analysis.genesByAllele;
+    kept++;
 
-      for (int allele : genesByAllele.keySet())
-        //Add variant for each gene
-        for (String gene : genesByAllele.get(allele))
-          if (!gene.isEmpty()) {
-            HashMap<Variant, ArrayList<Integer>> map = this.byGenes.computeIfAbsent(gene, k -> new HashMap<>());
-            ArrayList<Integer> alleles = map.computeIfAbsent(variant, k -> new ArrayList<>());
-            alleles.add(allele);
-          }
-      return true;
-    } catch (Exception e) {
-      return false;
+    for (int allele : genesByAllele.keySet())
+      //Add variant for each gene
+      for (String gene : genesByAllele.get(allele))
+        if (!gene.isEmpty()) {
+          HashMap<Variant, ArrayList<Integer>> map = this.byGenes.computeIfAbsent(gene, k -> new HashMap<>());
+          ArrayList<Integer> alleles = map.computeIfAbsent(variant, k -> new ArrayList<>());
+          alleles.add(allele);
+        }
+  }
+
+  public static class Analysis {
+    private final Variant variant;
+    private final HashMap<Integer, String[]> genesByAllele;
+
+    public Analysis(Variant variant, HashMap<Integer, String[]> genesByAllele) {
+      this.variant = variant;
+      this.genesByAllele = genesByAllele;
+    }
+
+    public Variant getVariant() {
+      return variant;
+    }
+
+    public HashMap<Integer, String[]> getGenesByAllele() {
+      return genesByAllele;
     }
   }
 
@@ -196,7 +207,7 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
       results.add(variant);
     }
 
-    HashMap<Partner, SortedList<String>> partnerMap = alleleMap.computeIfAbsent(num, k -> new HashMap<>());
+    HashMap<Partner, SortedList<String>> partnerMap = alleleMap.computeIfAbsent(num, ignoredK -> new HashMap<>());
 
     Partner partner = new Partner(partnerV, allele);
     SortedList<String> geneList = partnerMap.get(partner);
@@ -253,13 +264,7 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
 
     @Override
     public int hashCode() {
-      int hash = 7;
-      hash = 97 * hash + Objects.hashCode(this.chr);
-      hash = 97 * hash + this.pos;
-      hash = 97 * hash + Objects.hashCode(this.ret);
-      hash = 97 * hash + Objects.hashCode(this.alt);
-      hash = 97 * hash + this.allele;
-      return hash;
+      return Objects.hash(this.chr, this.pos, this.ret, this.alt, this.allele);
     }
 
     @Override
@@ -283,7 +288,5 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
         return false;
       return true;
     }
-    
-    
   }
 }

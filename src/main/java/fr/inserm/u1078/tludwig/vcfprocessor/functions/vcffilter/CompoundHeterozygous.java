@@ -1,5 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 
+import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.BooleanParameter;
@@ -50,9 +51,9 @@ public class CompoundHeterozygous extends AbstractCompoundFunction {
     this.cases = new int[ped.getCases().size()];
     this.controls = new int[ped.getControls().size()];
     if (this.cases.length == 0)
-      this.fatalAndQuit("No case sample present");
+      Message.die("No case sample present");
     if (this.controls.length == 0)
-      this.fatalAndQuit("No control sample present");
+      Message.die("No control sample present");
     int i = 0;
     ArrayList<Sample> samples = new ArrayList<>(this.getVCF().getSamples());
     for (Sample cas : ped.getCases())
@@ -107,7 +108,6 @@ public class CompoundHeterozygous extends AbstractCompoundFunction {
     return true;
   }
 
-  @SuppressWarnings("SpellCheckingInspection")
   @Override
   public TestingScript[] getScripts() {
     ArrayList<TestingScript> scripts = new ArrayList<>();

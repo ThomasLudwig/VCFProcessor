@@ -48,34 +48,34 @@ public class CoverageStats extends Function {
     @SuppressWarnings("unused")
     @Override
     public void executeFunction() throws Exception {
-        UniversalReader in = tsv.getReader();
-        String line;
-        int pos = 0;
-        while((line = in.readLine()) != null){
-            pos++;
-            NumberSeries s = new NumberSeries("", SortedList.Strategy.SORT_AFTERWARDS);
-            LineBuilder lb = new LineBuilder(this.chr.getStringValue());
-            lb.addColumn(pos);
-            String[] f = line.split("\\s+",-1);
-            for(String g : f)
-                s.add(new Integer(g));
-            lb.addColumn(s.getMean());
-            lb.addColumn(s.getMedian());
-            int l = s.size();
-            ArrayList<Double> v = s.getAllValues();
-            int i = 0;
-            for(int depth : DEPTHS){
-                while (i < l) {
-                    if (v.get(i) >= depth)
-                        break;
+        try(UniversalReader in = tsv.getReader()) {
+            String line;
+            int pos = 0;
+            while ((line = in.readLine()) != null) {
+                pos++;
+                NumberSeries s = new NumberSeries("", SortedList.Strategy.SORT_AFTERWARDS);
+                LineBuilder lb = new LineBuilder(this.chr.getStringValue());
+                lb.addColumn(pos);
+                String[] f = line.split("\\s+", -1);
+                for (String g : f)
+                    s.add(new Integer(g));
+                lb.addColumn(s.getMean());
+                lb.addColumn(s.getMedian());
+                int l = s.size();
+                ArrayList<Double> v = s.getAllValues();
+                int i = 0;
+                for (int depth : DEPTHS) {
+                    while (i < l) {
+                        if (v.get(i) >= depth)
+                            break;
 
-                    i++;
+                        i++;
+                    }
+                    lb.addColumn(l - i);
                 }
-                lb.addColumn(l - i);
+                println(lb.toString());
             }
-            println(lb.toString());
         }
-        in.close();
     }
 
     @Override

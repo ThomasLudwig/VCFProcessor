@@ -1,6 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.filters.genotype;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.GenotypeFilter;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 
 /**
  * Filters Heterozygous Genotypes with V_AD/DP above of below a given threshold
@@ -36,28 +37,24 @@ public class GenotypeISKSVAFFilter extends GenotypeFilter {
   }
 
   @Override
-  public boolean pass(String t) {
-    String[] geno = t.split(":");
-    String g = geno[0];
-    if(g.startsWith("."))
+  public boolean pass(String[] geno) {
+    int[] alleles = Genotype.getAlleles(geno[0]);
+    if(alleles == null)
       return true;
-    String[] alleles = g.replace('|', '/').split("\\/");
-    int f = new Integer(alleles[0]);
-    int s = new Integer(alleles[1]);
+    int f = alleles[0];
+    int s = alleles[1];
     if(f == s)
       return true;
     String[] ads = geno[adPos].split(",");
-    double dp = new Integer(geno[dpPos]);
+    double dp = Integer.parseInt(geno[dpPos]);
     if(f > 0 && s > 0){
-      int ad = Math.max(new Integer(ads[f]), new Integer(ads[s]));
+      int ad = Math.max(Integer.parseInt(ads[f]), Integer.parseInt(ads[s]));
       double ratio = dp == 0 ? 0 : ad/dp;
-
       return (min <= ratio && ratio <= max);
     }
 
-    int ad = new Integer(ads[f > 0 ? f : s]);
+    int ad = Integer.parseInt(ads[f > 0 ? f : s]);
     double ratio = dp == 0 ? 0 : ad/dp;
-
     return (min <= ratio && ratio <= max);
   }
 

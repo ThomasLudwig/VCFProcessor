@@ -2,6 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 public class Sample implements Comparable<Sample> {
 
@@ -44,13 +45,17 @@ public class Sample implements Comparable<Sample> {
   }
 
   @Override
-  public boolean equals(Object obj) { //TODO override hashCode
+  public int hashCode() {
+    return Objects.hash(this.fid, this.id, this.pid, this.mid, this.sex, this.phenotype, this.group);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
     if(obj == null)
       return false;
     if(obj instanceof Sample){
       Sample that = (Sample)obj;
-      
-      
+
       if(!isEqual(this.fid,that.fid))
         return false;
       if(!isEqual(this.id,that.id))
@@ -141,7 +146,7 @@ public class Sample implements Comparable<Sample> {
   @Override
   public String toString() {
     String T = "\t";
-    return this.fid + T + this.id + T + this.pid + T + this.mid + T + sex + T + phenotype + T + group;
+    return this.fid + T + this.id + T + this.pid + T + this.mid + T + this.sex + T + this.phenotype + T + this.group;
   }
 
   public static ArrayList<String> getCommonIDs(Collection<Sample> lefts, Collection<Sample> rights) {

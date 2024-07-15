@@ -1,7 +1,9 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.format;
 
 import fr.inserm.u1078.tludwig.maok.LineBuilder;
+import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
@@ -15,7 +17,7 @@ import java.util.Arrays;
  * Checked for release on 2020-08-20
  * Unit Test defined on 2020-20-20
  */
-public class VCF2HTML extends ParallelVCFFunction { 
+public class VCF2HTML extends ParallelVCFFunction {
 
   private static final String CSQ = "CSQ=";
   private static final String FREX = "FREX=";
@@ -80,10 +82,10 @@ public class VCF2HTML extends ParallelVCFFunction {
     setSamples(getVCF().getSampleHeader());
 
     if (samples == null) {
-      this.fatalAndQuit("No Samples available");
+      Message.die("No Samples available");
     }
     if (info == null) {
-      this.fatalAndQuit("No INFO available");
+      Message.die("No INFO available");
     }
   }
 
@@ -148,8 +150,8 @@ public class VCF2HTML extends ParallelVCFFunction {
     lb.openHTML(tag, clas).append(s).closeHTML(tag);
   }
   
-  private static void td(LineBuilder lb, String s, String clas) {
-    tag(lb, "td", s, clas);
+  private static void td(LineBuilder lb, String s, String clas, boolean first) {
+    tag(lb, "td", first ? s : "", clas);
   }
   
   private static void th(LineBuilder lb, String s, String clas) {
@@ -157,18 +159,22 @@ public class VCF2HTML extends ParallelVCFFunction {
   }
 
   @Override
-  public String[] processInputLine(String line) {
-    String[] f = line.split(T);
-
-    String[] infs = f[7].split(";");
-    StringBuilder infoo = new StringBuilder(infs[0]);
+  public String[] processInputRecord(VariantRecord record) {
+    String[][] inf = record.getInfo();
+    /*String[] infs = f[7].split(";");*/
+    StringBuilder infoSB = new StringBuilder(inf[0][0]);
+    if(inf[0][1] != null)
+      infoSB.append("=").append(inf[0][1]);
     String[] csqLists = null;
 
-    for (int i = 1; i < infs.length; i++)
-      if (infs[i].startsWith(CSQ))
-        csqLists = infs[i].substring(CSQ.length()).split(",");
-      else
-        infoo.append(";").append(infs[i]);
+    for (int i = 1; i < inf.length; i++)
+      if (inf[i][0].equals(CSQ))
+        csqLists = inf[i][1].split(",");
+      else {
+        infoSB.append(";").append(inf[i][0]);
+        if(inf[i][1] != null)
+          infoSB.append("=").append(inf[i][1]);
+      }
 
     if(csqLists == null)
       return NO_OUTPUT;
@@ -179,18 +185,17 @@ public class VCF2HTML extends ParallelVCFFunction {
       String csqs = csqLists[c];
       LineBuilder out = new LineBuilder();
       out.openHTML("tr");
-      for (int i = 0; i < COMMONS.length - 1; i++)
-        if (first)
-          td(out, f[i], COMMONS[i]);
-        else
-          td(out, "", COMMONS[i]);
-      if (first)
-        td(out, infoo.toString(), COMMONS[COMMONS.length - 1]);
-      else
-        td(out, "", COMMONS[COMMONS.length - 1]);
+      td(out, record.getChrom(), COMMONS[0], first);
+      td(out, record.getPos()+"", COMMONS[1], first);
+      td(out, record.getID(), COMMONS[2], first);
+      td(out, record.getRef(), COMMONS[3], first);
+      td(out, record.getAltString(), COMMONS[4], first);
+      td(out, record.getQual(), COMMONS[5], first);
+      td(out, record.getFiltersString(), COMMONS[6], first);
+      td(out, infoSB.toString(), COMMONS[COMMONS.length - 1], first);
       String[] csq = (csqs + " ").split("\\|");
       if (csq.length != info.size()) {
-        fatalAndQuit("Mismatch between csq (" + csq.length + ") and info [" + info.size() + "]\n" + csqs);
+        Message.die("Mismatch between csq (" + csq.length + ") and info [" + info.size() + "]\n" + csqs);
       }
       for (int i = 0; i < info.size(); i++){
         String infoType = info.get(i).trim();
@@ -202,14 +207,10 @@ public class VCF2HTML extends ParallelVCFFunction {
           out.closeHTML("td");
         }
         else
-          td(out, csq[i], infoType);
+          td(out, csq[i], infoType, true);
       }
-
       for (int i = 0; i < samples.size(); i++)
-        if (first)
-          td(out, f[i + 8], samples.get(i));
-        else
-          td(out, "", samples.get(i));
+          td(out, record.getGenotypeString(i), samples.get(i), first);
 
       out.closeHTML("tr");
       out.newLine();
@@ -218,13 +219,7 @@ public class VCF2HTML extends ParallelVCFFunction {
     }
     return outs;
   }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
-  }
-  
+
   @Override
   public TestingScript[] getScripts() {
     return TestingScript.getSimpleVCFAnalysisScript();

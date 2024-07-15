@@ -4,6 +4,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
@@ -18,7 +19,7 @@ import java.util.HashMap;
  * Checked for release on 2020-05-25
  * Unit Test defined on   2020-08-04
  */
-public class AddDbSNP extends ParallelVCFFunction {
+public class AddDbSNP extends ParallelVCFFunction<Object> {
 
   public static final String RS_KEY = "RS";
   public static final String BUILD_KEY = "dbSNPBuildID";
@@ -73,8 +74,7 @@ public class AddDbSNP extends ParallelVCFFunction {
   public void begin() {
     super.begin();
     dbsnp = new HashMap<>();
-    try {
-      UniversalReader in = this.refFile.getReader();
+    try (UniversalReader in = this.refFile.getReader()){
       String line;
       Message.progressInfo("Loading");
       int read = 0;
@@ -101,9 +101,8 @@ public class AddDbSNP extends ParallelVCFFunction {
         }
         dbsnp.put(key, new String[]{rs,build});
       }
-      in.close();
     } catch (IOException e) {
-      this.fatalAndQuit("Unable to read dbSNP file " + this.refFile.getFilename());
+      Message.die("Unable to read dbSNP file " + this.refFile.getFilename());
     }
 
     Message.info(("Loading done"));
@@ -116,24 +115,17 @@ public class AddDbSNP extends ParallelVCFFunction {
   }
 
   @Override
-  public String[] processInputLine(String line) {
-    String[] f = line.split(T);
-    String key = f[VCF.IDX_CHROM] + "_" + f[VCF.IDX_POS];
+  public String[] processInputRecord(VariantRecord record) {
+    String key = record.getChrom() + "_" + record.getPos();
     String[] value = dbsnp.get(key);
     if (value != null) {
-      f[VCF.IDX_ID] = "rs" + value[0];
-      f[VCF.IDX_INFO] += ";" + RS_KEY + "=" + value[0] + ";" + BUILD_KEY + "=" + value[1];
-      return new String[]{String.join(T, f)};
+      record.setID("rs" + value[0]);
+      record.addInfo(RS_KEY, value[0]);
+      record.addInfo(BUILD_KEY, value[1]);
     }
-    return new String[]{line};
+    return new String[]{record.toString()};
   }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
-  }
-  
+
   @Override
   public TestingScript[] getScripts() {
     TestingScript def = TestingScript.newFileTransform();

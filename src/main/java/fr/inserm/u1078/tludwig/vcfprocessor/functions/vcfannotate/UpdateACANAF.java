@@ -13,7 +13,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
  * Checked for release on 2020-05-25
  * Unit Test defined on   2020-05-08
  */
-public class UpdateACANAF extends ParallelVCFVariantFunction { 
+public class UpdateACANAF extends ParallelVCFVariantFunction<Object> {
   @Override
   public String getSummary() {
     return "Resets the "+Description.code("AC")+" "+Description.code("AN")+" and "+Description.code("AF")+" values for the given VCF file";
@@ -53,13 +53,7 @@ public class UpdateACANAF extends ParallelVCFVariantFunction {
     variant.recomputeACAN();
     return asOutput(variant);
   }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
-  }
-  
+
   @Override
   public TestingScript[] getScripts() {
     return TestingScript.getSimpleVCFTransformScript();

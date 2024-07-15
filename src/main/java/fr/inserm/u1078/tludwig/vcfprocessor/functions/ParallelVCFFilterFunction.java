@@ -1,36 +1,32 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 
 /**
  *
  * @author Thomas E. Ludwig (INSERM - U1078) 2020-08-05
  */
-public abstract class ParallelVCFFilterFunction extends ParallelVCFFunction {
+public abstract class ParallelVCFFilterFunction extends ParallelVCFFunction<Integer> {
   
   private int inputLines = 0;
   private int outputLines = 0;
 
   @Override
-  public final String[] processInputLine(String line) {
-    String[] ret = this.processInputLineForFilter(line);
+  public final String[] processInputRecord(VariantRecord record) {
+    String[] ret = this.processInputRecordForFilter(record);
     if(ret != null)
       this.pushAnalysis(ret.length);
     return ret;
   }
   
-  public abstract String[] processInputLineForFilter(String line);
+  public abstract String[] processInputRecordForFilter(VariantRecord record);
 
   @SuppressWarnings("unused")
   @Override
-  public final boolean checkAndProcessAnalysis(Object analysis) {
-    try {
-      int add = (Integer)analysis;
-      this.inputLines++;
-      this.outputLines+=add;
-      return true;
-    } catch (Exception ignore) { }
-    return false;
+  public final void processAnalysis(Integer add) {
+    this.inputLines++;
+    this.outputLines+=add;
   }
 
   @SuppressWarnings("unused")

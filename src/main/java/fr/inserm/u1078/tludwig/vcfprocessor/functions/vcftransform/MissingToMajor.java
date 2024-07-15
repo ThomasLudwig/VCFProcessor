@@ -83,13 +83,7 @@ public class MissingToMajor extends ParallelVCFVariantFunction {
     variant.recomputeACAN();
     return asOutput(variant);
   }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
-  }
-  
+
   @Override
   public TestingScript[] getScripts() {
     return TestingScript.getSimpleVCFTransformScript();

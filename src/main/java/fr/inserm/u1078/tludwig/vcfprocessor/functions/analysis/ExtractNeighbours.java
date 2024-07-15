@@ -3,7 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF.Reader;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF.Wrapper;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
@@ -66,28 +66,27 @@ public class ExtractNeighbours extends VCFFunction {
     VCF vcf = this.vcfFile.getVCF(VCF.STEP10000);
     Reader reader = vcf.getReaderAndStart();
     samples = vcf.getSamples();
-    Wrapper previous = reader.nextLine();
-    Wrapper current;
-    if (previous != null && previous.line != null)
-      while ((current = reader.nextLine()) != null && current.line != null) {
+    VariantRecord previous = reader.nextRecord();
+    VariantRecord current;
+    if (previous != null)
+      while ((current = reader.nextRecord()) != null) {
         compare(previous, current, vcf);
         previous = current;
       }
   }
 
-  private void compare(Wrapper previousW, Wrapper currentW, VCF vcf) {
-
-    String[] p = previousW.line.split(T);
-    String[] c = currentW.line.split(T);
-    if (!p[0].equals(c[0]))
+  private void compare(VariantRecord previousW, VariantRecord currentW, VCF vcf) {
+    VariantRecord p = previousW;
+    VariantRecord c = currentW;
+    if (!p.getChrom().equals(c.getChrom()))
       return;
-    int posP = new Integer(p[1]);
-    int posC = new Integer(c[1]);
+    int posP = p.getPos();
+    int posC = c.getPos();
     int dist = posC - posP;
     if (dist == 1 || dist == 2)
       try {
-        Variant previous = vcf.createVariant(previousW.line);
-        Variant current = vcf.createVariant(currentW.line);
+        Variant previous = previousW.createVariant(vcf);
+        Variant current = currentW.createVariant(vcf);
         if (previous.isSNP() && current.isSNP())
           for (Sample sample : samples)
             if (previous.getGenotype(sample).hasAlternate() && current.getGenotype(sample).hasAlternate()) {

@@ -3,7 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.maok.NumberSeries;
 import fr.inserm.u1078.tludwig.maok.SortedList;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.HashMap;
@@ -16,7 +16,7 @@ import java.util.HashMap;
  * Checked for release on 2020-05-12
  * Unit Test defined on   2020-07-08
  */
-public class VQSLod extends ParallelVCFFunction {
+public class VQSLod extends ParallelVCFFunction<VQSLod.Analysis> {
 
   private static final String VQSLOD = "VQSLOD=";
   public static final String[] HEADER = {"Tranche","Mean","Min","D1","D2","D3","D4","Median","D6","D7","D8","D9","Max"};
@@ -92,33 +92,44 @@ public class VQSLod extends ParallelVCFFunction {
   }
 
   @Override
-  public String[] processInputLine(String line) {
-    String[] f = line.split(T);
-    String tr = f[VCF.IDX_FILTER];
-    String info = f[VCF.IDX_INFO];
-    int idx = info.indexOf(VQSLOD);
-    if (idx != -1) {
-      String v = info.substring(idx + VQSLOD.length()).split(";")[0];
-      this.pushAnalysis(new Object[]{tr, Double.parseDouble(v)});
-    }
+  public String[] processInputRecord(VariantRecord record) {
+    String tr = record.getFiltersString();
+    String[][] info = record.getInfo();
+    for(String[] kv : info)
+      if(kv[0].equals(VQSLOD))
+        this.pushAnalysis(new Analysis(tr, Double.parseDouble(kv[1])));
     return new String[]{};
   }
 
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    if (analysis instanceof Object[]) {
-      String tranche = (String) ((Object[]) analysis)[0];
-      Double vqslod = (Double) ((Object[]) analysis)[1];
+  public void processAnalysis(Analysis analysis) {
+      String tranche = analysis.getTranche();
+      double vqslod = analysis.getVqslod();
       NumberSeries ns = tranches.get(tranche);
       if (ns == null) {
         ns = new NumberSeries(tranche, SortedList.Strategy.ADD_INSERT_SORT);
         tranches.put(tranche, ns);
       }
       ns.add(vqslod);
-      return true;
-    } 
-    return false;
+  }
+
+  public static class Analysis {
+    private final String tranche;
+    private final double vqslod;
+
+    public Analysis(String tranche, double vqslod) {
+      this.tranche = tranche;
+      this.vqslod = vqslod;
+    }
+
+    public String getTranche() {
+      return tranche;
+    }
+
+    public double getVqslod() {
+      return vqslod;
+    }
   }
 
   @Override

@@ -92,57 +92,59 @@ public class GenerateHomoRefForPosition extends Function { //TODO Parallelize
     println("##contig=<ID=Y,length=59373566,assembly=b37>");
     println("##contig=<ID=MT,length=16569,assembly=b37>");
 
-    println("##reference=file://"+this.fasta.getFullPath());
+    println("##reference=file://" + this.fasta.getFullPath());
     println(VCF.getStamp());
 
     //Get Samples
-    StringBuilder header = new StringBuilder(String.join(T,"#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT"));
+    StringBuilder header = new StringBuilder(String.join(T, "#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT"));
     int nbSample = 0;
-    UniversalReader sIn = sampleFile.getReader();
     String line;
-    while ((line = sIn.readLine()) != null) {
-      nbSample++;
-      header.append(T).append(line);
+    try (UniversalReader sIn = sampleFile.getReader()) {
+      while ((line = sIn.readLine()) != null) {
+        nbSample++;
+        header.append(T).append(line);
+      }
     }
-    sIn.close();
+
 
     Fasta reference = fasta.getFasta();
 
     println(header.toString());
-    UniversalReader in = positionFile.getReader();
-    Date start = new Date();
-    int read = 0;
-    while ((line = in.readLine()) != null) {
-      read++;
-      if (read % 10000 == 0) {
-        Date now = new Date();
-        int seconds = DateTools.durationInSeconds(start, now);
-        if (seconds == 0)
-          seconds++;
-        int speed = read / seconds;
-        Message.progressInfo(read + " lines read from " + fasta.getFilename() + " in " + DateTools.durationAsString(start, now) + " (" + speed + " lines/s)");
+    try (UniversalReader in = positionFile.getReader()) {
+      Date start = new Date();
+      int read = 0;
+      while ((line = in.readLine()) != null) {
+        read++;
+        if (read % 10000 == 0) {
+          Date now = new Date();
+          int seconds = DateTools.durationInSeconds(start, now);
+          if (seconds == 0)
+            seconds++;
+          int speed = read / seconds;
+          Message.progressInfo(read + " lines read from " + fasta.getFilename() + " in " + DateTools.durationAsString(start, now) + " (" + speed + " lines/s)");
+        }
+        String[] f = line.split("\\s+");
+        String[] out = new String[9 + nbSample];
+        out[VCF.IDX_CHROM] = f[VCF.IDX_CHROM];
+        out[VCF.IDX_POS] = f[VCF.IDX_POS];
+        out[VCF.IDX_ID] = ".";
+        out[VCF.IDX_REF] = "" + reference.getCharacterFor(out[VCF.IDX_CHROM], new Long(out[VCF.IDX_POS]));
+        out[VCF.IDX_ALT] = "" + transition(out[VCF.IDX_REF].charAt(0));
+        out[VCF.IDX_QUAL] = "2000";
+        out[VCF.IDX_FILTER] = "PASS";
+        out[VCF.IDX_INFO] = ".";
+        out[VCF.IDX_FORMAT] = DEFAULT_FORMAT;
+        for (int i = 0; i < nbSample; i++)
+          out[VCF.IDX_SAMPLE + i] = DEFAULT_GENOTYPE;
+        println(String.join(T, out));
       }
-      String[] f = line.split("\\s+");
-      String[] out = new String[9 + nbSample];
-      out[VCF.IDX_CHROM] = f[VCF.IDX_CHROM];
-      out[VCF.IDX_POS] = f[VCF.IDX_POS];
-      out[VCF.IDX_ID] = ".";
-      out[VCF.IDX_REF] = ""+reference.getCharacterFor(out[VCF.IDX_CHROM], new Long(out[VCF.IDX_POS]));
-      out[VCF.IDX_ALT] = ""+transition(out[VCF.IDX_REF].charAt(0));
-      out[VCF.IDX_QUAL] = "2000";
-      out[VCF.IDX_FILTER] = "PASS";
-      out[VCF.IDX_INFO] = ".";
-      out[VCF.IDX_FORMAT] = DEFAULT_FORMAT;
-      for (int i = 0; i < nbSample; i++)
-        out[VCF.IDX_SAMPLE + i] = DEFAULT_GENOTYPE;
-      println(String.join(T, out));
+      Date now = new Date();
+      int seconds = DateTools.durationInSeconds(start, now);
+      if (seconds == 0)
+        seconds++;
+      int speed = read / seconds;
+      Message.info(read + " lines read from " + fasta.getFilename() + " in " + DateTools.durationAsString(start, now) + " (" + speed + " lines/s)");
     }
-    Date now = new Date();
-    int seconds = DateTools.durationInSeconds(start, now);
-    if (seconds == 0)
-      seconds++;
-    int speed = read / seconds;
-    Message.info(read + " lines read from " + fasta.getFilename() + " in " + DateTools.durationAsString(start, now) + " (" + speed + " lines/s)");
   }
 
   private static char transition(char c) {

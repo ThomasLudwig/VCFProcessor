@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcftransform;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.BooleanParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
@@ -60,59 +61,47 @@ public class SetGenotypeFromProbability extends ParallelVCFFunction {
     return OUT_VCF;
   }
 
-  private String getGenotype(String sample, int p) {
-    String[] f = sample.split(":");
+  private void updateGenotype(VariantRecord record, int sample, int probaIndex) {
+    String[] f = record.getGenotypeString(sample).split(":");
     String geno = f[0];
 
     if (geno.equals("./.") || this.overwrite.getBooleanValue()) {
-      String[] ps = f[p].split(",");
-      double[] probabilities = new double[]{new Double(ps[0]), new Double(ps[1]), new Double(ps[2])};
+      String[] ps = f[probaIndex].split(",");
+      double[] probabilities = new double[]{Double.parseDouble(ps[0]), Double.parseDouble(ps[1]), Double.parseDouble(ps[2])};
       int max = 0;
       if (probabilities[1] > probabilities[0])
         max = 1;
       if (probabilities[2] > probabilities[max])
         max = 2;
-      geno = GENOS[max];
-      StringBuilder ret = new StringBuilder(geno);
-      for (int i = 1; i < f.length; i++)
-        ret.append(":").append(f[i]);
-      return ret.toString();
+      record.updateGT(sample, GENOS[max]);
     }
-    return sample;
   }
 
   @Override
-  public String[] processInputLine(String line) {
-    String[] f = line.split(T);
-    if(f[VCF.IDX_ALT].split(",").length > 1){
-      Message.warning("Can't process line why more than 1 alternate allele ["+String.join(" ", f)+"].");
+  public String[] processInputRecord(VariantRecord record) {
+    if(record.getAlts().length > 1){
+      Message.warning("Can't process line why more than 1 alternate allele ["+record+"].");
       return NO_OUTPUT;
     }
       
 
-    String[] format = f[8].split(":");
+    String[] format = record.getFormats();
     int p = -1;
     for (int i = 0; i < format.length; i++)
       if (format[i].equalsIgnoreCase("GP"))
         p = i;
 
     if (p == -1) {
-      Message.warning("Missing GP field in line  ["+String.join(" ", f)+"].");
+      Message.warning("Missing GP field in line  ["+record.toString()+"].");
       return NO_OUTPUT;
     }
 
-    for (int i = VCF.IDX_SAMPLE; i < f.length; i++)
-      f[i] += T + getGenotype(f[i], p);
+    for(int i = 0 ; i < record.getNumberOfSamples(); i++)
+      updateGenotype(record, i, p);
 
-    return new String[]{String.join(T, f)};
+    return new String[]{record.toString()};
   }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
-  }
-  
+
   @Override
   public TestingScript[] getScripts() {
     TestingScript sFalse = TestingScript.newFileTransform();

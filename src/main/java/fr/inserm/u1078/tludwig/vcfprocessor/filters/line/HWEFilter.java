@@ -1,6 +1,8 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.filters.line;
 
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 
 /**
  *
@@ -16,28 +18,26 @@ public class HWEFilter extends LineFilter {
   }
 
   @Override
-  public boolean pass(String[] t) {
+  public boolean pass(VariantRecord record) {
     //TODO what about multiallelic variants ?
-    if(t[4].contains(","))
+    if(record.getAlts().length > 1)
       return !this.isKeep();
     
     int aa = 0;
     int ab = 0;
     int bb = 0;
 
-    for (int i = 9; i < t.length; i++) {
-      String geno = t[i].split(":")[0].replace("|", "/");
-      switch (geno) {
-        case "0/0":
-          aa++;
-          break;
-        case "1/1":
-          bb++;
-          break;
-        case "0/1":
-        case "1/0":
+    for(int s = 0 ; s < record.getNumberOfSamples(); s++) {
+      int[] alleles = Genotype.getAlleles(record.getGT(s));
+      if(alleles != null && alleles.length == 2) {
+        if(alleles[0] != alleles[1])
           ab++;
-          break;
+        else{
+          if(alleles[0] == 0)
+            aa++;
+          else
+            bb++;
+        }
       }
     }
 
@@ -49,6 +49,11 @@ public class HWEFilter extends LineFilter {
       pvalue += probaHWE(taa, tab, tbb);
 
     return (pvalue >= threshold) == this.isKeep();
+  }
+
+  @Override
+  public boolean leftColumnsOnly() {
+    return false;
   }
 
   public static double probaHWE(int aa, int ab, int bb) {

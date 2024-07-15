@@ -2,7 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
  * Checked for release on 2020-05-12
  * Unit Test defined on   2020-07-08
  */
-public class MultiAllelicProportion extends ParallelVCFFunction { 
+public class MultiAllelicProportion extends ParallelVCFFunction<Integer[]> {
   private static final String[] HEADER = {"Chr","pos_n","pos_n+Window_size","nb_multialleleic variants"};
   ArrayList<Integer[]>[] keyValues;
 
@@ -66,13 +66,12 @@ public class MultiAllelicProportion extends ParallelVCFFunction {
   }
 
   @Override
-  public String[] processInputLine(String line) {
-    String[] f = line.split(T);
-    int chr = Variant.chromToNumber(f[VCF.IDX_CHROM]);
+  public String[] processInputRecord(VariantRecord record) {
+    int chr = Variant.chromToNumber(record.getChrom());
     if (chr <= 22) {
-      int value = f[VCF.IDX_ALT].split(",").length + 1;
+      int value = record.getAlts().length + 1;
       if (value >= 4) {
-        this.pushAnalysis(new Integer[]{chr - 1, new Integer(f[VCF.IDX_POS]), value});
+        this.pushAnalysis(new Integer[]{chr - 1, record.getPos(), value});
       }
     }
     return NO_OUTPUT;
@@ -80,15 +79,8 @@ public class MultiAllelicProportion extends ParallelVCFFunction {
   
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    try {
-      Integer[] ckv = (Integer[])analysis;
+  public void processAnalysis(Integer[] ckv) {
       keyValues[ckv[0]].add(ckv);
-      return true;
-    } catch (Exception e) {
-      Message.error("Error while checking analysis results", e);
-    }
-    return false;
   }
 
   @SuppressWarnings("unused")

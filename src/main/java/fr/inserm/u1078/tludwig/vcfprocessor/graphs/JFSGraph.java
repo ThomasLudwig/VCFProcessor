@@ -48,9 +48,8 @@ public class JFSGraph extends HeatMapGraph {
 
   @Override
   protected void loadData() throws GraphException {
-    try {
+    try (UniversalReader in = new UniversalReader(this.filename)){
       this.counts = new ArrayList<>();
-      UniversalReader in = new UniversalReader(this.filename);
       String line;
 
       while ((line = in.readLine()) != null) {
@@ -64,8 +63,6 @@ public class JFSGraph extends HeatMapGraph {
         }
         this.counts.add(values);
       }
-
-      in.close();
     } catch (IOException e) {
       throw new GraphException(e);
     }

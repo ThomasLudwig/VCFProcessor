@@ -1,4 +1,12 @@
 # Changelog
+## 1.2.0 (2024-07-15)
+### core
+- `BCF` : **added** possibility to process BCF file (through a call to VCF)
+- Extensive Code rewrite to speed up BCF treatments
+- `Canonical` : **fixed** Left alignment (the event is always the leftmost possible)
+### functions
+- `ExtractCanonical` : **added** Function that convert a VCF to a list of canonical variant
+
 ## 1.1.0 (2024-05-16)
 ### core
 - Extensive Code clean-up

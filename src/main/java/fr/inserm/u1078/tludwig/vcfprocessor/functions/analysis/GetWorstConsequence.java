@@ -70,12 +70,6 @@ public class GetWorstConsequence extends ParallelVCFVariantFunction {
     return outs;
   }
 
-  @SuppressWarnings("unused")
-  @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    return false;
-  }  
-  
   @Override
   public TestingScript[] getScripts() {
     return TestingScript.getSimpleVCFAnalysisScript();

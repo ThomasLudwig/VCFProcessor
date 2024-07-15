@@ -3,20 +3,20 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 import fr.inserm.u1078.tludwig.maok.FisherExactTest;
 import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.maok.SortedList;
-import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
+import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.PedException;
-import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.PedFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.TSVFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Info;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -30,10 +30,9 @@ import java.util.HashMap;
  * Checked for release on 2020-08-03
  * Unit Test defined on 2020-08-03
  */
-public class QC extends ParallelVCFVariantFunction {
+public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
 
   //TODO the disabled option doesn't work for missing values. Is this still true ?
-  public final PedFileParameter pedFile = new PedFileParameter();
   public final FileParameter parameters = new FileParameter(OPT_OPT, "custom.parameters.tsv", "file containing the various thresholds for the QC (see Documentation)");
   public final TSVFileParameter report = new TSVFileParameter(OPT_REPORT, "filteredVariant.tsv", "output file listing all the variants that were filtered, and why");
 
@@ -222,8 +221,7 @@ public class QC extends ParallelVCFVariantFunction {
     //At class instantiation, all parameters are set to their default thresholds
 
     if (!"null".equalsIgnoreCase(filename)) {//If a filename was provided
-      try {
-        UniversalReader in = new UniversalReader(filename);
+      try (UniversalReader in = new UniversalReader(filename)){
         String line;
         while ((line = in.readLine()) != null) {
           line = line.trim();
@@ -318,13 +316,12 @@ public class QC extends ParallelVCFVariantFunction {
                 minFisherCallRate = parseMinDouble(filename, f, minFisherCallRate);
                 break;
               default:
-                this.fatalAndQuit("Unknown parameter keyword [" + f[0] + "] in file [" + filename + "]");
+                Message.die("Unknown parameter keyword [" + f[0] + "] in file [" + filename + "]");
             }
           }
         }
-        in.close();
       } catch (IOException e) {
-        this.fatalAndQuit("Unable to parse file [" + filename + "] to set the parameter value. Provide a valid file name, or \"null\" to use defaults parameters", e);
+        Message.fatal("Unable to parse file [" + filename + "] to set the parameter value. Provide a valid file name, or \"null\" to use defaults parameters", e, true);
       }
     }
   }
@@ -355,9 +352,9 @@ public class QC extends ParallelVCFVariantFunction {
     if (!"default".equalsIgnoreCase(f[1]))
       try {
         Message.info("Parameter ["+f[0]+"] : "+f[1]);
-        return new Double(f[1]);
+        return Double.parseDouble(f[1]);
       } catch (NumberFormatException e) {
-        this.fatalAndQuit("Unable to set value [" + f[1] + "] to parameter [" + f[0] + "], from file [" + filename + "]. Decimal value expected");
+        Message.die("Unable to set value [" + f[1] + "] to parameter [" + f[0] + "], from file [" + filename + "]. Decimal value expected");
       }
     Message.info("Parameter ["+f[0]+"] : "+defaultValue+" (default Value)");
     return defaultValue;
@@ -383,9 +380,9 @@ public class QC extends ParallelVCFVariantFunction {
     if (!"default".equalsIgnoreCase(f[1]))
       try {
         Message.info("Parameter ["+f[0]+"] : "+f[1]);
-        return new Integer(f[1]);
+        return Integer.parseInt(f[1]);
       } catch (NumberFormatException e) {
-        this.fatalAndQuit("Unable to set value [" + f[1] + "] to parameter [" + f[0] + "], from file [" + filename + "]. Integer value expected");
+        Message.die("Unable to set value [" + f[1] + "] to parameter [" + f[0] + "], from file [" + filename + "]. Integer value expected");
       }
     Message.info("Parameter ["+f[0]+"] : "+defaultValue+" (default Value)");
     return defaultValue;
@@ -496,7 +493,7 @@ public class QC extends ParallelVCFVariantFunction {
       out.println(getHeader());
       reportLines = new SortedList<>(new ArrayList<>(), SortedList.Strategy.ADD_FROM_END);
     } catch (IOException e) {
-      this.fatalAndQuit("Unable to open report file [" + this.report.getFilename() + "]");
+      Message.die("Unable to open report file [" + this.report.getFilename() + "]");
     }
 
     count[IDX_UNFILTERED] = 0;
@@ -535,7 +532,7 @@ public class QC extends ParallelVCFVariantFunction {
           samples.get(group).add(sample.getId());
         }
       } catch (PedException ex) {
-        this.fatalAndQuit("Could not read ped file", ex);
+        Message.fatal("Could not read ped file", ex, true);
       }
     }
 
@@ -592,7 +589,7 @@ public class QC extends ParallelVCFVariantFunction {
     //DONE Qual by depth (QD) ≥ 2
     if (this.enableMinQD)
       try {
-        double d = new Double(info.getAnnot(KEY_QD));
+        double d = Double.parseDouble(info.getAnnot(KEY_QD));
         if (d < this.minQD)
           export.qualByDepth = d + "";
       } catch (NullPointerException | NumberFormatException e) {
@@ -602,7 +599,7 @@ public class QC extends ParallelVCFVariantFunction {
     //DONE Inbreeding coefficient (InbreedingCoeff) either ≥(-0.8) or not calculated
     if (this.enableMinInbreeding)
       try {
-        double d = new Double(info.getAnnot(KEY_INBREEDING));
+        double d = Double.parseDouble(info.getAnnot(KEY_INBREEDING));
         if (d < this.minInbreeding)
           export.inbreedingCoef = d + "";
       } catch (NullPointerException | NumberFormatException e) {
@@ -611,7 +608,7 @@ public class QC extends ParallelVCFVariantFunction {
     //DONE MQRankSum (Z-score From Wilcoxon rank sum test of Alt vs. Ref read mapping qualities) either ≥(-12.5) or not calculated
     if (this.enableMinMQRankSum)
       try {
-        double d = new Double(info.getAnnot(KEY_MQRANKSUM));
+        double d = Double.parseDouble(info.getAnnot(KEY_MQRANKSUM));
         if (d < this.minMQRankSum)
           export.mqRankSum = d + "";
       } catch (NullPointerException | NumberFormatException e) {
@@ -635,7 +632,7 @@ public class QC extends ParallelVCFVariantFunction {
       //SOR (Symmetric Odds Ratio of 2x2 contingency table to detect strand bias) ≤3 for SNPs or ≤10 for indels
       if (enableMaxSORSNP)
         try {
-          double d = new Double(info.getAnnot(KEY_SOR));
+          double d = Double.parseDouble(info.getAnnot(KEY_SOR));
           if (d > this.maxSOR_SNP)
             export.sor = d + "";
         } catch (NullPointerException | NumberFormatException e) {
@@ -644,7 +641,7 @@ public class QC extends ParallelVCFVariantFunction {
       //MQ (overall mapping quality of reads supporting a variant call) ≥40 for SNPs or ≥10 for indels
       if (enableMinMQSNP)
         try {
-          double d = new Double(info.getAnnot(KEY_MQ));
+          double d = Double.parseDouble(info.getAnnot(KEY_MQ));
           if (d < minMQ_SNP)
             export.mq = d + "";
         } catch (NullPointerException | NumberFormatException e) {
@@ -653,7 +650,7 @@ public class QC extends ParallelVCFVariantFunction {
       //ReadPosRankSum (Z-score from Wilcoxon rank sum test of Alt vs. Ref read position bias) either ≥(-8) for SNP or ≥(-20) for indels, or not calculated
       if (enableMinRPRSSNP)
         try {
-          double d = new Double(info.getAnnot(KEY_READPOSRANKSUM));
+          double d = Double.parseDouble(info.getAnnot(KEY_READPOSRANKSUM));
           if (d < minRPRS_SNP)
             export.readPosRankSum = d + "";
         } catch (NullPointerException | NumberFormatException e) {
@@ -860,49 +857,42 @@ public class QC extends ParallelVCFVariantFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) { //TODO unsorted output
-    try {
-      Export export = (Export) analysis;
-      if (!export.isFiltered())
-        count[IDX_UNFILTERED]++;
-      else {
-        if (!export.callRate.isEmpty())
-          count[IDX_CALL]++;
-        if (!export.fisherCallRate.isEmpty())
-          count[IDX_CALLRATE_DISTRIBUTION]++;
-        if (!export.qualByDepth.isEmpty())
-          count[IDX_QUAL_BY_DEPTH]++;
-        if (!export.inbreedingCoef.isEmpty())
-          count[IDX_INBREEDING_COEF]++;
-        if (!export.mqRankSum.isEmpty())
-          count[IDX_MQRANKSUM]++;
-        if (!export.fs.isEmpty())
-          count[IDX_FS]++;
-        if (!export.sor.isEmpty())
-          count[IDX_SOR]++;
-        if (!export.mq.isEmpty())
-          count[IDX_MQ]++;
-        if (!export.readPosRankSum.isEmpty())
-          count[IDX_READPOSRANKSUM]++;
-        if (!export.altLowQual.isEmpty())
-          count[IDX_ALT_LOWQUAL]++;
-        if (!export.abHet.isEmpty())
-          count[IDX_ABHET]++;
-        if (!export.ac0.isEmpty())
-          count[IDX_AC0]++;
-        if (!export.af1.isEmpty())
-          count[IDX_AF1]++;
+  public void processAnalysis(Export export) { //TODO unsorted output
+    if (!export.isFiltered())
+      count[IDX_UNFILTERED]++;
+    else {
+      if (!export.callRate.isEmpty())
+        count[IDX_CALL]++;
+      if (!export.fisherCallRate.isEmpty())
+        count[IDX_CALLRATE_DISTRIBUTION]++;
+      if (!export.qualByDepth.isEmpty())
+        count[IDX_QUAL_BY_DEPTH]++;
+      if (!export.inbreedingCoef.isEmpty())
+        count[IDX_INBREEDING_COEF]++;
+      if (!export.mqRankSum.isEmpty())
+        count[IDX_MQRANKSUM]++;
+      if (!export.fs.isEmpty())
+        count[IDX_FS]++;
+      if (!export.sor.isEmpty())
+        count[IDX_SOR]++;
+      if (!export.mq.isEmpty())
+        count[IDX_MQ]++;
+      if (!export.readPosRankSum.isEmpty())
+        count[IDX_READPOSRANKSUM]++;
+      if (!export.altLowQual.isEmpty())
+        count[IDX_ALT_LOWQUAL]++;
+      if (!export.abHet.isEmpty())
+        count[IDX_ABHET]++;
+      if (!export.ac0.isEmpty())
+        count[IDX_AC0]++;
+      if (!export.af1.isEmpty())
+        count[IDX_AF1]++;
 
-        reportLines.add(export);
-      }
-      return true;
-    } catch (Exception e) {
-      //Ignores
+      reportLines.add(export);
     }
-    return false;
   }
 
-  private static class Export implements Comparable<Export> {
+  public static class Export implements Comparable<Export> {
 
     private final String chrom;
     private final String pos;
@@ -983,14 +973,13 @@ public class QC extends ParallelVCFVariantFunction {
       if (exp == null)
         return 1;
 
-      int comp = Variant.compare(this.chrom, new Integer(this.pos), exp.chrom, new Integer(exp.pos));
+      int comp = Variant.compare(this.chrom, Integer.parseInt(this.pos), exp.chrom, Integer.parseInt(exp.pos));
       if (comp == 0)
         return (this.ref + " " + this.alt).compareTo(exp.ref + " " + exp.alt);
       return comp;
     }
   }
 
-  @SuppressWarnings("SpellCheckingInspection")
   @Override
   public TestingScript[] getScripts() {
     return new TestingScript[]{

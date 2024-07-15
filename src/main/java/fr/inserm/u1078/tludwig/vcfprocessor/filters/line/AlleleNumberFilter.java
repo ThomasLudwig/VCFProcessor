@@ -1,5 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.filters.line;
 
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
 
 /**
@@ -18,9 +19,14 @@ public class AlleleNumberFilter extends LineFilter {
   }
 
   @Override
-  public boolean pass(String[] t) {
-    int nb = t[4].split(",").length + 1;
+  public boolean pass(VariantRecord record) {
+    int nb = record.getAlts().length + 1;
     return (minAllele <= nb && nb <= maxAllele);
+  }
+
+  @Override
+  public boolean leftColumnsOnly() {
+    return true;
   }
 
   @Override

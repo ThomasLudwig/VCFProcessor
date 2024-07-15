@@ -23,7 +23,7 @@ public class SampleSexFilter extends SampleFilter {
     this(keep);
     for (String sex : sexes)
       try {
-        this.add(new Integer(sex));
+        this.add(Integer.parseInt(sex));
       } catch (Exception e) {
         Message.warning("Unrecognized sex [" + sex + "] must be an integer");
       }

@@ -33,10 +33,11 @@ public class GeneCards extends Function {
   @Override
   public void executeFunction() throws Exception {
     println("#!/bin/bash");
-    UniversalReader in = this.geneList.getReader();
-    String line;
-    while ((line = in.readLine()) != null)
-      getHTML(line);
+    try(UniversalReader in = this.geneList.getReader()) {
+      String line;
+      while ((line = in.readLine()) != null)
+        getHTML(line);
+    }
   }
 
   private void getHTML(String gene) {

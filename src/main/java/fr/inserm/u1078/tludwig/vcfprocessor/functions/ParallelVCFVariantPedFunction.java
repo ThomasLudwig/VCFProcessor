@@ -10,8 +10,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.PedFileParamete
  *
  * @author Thomas E. Ludwig (INSERM - U1078) 2019-09-09
  */
-public abstract class ParallelVCFVariantPedFunction extends ParallelVCFVariantFunction {
-  
+public abstract class ParallelVCFVariantPedFunction<T> extends ParallelVCFVariantFunction<T> {
+
   public final PedFileParameter pedFile = new PedFileParameter();
   private Ped ped;
 

@@ -9,6 +9,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.FunctionFactory;
 
 import java.io.*;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -23,10 +24,10 @@ public class Main {
   //DONE replace all method[Blablabla[] args) with method[Blablabla... args) and with a suitable way to apply them to ArrayList<Blablabla> 
   //DONE force the doc to explicitly state what happens in case of multiallelic variants 
   //DONE replace ArrayList<XXXXX> with Collection<XXXXX> in method arguments
-  //TODO put assert wherever it should
+  //TODO put Objects.RequiereNotNull(object, message) wherever it should
   //TODO everywhere, return empty List instead of null (what about tables ?)
   //TODO use LineBuilder/Columns everywhere
-  //TODO override hashcode if equals is overridden : read all responses in https://stackoverflow.com/questions/2265503/why-do-i-need-to-override-the-equals-and-hashcode-methods-in-java
+  //DONE override hashcode if equals is overridden : read all responses in https://stackoverflow.com/questions/2265503/why-do-i-need-to-override-the-equals-and-hashcode-methods-in-java
   //TODO when generating doc, generate doc.v2020-07-09 and symlink doc to the latest
   //TODO Leaking this in constructor --> deport constructor to factory createNewObject()...
   //DONE other versioning system than just a date/build number : VERSION.MAJOR.MINOR VERSION (change of paradigm, change in structure, isolated changes) with real tracking
@@ -55,9 +56,9 @@ public class Main {
       doStart(args);
     } catch (StartUpException e) {
       if (e.getCause() == null)
-        die("VCFProcessor could not be started : " + e.getMessage());
+        Message.die("VCFProcessor could not be started : " + e.getMessage());
       else
-        die("VCFProcessor could not be started : " + e.getMessage(), e.getCause());
+        Message.fatal("VCFProcessor could not be started : " + e.getMessage(), e.getCause(), true);
     }
   }
   
@@ -69,14 +70,13 @@ public class Main {
     Message.setVerboseActive(true);
     Message.setDebugActive(true);
     if (args.length < 3)
-      die("Usage : --test input.vcf output.vcf.gz");
+      Message.die("Usage : --test input.vcf output.vcf.gz");
 
   }
 
   public static final String CHANGELOG = "CHANGELOG.md";
   public static final String OVERVIEW = "overview.md";
-  @SuppressWarnings("SpellCheckingInspection")
-  public static final String File_FORMATS = "fileformats.md";
+    public static final String File_FORMATS = "fileformats.md";
   public static final String DOWNLOAD = "download.md";
   public static final String CONF = "conf.py";
 
@@ -128,7 +128,8 @@ public class Main {
   private static String getStringFromResource(String resource){
     LineBuilder out = new LineBuilder();
     InputStream is = Main.class.getResourceAsStream("/"+resource);
-    assert is != null : "Resource not found ["+resource+"]";
+    if(is == null)
+      throw new StartUpException("Resource not found["+resource+"]");
     BufferedReader in = new BufferedReader(new InputStreamReader(is));
     String line;
     try {
@@ -223,7 +224,10 @@ public class Main {
     //check for extra arguments
     for (int i = 0; i < args.length; i++) {
       String arg = args[i];
-      assert arg != null : "Argument "+i+" is null";
+
+      if(arg == null)
+        throw new StartUpException("Argument " + i + " is null");
+
       switch (arg) {
         case KEY_VERBOSE:
           Message.setVerboseActive(true);
@@ -239,7 +243,8 @@ public class Main {
 
     Main.args = args;
     Function f = FunctionFactory.getFunction(args);
-    assert f != null : "Function is null for ["+ Arrays.toString(args) +"]";
+    if(f == null)
+      throw new StartUpException("Function is null for ["+ Arrays.toString(args) +"]");
     if (f.start(args))
       f.execute();
   }
@@ -249,18 +254,14 @@ public class Main {
   }
 
   public static String getJar(Class<?> clazz) throws StartUpException {
-    try {
-      String path = clazz.getProtectionDomain().getCodeSource().getLocation().getPath();
-      String decoded = URLDecoder.decode(path, "UTF-8");
-      if (decoded.endsWith("!/"))
-        decoded = decoded.substring(0, decoded.length() - 2);
-      if (decoded.startsWith("file:"))
-        decoded = decoded.substring(5);
-      return decoded;
+    String path = clazz.getProtectionDomain().getCodeSource().getLocation().getPath();
+    String decoded = URLDecoder.decode(path, StandardCharsets.UTF_8);
+    if (decoded.endsWith("!/"))
+      decoded = decoded.substring(0, decoded.length() - 2);
+    if (decoded.startsWith("file:"))
+      decoded = decoded.substring(5);
+    return decoded;
 
-    } catch (UnsupportedEncodingException e) {
-      throw new StartUpException("Unable to get jar from class : " + clazz.getSimpleName(), e);
-    }
   }
 
   public static String getDefaultPluginDirectory(String dir) throws StartUpException {
@@ -284,11 +285,12 @@ public class Main {
   }
 
   public static String getVersion() {
-    final String filename = "/CHANGELOG.md";
+    final String filename = "/CHANGELOG.VCFProcessor.md";
     try {
       String line;
       InputStream is = Main.class.getResourceAsStream(filename);
-      assert is != null : filename + " not found";
+      if(is == null)
+        throw new StartUpException("File not found ["+filename+"]");
       BufferedReader in = new BufferedReader(new InputStreamReader(is));
       while ((line = in.readLine()) != null) {
         if (line.toLowerCase().startsWith("## "))
@@ -299,15 +301,4 @@ public class Main {
     }
     return "v?.?.?(????-??-??)";
   }
-
-  public static void die(String fatalMessage){
-    Message.fatal(fatalMessage);
-    System.exit(-1);
-  }
-
-  public static void die(String fatalMessage, Throwable throwable){
-    Message.fatal(fatalMessage, throwable);
-    System.exit(-1);
-  }
-
 }

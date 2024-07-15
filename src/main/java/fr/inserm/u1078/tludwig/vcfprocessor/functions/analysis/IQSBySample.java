@@ -1,22 +1,21 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 
-import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.maok.tools.DateTools;
 import fr.inserm.u1078.tludwig.maok.tools.MathTools;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.maok.tools.StringTools;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCFException;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.MultiVCFReader;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.MultiVCFReader.LinesPair;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.PedException;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.*;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.MultiVCFReader.RecordPair;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPedFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.IntegerParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThread;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThreadFactory;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TreeMap;
@@ -126,7 +125,7 @@ public class IQSBySample extends VCFPedFunction {
     Message.info("Found " + imputedVCF.getSamples().size() + " samples in " + imputedVCF.getFilename());
     Message.info("Found " + sampleData.size() + " in common");
 
-    ExecutorService threadPool = Executors.newFixedThreadPool(cpu.getIntegerValue());
+    ExecutorService threadPool = Executors.newFixedThreadPool(cpu.getIntegerValue(), new WellBehavedThreadFactory());
     Worker[] workers = new Worker[cpu.getIntegerValue()];
     for (int i = 0; i < workers.length; i++) {
       workers[i] = new Worker();
@@ -134,7 +133,7 @@ public class IQSBySample extends VCFPedFunction {
     }
     
     int nb = 0;
-    MultiVCFReader.LinesPair lines = reader.getNextLines();
+    RecordPair lines = reader.getNextLines();
     while (lines.getFirst() != null) {
       workers[nb++ % cpu.getIntegerValue()].put(new IQSData(lines)); //TODO check : objet must be build in thread ???
       lines = reader.getNextLines();
@@ -203,18 +202,18 @@ public class IQSBySample extends VCFPedFunction {
   }
 
   private static class IQSData {
-    static final IQSData LAST = new IQSData(new LinesPair());
+    static final IQSData LAST = new IQSData(new RecordPair());
     
-    private final ArrayList<String> actLines;
-    private final ArrayList<String> impLines;
+    private final ArrayList<VariantRecord> actLines;
+    private final ArrayList<VariantRecord> impLines;
 
-    IQSData(LinesPair pair) {
+    IQSData(RecordPair pair) {
       this.actLines = pair.getFirst();
       this.impLines = pair.getSecond();
     }
   }
 
-  private class Worker implements Runnable {
+  private class Worker extends WellBehavedThread {
     private final LinkedBlockingQueue<IQSData> queue = new LinkedBlockingQueue<>(1000);
 
     public void willEnd() {
@@ -224,13 +223,11 @@ public class IQSBySample extends VCFPedFunction {
     public void put(IQSData iqsdata) {
       try {
         this.queue.put(iqsdata);
-      } catch (InterruptedException e) {
-        //Ignore
-      }
+      } catch (InterruptedException ignore) { }
     }
 
     @Override
-    public void run() {
+    public void doRun() {
       boolean run = true;
       while (run) {
         IQSData data;
@@ -238,20 +235,20 @@ public class IQSBySample extends VCFPedFunction {
           data = queue.take();
 
           if (data.actLines != null) {
-            for (String actLine : data.actLines) {
+            for (VariantRecord actLine : data.actLines) {
               Variant actual = null;
               try {
                 actual = act.createVariant(actLine);
               } catch (VCFException e) {
-                fatalAndQuit("Unable to create variant from following line in " + act.getFilename() + "\n" + actLine, e);
+                Message.fatal("Unable to create variant from following line in " + act.getFilename() + "\n" + actLine, e, true);
               }
               if (actual != null) //Not filtered 
-                for (String impLine : data.impLines) {
+                for (VariantRecord impLine : data.impLines) {
                   Variant imputed = null;
                   try {
                     imputed = imputedVCF.createVariant(impLine);
                   } catch (VCFException e) {
-                    fatalAndQuit("Unable to create variant from following line in " + imputedVCF.getFilename() + "\n" + impLine, e);
+                    Message.fatal("Unable to create variant from following line in " + imputedVCF.getFilename() + "\n" + impLine, e, true);
                   }
 
                   if (imputed != null)//Not filtered
@@ -277,9 +274,7 @@ public class IQSBySample extends VCFPedFunction {
             update();
           } else
             run = false;
-        } catch (InterruptedException ex) {
-          //Ignore
-        }
+        } catch (InterruptedException ignore) { }
       }
     }
   }

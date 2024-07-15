@@ -1,13 +1,13 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 
-import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFilterPedFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.BooleanParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.EnumParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.PedFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+
 import java.util.ArrayList;
 
 /**
@@ -18,9 +18,7 @@ import java.util.ArrayList;
  * Checked for release on 2020-08-07
  * Unit Test defined on 2020-08-10
  */
-public class Recessive extends ParallelVCFVariantFilterFunction {
-
-  public final PedFileParameter pedFile = new PedFileParameter();
+public class Recessive extends ParallelVCFVariantFilterPedFunction {
   private final BooleanParameter missing = new BooleanParameter(OPT_MISSING, "Missing genotypes allowed ?"); //TODO Missing should always be allowed, but rejected from the commandline filters
   private final BooleanParameter noHomo = new BooleanParameter(OPT_NO_HOMO, "Reject if a control is homozygous to reference allele ?");
   private final EnumParameter strict = new EnumParameter(OPT_MODE, "strict,loose", "Mode", "strict : true for all cases | loose : true for at least one case");
@@ -139,7 +137,6 @@ public class Recessive extends ParallelVCFVariantFilterFunction {
     }
   }
 
-  @SuppressWarnings("SpellCheckingInspection")
   @Override
   public TestingScript[] getScripts() {
     ArrayList<TestingScript> scripts = new ArrayList<>();

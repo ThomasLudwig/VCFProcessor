@@ -3,7 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.RatioParameter;
@@ -67,24 +67,21 @@ public class RandomVariants extends ParallelVCFFilterFunction {
   public void begin() {
     super.begin();
     positions = new ArrayList<>();
-    try {
-      UniversalReader in = this.keepPosition.getReader();
+    try (UniversalReader in = this.keepPosition.getReader()){
       String line;
       while ((line = in.readLine()) != null)
         if (!line.trim().isEmpty())
           positions.add(line);
-      in.close();
     } catch (IOException e) {
       Message.error("Could not read positions from "+this.keepPosition.getFilename());
     }
   }
 
   @Override
-  public String[] processInputLineForFilter(String line) {
-    String[] f = line.split(T);
-    if (positions.contains(f[VCF.IDX_ID]) || positions.contains(f[VCF.IDX_CHROM] + ":" + f[VCF.IDX_POS]))
-      return new String[]{line};
-    return Math.random() < this.probability.getFloatValue() ? new String[]{line} : NO_OUTPUT;
+  public String[] processInputRecordForFilter(VariantRecord record) {
+    if (positions.contains(record.getID()) || positions.contains(record.getChrom() + ":" + record.getPos()))
+      return new String[]{record.toString()};
+    return Math.random() < this.probability.getFloatValue() ? new String[]{record.toString()} : NO_OUTPUT;
   }
 
   @Override

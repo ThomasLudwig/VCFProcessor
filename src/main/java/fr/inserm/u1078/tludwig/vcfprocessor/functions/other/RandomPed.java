@@ -37,27 +37,29 @@ public class RandomPed extends Function {
   @Override
   public void executeFunction() throws Exception {
     int nbLine = 0;
-    UniversalReader in = this.pedFile.getReader();
     String line;
-    ArrayList<Integer> total = new ArrayList<>();
-    while (in.readLine() != null) {
-      nbLine++;
-      total.add(nbLine);
-    }
-    in.close();
     ArrayList<Integer> keep = new ArrayList<>();
-    for (int i = 0; i < this.number.getIntegerValue(); i++) {
-      int index = (int) (Math.random() * total.size());
-      keep.add(total.remove(index));
+    ArrayList<Integer> total = new ArrayList<>();
+    try(UniversalReader in = this.pedFile.getReader()) {
+      while (in.readLine() != null) {
+        nbLine++;
+        total.add(nbLine);
+      }
+      in.close();
+
+      for (int i = 0; i < this.number.getIntegerValue(); i++) {
+        int index = (int) (Math.random() * total.size());
+        keep.add(total.remove(index));
+      }
+      nbLine = 0;
     }
-    nbLine = 0;
-    in = this.pedFile.getReader();
-    while ((line = in.readLine()) != null) {
-      nbLine++;
-      if (keep.contains(nbLine))
-        println(line);
+    try(UniversalReader in = this.pedFile.getReader()){
+      while ((line = in.readLine()) != null) {
+        nbLine++;
+        if (keep.contains(nbLine))
+          println(line);
+      }
     }
-    in.close();
   }
 
   @Override

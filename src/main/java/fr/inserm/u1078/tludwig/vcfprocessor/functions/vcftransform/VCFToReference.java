@@ -2,10 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcftransform;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.FastaException;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.Fasta;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCFException;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.*;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FastaFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
@@ -19,7 +16,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
  * Checked for release on 2020-05-26
  * Unit Test defined on   2020-09-22
  */
-public class VCFToReference extends ParallelVCFFunction {
+public class VCFToReference extends ParallelVCFFunction<Boolean> {
 
   private final FastaFileParameter refFile = new FastaFileParameter();
 
@@ -67,7 +64,7 @@ public class VCFToReference extends ParallelVCFFunction {
 
   private String revert(String geno) {
     if (geno.length() != 3) {
-      fatalAndQuit("Genotypes length != 3 : [" + geno + "]");
+      Message.die("Genotypes length != 3 : [" + geno + "]");
     }
     if (geno.charAt(1) == '|') {
       char f = geno.charAt(0);
@@ -90,47 +87,43 @@ public class VCFToReference extends ParallelVCFFunction {
   }
 
   @Override
-  public String[] processInputLine(String line) {
+  public String[] processInputRecord(VariantRecord record) {
     try {
-      String[] f = line.split(T);
-
-      String vcfRef = f[VCF.IDX_REF];
-      String vcfAlt = f[VCF.IDX_ALT];
+      String vcfRef = record.getRef();
+      String vcfAlt = record.getAltString();
       
       if(vcfRef.length() != 1 || vcfAlt.length() != 1){
-        Message.warning("Can't process multiallelic/nonSNV variant ["+String.join(" ", f)+"], in the ref.");
+        Message.warning("Can't process multiallelic/nonSNV variant ["+record+"], in the ref.");
         return NO_OUTPUT;
       }
       
-      String fastaRef = fasta.getStringFor(f[VCF.IDX_CHROM], new Integer(f[VCF.IDX_POS]), 1);
-      if (f[VCF.IDX_REF].equals(fastaRef)) {
-        this.pushAnalysis(Boolean.TRUE);//kept++;
-        return new String[]{line};
+      String fastaRef = fasta.getStringFor(record.getChrom(), record.getPos(), 1);
+      if (vcfRef.equals(fastaRef)) {
+        this.pushAnalysis(true);//kept++;
+        return new String[]{record.toString()};
       }
       
-      if (!f[VCF.IDX_ALT].equals(fastaRef)){ 
-        Message.warning("Can't process variant ["+String.join(" ", f)+"], reference from fasta not found ["+fastaRef+"]");
+      if (!vcfAlt.equals(fastaRef)){
+        Message.warning("Can't process variant ["+record+"], reference from fasta not found ["+fastaRef+"]");
         return NO_OUTPUT;
       }
       
-      this.pushAnalysis(Boolean.FALSE);//reverted++;
+      this.pushAnalysis(false);//reverted++;
       //Swap ref/alt
-      f[VCF.IDX_REF] = vcfAlt;
-      f[VCF.IDX_ALT] = vcfRef;
+      record.setRef(vcfAlt);
+      record.setAlt(vcfRef);
       //Revert all genotypes
       //here we assume only biallelic snps
-      for (int i = VCF.IDX_SAMPLE; i < f.length; i++) {
-        String[] g = f[i].split(":");
-        g[0] = revert(g[0]);
-        f[i] = String.join(":", g);
-      }
+      for (int i = 0; i < record.getNumberOfSamples(); i++)
+        record.updateGT(i, revert(record.getGT(i)));
+
       //TODO what about info (fields are flipped)  ex AD, AC, ....
-      Variant v = this.getVCF().createVariant(String.join(T, f));
+      Variant v = record.createVariant(getVCF());
       v.recomputeACAN();
       
       return asOutput(v);
     } catch (FastaException | VCFException ex) {
-      this.fatalAndQuit("Unable to process Line\n"+line, ex);
+      Message.fatal("Unable to process Line\n"+record, ex, true);
       return NO_OUTPUT;
     }
   }
@@ -142,7 +135,7 @@ public class VCFToReference extends ParallelVCFFunction {
     try {
       fasta = this.refFile.getFasta();
     } catch (FastaException e) {
-      this.fatalAndQuit("Could not load fasta file", e);
+      Message.fatal("Could not load fasta file", e, true);
     }    
   }
 
@@ -154,16 +147,11 @@ public class VCFToReference extends ParallelVCFFunction {
   
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    if(Boolean.TRUE.equals(analysis)){
+  public void processAnalysis(Boolean isKept) {
+    if(isKept)
       kept++;
-      return true;
-    }
-    else if(Boolean.FALSE.equals(analysis)){
+    else
       reverted++;
-      return true;
-    }
-    return false;
   }
 
   

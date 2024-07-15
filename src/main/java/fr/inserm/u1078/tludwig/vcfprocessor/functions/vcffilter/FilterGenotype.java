@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.ListParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
@@ -79,22 +80,20 @@ public class FilterGenotype extends ParallelVCFFilterFunction { //TODO add suppo
 
       Message.info((keeps[i] ? "KEEP  " : "REMOVE")+" "+genotypes[i]+" for "+ samples[i]+"(#"+indices[i]+", column["+(VCF.IDX_SAMPLE+indices[i]+1)+"])");
       if (this.indices[i] == -1)
-        this.fatalAndQuit("Sample " + samples[i] + " not found in VCF File " + vcfFile.getFilename());
+        Message.die("Sample " + samples[i] + " not found in VCF File " + vcfFile.getFilename());
     }          
   }
 
   @Override
-  public String[] processInputLineForFilter(String line) {
-    String[] fields = line.split(T);
+  public String[] processInputRecordForFilter(VariantRecord record) {
     for (int i = 0; i < this.indices.length; i++) {
-      String geno = fields[VCF.IDX_SAMPLE+this.indices[i]].split(":")[0];
+      String geno = record.getGT(i);
       if (geno.equals(this.genotypes[i]) != keeps[i]) //reject if "kept" genotypes mismatch, or "remove" genotypes match
         return NO_OUTPUT;
     }
-    return new String[]{line};
+    return new String[]{record.toString()};
   }
 
-  @SuppressWarnings("SpellCheckingInspection")
   @Override
   public TestingScript[] getScripts() {
     TestingScript scr = TestingScript.newFileTransform();

@@ -32,10 +32,8 @@ import java.util.Date;
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 20 mai 2015
  */
 public abstract class Function {
-  public static final String OPT_REF = "--ref"; //TODO OPT as enum
+  public static final String OPT_REF = "--ref"; //TODO OPT as enum ? why, less flexible
   public static final String OPT_CPU = "--cpu";
-
-  @SuppressWarnings("SpellCheckingInspection")
   public static final String OPT_TPED = "--tped";
   public static final String OPT_FREX = "--frex";
   public static final String OPT_VCF = "--vcf";
@@ -72,8 +70,7 @@ public abstract class Function {
   public static final String OPT_GENE = "--gene";
   public static final String OPT_HOMO = "--homo";
   public static final String OPT_MISSING = "--missing";
-  @SuppressWarnings("SpellCheckingInspection")
-  public static final String OPT_NO_HOMO = "--nohomo";
+    public static final String OPT_NO_HOMO = "--nohomo";
   public static final String OPT_MODE = "--mode";
   public static final String OPT_TYPE = "--type";
   public static final String OPT_POP = "--pop";
@@ -136,8 +133,6 @@ public abstract class Function {
     TYPE_UNKNOWN
   };
 
-  //TODO gradle has a lot of compatibility uses (strong correlation with java version), maybe switch to another compiler ?
-
   public final String getFunctionType() {
     String jar = Main.getJar(this.getClass());
     String main = Main.getJar();
@@ -181,13 +176,13 @@ public abstract class Function {
 
   public abstract String getOutputExtension();
   
-  //TODO add --gz to the docs (command line, and rtd
-  //TODO hunt all PrintWriters and open them as bgzip if they are VCF and bgzip is activated
+  //TODO add --gz to the docs (command line, and rtd)
+
   public static void setOutputBgzipped(){ 
     if(FIRST_CALL_OUTPUT_BGZIPPED)
       BGZIPPED_OUTPUT = true;
     else
-      Main.die("Call to "+Function.class.getSimpleName()+".setBgzippedOutput() can only made once");
+      Message.die("Call to "+Function.class.getSimpleName()+".setBgzippedOutput() can only made once");
     FIRST_CALL_OUTPUT_BGZIPPED = false;
   }
   
@@ -212,7 +207,7 @@ public abstract class Function {
     
     if (msg.length() > 0) {
       this.showUsage();
-      this.fatalAndQuit("Invalid argument(s)" + msg);
+      Message.fatal("Invalid argument(s)" + msg, true);
       return false;
     }
 
@@ -238,7 +233,7 @@ public abstract class Function {
         System.setErr(errStream);
       }
     } catch (IOException e) {
-      this.fatalAndQuit("Could not redirect output", e);
+      Message.fatal("Could not redirect output", e, true);
       return false;
     }
     return true;
@@ -280,12 +275,12 @@ public abstract class Function {
     try {
       this.executeFunction();
     } catch (Exception e) {
-      Function.this.fatalAndQuit("Unable to execute function " + this.getFunctionName(), e);
+      Message.fatal("Unable to execute function " + this.getFunctionName(), e, true);
 
     }
     Date endDate = new Date();
     Message.info("Computation Ended at " + endDate + " (duration " + DateTools.durationInSeconds(startDate, endDate) + "s), waiting for output file to be written.");
-    this.quit();
+    this.quit(true);
   }
 
   private String getHostname() {
@@ -300,25 +295,15 @@ public abstract class Function {
     System.out.println(o);
   }
 
-  public void fatalAndQuit(String message, Exception e) {
-    Message.fatal(message, e);
-    this.quit();
-  }
-  
-  public void fatalAndQuit(String message){
-    Message.fatal(message);
-    this.quit();
-  }
-  
-  public void quit() {
+  public void quit(boolean ok) {
     if (outStream != null)
       outStream.close();
     System.setOut(STD_OUT);
     if (errStream != null)
       errStream.close();
     System.setErr(STD_ERR);
-    Message.setProgressBarActive(true);
-    System.exit(-1);
+
+    System.exit(ok ? 0 : -1);
   }
 
   public final String getPackage() {
@@ -396,7 +381,7 @@ public abstract class Function {
 
   public final String getUsage() {
     LineBuilder msg = new LineBuilder();
-    msg.newLine(Message.yellow(this.getClass().getSimpleName()));
+    msg.newLine(Message.Color.yellow(this.getClass().getSimpleName()));
     
     int keyLength = 0 ;
     int exampleLength = 0;
@@ -411,20 +396,23 @@ public abstract class Function {
     for (Parameter param : this.getParameters())
       msg.newLine(param.getCommandLineDescription(keyLength, exampleLength)); //space is in the getCommandLine()
     msg.newLine(GzParameter.GZ_PARAMETER.getCommandLineDescription(keyLength, exampleLength));
-    msg.append(Message.white("(" + Description.descriptionToPlainText(this.getSummary()) + ")"));
+    msg.append(Message.Color.white("(" + Description.descriptionToPlainText(this.getSummary()) + ")"));
     return msg.toString();
   }
 
   public final String getShortUsage() {
-    StringBuilder msg = new StringBuilder(Message.yellow(this.getClass().getSimpleName()));
+    StringBuilder msg = new StringBuilder(Message.Color.yellow(this.getClass().getSimpleName()));
     for (Parameter param : this.getParameters())
       if (param != null && !(param instanceof OutputParameter))
         msg.append(param.getCommandLine()); //space is in the getCommandLine()
-    return msg + " " + Message.white("(" + Description.descriptionToPlainText(this.getSummary()) + ")");
+    return msg + " " + Message.Color.white("(" + Description.descriptionToPlainText(this.getSummary()) + ")");
   }
 
   public void showUsage() {
-    Main.die("Usage : " + JavaTools.command(this.getClass()) + "\n" + this.getUsage() + "\n" + this.getDescription().asText());
+    String msg = "Usage : " + JavaTools.command(this.getClass()) + "\n";
+    msg += this.getUsage() + "\n";
+    msg += this.getDescription().asText();
+    Message.fatal(msg, false);
   }
 
   public final Parameter[] getParameters() { //there are mention of VCFFunction ... for sorting purpose
@@ -483,7 +471,7 @@ public abstract class Function {
       fields.removeAll(removes);
 
     } catch (IllegalAccessException | IllegalArgumentException | SecurityException e) {
-      this.fatalAndQuit("Problem getting field for function " + this.getFunctionName(), e);
+      Message.fatal("Problem getting field for function " + this.getFunctionName(), e, true);
     }
 
     //check validity
@@ -491,7 +479,7 @@ public abstract class Function {
     for (Parameter param : ret) {
       String key = param.getKey();
       if (keys.contains(key))
-        this.fatalAndQuit("Duplicate key [" + key + "] in the definition of Function " + this.getFunctionName() + " (" + this.getFunctionType() + ")");
+        Message.die("Duplicate key [" + key + "] in the definition of Function " + this.getFunctionName() + " (" + this.getFunctionType() + ")");
       else
         keys.add(key);
     }
@@ -502,9 +490,9 @@ public abstract class Function {
   /**
    * Really executes the function
    *
-   * @throws java.lang.Exception if something went wrong
+   * @throws FunctionException if something went wrong
    */
-  @SuppressWarnings("unused")
+
   public abstract void executeFunction() throws Exception; //TODO should be FunctionException
   
   public static PrintWriter getPrintWriter(String filename, boolean bgzip) throws IOException{

@@ -2,6 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
@@ -51,9 +52,9 @@ public class FilterKnownID extends ParallelVCFFilterFunction {
   }
 
   @Override
-  public String[] processInputLineForFilter(String line) {
-    String[] f = line.split(T);
-    return f[VCF.IDX_ID] == null || f[VCF.IDX_ID].isEmpty() || f[VCF.IDX_ID].equals(".") ? new String[]{line} : NO_OUTPUT;
+  public String[] processInputRecordForFilter(VariantRecord record) {
+    String id = record.getID();
+    return id == null || id.isEmpty() || id.equals(".") ? new String[]{record.toString()} : NO_OUTPUT;
   }
   
   @Override

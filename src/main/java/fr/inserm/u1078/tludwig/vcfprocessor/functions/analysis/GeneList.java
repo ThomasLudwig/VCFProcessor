@@ -16,7 +16,7 @@ import java.util.TreeSet;
  * Checked for release on 2020-05-12
  * Unit Test defined on   2020-07-07
  */
-public class GeneList extends ParallelVCFVariantFunction {
+public class GeneList extends ParallelVCFVariantFunction<String[]> {
 
   TreeSet<String> genes;
 
@@ -83,13 +83,9 @@ public class GeneList extends ParallelVCFVariantFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean checkAndProcessAnalysis(Object analysis) {
-    if(analysis instanceof String[]){
-      Collections.addAll(genes, (String[]) analysis);
-      return true;
-    }
-    return false;
-  }  
+  public void processAnalysis(String[] analysis) {
+    Collections.addAll(genes, analysis);
+  }
   
   @Override
   public TestingScript[] getScripts() {

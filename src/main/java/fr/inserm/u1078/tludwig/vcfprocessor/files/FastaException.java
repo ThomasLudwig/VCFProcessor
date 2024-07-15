@@ -5,7 +5,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.files;
  *
  * @author maria
  */
-public class FastaException extends Exception {
+public class FastaException extends FileFormatException {
 
   public FastaException() {
   }
