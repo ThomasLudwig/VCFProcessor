@@ -4,6 +4,7 @@
 - `BCF` : **added** possibility to process BCF file (through a call to VCF)
 - Extensive Code rewrite to speed up BCF treatments
 - `Canonical` : **fixed** Left alignment (the event is always the leftmost possible)
+- Java 8 -> 11
 ### functions
 - `ExtractCanonical` : **added** Function that convert a VCF to a list of canonical variant
 
