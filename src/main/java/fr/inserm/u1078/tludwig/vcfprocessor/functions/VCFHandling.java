@@ -13,6 +13,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 public interface VCFHandling {
   String PREFIX_MULTIALLELIC = "In case of multiallelic variants : ";
   String MULTIALLELIC_NA = "na";
+  String MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE = "Each alternate allele is processed independently, While '*' allele ignored.";
+  //TODO ignore star in each function
   String MULTIALLELIC_ALLELE_AS_LINE = "Each alternate allele is processed independently.";
   String MULTIALLELIC_FORBIDDEN = "An error will be thrown, as this function expects only monoallelic variants. The affected variant line will be dropped.";
   String MULTIALLELIC_DROP = "The affected variant line will be silently dropped.";

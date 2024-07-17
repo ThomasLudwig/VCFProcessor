@@ -1,8 +1,9 @@
 # Changelog
-## 1.2.1 (2024-07-15)
+## 1.2.1 (2024-07-17)
 Minor revisions
 ### core
 ### functions
+- Ignore "*" allele in most analyses
 ### filters
 
 ## 1.2.0 (2024-07-15)

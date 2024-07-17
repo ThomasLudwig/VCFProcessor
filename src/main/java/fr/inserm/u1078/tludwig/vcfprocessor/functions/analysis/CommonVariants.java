@@ -87,7 +87,7 @@ public class CommonVariants extends ParallelVCFFunction {
   @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
+    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }
   
   @Override

@@ -112,7 +112,7 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
   @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
+    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }
   
   @Override
@@ -121,9 +121,11 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
       String[] infos = variant.getInfo().toString().split(";");
       int[] acs = getACs(infos);
       int an = getAN(infos);
-      String[] outs = new String[variant.getAlleleCount() - 1];
-      for (int a = 1; a < variant.getAlleleCount(); a++) {
-        int ac = acs[a - 1];
+      int[] nonStars = variant.getNonStarAltAllelesAsArray();
+      String[] outs = new String[nonStars.length];
+      for (int i = 0 ; i < nonStars.length; i++) {
+        int a = nonStars[i];
+        int ac = acs[i];
         double af = (1.0 * ac) / an;
         String canonical = new Canonical(variant.getChromNumber(), variant.getPos(), variant.getRef(), variant.getAllele(a)).toString();
         String gnom = gnomadData.get(canonical);
@@ -140,7 +142,7 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
           if(VEPConsequence.getWorstConsequence(vep).equals(worst))
             genes.add(gene);
         }
-        outs[a - 1] = variant.getChrom() + T + variant.getPos() + T + variant.getId() + T + variant.getRef() + T + variant.getAllele(a) + T + qual + T + worst.getName() + T + String.join(",", genes) + T + acs[a - 1] + T + af + T + an + T + gnom;
+        outs[i] = variant.getChrom() + T + variant.getPos() + T + variant.getId() + T + variant.getRef() + T + variant.getAllele(a) + T + qual + T + worst.getName() + T + String.join(",", genes) + T + acs[a - 1] + T + af + T + an + T + gnom;
       }
       return outs;
     } catch (NumberFormatException e) {

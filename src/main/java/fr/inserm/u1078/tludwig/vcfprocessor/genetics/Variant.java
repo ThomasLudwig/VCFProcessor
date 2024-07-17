@@ -202,6 +202,22 @@ public class Variant implements Comparable<Variant> {
     return major;
   }
 
+  public int[] getNonStarAltAllelesAsArray(){
+    ArrayList<Integer> nonStarAltAlleles = this.getNonStarAltAllelesAsList();
+    int[] ret = new int[nonStarAltAlleles.size()];
+    for(int i = 0 ; i < nonStarAltAlleles.size(); i++)
+      ret[i] = nonStarAltAlleles.get(i);
+    return ret;
+  }
+
+  private ArrayList<Integer> getNonStarAltAllelesAsList() {
+    ArrayList<Integer> nonStarAltAlleles = new ArrayList<>();
+    for(int a = 1; a < this.alleles.length; a++)
+      if(!"*".equals(this.alleles[a]))
+        nonStarAltAlleles.add(a);
+    return nonStarAltAlleles;
+  }
+
   public boolean isMissingForAll() {
     for (Genotype genotype : this.genotypes)
       if (!genotype.isMissing())

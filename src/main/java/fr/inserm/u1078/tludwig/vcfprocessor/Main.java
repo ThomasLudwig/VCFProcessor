@@ -55,10 +55,7 @@ public class Main {
     try {
       doStart(args);
     } catch (StartUpException e) {
-      if (e.getCause() == null)
-        Message.die("VCFProcessor could not be started : " + e.getMessage());
-      else
-        Message.fatal("VCFProcessor could not be started : " + e.getMessage(), e.getCause(), true);
+      Message.fatal("VCFProcessor could not be started : " + e.getMessage(), e, true);
     }
   }
   
@@ -74,7 +71,7 @@ public class Main {
 
   }
 
-  public static final String CHANGELOG = "CHANGELOG.md";
+  public static final String CHANGELOG = "CHANGELOG.VCFProcessor.md";
   public static final String OVERVIEW = "overview.md";
     public static final String File_FORMATS = "fileformats.md";
   public static final String DOWNLOAD = "download.md";

@@ -60,13 +60,13 @@ public class ExtractPrivateToGroup extends ParallelVCFVariantPedFunction {
   @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
+    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }  
 
   @Override
   public String[] processInputVariant(Variant variant) {
     ArrayList<String> outs = new ArrayList<>();
-    for (int a = 1; a < variant.getAlleleCount(); a++) {
+    for (int a : variant.getNonStarAltAllelesAsArray()) {
       ArrayList<String> groups = variant.getGroupsWithAllele(a);
       if (groups.size() == 1) {
         String out = variant.getChrom() + T + variant.getPos() + T + groups.get(0);

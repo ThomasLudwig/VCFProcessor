@@ -103,12 +103,12 @@ public class CountFromPublicDB extends ParallelVCFVariantFunction<CountFromPubli
   @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
+    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }
     
   @Override
   public String[] processInputVariant(Variant variant) {
-    for (int a = 1; a < variant.getAlleleCount(); a++)
+    for (int a : variant.getNonStarAltAllelesAsArray())
       this.pushAnalysis(new CountAnalysis(variant.isSNP(a), variant.getInfo().isInDBSNPVEP(a), variant.getInfo().isIn1KgVEP(a), variant.getInfo().isInGnomADVEP(a)));
     return NO_OUTPUT;
   }

@@ -46,7 +46,7 @@ public class PrivateAndShared extends ParallelVCFVariantPedFunction<PrivateAndSh
   @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
+    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }
 
   @SuppressWarnings("unused")
@@ -87,7 +87,7 @@ public class PrivateAndShared extends ParallelVCFVariantPedFunction<PrivateAndSh
 
   @Override
   public String[] processInputVariant(Variant variant) {
-    for (int a = 1; a < variant.getAlleles().length; a++)
+    for (int a : variant.getNonStarAltAllelesAsArray())
       if (!variant.getInfo().isInDBSNPVEP(a)) {
         ArrayList<Integer> gps = new ArrayList<>();
         boolean isShared = false;
