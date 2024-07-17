@@ -68,13 +68,13 @@ public class FrequencyForPrivate extends ParallelVCFVariantPedFunction {
   @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
+    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }
 
   @Override
   public String[] processInputVariant(Variant variant) {
     ArrayList<String> outs = new ArrayList<>();
-    for (int a = 1; a < variant.getAlleles().length; a++)
+    for (int a : variant.getNonStarAltAllelesAsArray())
       if (!variant.getInfo().isIn1KgVEP(a) && !variant.getInfo().isInDBSNPVEP(a) && !variant.getInfo().isInGnomADVEP(a)) {
         int[] countByGroup = new int[G];
         int[] totalInGroup = new int[G];

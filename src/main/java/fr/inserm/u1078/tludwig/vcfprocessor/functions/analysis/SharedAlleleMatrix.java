@@ -82,8 +82,7 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction<SharedAlleleM
     Genotype[] genos = variant.getGenotypes();
 
     double[] af = variant.getAF();
-    
-    for (int a = 1; a < variant.getAlleleCount(); a++) {
+    for (int a : variant.getNonStarAltAllelesAsArray()) {
       double f = af[a];
       if (variant.isSNP(a) && (f <= 0.05 || !variant.getInfo().isInDBSNPVEP(a)))
         for (int l = 0; l < genos.length; l++)

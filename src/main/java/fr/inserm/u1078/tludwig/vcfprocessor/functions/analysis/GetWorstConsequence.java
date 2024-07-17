@@ -40,7 +40,7 @@ public class GetWorstConsequence extends ParallelVCFVariantFunction {
   @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
+    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }
 
   @SuppressWarnings("unused")
@@ -62,10 +62,12 @@ public class GetWorstConsequence extends ParallelVCFVariantFunction {
 
   @Override
   public String[] processInputVariant(Variant variant) {
-    String[] outs = new String[variant.getAlleleCount()-1];
-    for (int a = 1; a < variant.getAlleleCount(); a++) {
+    int[] nonStar = variant.getNonStarAltAllelesAsArray();
+    String[] outs = new String[nonStar.length];
+    for (int i = 0 ; i < nonStar.length; i++) {
+      int a = nonStar[i];
       VEPAnnotation csqGene = variant.getInfo().getWorstVEPAnnotation(a);
-      outs[a-1] = variant.getChrom() + T + variant.getPos() + T + variant.getId() + T + variant.getRef() + T + variant.getAllele(a) + T + csqGene.getConsequence() + T + csqGene.getSYMBOL();
+      outs[i] = variant.getChrom() + T + variant.getPos() + T + variant.getId() + T + variant.getRef() + T + variant.getAllele(a) + T + csqGene.getConsequence() + T + csqGene.getSYMBOL();
     }
     return outs;
   }

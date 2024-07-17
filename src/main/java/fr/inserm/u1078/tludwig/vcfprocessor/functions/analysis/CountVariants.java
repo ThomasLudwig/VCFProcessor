@@ -92,7 +92,7 @@ public class CountVariants extends ParallelVCFVariantPedFunction<int[]> {
   @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
+    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }
 
   @Override
@@ -102,7 +102,7 @@ public class CountVariants extends ParallelVCFVariantPedFunction<int[]> {
       String group = s.getGroup();
       int ig = groups.indexOf(group);
       int is = samples[ig].indexOf(s);
-      for (int a = 1; a < variant.getAlleles().length; a++)
+      for (int a : variant.getNonStarAltAllelesAsArray())
         if (g.hasAllele(a))
           this.pushAnalysis(new int[]{ig, is});
           //this.counts.get(ig)[is]++;

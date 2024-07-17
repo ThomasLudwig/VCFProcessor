@@ -1,7 +1,5 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files;
 
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
-
 /**
  * Exception related to VCF
  *

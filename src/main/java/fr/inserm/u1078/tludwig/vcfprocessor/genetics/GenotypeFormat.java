@@ -2,7 +2,6 @@ package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Genotype Format from VCF File

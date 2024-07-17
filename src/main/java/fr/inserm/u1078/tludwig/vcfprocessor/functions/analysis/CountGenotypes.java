@@ -76,13 +76,14 @@ public class CountGenotypes extends ParallelVCFVariantPedFunction {
   @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
+    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }
   
   @Override
   public String[] processInputVariant(Variant variant) {
-    String[] outs = new String[variant.getAlleleCount() -1];
-    for (int a = 1; a < variant.getAlleleCount(); a++) {
+    int[] nonStars = variant.getNonStarAltAllelesAsArray();
+    String[] outs = new String[nonStars.length - 1];
+    for (int a = 1; a < nonStars.length; a++) {
       int[][] counts = new int[GRP + 1][3];
 
       for (Genotype g : variant.getGenotypes()) {
