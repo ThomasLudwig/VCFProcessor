@@ -4,6 +4,8 @@ import fr.inserm.u1078.tludwig.maok.Point;
 import fr.inserm.u1078.tludwig.maok.SVG;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.ColorTools;
+import fr.inserm.u1078.tludwig.maok.tools.Message;
+
 import java.awt.Color;
 import java.io.IOException;
 
@@ -210,6 +212,7 @@ private int[][] f2;
         int max = getMaxTable(this.f2);
         Color color = ColorTools.getColor(this.groups[h]);
         double newHeight = height * value * ratio / max;
+        Message.verbose("value="+value+" max="+max+" height="+height+" draw="+height+"*"+value+"*"+ratio+"/"+max+"="+newHeight);
         double margin = height - newHeight;
         if (newHeight == 0) {
             svg.line(new Point(x, y + margin), new Point(x + width, y + margin), 1, Color.black);
@@ -221,9 +224,9 @@ private int[][] f2;
     private static int getMaxTable(int[][] f2){
         int max = 0;
         for(int[] l :f2)
-            for(int v : l)
-                if(v > max)
-                    max = v;
+            for(int i = 0 ; i < l.length -1 ; i++)
+                if(l[i] > max)
+                    max = l[i];
         return max;
     }
 

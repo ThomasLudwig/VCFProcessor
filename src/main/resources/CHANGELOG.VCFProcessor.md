@@ -1,10 +1,13 @@
 # Changelog
-## 1.2.1 (2024-07-17)
+## 1.2.1 (2024-09-13)
 Minor revisions
 ### core
 ### functions
 - Ignore "*" allele in most analyses
+- `FilterF2` : Direct output instead of BufferedOutput (to avoid Out-of-Memory Exception)
 ### filters
+### graphs
+- `F2Graph` : Highest value bar at 100% height
 
 ## 1.2.0 (2024-07-15)
 ### core

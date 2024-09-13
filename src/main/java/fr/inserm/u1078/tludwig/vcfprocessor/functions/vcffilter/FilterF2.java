@@ -11,7 +11,6 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.TreeMap;
 
 /**
  * Filters variants to keep only those contributing to F2 data.
@@ -37,7 +36,7 @@ public class FilterF2 extends ParallelVCFPedFunction<FilterF2.Analysis> {
   private static final int NEW_SNV = 2;
   private static final int NEW_IND = 3;
   private static final int OVERALL = 4;
-  private TreeMap<Variant, boolean[]> storeF2;
+  //private TreeMap<Variant, boolean[]> storeF2;
 
   @Override
   public String getSummary() {
@@ -94,15 +93,15 @@ public class FilterF2 extends ParallelVCFPedFunction<FilterF2.Analysis> {
   @Override
   public void begin() {
     super.begin();
-    this.storeF2 = new TreeMap<>();
+    //this.storeF2 = new TreeMap<>();
     String filename = this.dir.getDirectory() + this.prefix.getStringValue();
 
     try {
       this.f2all = getPrintWriter(filename + ".all.vcf");
-      this.f2old = getPrintWriter(filename + ".old.vcf");
+      this.f2old = getPrintWriter(filename + ".known.vcf");
       this.f2new = getPrintWriter(filename + ".new.vcf");
       this.f2snpAll = getPrintWriter(filename + ".snp.all.vcf");
-      this.f2snpOld = getPrintWriter(filename + ".snp.old.vcf");
+      this.f2snpOld = getPrintWriter(filename + ".snp.known.vcf");
       this.f2snpNew = getPrintWriter(filename + ".snp.new.vcf");
     } catch (IOException e) {
       Message.fatal("Unable to create result files", e, true);
@@ -119,22 +118,6 @@ public class FilterF2 extends ParallelVCFPedFunction<FilterF2.Analysis> {
   @Override
   public void end() {
     super.end();
-
-    for (Variant variant : this.storeF2.navigableKeySet()) {
-      boolean[] isF2 = this.storeF2.get(variant);
-      this.f2all.println(variant);
-      if (isF2[NEW_SNV])
-        this.f2snpNew.println(variant);
-      if (isF2[OLD_SNV])
-        this.f2snpOld.println(variant);
-      if (isF2[NEW_SNV] || isF2[OLD_SNV])
-        this.f2snpAll.println(variant);
-      if (isF2[OLD_IND] || isF2[OLD_SNV])
-        this.f2old.println(variant);
-      if (isF2[NEW_SNV] || isF2[NEW_IND])
-        this.f2new.println(variant);
-    }
-
     this.f2all.close();
     this.f2old.close();
     this.f2new.close();
@@ -190,7 +173,21 @@ public class FilterF2 extends ParallelVCFPedFunction<FilterF2.Analysis> {
   public void processAnalysis(Analysis analysis) {
     Variant variant = analysis.getVariant();
     boolean[] isF2 = analysis.getIsF2();
-    storeF2.put(variant, isF2);
+    //storeF2.put(variant, isF2);
+   // for (Variant variant : this.storeF2.navigableKeySet()) {
+    //  boolean[] isF2 = this.storeF2.get(variant);
+      this.f2all.println(variant);
+      if (isF2[NEW_SNV])
+        this.f2snpNew.println(variant);
+      if (isF2[OLD_SNV])
+        this.f2snpOld.println(variant);
+      if (isF2[NEW_SNV] || isF2[OLD_SNV])
+        this.f2snpAll.println(variant);
+      if (isF2[OLD_IND] || isF2[OLD_SNV])
+        this.f2old.println(variant);
+      if (isF2[NEW_SNV] || isF2[NEW_IND])
+        this.f2new.println(variant);
+  //  }
   }
 
   public static class Analysis {
