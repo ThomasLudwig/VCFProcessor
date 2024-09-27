@@ -43,10 +43,10 @@ public class BCFRecord extends VariantRecord {
     this.qual = readQual(inCommon);
 
     // Read sizes
-    int nInfo = inCommon.readInt16();
-    int nAllele = inCommon.readInt16();
-    int nSample = inCommon.readInt24();
-    int nFormat = inCommon.readInt8();
+    int nInfo = inCommon.readUInt16();
+    int nAllele = inCommon.readUInt16();
+    int nSample = inCommon.readUInt24();
+    int nFormat = inCommon.readUInt8();
 
     // Parse the ID field
     this.id = readID(inCommon);

@@ -46,11 +46,6 @@ public class FilterKnownID extends ParallelVCFFilterFunction {
   }
 
   @Override
-  public String getOutputExtension() {
-    return OUT_VCF;
-  }
-
-  @Override
   public String[] processInputRecordForFilter(VariantRecord record) {
     String id = record.getID();
     return id == null || id.isEmpty() || id.equals(".") ? new String[]{record.toString()} : NO_OUTPUT;

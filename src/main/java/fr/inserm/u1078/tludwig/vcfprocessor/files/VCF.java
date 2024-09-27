@@ -27,7 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 23 juin 2015
  */
-public class VCF {
+public class VCF implements FileFormat {
 
   public static final int IDX_CHROM = 0;
   public static final int IDX_POS = 1;
@@ -869,5 +869,15 @@ public class VCF {
     public int getNumber() {
       return number;
     }
+  }
+
+  @Override
+  public String[] knownExtensions() {
+    return new String[]{"vcf", "vcf.gz"};
+  }
+
+  @Override
+  public String fileFormatDescription() {
+    return "Variant call format";
   }
 }

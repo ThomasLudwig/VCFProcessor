@@ -6,8 +6,9 @@ import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.ColorTools;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 
-import java.awt.Color;
+import java.awt.*;
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX CLASS DESCRIPTION XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -18,7 +19,9 @@ import java.io.IOException;
  * Unit Test defined on xxxx-xx-xx
  */
 public class F2Graph extends Graph {
-private int[][] f2;
+    private final HashMap<String, Color> colors;
+
+    private int[][] f2;
     private String[] groups;
     private final String filename;
     private SVG svg;
@@ -26,9 +29,10 @@ private int[][] f2;
     private final String legend;
     private static final int L = 2;
 
-    public F2Graph(String filename, String legend) {
+    public F2Graph(String filename, String legend, HashMap<String, Color> colors) {
         this.filename = filename;
         this.legend = legend;
+        this.colors = colors;
     }
 
     @Override
@@ -141,16 +145,14 @@ private int[][] f2;
             size = (size * newHeight) / th;
         }
         //double space = (newHeight - th) / 2;
-        svg.text(new Point(x + width - 1, y + height - 1), size, true, false, "end", ColorTools.getColor(group), group);
+        svg.text(new Point(x + width - 1, y + height - 1), size, true, false, "end", getColor(group), group);
     }
 
     private static int getMaxLetter(String[] strings) {
         int max = 0;
-        for (String string : strings) {
-            if (max < string.length()) {
+        for (String string : strings)
+            if (max < string.length())
                 max = string.length();
-            }
-        }
         return max;
     }
     
@@ -174,7 +176,7 @@ private int[][] f2;
             size = (size * newWidth) / tw;
         }
         double space = (newWidth - tw) / 2;
-        svg.text(new Point(newX + (newWidth - space) - 1, y + height - 1), size, true, true, "start", ColorTools.getColor(group), group);
+        svg.text(new Point(newX + (newWidth - space) - 1, y + height - 1), size, true, true, "start", getColor(group), group);
 
     }
 
@@ -210,7 +212,7 @@ private int[][] f2;
         double ratio = 0.95;
         int value = this.f2[g][h];
         int max = getMaxTable(this.f2);
-        Color color = ColorTools.getColor(this.groups[h]);
+        Color color = getColor(this.groups[h]);
         double newHeight = height * value * ratio / max;
         Message.verbose("value="+value+" max="+max+" height="+height+" draw="+height+"*"+value+"*"+ratio+"/"+max+"="+newHeight);
         double margin = height - newHeight;
@@ -220,7 +222,7 @@ private int[][] f2;
             svg.horizontalBar(new Point(x, y + margin), width, newHeight, 1, color, Color.black);
         }
     }
-    
+
     private static int getMaxTable(int[][] f2){
         int max = 0;
         for(int[] l :f2)
@@ -243,7 +245,7 @@ private int[][] f2;
         double offset = 0.05 * height;
         int value = this.f2[i][this.groups.length];
         int max = getMaxTotal(f2);
-        Color color = ColorTools.getColor(this.groups[i]);
+        Color color = getColor(this.groups[i]);
         double newX = x + offset;
         double newY = y + offset;
         double newHeight = height - 2 * offset;
@@ -269,6 +271,13 @@ private int[][] f2;
         svg = new SVG(width, height, false);
         this.draw();
         svg.exportAsPNG(filename);
+    }
+
+    private Color getColor(String name){
+        Color c = colors.get(name);
+        if(c != null)
+            return c;
+        return ColorTools.getColor(name);
     }
 
 }

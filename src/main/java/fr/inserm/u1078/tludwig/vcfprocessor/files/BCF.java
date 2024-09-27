@@ -13,7 +13,8 @@ import java.util.zip.ZipException;
  * Representation of a BCF File.<br/>
  * The header is store and the record lines can be fetched on demand.
  */
-public class BCF {
+public class BCF implements FileFormat {
+  private static final String BCF_MAGIC_STRING = "BCF\2\2";
   private final BCFHeader header;
   private final BufferedInputStream in;
 
@@ -41,7 +42,7 @@ public class BCF {
       BufferedInputStream in = new BufferedInputStream(new GZIPInputStream(new FileInputStream(filename)));
       byte[] magic = in.readNBytes(5);
       String magicString = new String(magic);
-      if (!magicString.equals("BCF\2\2"))
+      if (!magicString.equals(BCF_MAGIC_STRING))
         throw new BCFException("Not a valid BCF2 file (no BCF Magic String))");
       return in;
     } catch(ZipException e) {
@@ -72,5 +73,15 @@ public class BCF {
 
   public String getNextHeaderLine(){
     return header.getNextHeaderLine();
+  }
+
+  @Override
+  public String[] knownExtensions() {
+    return new String[]{"bcf"};
+  }
+
+  @Override
+  public String fileFormatDescription() {
+    return "Binary variant call format";
   }
 }

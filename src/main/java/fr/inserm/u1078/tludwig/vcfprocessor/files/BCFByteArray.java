@@ -1,12 +1,9 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files;
 
-import java.nio.BufferUnderflowException;
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * Encapsulation of a Byte Array and a pointer, with methods to parse data from a BCF File
  */
-public class BCFByteArray {
+public class BCFByteArray extends ByteArray {
 
   /**
    * DataType that can be encoded
@@ -23,37 +20,13 @@ public class BCFByteArray {
   public static final int MISSING_FLOAT = 0x7F800001;
   public static final int MISSING_CHAR = 0x00;
 
-  private final byte[] data;
-  private final AtomicInteger pointer;
 
   /**
    * Constructor
    * @param array - the underlying Byte Array
    */
   public BCFByteArray(byte[] array){
-    this.data = array;
-    pointer = new AtomicInteger(0);
-  }
-
-  /**
-   * Check for Underflow, returns current pointer values, then add an integer
-   * @param i - the pointer value to add
-   * @return the value before adding
-   */
-  private int getPointerAndAdd(int i){
-    if(pointer.get() >= data.length)
-      throw new BufferUnderflowException();
-    return pointer.getAndAdd(i);
-  }
-
-  /**
-   * Check for Underflow, returns current pointer values, then increment
-   * @return the pointer value before increment
-   */
-  private int getPointerAndIncrement(){
-    if(pointer.get() >= data.length)
-      throw new BufferUnderflowException();
-    return pointer.getAndIncrement();
+    super(array);
   }
 
   /**
@@ -112,9 +85,9 @@ public class BCFByteArray {
   public int readTypedInt() throws BCFException {
     switch (readArrayDescription().getType()) {
       case INT8:
-        return readInt8();
+        return readUInt8();
       case INT16:
-        return readInt16();
+        return readUInt16();
       case INT32:
         return readInt32();
       default:
@@ -133,10 +106,10 @@ public class BCFByteArray {
     for(int i = 0 ; i < ad.getLength(); i++) {
       switch (ad.getType()) {
         case INT8:
-          ints[i] = readInt8();
+          ints[i] = readUInt8();
           break;
         case INT16:
-          ints[i] = readInt16();
+          ints[i] = readUInt16();
           break;
         case INT32:
           ints[i] = readInt32();
@@ -179,7 +152,7 @@ public class BCFByteArray {
     boolean empty = true;
     StringBuilder ret = new StringBuilder();
     for(int i = 0 ; i < l; i++){
-      int v = readInt8();
+      int v = readUInt8();
       if(isMissing(v, DataType.INT8))
         ret.append(",.");
       else {
@@ -201,7 +174,7 @@ public class BCFByteArray {
     boolean empty = true;
     StringBuilder ret = new StringBuilder();
     for(int i = 0 ; i < l; i++){
-      int v = readInt16();
+      int v = readUInt16();
       if(isMissing(v, DataType.INT16))
         ret.append(",.");
       else {
@@ -244,7 +217,7 @@ public class BCFByteArray {
   private String readCharsAsString(int l) {
     StringBuilder ret = new StringBuilder();
     for(int i = 0 ; i < l; i++) {
-      byte b = data[getPointerAndIncrement()];
+      byte b = readByte();
       if(!isMissing(b, DataType.CHAR))
         ret.append((char)b);
     }
@@ -327,29 +300,14 @@ public class BCFByteArray {
   private int readInt(DataType t) throws BCFException {
     switch (t) {
       case INT8:
-        return readInt8();
+        return readUInt8();
       case INT16:
-        return readInt16();
+        return readUInt16();
       case INT32:
         return readInt32();
       default:
         throw new BCFException("Integer type expected: found["+t+"]");
     }
-  }
-
-  /**
-   * Reads one byte from the buffer
-   * @return - the byte
-   */
-  public byte readByte() {
-    return data[getPointerAndIncrement()];
-  }
-
-  public byte[] readBytes(int n){
-    int start = getPointerAndAdd(n);
-    byte[] bytes = new byte[n];
-    System.arraycopy(data, start,bytes, 0, n);
-    return bytes;
   }
 
   /**
@@ -371,58 +329,6 @@ public class BCFByteArray {
         s = 4;
     }
     getPointerAndAdd(ad.getLength() * s * l);
-  }
-
-  /**
-   * Reads one INT8 from the buffer
-   * @return the value
-   */
-  public int readInt8() {
-    return 0xFF & data[getPointerAndIncrement()];
-  }
-
-  /**
-   * Reads one INT16 from the buffer
-   * @return the value
-   */
-  public int readInt16() {
-    return (0xFF & data[getPointerAndIncrement()]) + 256 * (0xFF & data[getPointerAndIncrement()]);
-  }
-
-  /**
-   * Reads one INT24 from the buffer
-   * @return the value
-   */
-  public int readInt24() {
-    return (0xFF & data[getPointerAndIncrement()]) + 256 * ((0xFF & data[getPointerAndIncrement()]) + 256 * (0xFF & data[getPointerAndIncrement()]));
-  }
-
-  /**
-   * Reads one INT32 from the buffer
-   * @return the value
-   */
-  public int readInt32() {
-    return java.nio.ByteBuffer.wrap(readBytes(4)).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
-    /*return data[getPointerAndIncrement()]
-        + 256 * ((0xFF & data[getPointerAndIncrement()])
-        + 256 * ((0xFF & data[getPointerAndIncrement()])
-        + 256 * (0xFF & data[getPointerAndIncrement()])));*/
-  }
-
-  /**
-   * Reads a String from the buffer
-   * @param size the number of char
-   * @return the string (or null if empty)
-   */
-  public String readString(final int size) {
-    final byte[] bytes = new byte[size];
-    System.arraycopy(data, getPointerAndAdd(size), bytes, 0, size);
-
-    int goodLength = 0;
-    for ( ; goodLength < bytes.length ; goodLength++ )
-      if ( bytes[goodLength] == 0 ) break;
-
-    return goodLength == 0 ? null : new String(bytes, 0, goodLength);
   }
 
   /**

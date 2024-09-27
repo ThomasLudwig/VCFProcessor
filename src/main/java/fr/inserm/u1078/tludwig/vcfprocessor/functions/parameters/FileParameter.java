@@ -3,6 +3,8 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters;
 
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
+import fr.inserm.u1078.tludwig.maok.tools.FileTools;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -67,15 +69,17 @@ public class FileParameter extends Parameter {
   }
 
   public String getBasename() {
-    String ret = this.getFilename();
-    for (String ext : this.getExtensions()) {
-      String tmp = this.getFilename();
-      if (tmp.toLowerCase().endsWith("." + ext.toLowerCase()))
-        tmp = tmp.substring(0, tmp.length() - (1 + ext.length()));
-      if (ret.length() > tmp.length())
-        ret = tmp;
+    return FileTools.getBasename(this.getFilename(), getDottedExtensions());
+  }
+
+  private String[] getDottedExtensions(){
+    String[] exts = this.getExtensions();
+    String[] ret = new String[exts.length];
+    for(int i = 0 ; i < exts.length; i++){
+      ret[i] = exts[i];
+      if(!ret[i].startsWith("."))
+        ret[i] = "." + ret[i];
     }
-    
-    return ret.substring(ret.lastIndexOf(File.separatorChar)+1);
+    return ret;
   }
 }

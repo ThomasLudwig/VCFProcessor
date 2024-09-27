@@ -57,11 +57,6 @@ public class RandomVariants extends ParallelVCFFilterFunction {
     return null;
   }
 
-  @Override
-  public String getOutputExtension() {
-    return OUT_VCF;
-  }
-
   @SuppressWarnings("unused")
   @Override
   public void begin() {

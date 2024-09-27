@@ -13,7 +13,7 @@ import java.util.HashMap;
  *
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 5 avr. 2016
  */
-public class Bed {
+public class Bed implements FileFormat {
 
   private final String filename;
   private final HashMap<Integer, SortedList<Region>> regions;
@@ -164,5 +164,15 @@ public class Bed {
     }
 
     return reg.get(current).contains(chr, pos);
+  }
+
+  @Override
+  public String[] knownExtensions() {
+    return new String[]{"bed"};
+  }
+
+  @Override
+  public String fileFormatDescription() {
+    return "Browser Extensible Data";
   }
 }

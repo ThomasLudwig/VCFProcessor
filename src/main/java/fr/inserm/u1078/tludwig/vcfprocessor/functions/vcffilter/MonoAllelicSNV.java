@@ -45,11 +45,6 @@ public class MonoAllelicSNV extends ParallelVCFFilterFunction {
   }
 
   @Override
-  public String getOutputExtension() {
-    return OUT_VCF;
-  }
-
-  @Override
   public String[] processInputRecordForFilter(VariantRecord record) {
     String ref = record.getRef();
     String alt = record.getAltString();

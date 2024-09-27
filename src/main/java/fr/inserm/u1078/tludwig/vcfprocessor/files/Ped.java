@@ -2,6 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.files;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -14,7 +15,7 @@ import java.util.Collection;
  * @author Thomas E. Ludwig (INSERM - U1078)
  * Started : 2015/03/17
  */
-public class Ped {
+public class Ped implements FileFormat {
   public static final String NO_GROUP = "NO_GROUP";
   public static final int SEX_MALE = 1;
   public static final int SEX_FEMALE = 2;
@@ -342,5 +343,15 @@ public class Ped {
       if (!groups.contains(sample.getGroup()))
         groups.add(sample.getGroup());
     return groups;
+  }
+
+  @Override
+  public String[] knownExtensions() {
+    return new String[]{"ped"};
+  }
+
+  @Override
+  public String fileFormatDescription() {
+    return "Pedigree file";
   }
 }

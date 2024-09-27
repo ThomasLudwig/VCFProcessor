@@ -1,10 +1,12 @@
 # Changelog
-## 1.2.1 (2024-09-13)
+## 1.2.1 (2024-09-27)
 Minor revisions
 ### core
+- `BAM` : **added** BAM file parser
 ### functions
 - Ignore "*" allele in most analyses
 - `FilterF2` : Direct output instead of BufferedOutput (to avoid Out-of-Memory Exception)
+- `FilterSeenInGnomAD` : **added** Filters out variants that are seen in gnomAD 
 ### filters
 ### graphs
 - `F2Graph` : Highest value bar at 100% height

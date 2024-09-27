@@ -56,11 +56,6 @@ public class FilterGenotype extends ParallelVCFFilterFunction { //TODO add suppo
     return null;
   }
 
-  @Override
-  public String getOutputExtension() {
-    return OUT_VCF;
-  }
-
   @SuppressWarnings("unused")
   @Override
   public void begin() {
