@@ -2,10 +2,9 @@
  */
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters;
 
-import fr.inserm.u1078.tludwig.maok.tools.FileTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.PedException;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCFException;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCFException;
 
 /**
  *
@@ -20,7 +19,7 @@ public class VCFFileParameter extends FileParameter {
 
   @Override
   public String[] getExtensions() {
-    return new String[]{"vcf", "gz"};
+    return new String[]{"vcf", "vcf.gz"};
   }
 
   public VCF getVCF(int step) throws VCFException, PedException {
@@ -39,10 +38,6 @@ public class VCFFileParameter extends FileParameter {
     if(vcf == null)
       vcf = new VCF(this.getFilename(), mode, step);
     return vcf;
-  }
-
-  public String getBasename() {
-    return FileTools.getBasename(this.getFilename(), new String[]{".vcf.gz", ".vcf"});
   }
 
 }

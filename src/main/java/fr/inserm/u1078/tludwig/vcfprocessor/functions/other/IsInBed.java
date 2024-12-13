@@ -53,10 +53,10 @@ public class IsInBed extends Function {
         return;
       }
 
-      int low = r.getStart();
-      int high = r.getEnd();
+      int low = r.getStart1Based();
+      int high = r.getEnd1Based();
 
-      if (high < pos && (previousRegion == null || high > previousRegion.getEnd()))
+      if (high < pos && (previousRegion == null || high > previousRegion.getEnd1Based()))
         previousRegion = r;
       if (low > pos) {
         nextRegion = r;

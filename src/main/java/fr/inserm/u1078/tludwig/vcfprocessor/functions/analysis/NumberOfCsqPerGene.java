@@ -57,7 +57,7 @@ public class NumberOfCsqPerGene extends ParallelVCFVariantFunction<NumberOfCsqPe
   @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
+    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }
 
   @SuppressWarnings("unused")
@@ -119,7 +119,7 @@ public class NumberOfCsqPerGene extends ParallelVCFVariantFunction<NumberOfCsqPe
 
   @Override
   public String[] processInputVariant(Variant variant) {
-    for(int a = 1 ; a < variant.getAlleleCount(); a++){
+    for(int a : variant.getNonStarAltAllelesAsArray()){
       Map<String, VEPAnnotation> worsts = variant.getInfo().getWorstVEPAnnotationsByGene(a);
       for (String gene : worsts.keySet()) {
         if(table.containsKey(gene)){

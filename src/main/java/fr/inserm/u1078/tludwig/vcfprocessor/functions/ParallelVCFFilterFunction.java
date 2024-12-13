@@ -1,7 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 
 /**
  *
@@ -21,6 +21,11 @@ public abstract class ParallelVCFFilterFunction extends ParallelVCFFunction<Inte
   }
   
   public abstract String[] processInputRecordForFilter(VariantRecord record);
+
+  @Override
+  public String getOutputExtension() {
+    return OUT_VCF;
+  }
 
   @SuppressWarnings("unused")
   @Override

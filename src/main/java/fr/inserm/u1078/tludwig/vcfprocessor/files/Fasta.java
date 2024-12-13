@@ -10,7 +10,7 @@ import java.io.RandomAccessFile;
  *
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 21 mai 2015
  */
-public class Fasta {
+public class Fasta implements FileFormat {
 
   /**
    * the filename of the fastq file
@@ -114,5 +114,15 @@ public class Fasta {
     } catch (IOException e) {
       Message.error("Could not close file " + this.filename);
     }
+  }
+
+  @Override
+  public String[] knownExtensions() {
+    return new String[]{"fasta","fa"};
+  }
+
+  @Override
+  public String fileFormatDescription() {
+    return "Sequence file format";
   }
 }

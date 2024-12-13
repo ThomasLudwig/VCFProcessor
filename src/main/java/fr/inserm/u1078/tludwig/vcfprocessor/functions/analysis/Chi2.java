@@ -44,7 +44,7 @@ public class Chi2 extends ParallelVCFVariantPedFunction<Chi2.Chi2Analysis> {
   @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
+    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }
   
   @SuppressWarnings("unused")
@@ -148,7 +148,7 @@ public class Chi2 extends ParallelVCFVariantPedFunction<Chi2.Chi2Analysis> {
     int i = 0;
     for (Sample sample : getPed().getCases()) {
       int[] alleles = variant.getGenotype(sample).getAlleles();
-      if(alleles != null)
+      if(isValidAllele(alleles, variant.getAlleles()))
         for(int a : alleles)
           if(a > 0)
             this.pushAnalysis(new Chi2Analysis(i, true));
@@ -157,13 +157,24 @@ public class Chi2 extends ParallelVCFVariantPedFunction<Chi2.Chi2Analysis> {
     i = 0;
     for (Sample sample : getPed().getControls()) {
       int[] alleles = variant.getGenotype(sample).getAlleles();
-      if(alleles != null)
+      if(isValidAllele(alleles, variant.getAlleles()))
         for(int a : alleles)
           if(a > 0)
             this.pushAnalysis(new Chi2Analysis(i, false));
       i++;
     }
     return NO_OUTPUT;
+  }
+
+  public boolean isValidAllele(int[] values, String[] alleles){
+    if(values == null)
+      return false;
+    if(values.length == 0)
+      return false;
+    for(int i = 1 ; i < values.length; i++)
+      if("*".equals(alleles[i]))
+        return false;
+    return true;
   }
 
   @SuppressWarnings("unused")

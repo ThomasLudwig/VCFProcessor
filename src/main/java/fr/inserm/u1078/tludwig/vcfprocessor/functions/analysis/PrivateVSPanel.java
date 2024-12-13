@@ -2,7 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParameter;
@@ -23,9 +23,8 @@ import java.util.Objects;
  */
 public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading of the largest file (probably the panel)
   //TODO develop a Graph for these results
-
   private final VCFFileParameter refFile = new VCFFileParameter(OPT_REF, "reference.vcf", "the panel VCF File (can be gzipped)");
-  
+
   private static final int C = VEPConsequence.values().length;
   private static final int CHROM_NB = 26;
   @SuppressWarnings("unchecked")
@@ -58,7 +57,7 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
   @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
+    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }
 
   @SuppressWarnings("unused")
@@ -77,7 +76,6 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
   public void executeFunction() throws Exception {
     for (int i = 0; i < CHROM_NB; i++)
       this.variants[i] = new ArrayList<>();
-    
     loadVariants();
     browseReference();
     printResults();
@@ -90,7 +88,7 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
     Variant variant;
     while ((variant = vcf.getUnparallelizedNextVariant()) != null) {
       int chrom = variant.getChromNumber();
-      for (int a = 1; a < variant.getAlleleCount(); a++) {
+      for (int a : variant.getNonStarAltAllelesAsArray()) {
         this.variants[chrom].add(new MiniVariant(variant, a));
         for (int level : variant.getInfo().getConsequenceLevels(a))
           total[level]++;
@@ -111,7 +109,6 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
       }
       println(line.toString());
     }
-
   }
 
   private void browseReference() throws Exception {    
@@ -128,7 +125,7 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
     }
     
     ref.getReaderAndStart();
-    ArrayList<Sample> samples = new ArrayList<>(ref.getSamples());
+    ArrayList<Sample> samples = new ArrayList<>(ref.getSortedSamples());
     
     Message.info("Processing  Ref VCF for " + N + " samples");
 
@@ -136,7 +133,7 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
     while ((variant = ref.getUnparallelizedNextVariant()) != null) {
       int chrom = variant.getChromNumber();
 
-      for (int a = 1; a < variant.getAlleleCount(); a++) {
+      for (int a : variant.getNonStarAltAllelesAsArray()) {
         int index = this.variants[chrom].indexOf(new MiniVariant(variant, a));
         if (index != -1) {
           MiniVariant found = this.variants[chrom].get(index);

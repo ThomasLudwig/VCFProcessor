@@ -91,14 +91,14 @@ public class FrequencyCorrelation extends ParallelVCFVariantFunction { //TODO re
   @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
+    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }
 
   @Override
   public String[] processInputVariant(Variant variant) {
     ArrayList<String> ret = new ArrayList<>();
     if (variant.getPercentMissing() <= 0.01)
-      for (int a = 1; a < variant.getAlleles().length; a++) {
+      for (int a : variant.getNonStarAltAllelesAsArray()) {
         String chr = variant.getChrom();
         int pos = variant.getPos();
         String ref = variant.getRef();

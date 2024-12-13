@@ -3,9 +3,11 @@ package fr.inserm.u1078.tludwig.vcfprocessor.files;
 import fr.inserm.u1078.tludwig.maok.SortedList;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.RegionException;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Region;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.RegionException;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -13,7 +15,7 @@ import java.util.HashMap;
  *
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 5 avr. 2016
  */
-public class Bed {
+public class Bed implements FileFormat {
 
   private final String filename;
   private final HashMap<Integer, SortedList<Region>> regions;
@@ -24,16 +26,29 @@ public class Bed {
     this.regions = new HashMap<>();
     this.parse();
     Message.info(filename + " loaded : " + this.getRegionNumber() + " regions found; total size : " + this.getRegionSize());
+    /*for(Integer chr : regions.keySet())
+      for(Region region : regions.get(chr))
+        Message.debug("Loaded "+region);*/
   }
 
   private void parse() {
     regions.clear();
-      try(UniversalReader in = new UniversalReader(this.filename)){
+    try(UniversalReader in = new UniversalReader(this.filename)){
       String line;
-      while ((line = in.readLine()) != null)
-        if (line.charAt(0) != '#')
-          this.addRegion(new Region(line, Region.FORMAT_BED));
-    } catch (Exception e) {
+      while ((line = in.readLine()) != null) {
+        boolean process = true;
+        if (line.isEmpty())
+          process = false;
+        if (line.charAt(0) == '#')
+          process = false;
+        if (line.toLowerCase().startsWith("browser"))
+          process = false;
+        if (line.toLowerCase().startsWith("track"))
+          process = false;
+        if(process)
+          this.addRegion(new Region(line, Region.Format.BED_FILE));
+      }
+    } catch (IOException e) {
       Message.error("Could not parse BED file " + this.filename + "\n" + e.getMessage());
     }
   }
@@ -53,14 +68,14 @@ public class Bed {
     chrReg.add(r);
     this.regions.put(num, chrReg);
   }
-  
+
   public void addPadding(int padding){
     for (int n : this.regions.keySet()){
       this.addPadding(n, padding);
       this.simplify(n);
     }
   }
-  
+
   private void addPadding(int seq, int padding){
     for(Region region : this.regions.get(seq))
       region.addPadding(padding);
@@ -72,7 +87,7 @@ public class Bed {
         System.out.println(region.asBed());
   }
 
-  private void simplify() {
+  public void simplify() {
     for (int n : this.regions.keySet())
       this.simplify(n);
   }
@@ -90,7 +105,7 @@ public class Bed {
         if (last.overlap(current)) {
           last = tmp.remove(tmp.size() - 1);
           try {
-            tmp.add(Region.combine(last, current));
+            tmp.add(Region.merge(last, current));
           } catch (RegionException e) {
             Message.error(e.getMessage());
           }
@@ -137,7 +152,7 @@ public class Bed {
   }
 
   public boolean contains(String chr, int pos) {
-    Region target = new Region(chr, pos, pos, Region.FORMAT_BED);
+    Region target = new Region(chr, pos, pos, Region.Format.FULL_1_BASED);
     ArrayList<Region> reg = this.regions.get(Variant.chromToNumber(chr));
     int low = 0;
     int high = reg.size() - 1;
@@ -164,5 +179,15 @@ public class Bed {
     }
 
     return reg.get(current).contains(chr, pos);
+  }
+
+  @Override
+  public String[] knownExtensions() {
+    return new String[]{"bed"};
+  }
+
+  @Override
+  public String fileFormatDescription() {
+    return "Browser Extensible Data";
   }
 }

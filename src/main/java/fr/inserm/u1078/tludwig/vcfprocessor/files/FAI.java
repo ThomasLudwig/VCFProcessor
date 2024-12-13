@@ -10,7 +10,7 @@ import java.util.HashMap;
  *
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 20 mai 2015
  */
-public class FAI {
+public class FAI implements FileFormat {
 
   public final String filename;
   private final HashMap<String, FAILine> chromosomes;
@@ -123,5 +123,15 @@ public class FAI {
     public long getChromosomeLength() {
       return chromosomeLength;
     }
+  }
+
+  @Override
+  public String[] knownExtensions() {
+    return new String[]{"fai"};
+  }
+
+  @Override
+  public String fileFormatDescription() {
+    return "Fasta index file";
   }
 }

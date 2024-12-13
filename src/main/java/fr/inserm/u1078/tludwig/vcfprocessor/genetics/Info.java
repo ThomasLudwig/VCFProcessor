@@ -2,8 +2,8 @@ package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 
 import fr.inserm.u1078.tludwig.maok.SortedList;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF.InfoFormatHeader;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF.InfoFormatHeader;
 
 import java.util.*;
 

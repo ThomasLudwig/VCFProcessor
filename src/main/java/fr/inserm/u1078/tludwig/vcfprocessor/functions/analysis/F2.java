@@ -70,7 +70,7 @@ public class F2 extends ParallelVCFVariantPedFunction<F2.F2Analysis> {
   @SuppressWarnings("unused")
   @Override
   public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
+    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }
   
   @Override
@@ -178,7 +178,7 @@ public class F2 extends ParallelVCFVariantPedFunction<F2.F2Analysis> {
 
   @Override
   public String[] processInputVariant(Variant variant) {
-    for (int a = 1; a < variant.getAlleles().length; a++)
+    for (int a : variant.getNonStarAltAllelesAsArray())
       process(variant, a);
     return NO_OUTPUT;
   }

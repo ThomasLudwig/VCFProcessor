@@ -3,7 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.filters.line;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.maok.tools.StringTools;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Region;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
@@ -75,7 +75,7 @@ public class PositionFilter extends LineFilter {
         break;
     }
     
-    this.add(new Region(chr, start, end, Region.FORMAT_BASE_1));
+    this.add(new Region(chr, start, end, Region.Format.FULL_1_BASED));
   }
   
   /**
@@ -97,13 +97,13 @@ public class PositionFilter extends LineFilter {
     int end;
     
     if(f.length > 2) {
-      start = new Integer(f[1]);
-      end = new Integer(f[2]);
+      start = Integer.parseInt(f[1]);
+      end = Integer.parseInt(f[2]);
     } else {
       throw new Exception("Invalid for [" + trimmed + "]");
     }
     
-    this.add(new Region(chr, start, end, Region.FORMAT_BED));
+    this.add(new Region(chr, start, end, Region.Format.BED_FILE));
   }
 
   
@@ -184,7 +184,7 @@ public class PositionFilter extends LineFilter {
       int length = record.getRef().replace("-", "").length();
       for (String alt : record.getAlts())
         length = Math.max(length, alt.replace("-", "").length());
-      Region target = new Region(record.getChrom(), start, start + length - 1, Region.FORMAT_BASE_1);
+      Region target = new Region(record.getChrom(), start, start + length - 1, Region.Format.FULL_1_BASED);
       if (isKeep()) {
         for (Region r : regions)
           if (target.overlap(r))

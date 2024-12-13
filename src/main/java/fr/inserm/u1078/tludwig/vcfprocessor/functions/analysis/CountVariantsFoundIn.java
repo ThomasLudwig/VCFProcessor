@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class CountVariantsFoundIn extends ParallelVCFVariantFunction<CountVariantsFoundIn.Analysis> {
-  FileParameter referenceFile = new FileParameter(OPT_REF, "gnomad.2.1.canonical", "List of variants found in the reference file (in canonical format)");
+  final FileParameter referenceFiles = new FileParameter(OPT_REF, "gnomad.2.1.canonical", "File containing list of files with List of variants found in the reference file (in canonical format)");
   public static final int IS_SNP = 1;
   public static final int IS_SINGLETON = 2;
   public static final int IS_IN_REFERENCE = 4;
@@ -25,7 +25,7 @@ public class CountVariantsFoundIn extends ParallelVCFVariantFunction<CountVarian
   /**
    * Variants found in the reference
    */
-  HashMap<Integer, HashSet<String>> referenceVariants = new HashMap<>();
+  final HashMap<Integer, HashSet<String>> referenceVariants = new HashMap<>();
   /**
    * The counts for each chrom/sample/type
    */
@@ -62,27 +62,41 @@ public class CountVariantsFoundIn extends ParallelVCFVariantFunction<CountVarian
 
   @Override
   public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
+    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }
 
-  public void loadGnomAD() {
-    Message.info("Loading known variants from "+referenceFile.getFilename());
+  private void loadReferenceVariants() {
+    Message.info("Listing reference files from "+referenceFiles.getFilename());
+    try (UniversalReader in = this.referenceFiles.getReader()) {
+      String line;
+      while((line = in.readLine()) != null)
+        if(!line.isEmpty())
+          this.loadReferenceVariants(line);
+    } catch(IOException e) {
+      Message.fatal("Could not read reference file ["+referenceFiles+"]", e, true);
+    }
+  }
+
+  private void loadReferenceVariants(String referenceFile) {
+
+    Message.info("Loading known variants from "+referenceFile);
     int read = 0;
-    try (UniversalReader in = this.referenceFile.getReader()) {
+    try (UniversalReader in = new UniversalReader(referenceFile)) {
       String line = in.readLine();
       while((line = in.readLine()) != null) {
         read++;
         String canon = line.split(T)[0];
         int chrom = Integer.parseInt(canon.split(":")[0]);
         HashSet<String> variants = referenceVariants.computeIfAbsent(chrom, ignored -> new HashSet<>());
+
         variants.add(canon);
         if(read % 100000 == 0)
-          Message.progressInfo("Known variants loaded : "+read);
+          Message.progressInfo("Known variants in ["+referenceFile+"] loaded : "+read);
       }
     } catch(IOException e) {
-      Message.fatal("Could not read reference file ["+this.referenceFile.getFilename()+"]", e, true);
+      Message.fatal("Could not read reference file ["+referenceFile+"]", e, true);
     }
-    Message.info("Known variants loaded : "+read);
+    Message.info("Known variants in ["+referenceFile+"] loaded : "+read);
   }
 
   @Override
@@ -102,11 +116,11 @@ public class CountVariantsFoundIn extends ParallelVCFVariantFunction<CountVarian
   public void begin() {
     try {
       super.begin();
-      this.loadGnomAD();
-      int nbSamples = this.getVCF().getSamples().size();
+      this.loadReferenceVariants();
+      int nbSamples = this.getVCF().getNumberOfSamples();
       samples = new String[nbSamples];
       int i = 0;
-      for(Sample sample : this.getVCF().getSamples())
+      for(Sample sample : this.getVCF().getSortedSamples())
         samples[i++] = sample.getId();
       this.counts = new int[24][nbSamples + 1][1 + IS_SNP + IS_SINGLETON + IS_IN_REFERENCE]; //chrom, samples, type
     } catch(Exception e) {
@@ -135,36 +149,36 @@ public class CountVariantsFoundIn extends ParallelVCFVariantFunction<CountVarian
   @Override
   public String[] processInputVariant(Variant variant) {
     if(isKept(variant)) {
-      for(int a = 1; a < variant.getAlleleCount(); a++) {
+      for(int a : variant.getNonStarAltAllelesAsArray()) {
         Canonical canonical = variant.getCanonical(a);
         int chrom = canonical.getChr();
         int type = 0;
-        if(canonical.isSNP())
+        if (canonical.isSNP())
           type += IS_SNP;
         HashSet<String> variants = referenceVariants.get(chrom);
-        if(variants != null && variants.contains(canonical.toString()))
+        if (variants != null && variants.contains(canonical.toString()))
           type += IS_IN_REFERENCE;
         Genotype[] genotypes = variant.getGenotypes();
         boolean[] present = new boolean[genotypes.length];
 
         int count = 0;
-        for(int i = 0 ; i < genotypes.length; i++){
+        for (int i = 0; i < genotypes.length; i++) {
           present[i] = genotypes[i].hasAllele(a);
-          if(canonical.toString().equals("3:101586571:1:TGTGTGTGTGAGAGAGAGAGAGAGAGAGAGTTTCTTGTTTCA"))
-            Message.debug(i+ " "+present[i] + " " + genotypes[i].getAlleles()[0]+"/"+genotypes[i].getAlleles()[1]);
-          if(present[i])
+          if (canonical.toString().equals("3:101586571:1:TGTGTGTGTGAGAGAGAGAGAGAGAGAGAGTTTCTTGTTTCA"))
+            Message.debug(i + " " + present[i] + " " + genotypes[i].getAlleles()[0] + "/" + genotypes[i].getAlleles()[1]);
+          if (present[i])
             count++;
         }
 
-        if(count == 1) {
+        if (count == 1) {
           type += IS_SINGLETON;
         }
 
-        if(canonical.toString().equals("3:101586571:1:TGTGTGTGTGAGAGAGAGAGAGAGAGAGAGTTTCTTGTTTCA"))
-          Message.debug(canonical+" (allele["+a+"]) "+new Analysis(chrom, type, present));
+        if (canonical.toString().equals("3:101586571:1:TGTGTGTGTGAGAGAGAGAGAGAGAGAGAGTTTCTTGTTTCA"))
+          Message.debug(canonical + " (allele[" + a + "]) " + new Analysis(chrom, type, present));
 
-        if(count > 0)
-          pushAnalysis( new Analysis(chrom, type, present));
+        if (count > 0)
+          pushAnalysis(new Analysis(chrom, type, present));
       }
     }
 

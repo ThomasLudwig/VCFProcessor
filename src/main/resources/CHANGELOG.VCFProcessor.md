@@ -1,9 +1,18 @@
 # Changelog
-## 1.2.1 (2024-07-15)
+## 1.2.1 (2024-12-13)
 Minor revisions
 ### core
+- `BAM` : **added** BAM file parser
+- `BED` and `Region` parsing updatedVFP
+- `VCF` : **fixed** getSamples() replaced with getSortedSamples(). The results were sorted by Hash instead of their order in the file
 ### functions
+- Ignore "*" allele in most analyses
+- `FilterF2` : Direct output instead of BufferedOutput (to avoid Out-of-Memory Exception)
+- `FilterSeenInGnomAD` : **added** Filters out variants that are seen in gnomAD
+- `CommonVariantsInSamplePairs` : **added** Count variants that are common to each sample pairs
 ### filters
+### graphs
+- `F2Graph` : Highest value bar at 100% height
 
 ## 1.2.0 (2024-07-15)
 ### core

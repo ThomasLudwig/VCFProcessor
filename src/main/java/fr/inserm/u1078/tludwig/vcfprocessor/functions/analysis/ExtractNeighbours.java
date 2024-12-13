@@ -1,14 +1,15 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF.Reader;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF.Reader;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
-import java.util.NavigableSet;
+
+import java.util.Collection;
 
 /**
  * Creates a bed file of the positions where at least one sample has 2 SNVs that could be in the same triplet (regardless of the reading frame)
@@ -21,7 +22,7 @@ import java.util.NavigableSet;
  */
 public class ExtractNeighbours extends VCFFunction {
 
-  private NavigableSet<Sample> samples = null;
+  private Collection<Sample> samples = null;
 
   @Override
   public String getSummary() {
@@ -65,7 +66,7 @@ public class ExtractNeighbours extends VCFFunction {
   public void executeFunction() throws Exception {
     VCF vcf = this.vcfFile.getVCF(VCF.STEP10000);
     Reader reader = vcf.getReaderAndStart();
-    samples = vcf.getSamples();
+    samples = vcf.getSortedSamples();
     VariantRecord previous = reader.nextRecord();
     VariantRecord current;
     if (previous != null)

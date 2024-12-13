@@ -2,7 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Canonical;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
@@ -28,7 +28,7 @@ public class ExtractCanonical extends ParallelVCFFunction {
 
   @Override
   public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
+    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }
 
   @Override
@@ -52,8 +52,10 @@ public class ExtractCanonical extends ParallelVCFFunction {
     String[] alt = record.getAlts();
     boolean[] AC = areACPositive(record);
 
-    for (int a = 0; a < AC.length; a++)
-      ret.add(new Canonical(record.getChrom(), record.getPos(), record.getRef(), alt[a]).toString()+"\t"+AC[a]);
+    for (int a = 0; a < AC.length; a++) {
+      if(!"*".equals(record.getAlts()[a]))
+        ret.add(new Canonical(record.getChrom(), record.getPos(), record.getRef(), alt[a]).toString() + "\t" + AC[a]);
+    }
 
     return ret.toArray(new String[0]);
   }

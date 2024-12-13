@@ -6,7 +6,11 @@ import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.*;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.MultiVCFReader.RecordPair;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.MultiVCFReader;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.MultiVCFReader.RecordPair;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCFException;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPedFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.IntegerParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParameter;
@@ -121,8 +125,8 @@ public class IQSBySample extends VCFPedFunction {
     for (String sample : reader.getCommonsSamples())
       sampleData.put(sample, new SampleData());
 
-    Message.info("Found " + act.getSamples().size() + " samples in " + act.getFilename());
-    Message.info("Found " + imputedVCF.getSamples().size() + " samples in " + imputedVCF.getFilename());
+    Message.info("Found " + act.getNumberOfSamples() + " samples in " + act.getFilename());
+    Message.info("Found " + imputedVCF.getNumberOfSamples() + " samples in " + imputedVCF.getFilename());
     Message.info("Found " + sampleData.size() + " in common");
 
     ExecutorService threadPool = Executors.newFixedThreadPool(cpu.getIntegerValue(), new WellBehavedThreadFactory());
@@ -154,7 +158,7 @@ public class IQSBySample extends VCFPedFunction {
     String[] s = g.getValue("GP"/*, format*/).split(",");
     double[] d = new double[s.length];
     for (int i = 0; i < s.length; i++)
-      d[i] = new Double(s[i]);
+      d[i] = Double.parseDouble(s[i]);
     return d;
   }
 

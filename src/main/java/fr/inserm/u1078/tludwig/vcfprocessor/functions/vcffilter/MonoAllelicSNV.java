@@ -1,7 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
@@ -42,11 +42,6 @@ public class MonoAllelicSNV extends ParallelVCFFilterFunction {
   @Override
   public String getCustomRequirement() {
     return null;
-  }
-
-  @Override
-  public String getOutputExtension() {
-    return OUT_VCF;
   }
 
   @Override

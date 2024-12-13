@@ -107,7 +107,7 @@ public class SimulateVCFFromExisting extends ParallelVCFPedFunction<Boolean> {
     final HashMap<String, Sample> cases = new HashMap<>();
     final HashMap<String, Sample> replace = new HashMap<>();
 
-    for(Sample sample : this.getVCF().getSamples()) {
+    for(Sample sample : this.getVCF().getSortedSamples()) {
       final String status = sample.getFid().toLowerCase();
       final String index = status.replace("control", "").replace("case", "").replace("replacement", "");
       if(status.startsWith("case"))

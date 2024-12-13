@@ -1,7 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 
 import fr.inserm.u1078.tludwig.maok.tools.StringTools;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 
 /**
  *
@@ -75,9 +75,15 @@ public class Canonical implements Comparable<Canonical> {
   }
 
   public static Canonical[] getCanonicals(int chr, int pos, String ref, String[] alts){
-    Canonical[] ret = new Canonical[alts.length];
+    int c = 0;
+    for(String alt : alts)
+      if(!"*".equals(alt))
+        c++;
+    Canonical[] ret = new Canonical[c];
+    c = 0;
     for (int i = 0; i < ret.length; i++)
-      ret[i] = new Canonical(chr, pos, ref, alts[i]);
+      if(!"*".equals(alts[i]))
+        ret[c++] = new Canonical(chr, pos, ref, alts[i]);
     return ret;
   }
 

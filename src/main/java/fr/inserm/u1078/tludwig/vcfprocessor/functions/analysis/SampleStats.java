@@ -74,7 +74,7 @@ public class SampleStats extends ParallelVCFVariantPedFunction<SampleStats.Analy
 
   @Override
   public void begin() {
-    S = getVCF().getSamples().size();
+    S = getVCF().getNumberOfSamples();
     depths = new int[S];
     depthPresent = new int[S];
     missings = new int[S];
@@ -125,13 +125,14 @@ public class SampleStats extends ParallelVCFVariantPedFunction<SampleStats.Analy
     int[] lSingletons = new int[S];
     boolean[] lMissings = new boolean[S];
 
-    boolean[] ts = new boolean[variant.getAlleles().length];
-    boolean[] tv = new boolean[variant.getAlleles().length];
+    int[] nonStar = variant.getNonStarAltAllelesAsArray();
+    boolean[] ts = new boolean[1+nonStar.length];
+    boolean[] tv = new boolean[1+nonStar.length];
     
     variant.recomputeACAN();
     int[] acs = variant.getAC();
 
-    for (int a = 1; a < variant.getAlleles().length; a++) {
+    for (int a : nonStar) {
       ts[a] = variant.isTransition(a);
       tv[a] = variant.isTransversion(a);
     }
@@ -150,7 +151,7 @@ public class SampleStats extends ParallelVCFVariantPedFunction<SampleStats.Analy
         //lDepths[s] = Math.max(geno.getSumAD(), geno.getDP()); //changed to get the same results as vcftools and bcftools
         if(geno.isHeterozygousDiploid())
           lHets[s]++;
-        for (int a = 1; a < variant.getAlleles().length; a++)
+        for (int a : nonStar)
           if (geno.hasAllele(a)) {
             lVariants[s]++;
             int ac = geno.getCount(a);

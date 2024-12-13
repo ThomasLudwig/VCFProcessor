@@ -8,9 +8,10 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.NavigableSet;
+import java.util.List;
 
 /**
  * returns a series of matrices [individuals/individuals] with the number of shared alleles.
@@ -28,7 +29,7 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction<SharedAlleleM
   private int[][] snp05;
   private int[][] snp1;
   private int[][] snp5;
-  private NavigableSet<Sample> samples;
+  private List<Sample> samples;
 
   @Override
   public String getSummary() {
@@ -68,7 +69,7 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction<SharedAlleleM
   @SuppressWarnings("unused")
   @Override
   public void begin() {
-    samples = getVCF().getSamples();
+    samples = getVCF().getSortedSamples();
     int N = samples.size();
 
     this.snpNew = new int[N][N];
@@ -82,8 +83,7 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction<SharedAlleleM
     Genotype[] genos = variant.getGenotypes();
 
     double[] af = variant.getAF();
-    
-    for (int a = 1; a < variant.getAlleleCount(); a++) {
+    for (int a : variant.getNonStarAltAllelesAsArray()) {
       double f = af[a];
       if (variant.isSNP(a) && (f <= 0.05 || !variant.getInfo().isInDBSNPVEP(a)))
         for (int l = 0; l < genos.length; l++)

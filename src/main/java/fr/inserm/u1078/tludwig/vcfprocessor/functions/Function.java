@@ -93,6 +93,7 @@ public abstract class Function {
   public static final String OPT_WIDTH = "--width";
   public static final String OPT_HEIGHT = "--height";
   public static final String OPT_NAME = "--name";
+  public static final String OPT_COLOR = "--color";
   public static final String OPT_X = "--x";
   public static final String OPT_Y = "--y";
   public static final String OPT_MAX = "--max";
@@ -105,6 +106,7 @@ public abstract class Function {
   public static final String OUT_BED = "bed";
   public static final String OUT_PED = "ped";
   public static final String OUT_TSV = "tsv";
+  public static final String OUT_SAM = "sam";
   public static final String OUT_HTML = "html";
   public static final String OUT_NONE = "NONE";
   public static final String OUT_TXT = "txt";
@@ -505,5 +507,11 @@ public abstract class Function {
     if(filename.endsWith(".gz"))
         return getPrintWriter(filename, true);
     return getPrintWriter(filename, BGZIPPED_OUTPUT);
-  }  
+  }
+
+  public static String progression(String type, int n, String filename, long start){
+    double dur = DateTools.duration(start);
+    int rate = (int)(n / dur);
+    return n + " "+type+" processed from " + filename + " in " + dur + "s (" + rate + " "+type+"/s)";
+  }
 }

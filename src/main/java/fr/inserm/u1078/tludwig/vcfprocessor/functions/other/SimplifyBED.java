@@ -44,7 +44,7 @@ public class SimplifyBED extends Function {
       while ((line = in.readLine()) != null)
         if (!line.isEmpty())
           if (line.charAt(0) != '#') {
-            Region r = new Region(line, Region.FORMAT_BED);
+            Region r = new Region(line, Region.Format.BED_FILE);
             boolean added = false;
             for (int i = 0; i < regions.size(); i++)
               if (r.compareTo(regions.get(i)) < 0) {
@@ -65,7 +65,7 @@ public class SimplifyBED extends Function {
           Region r = regions.remove(0);
           Region c = merged.remove(merged.size() - 1);
           if (r.overlap(c))
-            merged.add(Region.combine(r, c));
+            merged.add(Region.merge(r, c));
           else {
             merged.add(c);
             merged.add(r);
@@ -75,7 +75,7 @@ public class SimplifyBED extends Function {
 
       Message.info("After simplification there are " + merged.size() + " regions in the file");
       for (Region m : merged)
-        println(m.getChrom() + T + m.getStart() + T + m.getEnd());
+        println(m.asBed());
     }
   }
 
