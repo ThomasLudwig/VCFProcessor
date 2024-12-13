@@ -1,4 +1,8 @@
-package fr.inserm.u1078.tludwig.vcfprocessor.files;
+package fr.inserm.u1078.tludwig.vcfprocessor.files.alignments;
+
+import fr.inserm.u1078.tludwig.vcfprocessor.files.ByteArray;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Cigar;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Tag;
 
 import java.util.ArrayList;
 
@@ -8,7 +12,7 @@ public class BAMByteArray extends ByteArray {
    * Constructor
    * @param array - the underlying Byte Array
    */
-  public BAMByteArray(byte[] array) {
+  public BAMByteArray(final byte[] array) {
     super(array);
   }
 
@@ -62,7 +66,7 @@ public class BAMByteArray extends ByteArray {
 
   private static final String COULD_NOT_PARSE = "CouldNotParseValue";
 
-  public BAMRecord.Tag readTag() {
+  public Tag readTag() {
     /*
       tag Two-charactertag char[2]
       val type Valuetype: AcCsSiIfZHB,seeSection4.2.4 char
@@ -72,60 +76,58 @@ public class BAMByteArray extends ByteArray {
     String tag = readString(2);
     char type = (char)readByte();
     switch(type) {
-      case 'A' : return new BAMRecord.Tag(tag, type, ""+(char)readByte());
-      case 'c' : return new BAMRecord.Tag(tag, type, ""+readSInt8()); //int8
-      case 'C' : return new BAMRecord.Tag(tag, type, ""+readUInt8()); //uint8
-      case 's' : return new BAMRecord.Tag(tag, type, ""+readSInt16()); //int16
-      case 'S' : return new BAMRecord.Tag(tag, type, ""+readUInt16()); //uint16
+      case 'A' : return new Tag(tag, type, ""+(char)readByte());
+      case 'c' : return new Tag(tag, type, ""+readSInt8()); //int8
+      case 'C' : return new Tag(tag, type, ""+readUInt8()); //uint8
+      case 's' : return new Tag(tag, type, ""+readLittleEndianSInt16()); //int16
+      case 'S' : return new Tag(tag, type, ""+readLittleEndianUInt16()); //uint16
       case 'i' : //return new BAMRecord.Tag(tag, type, ""); //int32
-      case 'I' : return new BAMRecord.Tag(tag, type, ""+readInt32()); //uint32
-      case 'f' : return new BAMRecord.Tag(tag, type, ""+readFloat32IEEE754v2008()); //float32 IEEE 754-2008
-      case 'H' : //in absolute hexhex (ex: FF 0D etc.) is a String
-      case 'Z' : return new BAMRecord.Tag(tag, type, readNullTerminatedString());
-      case 'B' : return new BAMRecord.Tag(tag, type, readArrayForTag());
+      case 'I' : return new Tag(tag, type, ""+readLittleEndianSInt32()); //uint32
+      case 'f' : return new Tag(tag, type, ""+readFloat32IEEE754v2008()); //float32 IEEE 754-2008
+      case 'H' : // byte[] as String
+      case 'Z' : return new Tag(tag, type, readNullTerminatedString());
+      case 'B' : return new Tag(tag, type, readArrayForTag());
     }
-    return new BAMRecord.Tag(tag, type, COULD_NOT_PARSE);
+    return new Tag(tag, type, COULD_NOT_PARSE);
   }
 
   public String readArrayForTag(){
     char type = (char)readByte();
-    int count = readInt32();
+    int count = readLittleEndianUInt32();
     String[] ret = new String[count];
     switch(type){
       case 'c' : for(int i = 0 ; i < count; i++) ret[i] = ""+readSInt8(); break; //int8
       case 'C' : for(int i = 0 ; i < count; i++) ret[i] = ""+readUInt8(); break; //uint8
-      case 's' : for(int i = 0 ; i < count; i++) ret[i] = ""+readSInt16(); break; //int16
-      case 'S' : for(int i = 0 ; i < count; i++) ret[i] = ""+readUInt16(); break; //uint16
-      case 'i' : //return new BAMRecord.Tag(tag, type, ""); //int32
-      case 'I' : for(int i = 0 ; i < count; i++) ret[i] = ""+readInt32(); break; //uint32
+      case 's' : for(int i = 0 ; i < count; i++) ret[i] = ""+readLittleEndianSInt16(); break; //int16
+      case 'S' : for(int i = 0 ; i < count; i++) ret[i] = ""+readLittleEndianUInt16(); break; //uint16
+      case 'i' : for(int i = 0 ; i < count; i++) ret[i] = ""+readLittleEndianSInt32(); break; //int32
+      case 'I' : for(int i = 0 ; i < count; i++) ret[i] = ""+readLittleEndianUInt32(); break; //uint32
       case 'f' : for(int i = 0 ; i < count; i++) ret[i] = ""+readFloat32IEEE754v2008(); break; //float32 IEEE 754-2008
       default : return COULD_NOT_PARSE;
     }
     return String.join(",", ret);
   }
 
-  public BAMRecord.Tag[] readTags() {
+  public Tag[] readTags() {
     //until the end of the alignment block
-    ArrayList<BAMRecord.Tag> tags = new ArrayList<>();
+    ArrayList<Tag> tags = new ArrayList<>();
     while(this.available() > 0){
       tags.add(readTag());
     }
-    return tags.toArray(new BAMRecord.Tag[0]);
-
+    return tags.toArray(new Tag[0]);
   }
 
-  public BAMRecord.Cigar readCigar(int nOp) {
+  public Cigar readCigar(int nOp) {
     /*
      * cigar CIGAR:oplen<<4|op. ‘MIDNSHP=X’→‘012345678’ uint32t[ncigarop]
      * */
-
     int[] length = new int[nOp];
     byte[] types = new byte[nOp];
     for(int i = 0 ; i < nOp; i++){
-      int v = readInt32();
+      int v = readLittleEndianUInt32();
       types[i] = (byte)(v & 0x000f) ;
       length[i] = (v & 0xfff0) >> 4;
     }
-    return new BAMRecord.Cigar(length, types);
+    return new Cigar(length, types);
   }
 }

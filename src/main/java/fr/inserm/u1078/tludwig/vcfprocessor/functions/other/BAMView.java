@@ -1,14 +1,12 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.other;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.BAM;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.BAMRecord;
-import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
-import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.BAMFileParameter;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.alignments.AlignmentRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.alignments.BAMRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.SAMFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
-public class BAMView extends Function {
-  BAMFileParameter bamFile = new BAMFileParameter(OPT_BAM, "sample1.bam", "The bam file to process");
+public class BAMView extends SAMFunction<Object> {
 
   @Override
   public String getSummary() {
@@ -26,18 +24,10 @@ public class BAMView extends Function {
   }
 
   @Override
-  public void executeFunction() throws Exception {
-    BAM bam = bamFile.getBAM();
-    for(String header :  bam.getHeader().getSamHeader())
-      println(header);
-
-    BAMRecord record;
-    int i = 0;
-    while((record = bam.readNext()) != null) {
-      println(record);
-      if(i++ == 10)
-        break;
-    }
+  public String[] processInputRecord(AlignmentRecord record) {
+    BAMRecord bamRecord = (BAMRecord)record;
+    String string = bamRecord.getPointer()+T+bamRecord.getRefId()+T+bamRecord.getPos()+T+"bin["+bamRecord.getBin()+"]";
+    return new String[]{string};
   }
 
   @Override

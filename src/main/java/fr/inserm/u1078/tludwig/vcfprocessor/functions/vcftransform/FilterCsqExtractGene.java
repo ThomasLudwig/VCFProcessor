@@ -1,7 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcftransform;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.ConsequenceParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPAnnotation;

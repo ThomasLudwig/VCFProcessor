@@ -86,9 +86,8 @@ public class MergeVQSR extends Function implements VCFHandling {
 
         if (snp != null && indel != null) {
           count++;
-          if (count % 10000 == 0) {
-            progress(start, new Date().getTime(), count);
-          }
+          if (count % 10000 == 0)
+            Message.info(progression("variants", count, snpFile.getFilename()+" / "+indelFile.getFilename(),start));
           process(snp, indel);
         } else {
           run = false;
@@ -98,15 +97,15 @@ public class MergeVQSR extends Function implements VCFHandling {
             Message.error("Reached end of SNP file before reaching end of INDEL file");
         }
       }
-      progress(start, new Date().getTime(), count);
+      Message.info(progression("variants", count, snpFile.getFilename()+" / "+indelFile.getFilename(),start));
     }
   }
 
-  public void progress(long start, long now, int count){
+  /*public void progress(long start, long now, int count){
     double durs = (now - start)*.001;
     int rate = (int)(count/durs);
     Message.info(count+" variants processed in "+durs+"s. Rate: "+rate+" variants per seconds");
-  }
+  }*/
 
   private String extract (String snp, String indel){
     return "SNP["+

@@ -1,6 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.filters;
 
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 
 /**
  *

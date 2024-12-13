@@ -6,11 +6,11 @@ import fr.inserm.u1078.tludwig.maok.tools.MathTools;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.MultiVCFReader;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.MultiVCFReader.RecordPair;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCFException;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.MultiVCFReader;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.MultiVCFReader.RecordPair;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCFException;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction.Output;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.IntegerParameter;
@@ -116,8 +116,8 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
 
     samples = reader.getCommonsSamples();
 
-    Message.info("Found " + act.getSamples().size() + " samples in " + act.getFilename());
-    Message.info("Found " + imputedVCF.getSamples().size() + " samples in " + imputedVCF.getFilename());
+    Message.info("Found " + act.getNumberOfSamples() + " samples in " + act.getFilename());
+    Message.info("Found " + imputedVCF.getNumberOfSamples() + " samples in " + imputedVCF.getFilename());
     Message.info("Found " + samples.size() + " in common");
 
     println(String.join(T, HEADERS));

@@ -56,7 +56,7 @@ public class ExtractAlleleCounts extends ParallelVCFVariantFunction {
   @Override
   public String[] getHeaders() {
     StringBuilder header = new StringBuilder(String.join(T, HEADERS));
-    for (Sample sample : getVCF().getSamples())
+    for (Sample sample : getVCF().getSortedSamples())
       header.append(T).append(sample.getId());
     return new String[]{header.toString()};
   }
@@ -80,7 +80,7 @@ public class ExtractAlleleCounts extends ParallelVCFVariantFunction {
       int a = nonStar[i];
       LineBuilder out = new LineBuilder(common);
       out.addColumn(variant.getAllele(a));
-      for (Sample sample : getVCF().getSamples()) {
+      for (Sample sample : getVCF().getSortedSamples()) {
         Genotype g = variant.getGenotype(sample);
         if (g.isMissing())
           out.addColumn(".");

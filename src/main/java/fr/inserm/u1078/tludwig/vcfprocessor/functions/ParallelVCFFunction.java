@@ -1,12 +1,11 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions;
 
-import fr.inserm.u1078.tludwig.maok.tools.DateTools;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.PedException;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCFException;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF.Reader;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF.Reader;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCFException;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThread;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThreadFactory;
@@ -128,7 +127,7 @@ public abstract class ParallelVCFFunction<T> extends VCFFunction {
     while(this.isStillConsuming())
       TimeUnit.MILLISECONDS.sleep(10);
 
-    this.vcf.printVariantKept();
+    this.vcf.printVariantsKept();
     end();
     this.printFooters();
   }
@@ -301,16 +300,11 @@ public abstract class ParallelVCFFunction<T> extends VCFFunction {
     }
 
     private boolean process(Output out) {
-      if (out.n % STEP == 0) {
-        double dur = DateTools.duration(start);
-        int rate = (int)(out.n / dur);
-        Message.info(out.n + " variants processed from " + vcfFile.getFilename() + " in " + dur + "s (" + rate + " variants/s)");
-      }
+      if (out.n % STEP == 0)
+        Message.info(progression("variants", out.n, vcf.getFilename(), start));
 
       if(out.isEOF()){
-        double dur = DateTools.duration(start);
-        int rate = (int) (out.n / dur);
-        Message.info(out.n - 1 + " variants processed from " + vcfFile.getFilename() + " in " + dur + "s (" + rate + " variants/s)");
+        Message.info(progression("variants", out.n-1, vcf.getFilename(), start));
         return false;
       }
 

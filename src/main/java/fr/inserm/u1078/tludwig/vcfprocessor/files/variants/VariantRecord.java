@@ -1,14 +1,14 @@
-package fr.inserm.u1078.tludwig.vcfprocessor.files;
+package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.maok.tools.StringTools;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.AbstractRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.GenotypeFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 
-public abstract class VariantRecord {
-  public static final String T = "\t";
-  private boolean isFiltered = false;
+public abstract class VariantRecord extends AbstractRecord {
+
 
   public abstract Variant createVariant(VCF vcf) throws VCFException;
 
@@ -189,17 +189,4 @@ public abstract class VariantRecord {
    */
   public abstract String summary(int max);
 
-  /**
-   * Flag the Variant as "Filtered"
-   * @param vcf the VCF that filters the Record
-   */
-  public final void filter(VCF vcf){
-    if(!this.isFiltered)
-      vcf.filter();
-    this.isFiltered = true;
-  }
-
-  public final boolean isFiltered(){
-    return this.isFiltered;
-  }
 }

@@ -1,7 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.TabixReader;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.TabixReader;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 

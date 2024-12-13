@@ -74,7 +74,7 @@ public class SampleStats extends ParallelVCFVariantPedFunction<SampleStats.Analy
 
   @Override
   public void begin() {
-    S = getVCF().getSamples().size();
+    S = getVCF().getNumberOfSamples();
     depths = new int[S];
     depthPresent = new int[S];
     missings = new int[S];

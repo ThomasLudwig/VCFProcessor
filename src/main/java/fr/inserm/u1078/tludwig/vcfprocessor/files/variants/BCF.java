@@ -1,4 +1,4 @@
-package fr.inserm.u1078.tludwig.vcfprocessor.files;
+package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -13,10 +13,11 @@ import java.util.zip.ZipException;
  * Representation of a BCF File.<br/>
  * The header is store and the record lines can be fetched on demand.
  */
-public class BCF implements FileFormat {
-  private static final String BCF_MAGIC_STRING = "BCF\2\2";
+public class BCF implements VariantProducer {
+  public static final String BCF_MAGIC_STRING = "BCF\2\2";
   private final BCFHeader header;
   private final BufferedInputStream in;
+  private final VCF vcf;
 
   /**
    * Constructor
@@ -26,6 +27,7 @@ public class BCF implements FileFormat {
    * @throws BCFException if the file is not a gzipped BCF file
    */
   public BCF(String filename, VCF vcf) throws IOException, BCFException {
+    this.vcf = vcf;
     this.in = this.checkValid(filename);
     this.header = new BCFHeader(in, vcf);
   }
@@ -43,10 +45,10 @@ public class BCF implements FileFormat {
       byte[] magic = in.readNBytes(5);
       String magicString = new String(magic);
       if (!magicString.equals(BCF_MAGIC_STRING))
-        throw new BCFException("Not a valid BCF2 file (no BCF Magic String))");
+        throw new BCFException(BCFException.BCFE_NO_MAGIC);
       return in;
     } catch(ZipException e) {
-      throw new BCFException("Not a valid BCF2 file (not GZIP format)", e);
+      throw new BCFException(BCFException.BCFE_NOT_GZIP, e);
     }
   }
 
@@ -55,20 +57,29 @@ public class BCF implements FileFormat {
    * @return the BCF Record
    * @throws IOException if the file can't be read
    */
-  public RawRecordData readNext() throws IOException {
+  public RawVariantRecordData readNext() throws IOException {
     try {
       int leftSize = ByteBuffer.wrap(in.readNBytes(4)).order(ByteOrder.LITTLE_ENDIAN).getInt();
       int rightSize = ByteBuffer.wrap(in.readNBytes(4)).order(ByteOrder.LITTLE_ENDIAN).getInt();
       byte[] chromToInfo = in.readNBytes(leftSize);
       byte[] formatGenotypes = in.readNBytes(rightSize);
-      return new RawRecordData(new BCFByteArray(chromToInfo), new BCFByteArray(formatGenotypes));
+      return new RawVariantRecordData(new BCFByteArray(chromToInfo), new BCFByteArray(formatGenotypes));
     } catch(BufferUnderflowException bue){
       return null;
     }
   }
 
-  public VariantRecord build(RawRecordData raw) throws BCFException {
-    return new BCFRecord(header, raw.getInCommon(), raw.getInFormatGeno());
+  public VariantRecord build(RawVariantRecordData raw) throws VCFException {
+    try {
+      return new BCFRecord(header, raw.getInCommon(), raw.getInFormatGeno());
+    } catch(BCFException e){
+      throw new VCFException(this.vcf, e.getMessage(), e);
+    }
+  }
+
+  @Override
+  public void filter() {
+    this.vcf.filter();
   }
 
   public String getNextHeaderLine(){
@@ -82,6 +93,6 @@ public class BCF implements FileFormat {
 
   @Override
   public String fileFormatDescription() {
-    return "Binary variant call format";
+    return "Binary Variant Call Format";
   }
 }

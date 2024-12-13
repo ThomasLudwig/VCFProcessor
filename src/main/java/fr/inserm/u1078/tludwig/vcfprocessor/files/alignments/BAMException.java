@@ -1,6 +1,10 @@
-package fr.inserm.u1078.tludwig.vcfprocessor.files;
+package fr.inserm.u1078.tludwig.vcfprocessor.files.alignments;
 
 public class BAMException extends Exception {
+  public static final String BAM_NO_MAGIC = "Not a valid BAM file (no BAM Magic String)";
+  public static final String BAI_NO_MAGIC = "Not a valid BAI file (no BAI Magic String)";
+  public static final String BAM_NOT_GZIP= "Not a valid BAM file (not GZIP format)";
+
   public BAMException() {
   }
 

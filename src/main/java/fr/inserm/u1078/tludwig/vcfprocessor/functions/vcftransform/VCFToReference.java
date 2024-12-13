@@ -3,6 +3,8 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcftransform;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.*;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCFException;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FastaFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;

@@ -1,4 +1,4 @@
-package fr.inserm.u1078.tludwig.vcfprocessor.files;
+package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.commandline.BCFArguments;
 import fr.inserm.u1078.tludwig.vcfprocessor.commandline.CommandParser;
@@ -181,7 +181,7 @@ public class BCFHeader {
   public boolean isFormatKept(String format) throws BCFException {
     int idx = values.indexOf(format);
     if(idx < 0)
-      throw new BCFException("The format ["+format+"] was not declared in the header file");
+      throw new BCFException.UndeclaredFormatException(format);
     return isFormatKept(idx);
   }
 

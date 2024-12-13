@@ -1,7 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcfannotate;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Info;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPAnnotation;

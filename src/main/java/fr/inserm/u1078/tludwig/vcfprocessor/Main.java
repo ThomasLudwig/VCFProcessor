@@ -1,19 +1,25 @@
 package fr.inserm.u1078.tludwig.vcfprocessor;
 
 import fr.inserm.u1078.tludwig.maok.LineBuilder;
-import fr.inserm.u1078.tludwig.vcfprocessor.commandline.CommandParser;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.commandline.Argument;
+import fr.inserm.u1078.tludwig.vcfprocessor.commandline.CommandParser;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.FunctionFactory;
 
 import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.time.Year;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
 /**
  *
@@ -175,6 +181,8 @@ public class Main {
   private static void doStart(String[] args) throws StartUpException {
     Message.info("Welcome to " + TITLE + " " + getVersion() + " on " + System.getProperty("os.name"));
 
+    Message.info("2015-"+ Year.now().getValue()+" --- Thomas E. Ludwig --- thomas.ludwig@inserm.fr");
+
     //get plugin directory
     String pDir = getDefaultPluginDirectory("VCFProcessor_Plugins");
     for (int i = 0; i < args.length-1; i++) {
@@ -291,11 +299,48 @@ public class Main {
       BufferedReader in = new BufferedReader(new InputStreamReader(is));
       while ((line = in.readLine()) != null) {
         if (line.toLowerCase().startsWith("## "))
-          return line.substring(3);
+          return line.substring(3)+" "+getCompilationTime();
       }
     } catch (IOException e) {
       //Ignore
     }
     return "v?.?.?(????-??-??)";
+  }
+
+  public static String getCompilationTime() {
+    Date date = getClassBuildTime();
+    if(date == null)
+      return "Unknown Compilation Time";
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+    // Format the Date object
+    return "Compilation Date " + formatter.format(date);
+  }
+
+  private static Date getClassBuildTime() {
+    Date d = null;
+    Class<?> currentClass = new Object() {}.getClass().getEnclosingClass();
+    URL resource = currentClass.getResource(currentClass.getSimpleName() + ".class");
+    if (resource != null) {
+      if (resource.getProtocol().equals("file")) {
+        try {
+          d = new Date(new File(resource.toURI()).lastModified());
+        } catch (URISyntaxException ignored) { }
+      } else if (resource.getProtocol().equals("jar")) {
+        String path = resource.getPath();
+        d = new Date( new File(path.substring(5, path.indexOf("!"))).lastModified() );
+      } else if (resource.getProtocol().equals("zip")) {
+        String path = resource.getPath();
+        File jarFileOnDisk = new File(path.substring(0, path.indexOf("!")));
+        //long jfodLastModifiedLong = jarFileOnDisk.lastModified ();
+        //Date jfodLasModifiedDate = new Date(jfodLastModifiedLong);
+        try(JarFile jf = new JarFile (jarFileOnDisk)) {
+          ZipEntry ze = jf.getEntry (path.substring(path.indexOf("!") + 2));//Skip the ! and the /
+          long zeTimeLong = ze.getTime ();
+          Date zeTimeDate = new Date(zeTimeLong);
+          d = zeTimeDate;
+        } catch (IOException|RuntimeException ignored) { }
+      }
+    }
+    return d;
   }
 }

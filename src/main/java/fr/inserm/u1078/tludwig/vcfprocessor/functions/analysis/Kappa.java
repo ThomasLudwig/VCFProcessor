@@ -5,7 +5,7 @@ import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.maok.NumberSeries;
 import fr.inserm.u1078.tludwig.maok.SortedList;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectoryParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.TSVFileParameter;

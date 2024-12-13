@@ -1,7 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 
 import fr.inserm.u1078.tludwig.maok.tools.StringTools;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 
 /**
  *

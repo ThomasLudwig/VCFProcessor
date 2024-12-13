@@ -1,14 +1,16 @@
-package fr.inserm.u1078.tludwig.vcfprocessor.files;
+package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.DateTools;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
-import fr.inserm.u1078.tludwig.vcfprocessor.commandline.CommandParser;
 import fr.inserm.u1078.tludwig.vcfprocessor.Main;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.sample.FamFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.sample.MaxSampleFilter;
+import fr.inserm.u1078.tludwig.vcfprocessor.commandline.CommandParser;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.PedException;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.SampleFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.VariantFilter;
+import fr.inserm.u1078.tludwig.vcfprocessor.filters.sample.FamFilter;
+import fr.inserm.u1078.tludwig.vcfprocessor.filters.sample.MaxSampleFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPFormat;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
@@ -27,8 +29,7 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 23 juin 2015
  */
-public class VCF implements FileFormat {
-
+public class VCF implements VariantProducer {
   public static final int IDX_CHROM = 0;
   public static final int IDX_POS = 1;
   public static final int IDX_ID = 2;
@@ -51,7 +52,6 @@ public class VCF implements FileFormat {
   private String originalSampleHeader;
 
   private final String filename;
-
   private final CommandParser commandParser;
   private final UniversalReader in;
   private final BCF bcf;
@@ -144,7 +144,7 @@ public class VCF implements FileFormat {
   }
 
   private void filterSamples() {
-    int originalSampleNb = this.getSamples().size();
+    int originalSampleNb = this.getNumberOfSamples();
     FamFilter famFilter = null;
     MaxSampleFilter maxSampleFilter = null;
     ArrayList<SampleFilter> sampleFilters = new ArrayList<>();
@@ -161,7 +161,7 @@ public class VCF implements FileFormat {
 
     //First apply famFilter
     if (famFilter != null) {
-      for (Sample sample : sampleIndices.navigableKeySet())
+      for (Sample sample : this.getSortedSamples())
         if (!famFilter.pass(sample)) {
           Message.verbose("Sample [" + sample.getId() + "] has been filtered out by " + famFilter.getClass().getSimpleName());
           filtered.add(sample);
@@ -170,7 +170,7 @@ public class VCF implements FileFormat {
       this.bindToPed(famFilter.getFam());
     }
     //apply all filter        
-    for (Sample sample : sampleIndices.navigableKeySet())
+    for (Sample sample : this.getSortedSamples())
       if (!filtered.contains(sample))
         for (SampleFilter filter : sampleFilters)
           if (!(filter.pass(sample))) {
@@ -182,12 +182,12 @@ public class VCF implements FileFormat {
     //Last apply maxSampleFilter
     if (maxSampleFilter != null) {
       ArrayList<String> keptSoFar = new ArrayList<>();
-      for (Sample sample : sampleIndices.navigableKeySet())
+      for (Sample sample : this.getSortedSamples())
         if (!filtered.contains(sample))
           keptSoFar.add(sample.getId());
 
       maxSampleFilter.setSamples(keptSoFar);
-      for (Sample sample : sampleIndices.navigableKeySet())
+      for (Sample sample : this.getSortedSamples())
         if (!filtered.contains(sample))
           if (!(maxSampleFilter.pass(sample))) {
             Message.verbose("Sample [" + sample.getId() + "] has been filtered out by " + maxSampleFilter.getClass().getSimpleName());
@@ -305,31 +305,41 @@ public class VCF implements FileFormat {
     return "##" + title + "CommandLine=<ID=" + title + ",Version=" + version + ",Date=\"" + date + "\",Epoch=" + epoch + ",CommandLineOptions=\"" + options + "\">";
   }
 
-  public void printVariantKept() {
-    Message.info("Variant Kept : " + (this.nbVariantsRead.get() - this.nbVariantsFiltered.get()) + "/" + this.nbVariantsRead.get() + " (" + this.nbVariantsFiltered.get() + " filtered)");
+  public void printVariantsKept() {
+    Message.info("Variants Kept : " + (this.nbVariantsRead.get() - this.nbVariantsFiltered.get()) + "/" + this.nbVariantsRead.get() + " (" + this.nbVariantsFiltered.get() + " filtered)");
   }
 
-  private RawRecordData readRecordFromUnderlyingStructure() throws BCFException, IOException {
+  @Override
+  public RawVariantRecordData readNext() throws IOException {
+    String line = in.readLine();
+    if(line == null)
+      return null;
+    return new RawVariantRecordData(line);
+  }
+
+  @Override
+  public VariantRecord build(RawVariantRecordData record) throws VCFException {
+    return new VCFRecord(record.getLine(), VCF.this);
+  }
+
+  private RawVariantRecordData readRecordFromUnderlyingStructure() throws BCFException, IOException {
     if(bcf == null) {
-      String line = in.readLine();
-      if(line == null)
-        return null;
-      return new RawRecordData(line);
+      return this.readNext();
     }
     return bcf.readNext();
   }
 
-  private RawRecordData readNextPhysicalRecord() throws VCFException {
-    RawRecordData record;
+  private RawVariantRecordData readNextPhysicalRecord() throws VCFException {
     try {
-      if ((record = readRecordFromUnderlyingStructure()) != null)
+      RawVariantRecordData record  = readRecordFromUnderlyingStructure();
+      if (record != null)
         this.nbVariantsRead.incrementAndGet();
+      return record;//only filters until EOF
     } catch (IOException e) {
       throw new VCFException(this, "Could not read next line in BCF/VCF file", e);
     } catch (BCFException bcfe) {
       throw new VCFException(this, "Could not parse BCF file", bcfe);
     }
-    return record;//only filters until EOF
   }
 
   /**
@@ -475,8 +485,8 @@ public class VCF implements FileFormat {
 
   public static ArrayList<String> commonSamples(VCF file1, VCF file2) {
     ArrayList<String> ret = new ArrayList<>();
-    NavigableSet<Sample> samples2 = file2.getSamples();
-    for (Sample sample : file1.getSamples())
+    Collection<Sample> samples2 = file2.getSortedSamples();
+    for (Sample sample : file1.getSortedSamples())
       for (Sample s : samples2)
         if (sample.getId().equals(s.getId())) {
           ret.add(sample.getId());
@@ -489,12 +499,36 @@ public class VCF implements FileFormat {
     return headers;
   }
 
-  public NavigableSet<Sample> getSamples() {
+  public int getNumberOfSamples() {
+    return sampleIndices.size();
+  }
+
+  /*
+  public NavigableSet<Sample> getUnsortedSamples() {
     return sampleIndices.navigableKeySet();
+  }*/
+
+  public List<Sample> getSortedSamples(){
+    ArrayList<Sample> ret = new ArrayList<>();
+    for(Sample sample : sampleIndices.navigableKeySet()){
+      int index = sampleIndices.get(sample);
+      boolean added = false;
+      for(int i = 0 ; i < ret.size(); i++){
+        Sample current = ret.get(i);
+        if(index < sampleIndices.get(current)){
+          added = true;
+          ret.add(i, sample);
+          break;
+        }
+      }
+      if(!added)
+        ret.add(sample);
+    }
+    return ret;
   }
 
   public Sample getSample(String id){
-    for(Sample s : getSamples())
+    for(Sample s : getSortedSamples())
       if(s.getId().equals(id))
         return s;
     return null;
@@ -651,7 +685,7 @@ public class VCF implements FileFormat {
   }
 
   public boolean hasSample(String id) {
-    for (Sample sample : this.getSamples())
+    for (Sample sample : this.getSortedSamples())
       if (sample.getId().equals(id))
         return true;
     return false;
@@ -663,10 +697,10 @@ public class VCF implements FileFormat {
 
   public class IndexedRecord {
     public final int index;
-    public final RawRecordData raw;
+    public final RawVariantRecordData raw;
     public VariantRecord record = null;
 
-    public IndexedRecord(int index, RawRecordData raw) {
+    public IndexedRecord(int index, RawVariantRecordData raw) {
       this.index = index;
       this.raw = raw;
     }
@@ -687,7 +721,7 @@ public class VCF implements FileFormat {
         if (VCF.this.bcf != null)
           return VCF.this.bcf.build(raw);
         else
-          return new VCFRecord(raw.getLine(), VCF.this);
+          return VCF.this.build(raw);
       } catch(Exception e) {
         Message.fatal("Unable to create "+index+"th Record", e, true);
       }
@@ -723,7 +757,7 @@ public class VCF implements FileFormat {
 
     @Override
     public void doRun() {
-      RawRecordData record;
+      RawVariantRecordData record;
       try {
         for (read = 1; (record = VCF.this.readNextPhysicalRecord()) != null; read++)
           this.queue.put(new IndexedRecord(read, record));

@@ -3,7 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.maok.NumberSeries;
 import fr.inserm.u1078.tludwig.maok.SortedList;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.HashMap;

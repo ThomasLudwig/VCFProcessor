@@ -4,7 +4,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Canonical;

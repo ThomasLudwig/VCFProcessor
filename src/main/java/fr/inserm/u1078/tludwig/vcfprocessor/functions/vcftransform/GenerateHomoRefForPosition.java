@@ -6,7 +6,7 @@ import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import static fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description.LEFT_RIGHT_ARROW;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Fasta;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FastaFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;

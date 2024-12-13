@@ -1,8 +1,8 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCFException;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCFException;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 
 /**

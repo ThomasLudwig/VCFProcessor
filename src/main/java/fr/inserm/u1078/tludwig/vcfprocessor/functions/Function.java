@@ -507,5 +507,11 @@ public abstract class Function {
     if(filename.endsWith(".gz"))
         return getPrintWriter(filename, true);
     return getPrintWriter(filename, BGZIPPED_OUTPUT);
-  }  
+  }
+
+  public static String progression(String type, int n, String filename, long start){
+    double dur = DateTools.duration(start);
+    int rate = (int)(n / dur);
+    return n + " "+type+" processed from " + filename + " in " + dur + "s (" + rate + " "+type+"/s)";
+  }
 }

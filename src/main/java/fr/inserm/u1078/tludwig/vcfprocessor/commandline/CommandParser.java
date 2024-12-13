@@ -5,39 +5,19 @@ import fr.inserm.u1078.tludwig.vcfprocessor.Main;
 import fr.inserm.u1078.tludwig.vcfprocessor.StartUpException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.PedException;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.filters.*;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.genotype.*;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.AlleleCountFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.AlleleNumberFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.DPVariantFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.sample.FamFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.Filter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.GenotypeFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.SampleFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.VariantFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.FlagFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.GQVariantFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.HWEFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.IDFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.SNPIndelFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.InfoFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.sample.MaxSampleFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.MissingFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.PhaseFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.PositionFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.QualityFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.sample.SampleFamilyFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.sample.SampleGroupFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.sample.SampleIDFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.sample.SamplePhenotypeFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.sample.SampleSexFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.ThinFilter;
+import fr.inserm.u1078.tludwig.vcfprocessor.filters.line.*;
+import fr.inserm.u1078.tludwig.vcfprocessor.filters.sample.*;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.FunctionFactory;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.Parameter;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 
 /**
  *
@@ -54,6 +34,7 @@ public class CommandParser {
   private final ArrayList<Filter<?>> filters;
   private final ArrayList<SampleFilter> sampleFilters;
   private final ArrayList<LineFilter> lineFilters;
+  private final ArrayList<SAMLineFilter> samLineFilters;
   private final ArrayList<VariantFilter> variantFilters;
   private final ArrayList<GenotypeFilter> genotypeFilters;
   private final HashMap<String, String[]> options;
@@ -68,6 +49,7 @@ public class CommandParser {
   public CommandParser(String[] args) {
     this.filters = new ArrayList<>();
     this.lineFilters = new ArrayList<>();
+    this.samLineFilters = new ArrayList<>();
     this.sampleFilters = new ArrayList<>();
     this.variantFilters = new ArrayList<>();
     this.genotypeFilters = new ArrayList<>();
@@ -781,6 +763,11 @@ public class CommandParser {
   public ArrayList<LineFilter> getLineFilters() {
     return lineFilters;
   }
+
+  public ArrayList<SAMLineFilter> getSAMLineFilters() {
+    return samLineFilters;
+  }
+
   public ArrayList<VariantFilter> getVariantFilters() {
     return variantFilters;
   }

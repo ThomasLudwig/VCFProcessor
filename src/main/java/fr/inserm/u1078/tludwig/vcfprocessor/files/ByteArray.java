@@ -1,7 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files;
 
 import java.nio.BufferUnderflowException;
-import java.nio.ByteOrder;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ByteArray {
@@ -19,7 +18,7 @@ public class ByteArray {
    * Constructor
    * @param array - the underlying Byte Array
    */
-  public ByteArray(byte[] array) {
+  public ByteArray(final byte[] array) {
     this.data = array;
     pointer = new AtomicInteger(0);
   }
@@ -28,7 +27,7 @@ public class ByteArray {
    * Check for Underflow, returns current pointer values, then increment
    * @return the pointer value before increment
    */
-  int getPointerAndIncrement() {
+  public int getPointerAndIncrement() {
     if(pointer.get() >= data.length)
       throw new BufferUnderflowException();
     return pointer.getAndIncrement();
@@ -38,7 +37,7 @@ public class ByteArray {
    * Gets the number bytes left in the buffer
    * @return the buffer's size minus the pointer's position
    */
-  int available() {
+  public int available() {
     return data.length - pointer.get();
   }
 
@@ -47,7 +46,7 @@ public class ByteArray {
    * @param i - the pointer value to add
    * @return the value before adding
    */
-  int getPointerAndAdd(int i){
+  public int getPointerAndAdd(final int i){
     if(pointer.get() >= data.length)
       throw new BufferUnderflowException();
     return pointer.getAndAdd(i);
@@ -57,7 +56,7 @@ public class ByteArray {
    * Reads one Unsigned INT8 from the buffer
    * @return the value [0;2^8 - 1]
    */
-  public short readUInt8() {
+  public short readUInt8() { //faster implementation than ava.nio.ByteBuffer.wrap().getInt()
     return (short)(0xff & data[getPointerAndIncrement()]);
   }
 
@@ -65,7 +64,7 @@ public class ByteArray {
    * Reads one Unsigned INT16 from the buffer
    * @return the value [0;2^16 - 1]
    */
-  public int readUInt16() {
+  public int readLittleEndianUInt16() { //faster implementation than ava.nio.ByteBuffer.wrap().getInt()
     //TDO short
     return (0xff & data[getPointerAndIncrement()]) + 256 * (0xff & data[getPointerAndIncrement()]);
   }
@@ -74,15 +73,18 @@ public class ByteArray {
    * Reads one Unsigned INT24 from the buffer
    * @return the value
    */
-  public int readUInt24() {
-    return (0xff & data[getPointerAndIncrement()]) + 256 * ((0xff & data[getPointerAndIncrement()]) + 256 * (0xff & data[getPointerAndIncrement()]));
+  public int readLittleEndianUInt24() { //faster implementation than ava.nio.ByteBuffer.wrap().getInt()
+    return
+        (0xff & data[getPointerAndIncrement()]) +
+        (0xff & data[getPointerAndIncrement()]) * 256 +
+        (0xff & data[getPointerAndIncrement()]) * 65536;
   }
 
   /**
    * Reads one Signed INT8 from the buffer
    * @return the value [-2^7;2^7 - 1]
    */
-  public short readSInt8() {
+  public short readSInt8() { //faster implementation than ava.nio.ByteBuffer.wrap().getInt()
     int i = readUInt8();
     return i < 128 ? (short)i : (short)(i-256);
   }
@@ -91,19 +93,49 @@ public class ByteArray {
    * Reads one Signed INT16 from the buffer
    * @return the value [-2^15;2^15 - 1]
    */
-  public int readSInt16() {
+  public short readLittleEndianSInt16() { //faster implementation than ava.nio.ByteBuffer.wrap().getInt()
     //TODO short ?
-    int i = readUInt16();
-    return i < 32768 ? i : i-65536;
+    int i = readLittleEndianUInt16();
+    return i < 32768 ? (short)i : (short)(i-65536);
   }
 
   /**
    * Reads one INT32 from the buffer
    * @return the value [-2^31;2^31 - 1]
    */
-  public int readInt32() {
-    //TODO fasta to implements like int24
-    return java.nio.ByteBuffer.wrap(readBytes(4)).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
+  public int readLittleEndianSInt32() { //faster implementation than ava.nio.ByteBuffer.wrap().getInt()
+    return
+        (0xff & data[getPointerAndIncrement()]) +
+            (0xff & data[getPointerAndIncrement()]) * 256 +
+            (0xff & data[getPointerAndIncrement()]) * 65536 +
+            (0xff & data[getPointerAndIncrement()]) * 16777216;
+  }
+
+  public int[] readLittleEndianSInts32(int length) { //faster implementation than ava.nio.ByteBuffer.wrap().getInt()
+    int[] ret = new int[length];
+    for(int i = 0 ; i < length; i++)
+      ret[i] = readLittleEndianSInt32();
+    return ret;
+  }
+
+  /**
+   * Reads one INT32 from the Big Endian buffer
+   * @return the value [-2^31;2^31 - 1]
+   */
+  public int readBigEndianSInt32() { //faster implementation than ava.nio.ByteBuffer.wrap().getInt()
+    return
+        (0xff & data[getPointerAndIncrement()]) * 16777216 +
+        (0xff & data[getPointerAndIncrement()]) * 65536 +
+        (0xff & data[getPointerAndIncrement()]) * 256 +
+        (0xff & data[getPointerAndIncrement()]) ;
+  }
+
+  public int readLittleEndianUInt32() { //faster implementation than ava.nio.ByteBuffer.wrap().getInt()
+    final long val = readLittleEndianSInt32() & 0xffffffffL;
+    if ( val <= Integer.MAX_VALUE ) {
+      return (int)val;
+    }
+    throw new RuntimeException(" Unsigned Value["+val+"] is large than max value ["+Integer.MAX_VALUE+"]");
   }
 
   /**
@@ -111,8 +143,7 @@ public class ByteArray {
    * @return the value
    */
   public float readFloat32IEEE754v2008() {
-    //look for faster implementation
-    return java.nio.ByteBuffer.wrap(readBytes(4)).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+    return Float.intBitsToFloat(readBigEndianSInt32());
   }
 
   /**
@@ -128,9 +159,9 @@ public class ByteArray {
    * @param n - the number of bytes to read
    * @return - an array containing the bytes
    */
-  public byte[] readBytes(int n){
-    int start = getPointerAndAdd(n);
-    byte[] bytes = new byte[n];
+  public byte[] readBytes(final int n){
+    final int start = getPointerAndAdd(n);
+    final byte[] bytes = new byte[n];
     System.arraycopy(data, start,bytes, 0, n);
     return bytes;
   }
@@ -140,7 +171,7 @@ public class ByteArray {
    * @return the characters as a String
    */
   public String readNullTerminatedString() {
-    StringBuilder ret = new StringBuilder();
+    final StringBuilder ret = new StringBuilder();
     byte b;
     while((b = readByte()) != 0)
       ret.append((char)b);
@@ -161,5 +192,19 @@ public class ByteArray {
       if ( bytes[goodLength] == 0 ) break;
 
     return goodLength == 0 ? null : new String(bytes, 0, goodLength);
+  }
+
+  public static String hex(byte[] bs){
+    String ret = "";
+    for(byte b : bs)
+      ret += " "+hex(b);
+    return ret;
+  }
+
+  public static String hex(byte b){
+    String ret = Integer.toHexString(b & 0xff);
+    if(ret.length() < 2)
+      ret = "0"+ret;
+    return ret;
   }
 }

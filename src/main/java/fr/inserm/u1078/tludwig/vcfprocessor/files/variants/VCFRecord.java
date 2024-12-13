@@ -1,6 +1,7 @@
-package fr.inserm.u1078.tludwig.vcfprocessor.files;
+package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.AbstractRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.*;
 
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ public class VCFRecord extends VariantRecord {
   public VCFRecord(String line, VCF vcf) throws VCFException {
     if (line.charAt(0) == '#')
       throw new VCFException(vcf, "Could not create VCFRecord from the following line\n" + line);
-    String[] f = line.split(T);
+    String[] f = line.split(AbstractRecord.T);
     right = new ArrayList<>();
     left = new String[VCF.IDX_FORMAT]; //format is outside the boundaries
     System.arraycopy(f, 0, left, 0, VCF.IDX_FORMAT);
@@ -27,7 +28,7 @@ public class VCFRecord extends VariantRecord {
 
   @Override
   public String toString() {
-    return String.join(T, left) + T + String.join(T, right);
+    return String.join(AbstractRecord.T, left) + AbstractRecord.T + String.join(AbstractRecord.T, right);
   }
 
   @Override
@@ -37,7 +38,7 @@ public class VCFRecord extends VariantRecord {
     for (int i = 0; i <= lim; i++){
       summary[i] = right.get(i);
     }
-    return String.join(T, left) + T + String.join(T, summary);
+    return String.join(AbstractRecord.T, left) + AbstractRecord.T + String.join(AbstractRecord.T, summary);
   }
 
   @Override

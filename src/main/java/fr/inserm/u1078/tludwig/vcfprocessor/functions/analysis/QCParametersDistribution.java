@@ -183,13 +183,13 @@ public class QCParametersDistribution extends ParallelVCFVariantPedFunction<QCPa
     if ("null".equals(this.pedFile.getFilename())) {
       String group = "NO_GROUP";
       ArrayList<String> ss = new ArrayList<>();
-      for (Sample sample : getVCF().getSamples())
+      for (Sample sample : getVCF().getSortedSamples())
         ss.add(sample.getId());
       this.samples.put(group, ss);
     } else {
       try {
         Ped ped = this.pedFile.getPed();
-        for (Sample s : getVCF().getSamples()) {
+        for (Sample s : getVCF().getSortedSamples()) {
           String id = s.getId();
           Sample sample = Objects.requireNonNull(ped.getSample(id), "Sample not found [" + id + "]");
           String group = sample.getGroup() + sample.getPhenotype();
@@ -204,7 +204,7 @@ public class QCParametersDistribution extends ParallelVCFVariantPedFunction<QCPa
       }
     }
 
-    fisherET = new FisherExactTest(getVCF().getSamples().size());
+    fisherET = new FisherExactTest(getVCF().getNumberOfSamples());
 
     for (String key : KEYS) {
       boolean found = false;

@@ -1,4 +1,6 @@
-package fr.inserm.u1078.tludwig.vcfprocessor.files;
+package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
+
+import fr.inserm.u1078.tludwig.vcfprocessor.files.FileFormatException;
 
 /**
  * Exception related to VCF
@@ -49,21 +51,4 @@ public class VCFException extends FileFormatException {
       return " | VariantRecord is null";
     return " | For VariantRecord:\n"+record.summary(10);
   }
-/*
-  public VCFException(String message) {
-    super(message);
-  }
-
-  public VCFException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-  public VCFException(Throwable cause) {
-    super(cause);
-  }
-
-  public VCFException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-    super(message, cause, enableSuppression, writableStackTrace);
-  }*/
-
 }

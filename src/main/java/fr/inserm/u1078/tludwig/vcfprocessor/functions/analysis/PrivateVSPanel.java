@@ -2,7 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParameter;
@@ -125,7 +125,7 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
     }
     
     ref.getReaderAndStart();
-    ArrayList<Sample> samples = new ArrayList<>(ref.getSamples());
+    ArrayList<Sample> samples = new ArrayList<>(ref.getSortedSamples());
     
     Message.info("Processing  Ref VCF for " + N + " samples");
 

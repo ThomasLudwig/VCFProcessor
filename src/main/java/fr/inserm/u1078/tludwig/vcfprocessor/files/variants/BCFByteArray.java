@@ -1,4 +1,6 @@
-package fr.inserm.u1078.tludwig.vcfprocessor.files;
+package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
+
+import fr.inserm.u1078.tludwig.vcfprocessor.files.ByteArray;
 
 /**
  * Encapsulation of a Byte Array and a pointer, with methods to parse data from a BCF File
@@ -83,15 +85,16 @@ public class BCFByteArray extends ByteArray {
    * @throws BCFException if the buffer can't be read
    */
   public int readTypedInt() throws BCFException {
-    switch (readArrayDescription().getType()) {
+    DataType dt = readArrayDescription().getType();
+    switch (dt) {
       case INT8:
         return readUInt8();
       case INT16:
-        return readUInt16();
+        return readLittleEndianUInt16();
       case INT32:
-        return readInt32();
+        return readLittleEndianSInt32();
       default:
-        throw new BCFException("Unexpected type");
+        throw new BCFException.UnexpectedTypeException(dt);
     }
   }
 
@@ -109,10 +112,10 @@ public class BCFByteArray extends ByteArray {
           ints[i] = readUInt8();
           break;
         case INT16:
-          ints[i] = readUInt16();
+          ints[i] = readLittleEndianUInt16();
           break;
         case INT32:
-          ints[i] = readInt32();
+          ints[i] = readLittleEndianSInt32();
           break;
       }
     }
@@ -174,7 +177,7 @@ public class BCFByteArray extends ByteArray {
     boolean empty = true;
     StringBuilder ret = new StringBuilder();
     for(int i = 0 ; i < l; i++){
-      int v = readUInt16();
+      int v = readLittleEndianUInt16();
       if(isMissing(v, DataType.INT16))
         ret.append(",.");
       else {
@@ -196,7 +199,7 @@ public class BCFByteArray extends ByteArray {
     boolean empty = true;
     StringBuilder ret = new StringBuilder();
     for(int i = 0 ; i < l; i++){
-      int v = readInt32();
+      int v = readLittleEndianSInt32();
       if(isMissing(v, DataType.INT32))
         ret.append(",.");
       else {
@@ -234,7 +237,7 @@ public class BCFByteArray extends ByteArray {
   public String readFloatsAsString(int l) {
     String[] ret = new String[l];
     for(int i = 0 ; i < l; i++){
-      int v = readInt32();
+      int v = readLittleEndianSInt32();
       if(isMissing(v, DataType.FLOAT))
         ret[i] = ".";
       else
@@ -302,11 +305,11 @@ public class BCFByteArray extends ByteArray {
       case INT8:
         return readUInt8();
       case INT16:
-        return readUInt16();
+        return readLittleEndianUInt16();
       case INT32:
-        return readInt32();
+        return readLittleEndianSInt32();
       default:
-        throw new BCFException("Integer type expected: found["+t+"]");
+        throw new BCFException.UnexpectedTypeException(t);
     }
   }
 
@@ -381,7 +384,7 @@ public class BCFByteArray extends ByteArray {
         case 5 : return DataType.FLOAT;
         case 7 : return DataType.CHAR;
       }
-      throw new BCFException("Unkown Data type ["+(b & 0x0F)+"]");
+      throw new BCFException.UnexpectedTypeException(b);
     }
 
     public int getLength() {

@@ -1,4 +1,4 @@
-package fr.inserm.u1078.tludwig.vcfprocessor.files;
+package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
 import java.io.BufferedInputStream;
 import java.io.File;

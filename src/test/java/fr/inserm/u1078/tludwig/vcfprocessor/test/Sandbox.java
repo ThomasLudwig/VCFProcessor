@@ -1,9 +1,11 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.test;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.ByteArray;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Canonical;
 
-import java.util.Date;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -15,49 +17,82 @@ import java.util.Date;
  */
 public class Sandbox {
 
-  public static String hex(byte[] bs){
-    String ret = "";
-    for(byte b : bs)
-      ret += " "+hex(b);
-    return ret;
-  }
-
-  public static String hex(byte b){
-    String ret = Integer.toHexString(b & 0xff);
-    if(ret.length() < 2)
-      ret = "0"+ret;
-    return ret;
-  }
-
   public static void main(String[] args) throws Exception {
-    //testByte();
-    /*byte[] b1 = new byte[1];
-    byte[] b2 = new byte[2];
-    byte[] b3 = new byte[3];
-    Random r = new Random(1560156016);
-    for(int i = 0; i < 10; i++){
-      System.out.println("******************");
-      r.nextBytes(b1);
-      String out = "1-bit  Hex"+hex(b1);
-      System.out.println(out + "  : "+oreadSInt8(b1)+"|"+readSInt8(b1));
+    int S = 133;
+    int i = 0;
+    for(int a = 0; a < S - 1; a++)
+      for(int b = a + 1; b < S; b++,i++)
+        System.out.println(a +" - " + b + " ===> " + i);
 
-      r.nextBytes(b2);
-      out = "2-bits Hex"+hex(b2);
-      System.out.println(out + "  : "+oreadSInt16(b2)+"|"+readSInt16(b2));
-      System.out.println(out + "  : "+oreadUInt16(b2)+"|"+readUInt16(b2));
+     /* byte[] bytes = {
+          (byte)0x00, (byte)0x08, (byte)0x0f,
+          (byte)0x10, (byte)0x18, (byte)0x1f,
+          (byte)0x20, (byte)0x28, (byte)0x2f,
+          (byte)0x30, (byte)0x38, (byte)0x3f,
+          (byte)0x40, (byte)0x48, (byte)0x4f,
+          (byte)0x50, (byte)0x58, (byte)0x5f,
+          (byte)0x60, (byte)0x68, (byte)0x6f,
+          (byte)0x70, (byte)0x78, (byte)0x7f,
+          (byte)0x80, (byte)0x88, (byte)0x8f,
+          (byte)0x90, (byte)0x98, (byte)0x9f,
+          (byte)0xa0, (byte)0xa8, (byte)0xaf,
+          (byte)0xb0, (byte)0xb8, (byte)0xbf,
+          (byte)0xc0, (byte)0xc8, (byte)0xcf,
+          (byte)0xd0, (byte)0xd8, (byte)0xdf,
+          (byte)0xe0, (byte)0xe8, (byte)0xef,
+          (byte)0xf0, (byte)0xf8, (byte)0xff};
+      for(byte b : bytes){
+        byte[] data = {b,b,b,b};
+        System.out.println(hex(b)+" ["+getIntBuffered(data)+"] ["+getInt32(data)+"]");
+      }*/
 
-      r.nextBytes(b3);
-      out = "3-bits Hex"+hex(b3);
-      System.out.println(out + "  : "+oreadUInt24(b3)+"|"+readUInt24(b3));
 
-    }*/
-    byte[] b2 = new byte[]{(byte)0xfe, 0x07};
+   /* byte[] data = {(byte)0x08, (byte)0xa7, (byte)0x28, (byte)0x00};
     Date start = new Date();
-    for(int i = 0 ; i < 1000000000; i++){
-      int v = oreadSInt16(b2);
+    for(long i = 0 ; i < 10*(long)Integer.MAX_VALUE; i++) {
+      int v = getInt32(data);
+      //int v = getIntBuffered(data);
     }
     Date end = new Date();
-    System.out.println("Duration = "+(end.getTime() - start.getTime()));
+    int duration = (int)(end.getTime()-start.getTime());
+    System.out.println("Duration "+duration);*/
+    /*
+    byte[][] datas = {
+        {(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x01},
+        {(byte)0x3f,(byte)0x80,(byte)0x00,(byte)0x00},
+        {(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00},
+        {(byte)0x40,(byte)0x00,(byte)0x00,(byte)0x00},
+        {(byte)0x41,(byte)0x88,(byte)0x00,(byte)0x00},
+        {(byte)0x0f,(byte)0x0f,(byte)0x0f,(byte)0x0f},
+        {(byte)0x7f,(byte)0xc0,(byte)0x00,(byte)0x00},
+    };
+    for(byte[] data : datas)
+      decodeFloat(data);*/
+    /*int[] bins = BAI.bedRegionToBinArray(14520, 14812);
+    for(int bin : bins)
+      System.out.println("Bin "+bin);*/
+/*    for(int i = 0 ; i < 74; i++)
+      System.out.println(i+" "+ Bin.getParentIndex(i));
+      */
+
+  }
+
+  public static void decodeFloat(byte[] data){
+    int i = getInt32(new byte[]{data[3],data[2],data[1],data[0]});
+    float f = Float.intBitsToFloat(i);
+    System.out.println(ByteArray.hex(data)+" ->  "+i+" -> "+f +" | "+ ByteBuffer.wrap(data).order(ByteOrder.BIG_ENDIAN).getFloat());
+  }
+
+  public static int getIntBuffered(byte[] data) {
+    return java.nio.ByteBuffer.wrap(data).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
+  }
+
+  public static int getInt32(byte[] data) {
+    return
+        (0xff & data[0]) +
+            (0xff & data[1]) * 256 +
+            (0xff & data[2]) * 65536 +
+            (0xff & data[3]) * 16777216;
   }
 
   public static int oreadUInt16(byte[] data) {

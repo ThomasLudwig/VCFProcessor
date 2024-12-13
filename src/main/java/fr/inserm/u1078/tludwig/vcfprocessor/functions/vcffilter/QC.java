@@ -516,14 +516,14 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
     if ("null".equals(this.pedFile.getFilename())) {
       String group = "NO_GROUP";
       ArrayList<String> ss = new ArrayList<>();
-      for (Sample sample : getVCF().getSamples())
+      for (Sample sample : getVCF().getSortedSamples())
         ss.add(sample.getId());
       this.samples.put(group, ss);
     } else {
       try {
         ped = this.pedFile.getPed();
         this.getVCF().bindToPed(ped);
-        for (Sample sample : getVCF().getSamples()) {
+        for (Sample sample : getVCF().getSortedSamples()) {
           String group = sample.getGroup()/* + sample.getPhenotype()*/;
           sample.setGroup(group);
           ped.getSample(sample.getId()).setGroup(group);
@@ -536,7 +536,7 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
       }
     }
 
-    fisherET = new FisherExactTest(getVCF().getSamples().size());
+    fisherET = new FisherExactTest(getVCF().getNumberOfSamples());
 
     for (String key : KEYS) {
       boolean found = false;

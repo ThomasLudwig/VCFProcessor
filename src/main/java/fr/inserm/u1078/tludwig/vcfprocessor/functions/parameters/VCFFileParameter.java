@@ -3,8 +3,8 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.files.PedException;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCF;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VCFException;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCFException;
 
 /**
  *

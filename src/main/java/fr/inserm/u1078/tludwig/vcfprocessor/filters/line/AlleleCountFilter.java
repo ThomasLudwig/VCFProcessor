@@ -2,7 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.filters.line;
 
 import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.commandline.MinMaxGroupParser;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 

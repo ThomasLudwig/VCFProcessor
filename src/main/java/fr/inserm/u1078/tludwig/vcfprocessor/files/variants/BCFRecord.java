@@ -1,6 +1,7 @@
-package fr.inserm.u1078.tludwig.vcfprocessor.files;
+package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.AbstractRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.*;
 
 import java.util.*;
@@ -38,14 +39,14 @@ public class BCFRecord extends VariantRecord {
     // Parse Pos
     this.pos = readPos(inCommon);
     //Ignore (don't understand the use of this variable)
-    inCommon.readInt32();
+    inCommon.readLittleEndianSInt32();
     // Parse Qual
     this.qual = readQual(inCommon);
 
     // Read sizes
-    int nInfo = inCommon.readUInt16();
-    int nAllele = inCommon.readUInt16();
-    int nSample = inCommon.readUInt24();
+    int nInfo = inCommon.readLittleEndianUInt16();
+    int nAllele = inCommon.readLittleEndianUInt16();
+    int nSample = inCommon.readLittleEndianUInt24();
     int nFormat = inCommon.readUInt8();
 
     // Parse the ID field
@@ -64,7 +65,7 @@ public class BCFRecord extends VariantRecord {
     Sample[] rawSamples = header.getRawSamples();
 
     if(nSample != rawSamples.length)
-      throw new BCFException("Number of samples missmatch between header ["+rawSamples.length+"] and record ["+nSample+"]");
+      throw new BCFException.SampleNumberException(rawSamples.length, nSample);
 
     for(int i = 0 ; i < nSample; i++)
       this.selectedSamples.add(new IndexedSample(i, rawSamples[i]));
@@ -76,7 +77,7 @@ public class BCFRecord extends VariantRecord {
    * @return the name of the chromosome
    */
   private String readChrom(BCFByteArray in) {
-    int chr = in.readInt32();
+    int chr = in.readLittleEndianSInt32();
     return header.getContig(chr);
   }
 
@@ -86,7 +87,7 @@ public class BCFRecord extends VariantRecord {
    * @return the position
    */
   private int readPos(BCFByteArray in) {
-    return 1 + in.readInt32();
+    return 1 + in.readLittleEndianSInt32();
   }
 
   /**
@@ -262,7 +263,7 @@ public class BCFRecord extends VariantRecord {
    */
   @Override
   public String toString() {
-    return String.join(T, asFields());
+    return String.join(AbstractRecord.T, asFields());
   }
 
   public String[] asFields() {
@@ -301,7 +302,7 @@ public class BCFRecord extends VariantRecord {
    */
   @Override
   public String summary(int max) {
-    StringBuilder sb = new StringBuilder(String.join(T, getLeftColumns()));
+    StringBuilder sb = new StringBuilder(String.join(AbstractRecord.T, getLeftColumns()));
     if(genoValues == null)
       sb.append("\t").append("----");
     else {
@@ -652,7 +653,7 @@ public class BCFRecord extends VariantRecord {
       }
       genotypes[i] = new Genotype(geno, format, sample);//right index, because samples has already been reduces
       if(genotypes[i] == null) //TODO how can it be null ?
-        throw new BCFException("Genotype is null for sample ["+sample+"]");
+        throw new BCFException.NullGenotypeException(sample == null ? "null" : sample.toString());
     }
     return genotypes;
   }

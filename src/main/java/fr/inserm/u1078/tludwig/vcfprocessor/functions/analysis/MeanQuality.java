@@ -59,7 +59,7 @@ public class MeanQuality extends ParallelVCFVariantFunction {
   @SuppressWarnings("unused")
   @Override
   public void begin() {
-    samples = getVCF().getSamples().size();
+    samples = getVCF().getNumberOfSamples();
   }
 
   @SuppressWarnings("unused")

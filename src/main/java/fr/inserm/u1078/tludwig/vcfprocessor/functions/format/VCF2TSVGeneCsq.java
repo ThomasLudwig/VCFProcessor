@@ -3,7 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.format;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.VariantRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.ConsequenceParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
