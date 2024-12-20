@@ -1,4 +1,8 @@
 # Changelog
+## 1.2.2 (2024-12-20)
+### core
+- **added** : favicon in `conf.py` for ReadTheDocs
+- **added** : `BooleanParser` that will be used in `InfoValueFilter`
 ## 1.2.1 (2024-12-13)
 Minor revisions
 ### core

@@ -9,12 +9,12 @@ import java.util.ArrayList;
  *
  * @author Thomas E. Ludwig (INSERM - U1078) 2018-11-21
  */
-public class InfoFilter extends LineFilter {
+public class InfoTagsFilter extends LineFilter {
 
   private final ArrayList<String> fields;
   private final boolean and;
 
-  public InfoFilter(boolean keep, boolean and) {
+  public InfoTagsFilter(boolean keep, boolean and) {
     super(keep);
     this.and = and;
     this.fields = new ArrayList<>();
