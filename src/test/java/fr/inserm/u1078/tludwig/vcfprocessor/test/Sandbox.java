@@ -19,11 +19,109 @@ import java.nio.ByteOrder;
 public class Sandbox {
 
   public static void main(String[] args) throws Exception {
-    String exp = "((i:DP>12||i:GQ>30) && (s:TYPE=INDEL||s:TYPE=SNP)) || f:FRQ<0.01";
+   /* String exp = "((i:DP>12||i:GQ>30) && (s:TYPE=INDEL||s:TYPE=SNP)) || f:FRQ<0.01";
     BooleanParser bp = new BooleanParser(exp);
-    for(int i = 0 ; i < bp.getExpressions().length; i++)
-      bp.set(i, Math.random() > 0.5);
-    System.out.println(bp);
+    HashMap<String, String> kv = new HashMap<>();
+    kv.put("DP", "8");
+    kv.put("GQ", "31");
+    kv.put("TYPE", "SNP");
+    kv.put("FRQ", "0.005");
+
+    for(Evaluator evaluator : bp.getEvaluators())
+      evaluator.evaluate(kv.get(evaluator.getKey()));
+
+    System.out.println(bp.getFinalExpression());
+    System.out.println(bp.evaluate());*/
+
+    BooleanParser.BooleanExpressionEvaluator bee = new BooleanParser.BooleanExpressionEvaluator();
+    String[] exps = {"false",
+        "true",
+        "false&&true",
+        "false&&false",
+        "true&&false",
+        "true&&true",
+        "false||true",
+        "false||false",
+        "true||false",
+        "true||true",
+        "0||(0&&0)",
+        "0||(0&&1)",
+        "0||(1&&0)",
+        "0||(1&&1)",
+        "1||(0&&0)",
+        "1||(0&&1)",
+        "1||(1&&0)",
+        "1||(1&&1)",
+        "0&&(0||0)",
+        "0&&(0||1)",
+        "0&&(1||0)",
+        "0&&(1||1)",
+        "1&&(0||0)",
+        "1&&(0||1)",
+        "1&&(1||0)",
+        "1&&(1||1)",
+        "(0&&0)||0",
+        "(0&&0)||1",
+        "(0&&1)||0",
+        "(0&&1)||1",
+        "(1&&0)||0",
+        "(1&&0)||1",
+        "(1&&1)||0",
+        "(1&&1)||1",
+        "(0||0)&&0",
+        "(0||0)&&1",
+        "(0||1)&&0",
+        "(0||1)&&1",
+        "(1||0)&&0",
+        "(1||0)&&1",
+        "(1||1)&&0",
+        "(1||1)&&1",
+        "0||0||0",
+        "0||0||1",
+        "0||1||0",
+        "0||1||1",
+        "1||0||0",
+        "1||0||1",
+        "1||1||0",
+        "1||1||1",
+        "0&&0&&0",
+        "0&&0&&1",
+        "0&&1&&0",
+        "0&&1&&1",
+        "1&&0&&0",
+        "1&&0&&1",
+        "1&&1&&0",
+        "1&&1&&1",
+        "0&&0||0",
+        "0&&0||1",
+        "0&&1||0",
+        "0&&1||1",
+        "1&&0||0",
+        "1&&0||1",
+        "1&&1||0",
+        "1&&1||1",
+        "0||0&&0",
+        "0||0&&1",
+        "0||1&&0",
+        "0||1&&1",
+        "1||0&&0",
+        "1||0&&1",
+        "1||1&&0",
+        "1||1&&1",
+        "0||0&&0",
+        "0||0&&1",
+        "0||1&&0",
+        "0||1&&1",
+        "1||0&&0",
+        "1||0&&1",
+        "1||1&&0",
+        "1||1&&1",
+    };
+
+    for(String exp : exps){
+      System.out.println("Evaluating ["+exp+"] -> " + bee.evaluate(exp));
+    }
+
 
 
      /* byte[] bytes = {

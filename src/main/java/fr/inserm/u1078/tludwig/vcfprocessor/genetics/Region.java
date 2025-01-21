@@ -7,6 +7,8 @@ package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 5 avr. 2016
  */
 public class Region implements Comparable<Region> {
+  //TODO  in bed files, chr17 0 0, means the whole chr17
+
   public enum Format {FULL_1_BASED, BED_FILE, FULL_0_BASED};
 
   private final String chrom;
@@ -175,6 +177,9 @@ public class Region implements Comparable<Region> {
   public String toString() {
     if(this.getStart1Based() == 1 && this.getEnd1Based() == Integer.MAX_VALUE)
       return this.getChrom();
+    if(this.getStart0Based() == 0 && this.getEnd0Based() == 0)
+      return this.getChrom();
+
     return this.as1Based()+ " (1-based) "+asBed()+" (bedFormat)";
   }
 }
