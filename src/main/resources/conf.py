@@ -56,6 +56,7 @@ project = u'VCFProcessor'
 copyright = u'2020, Thomas E. Ludwig'
 author = u'Thomas E. Ludwig'
 html_logo = 'logo.vcfprocessorbig.png'
+html_favicon = 'favicon.ico'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

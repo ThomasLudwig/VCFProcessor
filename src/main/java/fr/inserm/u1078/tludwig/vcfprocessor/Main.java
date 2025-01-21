@@ -290,7 +290,7 @@ public class Main {
   }
 
   public static String getVersion() {
-    final String filename = "/CHANGELOG.VCFProcessor.md";
+    final String filename = "/"+CHANGELOG;
     try {
       String line;
       InputStream is = Main.class.getResourceAsStream(filename);

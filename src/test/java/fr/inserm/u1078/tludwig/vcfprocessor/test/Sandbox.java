@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.test;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.ByteArray;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Canonical;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.BooleanParser;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -18,11 +19,12 @@ import java.nio.ByteOrder;
 public class Sandbox {
 
   public static void main(String[] args) throws Exception {
-    int S = 133;
-    int i = 0;
-    for(int a = 0; a < S - 1; a++)
-      for(int b = a + 1; b < S; b++,i++)
-        System.out.println(a +" - " + b + " ===> " + i);
+    String exp = "((i:DP>12||i:GQ>30) && (s:TYPE=INDEL||s:TYPE=SNP)) || f:FRQ<0.01";
+    BooleanParser bp = new BooleanParser(exp);
+    for(int i = 0 ; i < bp.getExpressions().length; i++)
+      bp.set(i, Math.random() > 0.5);
+    System.out.println(bp);
+
 
      /* byte[] bytes = {
           (byte)0x00, (byte)0x08, (byte)0x0f,

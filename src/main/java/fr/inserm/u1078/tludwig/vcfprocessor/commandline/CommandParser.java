@@ -287,7 +287,7 @@ public class CommandParser {
 
     //PropertyArguments.KEEP_ANY_INFO
     if (hasArgument(PropertyArguments.KEEP_ANY_INFO)) {
-      InfoFilter keepAny = new InfoFilter(KEEP, ANY);
+      InfoTagsFilter keepAny = new InfoTagsFilter(KEEP, ANY);
       try {
         for (String info : getListOptions(PropertyArguments.KEEP_ANY_INFO))
           keepAny.add(info);
@@ -298,7 +298,7 @@ public class CommandParser {
     }
     //PropertyArguments.KEEP_ALL_INFO
     if (hasArgument(PropertyArguments.KEEP_ALL_INFO)) {
-      InfoFilter keepAll = new InfoFilter(KEEP, ALL);
+      InfoTagsFilter keepAll = new InfoTagsFilter(KEEP, ALL);
       try {
         for (String info : getListOptions(PropertyArguments.KEEP_ALL_INFO))
           keepAll.add(info);
@@ -309,7 +309,7 @@ public class CommandParser {
     }
     //PropertyArguments.REMOVE_ANY_INFO
     if (hasArgument(PropertyArguments.REMOVE_ANY_INFO)) {
-      InfoFilter removeAny = new InfoFilter(REMOVE, ANY);
+      InfoTagsFilter removeAny = new InfoTagsFilter(REMOVE, ANY);
       try {
         for (String info : getListOptions(PropertyArguments.REMOVE_ANY_INFO))
           removeAny.add(info);
@@ -320,7 +320,7 @@ public class CommandParser {
     }
     //PropertyArguments.REMOVE_ALL_INFO
     if (hasArgument(PropertyArguments.REMOVE_ALL_INFO)) {
-      InfoFilter removeAll = new InfoFilter(REMOVE, ALL);
+      InfoTagsFilter removeAll = new InfoTagsFilter(REMOVE, ALL);
       try {
         for (String info : getListOptions(PropertyArguments.REMOVE_ALL_INFO))
           removeAll.add(info);

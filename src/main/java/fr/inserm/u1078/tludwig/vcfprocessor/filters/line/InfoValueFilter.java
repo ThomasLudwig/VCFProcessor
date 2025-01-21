@@ -2,14 +2,16 @@ package fr.inserm.u1078.tludwig.vcfprocessor.filters.line;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.BooleanParser;
 
 /**
  *
  * @author Thomas E. Ludwig (INSERM - U1078) 2019-09-27
  */
-public class TagFilter extends LineFilter {
+public class InfoValueFilter extends LineFilter {
 
-  public TagFilter(boolean keep) {
+
+  public InfoValueFilter(boolean keep, BooleanParser parser) {
     super(keep);
   }
 
