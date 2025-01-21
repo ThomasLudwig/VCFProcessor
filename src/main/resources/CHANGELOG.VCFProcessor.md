@@ -1,8 +1,10 @@
 # Changelog
-## 1.2.2 (2024-12-20)
+## 1.2.2 (2025-01-21)
 ### core
 - **added** : favicon in `conf.py` for ReadTheDocs
-- **added** : `BooleanParser` that will be used in `InfoValueFilter`
+- **added** : ``Genotype`` function `getSumADOrElseDP` to fall back on DP if AD metrics is missing
+- **fixed** : Some new Integer(string) replaced with Integer.parseInt(string)
+
 ## 1.2.1 (2024-12-13)
 Minor revisions
 ### core
@@ -120,5 +122,3 @@ Minor revisions
 - `Main.main(String[] args)` : **moved** to Run to enforce `assert`
 - `FileParameter` : **fixed** `getExtension()` returns `String[]{}` instead of `null` by default
 - `Documentation` : **added** versioning
-
-

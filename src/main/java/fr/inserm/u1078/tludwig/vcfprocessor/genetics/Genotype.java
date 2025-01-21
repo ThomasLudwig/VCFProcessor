@@ -244,6 +244,17 @@ public class Genotype {
     return false;
   }
 
+  /**
+   * If possible get Sum Of AD, if metrics is unavailable, get DP
+   * @return
+   */
+  public int getSumADOrElseDP() {
+    int sumAD = getSumAD();
+    if(sumAD > -1)
+      return sumAD;
+    return getDP();
+  }
+
   public int getDP() {
     String dp = this.getValue(GenotypeFormat.DP);
     try {

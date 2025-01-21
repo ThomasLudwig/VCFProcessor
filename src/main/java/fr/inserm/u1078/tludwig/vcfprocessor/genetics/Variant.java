@@ -618,7 +618,7 @@ public class Variant implements Comparable<Variant> {
     int nbHQ = 0;
     int nbVariantHQ = 0;
     for (Genotype g : getGenotypes())
-      if (g.getSumAD() >= minSumAD && g.getGQ() >= minGQ) {
+      if (g.getSumADOrElseDP() >= minSumAD && g.getGQ() >= minGQ) {
         nbHQ++;
         if (g.hasAlternate())
           nbVariantHQ++;

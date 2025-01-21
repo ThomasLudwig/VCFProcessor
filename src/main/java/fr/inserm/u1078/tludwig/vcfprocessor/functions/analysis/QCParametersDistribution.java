@@ -273,9 +273,9 @@ public class QCParametersDistribution extends ParallelVCFVariantPedFunction<QCPa
         Genotype g = variant.getGenotype(sample);
         
         if (!g.isMissing()){
-          a.sumADs.add(g.getSumAD());
+          a.sumADs.add(g.getSumADOrElseDP());
           a.gqs.add(g.getGQ());
-          if (g.getSumAD() >= MIN_DP && g.getGQ() >= MIN_GQ) {
+          if (g.getSumADOrElseDP() >= MIN_DP && g.getGQ() >= MIN_GQ) {
             nbHQ++;
             if (g.hasAlternate())
               a.altHQ++;

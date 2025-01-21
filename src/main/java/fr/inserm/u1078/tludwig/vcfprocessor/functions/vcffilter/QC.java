@@ -623,7 +623,7 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
       //FS (phred-scaled p-value using Fisher's exact test to detect strand bias) ≤60 for SNPs or ≤200 for indels
       if (enableMaxFSSNP)
         try {
-          double d = new Double(info.getAnnot(KEY_FS));
+          double d = Double.parseDouble(info.getAnnot(KEY_FS));
           if (d > this.maxFS_SNP)
             export.fs = d + "";
         } catch (NullPointerException | NumberFormatException e) {
@@ -660,7 +660,7 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
       //FS (phred-scaled p-value using Fisher's exact test to detect strand bias) ≤60 for SNPs or ≤200 for indels
       if (enableMaxFSIndel)
         try {
-          double d = new Double(info.getAnnot(KEY_FS));
+          double d = Double.parseDouble(info.getAnnot(KEY_FS));
           if (d > maxFS_Indel)
             export.fs = d + "";
         } catch (NullPointerException | NumberFormatException e) {
@@ -669,7 +669,7 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
       //SOR (Symmetric Odds Ratio of 2x2 contingency table to detect strand bias) ≤3 for SNPs or ≤10 for indels
       if (enableMaxSORIndel)
         try {
-          double d = new Double(info.getAnnot(KEY_SOR));
+          double d = Double.parseDouble(info.getAnnot(KEY_SOR));
           if (d > maxSOR_Indel)
             export.sor = d + "";
         } catch (NullPointerException | NumberFormatException e) {
@@ -678,7 +678,7 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
       //MQ (overall mapping quality of reads supporting a variant call) ≥40 for SNPs or ≥10 for indels
       if (enableMinMQIndel)
         try {
-          double d = new Double(info.getAnnot(KEY_MQ));
+          double d = Double.parseDouble(info.getAnnot(KEY_MQ));
           if (d < minMQ_Indel)
             export.mq = d + "";
         } catch (NullPointerException | NumberFormatException e) {
@@ -687,7 +687,7 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
       //ReadPosRankSum (Z-score from Wilcoxon rank sum test of Alt vs. Ref read position bias) either ≥(-8) for SNP or ≥(-20) for indels, or not calculated
       if (enableMinRPRSIndel)
         try {
-          double d = new Double(info.getAnnot(KEY_READPOSRANKSUM));
+          double d = Double.parseDouble(info.getAnnot(KEY_READPOSRANKSUM));
           if (d < minRPRS_Indel)
             export.readPosRankSum = d + "";
         } catch (NullPointerException | NumberFormatException e) {
@@ -737,8 +737,8 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
         Genotype g = variant.getGenotype(sample);
 
         if (!g.isMissing()) {
-          if ((this.enableMinDP && g.getSumAD() < this.minDP) ||
-                  (this.enableMaxDP && g.getSumAD() > this.maxDP) ||
+          if ((this.enableMinDP && g.getSumADOrElseDP() < this.minDP) ||
+                  (this.enableMaxDP && g.getSumADOrElseDP() > this.maxDP) ||
                   (this.enableMinGQ && g.getGQ() < this.minGQ) ||
                   !passAB(g))
             g.setMissing();

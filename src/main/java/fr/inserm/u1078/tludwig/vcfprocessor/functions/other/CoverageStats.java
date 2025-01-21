@@ -58,7 +58,7 @@ public class CoverageStats extends Function {
                 lb.addColumn(pos);
                 String[] f = line.split("\\s+", -1);
                 for (String g : f)
-                    s.add(new Integer(g));
+                    s.add(Integer.parseInt(g));
                 lb.addColumn(s.getMean());
                 lb.addColumn(s.getMedian());
                 int l = s.size();
