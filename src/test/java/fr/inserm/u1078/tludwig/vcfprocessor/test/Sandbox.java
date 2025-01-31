@@ -3,10 +3,12 @@ package fr.inserm.u1078.tludwig.vcfprocessor.test;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.ByteArray;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Canonical;
-import fr.inserm.u1078.tludwig.vcfprocessor.utils.BooleanParser;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -19,6 +21,10 @@ import java.nio.ByteOrder;
 public class Sandbox {
 
   public static void main(String[] args) throws Exception {
+    testDiv();
+    /*int[] sizes = {1,2,3,4,5,6,7,8,9,15,16,17,20,63,64,65};
+    for(int size : sizes)
+      divide(size, 4);*/
    /* String exp = "((i:DP>12||i:GQ>30) && (s:TYPE=INDEL||s:TYPE=SNP)) || f:FRQ<0.01";
     BooleanParser bp = new BooleanParser(exp);
     HashMap<String, String> kv = new HashMap<>();
@@ -32,6 +38,8 @@ public class Sandbox {
 
     System.out.println(bp.getFinalExpression());
     System.out.println(bp.evaluate());*/
+
+    /*
 
     BooleanParser.BooleanExpressionEvaluator bee = new BooleanParser.BooleanExpressionEvaluator();
     String[] exps = {"false",
@@ -120,9 +128,7 @@ public class Sandbox {
 
     for(String exp : exps){
       System.out.println("Evaluating ["+exp+"] -> " + bee.evaluate(exp));
-    }
-
-
+    }*/
 
      /* byte[] bytes = {
           (byte)0x00, (byte)0x08, (byte)0x0f,
@@ -145,7 +151,6 @@ public class Sandbox {
         byte[] data = {b,b,b,b};
         System.out.println(hex(b)+" ["+getIntBuffered(data)+"] ["+getInt32(data)+"]");
       }*/
-
 
    /* byte[] data = {(byte)0x08, (byte)0xa7, (byte)0x28, (byte)0x00};
     Date start = new Date();
@@ -174,8 +179,43 @@ public class Sandbox {
 /*    for(int i = 0 ; i < 74; i++)
       System.out.println(i+" "+ Bin.getParentIndex(i));
       */
-
+    //testList();
   }
+
+  public static void testDiv() {
+    for(int batch : new int[]{1,2,3,4,5,6,8,12}){
+      for(int cpu : new int[]{1,2,4,6,8,12}){
+        int parallelBatches = Math.min(batch, cpu);
+        int parallelChromosomes = Math.max(1, cpu / parallelBatches);
+        int thread = parallelChromosomes*parallelBatches;
+        System.out.println("Batch["+batch+"] cpu["+cpu+"] : pB["+parallelBatches+"]*pC["+parallelChromosomes+"]=thread["+thread+"]");
+      }
+    }
+  }
+
+  public static void testList(){
+    HashMap<String, List<Integer>> map = new HashMap<>();
+    List<Integer> first = new ArrayList<>();
+    first.add(1);
+    first.add(2);
+    first.add(3);
+    map.put("toto", first);
+    List<Integer> second = map.get("toto");
+    second.add(4);
+    second.add(5);
+    second.add(6);
+    map.put("toto", second);
+    second.add(7);
+    List<Integer> third = map.remove("toto");
+    third.add(8);
+    map.put("toto", third);
+    third.add(9);
+
+    List<Integer> fin = map.get("toto");
+    for(int i : fin)
+      System.out.println("list : "+i);
+  }
+
 
   public static void decodeFloat(byte[] data){
     int i = getInt32(new byte[]{data[3],data[2],data[1],data[0]});

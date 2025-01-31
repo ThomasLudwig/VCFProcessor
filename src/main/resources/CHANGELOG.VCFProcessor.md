@@ -1,5 +1,5 @@
 # Changelog
-## 1.2.3 (2025-01-21)
+## 1.2.3 (2025-01-31)
 ### core
 - **moved** : some Functions changed package
 - **added** : utils package and its classes used by `InfoValueFilter`
