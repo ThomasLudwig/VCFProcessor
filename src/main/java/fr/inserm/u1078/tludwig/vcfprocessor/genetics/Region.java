@@ -106,6 +106,12 @@ public class Region implements Comparable<Region> {
 
   public int getSize() { return 1 + this.end - this.start; }
 
+  public boolean overlapsOrTouches(final Region r) {
+    if (this.chromNum != r.chromNum)
+      return false;
+    return overlapsOrTouches(r.start, r.end);
+  }
+
   public boolean overlap(final Region r) {
     if (this.chromNum != r.chromNum)
       return false;
@@ -116,6 +122,14 @@ public class Region implements Comparable<Region> {
     if(this.start > rEnd)
       return false;
     if(rStart > this.end)
+      return false;
+    return true;
+  }
+
+  public boolean overlapsOrTouches(final int rStart, final int rEnd) {
+    if(this.start > rEnd + 1)
+      return false;
+    if(rStart > this.end + 1)
       return false;
     return true;
   }
@@ -173,8 +187,9 @@ public class Region implements Comparable<Region> {
 
   @Override
   public String toString() {
-    if(this.getStart1Based() == 1 && this.getEnd1Based() == Integer.MAX_VALUE)
+    if(this.getStart0Based() == 0 && this.getEnd0Based() == 0)
       return this.getChrom();
-    return this.as1Based()+ " (1-based) "+asBed()+" (bedFormat)";
+   /* return this.as1Based()+ " (1-based) "+asBed()+" (bedFormat)";*/
+    return asBed(true);
   }
 }

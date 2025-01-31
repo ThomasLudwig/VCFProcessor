@@ -7,6 +7,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Region;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.RegionException;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +20,10 @@ public class Bed implements FileFormat {
 
   private final String filename;
   private final HashMap<Integer, SortedList<Region>> regions;
+
+  public Bed(File file) {
+    this(file.getAbsolutePath());
+  }
 
   public Bed(String filename) {
     Message.info("Start loading Bed file : " + filename);
