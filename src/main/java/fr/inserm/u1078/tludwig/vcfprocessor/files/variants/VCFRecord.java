@@ -166,6 +166,20 @@ public class VCFRecord extends VariantRecord {
     return ret;
   }
 
+  /**
+   * Gets the value for the INFO filed with the given key
+   * @param key the key to look for
+   * @return the value for the key
+   */
+  public String getInfo(String key) {
+    for (String f : getInfoString().split(";")) {
+      String[] kv = f.split("=");
+      if (key.equalsIgnoreCase(kv[0]))
+        return kv.length > 1 ? kv[1] : null;
+    }
+    return null;
+  }
+
   @Override
   public void addInfo(String key, String value) {
     String newInfo = key;

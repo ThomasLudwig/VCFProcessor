@@ -245,7 +245,7 @@ public class Sandbox {
    */
   public static int oreadUInt24(byte[] data) {
     byte[] d = {data[0], data[1], data[2], 0};
-    return 0xffffff & java.nio.ByteBuffer.wrap(d).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();//TODO test
+    return 0xffffff & java.nio.ByteBuffer.wrap(d).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
   }
 
   /**

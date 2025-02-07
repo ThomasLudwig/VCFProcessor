@@ -153,22 +153,13 @@ public class BedCoverageMerge extends Function {
   }
 
   private static List<RegionSamples> merge(List<RegionSamples> rAs, List<RegionSamples> rBs) {
-    int na=0,nb=0;
-    if(rAs != null)
-      na = rAs.size();
-    if(rBs != null)
-      nb = rBs.size();
-    //Message.debug("Merging "+na+" with "+nb);
     if(rAs == null || rAs.isEmpty()) return rBs;
     if(rBs == null || rBs.isEmpty()) return rAs;
 
     List<RegionSamples> out = new ArrayList<>();
-
     //init
     RegionSamples a = next(rAs);
     RegionSamples b = next(rBs);
-
-    int nbOp = 0;
     while(a != null || b != null) {
       if(a == null) {
         out.add(b);
@@ -193,9 +184,7 @@ public class BedCoverageMerge extends Function {
         a = next(rAs);
         b = next(rBs);
       }
-      nbOp++;
     }
-    //Message.debug("Nb Operation : "+nbOp);
     return out;
   }
 
@@ -220,7 +209,7 @@ public class BedCoverageMerge extends Function {
     return new TestingScript[0];
   }
 
-  static class RegionSamples extends Region {
+  public static class RegionSamples extends Region {
     private final int samples;
     public RegionSamples(String chr, int startBase1, int endBase1, int samples){
       super(chr, startBase1, endBase1, Format.FULL_1_BASED);
@@ -314,10 +303,11 @@ public class BedCoverageMerge extends Function {
       return ret;
     }
 
-    List<RegionSamples> split(RegionSamples r, int start2, int start3) {
+    static List<RegionSamples> split(RegionSamples r, int start2, int start3) {
       List<RegionSamples> ret = new ArrayList<>();
       ret.add(new RegionSamples(r.getChrom(), r.getStart1Based(), start2 - 1, r.getSamples()));
-      ret.addAll(split(new RegionSamples(r.getChrom(), start2, r.getEnd1Based(), r.getSamples()), start3));
+      ret.add(new RegionSamples(r.getChrom(), start2, start3 - 1, r.getSamples()));
+      ret.add(new RegionSamples(r.getChrom(), start3, r.getEnd1Based(), r.getSamples()));
       return ret;
     }
   }
@@ -327,7 +317,6 @@ public class BedCoverageMerge extends Function {
     List<File> inputs;
     File outputFile;
     int minDepth;
-
     int threadNumber = 1;
 
     public Batch(File outputFile, int minDepth) {

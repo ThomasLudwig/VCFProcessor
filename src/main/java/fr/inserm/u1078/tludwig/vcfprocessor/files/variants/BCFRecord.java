@@ -18,7 +18,7 @@ public class BCFRecord extends VariantRecord {
   private String[] alts;
   private String qual;
   private String[] filters;
-  private String[][] info;
+  private String[][] info; //TODO replace with HashMap ???
 
   private final String[][] genoValues;
 
@@ -537,6 +537,18 @@ public class BCFRecord extends VariantRecord {
    */
   public String[][] getInfo() {
     return info;
+  }
+
+  /**
+   * Gets the value for the INFO filed with the given key
+   * @param key the key to look for
+   * @return the value for the key
+   */
+  public String getInfo(String key) {
+    for(String[] kv : info)
+      if(key.equalsIgnoreCase(kv[0]))
+        return kv[1];
+    return null;
   }
 
   /**
