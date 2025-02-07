@@ -154,6 +154,7 @@ public abstract class VariantRecord extends AbstractRecord {
   public abstract String getFiltersString();
   public abstract String getInfoString();
   public abstract String[][] getInfo();
+  public abstract String getInfo(String key);
   public abstract void addInfo(String key, String value);
   public void addInfo(String[] kv){
     this.addInfo(kv[0], kv[1]);

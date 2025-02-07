@@ -1,21 +1,38 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.utils;
 
+import fr.inserm.u1078.tludwig.maok.tools.Message;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class BooleanParser {
   private final String expression;
-  //private final boolean[] values;
   private final Evaluator[] evaluators;
   private final String separatedExpression;
-
-  private static final String LEFT = "<<<";
-  private static final String RIGHT = ">>>";
+  private static final String LEFT = "(";
+  private static final String RIGHT = ")";
 
   public BooleanParser(String expression) throws EvaluatorParsingException {
     this.expression = expression.replaceAll("\\s+", "");
     this.evaluators = tokenize(this.expression);
     this.separatedExpression = splitedString(this.expression);
+    Message.debug("Original expression ["+expression+"]");
+    Message.debug("Separated expression ["+separatedExpression+"]");
+    for(Evaluator ev : evaluators) {
+      Message.debug("EV ["+ev+"]");
+    }
+  }
+
+  public BooleanParser(String expression, Evaluator[] evaluators, String separatedExpression) {
+    this.expression = expression;
+    this.separatedExpression = separatedExpression;
+    this.evaluators = new Evaluator[evaluators.length];
+    for(int i = 0 ; i < evaluators.length; i++)
+      this.evaluators[i] = Evaluator.newEvaluator(evaluators[i]);
+  }
+
+  public BooleanParser(BooleanParser source){
+    this(source.expression, source.evaluators, source.separatedExpression);
   }
 
   private static Evaluator[] tokenize(String expression) throws EvaluatorParsingException {
@@ -29,7 +46,7 @@ public class BooleanParser {
         .replaceAll("("+C+")\\1+", "$1");
     for(String s : simple.split(C, 0))
       if(!s.isEmpty())
-        tokens.add(new Evaluator(s));
+        tokens.add(Evaluator.newEvaluator(s));
     return tokens.toArray(new Evaluator[0]);
   }
 
@@ -51,6 +68,10 @@ public class BooleanParser {
       prev = cur;
     }
     return ret.toString();
+  }
+
+  public String getExpression() {
+    return expression;
   }
 
   private static boolean isDelim(char c) {
@@ -101,9 +122,7 @@ public class BooleanParser {
       String current;
       while(!(current = simplify(previous)).equals(previous)) {
         previous = current;
-        //System.out.println("Current : "+previous);
       }
-
 
       return "1".equals(current.replace("false","0").replace("true","1"));
     }

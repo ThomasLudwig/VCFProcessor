@@ -273,7 +273,8 @@ public class CommandParser {
       PropertyArguments.STRICT_KEEP_FILTERED_ALL,
       PropertyArguments.STRICT_REMOVE_FILTERED_ALL,
       PropertyArguments.STRICT_KEEP_FILTERED_ANY,
-      PropertyArguments.STRICT_REMOVE_FILTERED_ANY})
+      PropertyArguments.STRICT_REMOVE_FILTERED_ANY,
+    })
       if (hasArgument(arg)) {
         FlagFilter removeAllFlagFilter = new FlagFilter(arg.getKey());
         try {
@@ -372,6 +373,11 @@ public class CommandParser {
     //PropertyArguments.REMOVE_PHASED
     if (hasArgument(PropertyArguments.REMOVE_PHASED))
       addFilter(new PhaseFilter(REMOVE));
+
+    if (hasArgument(PropertyArguments.KEEP_INFO_VALUE))
+      addFilter(new InfoValueFilter(KEEP, getStringOption(PropertyArguments.KEEP_INFO_VALUE)));
+    if (hasArgument(PropertyArguments.REMOVE_INFO_VALUE))
+      addFilter(new InfoValueFilter(REMOVE, getStringOption(PropertyArguments.KEEP_INFO_VALUE)));
 
     //PropertyArguments.MIN_Q
     //PropertyArguments.MAX_Q

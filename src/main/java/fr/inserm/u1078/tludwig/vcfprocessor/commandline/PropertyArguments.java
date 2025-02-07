@@ -287,4 +287,57 @@ public class PropertyArguments {
           new String[][]{{"500", "Keep variants with QUALITY <= 500"}},
           new Description("Keep variants with a quality (VCF column QUALITY) at most equal to the given value")
   );
+
+  public static final Argument KEEP_INFO_VALUE = Argument.newArgument("--keep-info-value",
+      TYPE,
+      "logical expression",
+      new String[][]{{"(i:DP>10&&f:FREQ<=0.1)||s:VARIANTTYPE!=SNP","Keep variants where (DP>10 AND FREQ<=0.1) OR VARIANTTYPE == \"SNP\""},
+          {"f:FREQ<=0.1||f:FREQ=missing_field","Keep variants where FREQ<=0.1 or FREQ is missing"}},
+      new Description("Keep variants for which the expression if true.")
+          .addLine("Syntax : type:KEY[OPERATOR]value")
+          .addLine("Key is the name in the INFO field")
+          .addLine("value is the string/int/decimal value")
+          .addLine("Allowed types are ")
+          .addItemize(
+              "s for String",
+              "i for integer",
+              "f for decimal (float)")
+          .addLine("Allowed operators are")
+          .addItemize(
+              "'=' (for types s, i and f)",
+              "'!=' (for types s, i and f)",
+              "'>' (for types i and f)",
+              "'>=' (for types i and f)",
+              "'<' (for types i and f)",
+              "'<=' (for types i and f)"
+          ).addNote("Special value \"missing_field\" allows to define rules when the INFO field is not available for this variant")
+          .addNote("This filter is not well suited for annotation where multiple values are present (one per allele, for example).")
+
+  );
+
+  public static final Argument REMOVE_INFO_VALUE = Argument.newArgument("--remove-info-value",
+      TYPE,
+      "logical expression",
+      new String[][]{{"(i:DP>10&&f:FREQ<=0.1)||s:VARIANTTYPE!=SNP","Remove variants where (DP>10 AND FREQ<=0.1) OR VARIANTTYPE == \"SNP\""},
+          {"f:FREQ<=0.1||f:FREQ=missing_field","Remove variants where FREQ<=0.1 or FREQ is missing"}},
+      new Description("Remove variants for which the expression if true.")
+          .addLine("Syntax : type:KEY[OPERATOR]value")
+          .addLine("Key is the name in the INFO field")
+          .addLine("value is the string/int/decimal value")
+          .addLine("Allowed types are ")
+          .addItemize(
+              "s for String",
+              "i for integer",
+              "f for decimal (float)")
+          .addLine("Allowed operators are")
+          .addItemize(
+              "'=' (for types s, i and f)",
+              "'!=' (for types s, i and f)",
+              "'>' (for types i and f)",
+              "'>=' (for types i and f)",
+              "'<' (for types i and f)",
+              "'<=' (for types i and f)"
+          ).addNote("Special value \"missing_field\" allows to define rules when the INFO field is not available for this variant")
+          .addNote("This filter is not well suited for annotation where multiple values are present (one per allele, for example).")
+  );
 }

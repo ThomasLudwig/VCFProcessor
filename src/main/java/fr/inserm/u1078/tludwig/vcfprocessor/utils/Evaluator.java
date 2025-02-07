@@ -1,35 +1,66 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.utils;
 
-public class Evaluator {
+public abstract class Evaluator {
   public static final String OP_DIFFERENT = "!=";
   public static final String OP_GE = ">=";
   public static final String OP_LE = "<=";
   public static final String OP_EQUALS = "=";
   public static final String OP_GREATER = ">";
   public static final String OP_LESS = "<";
+  public static final String MISSING_VALUE = "missing_field";
+  public static final String MISSING_STRING = ""; //66fef03312342926bc17b891fc36805a = md5(MISSING)
   public static final String[] OPERATORS = {OP_DIFFERENT, OP_GE, OP_LE, OP_EQUALS, OP_GREATER, OP_LESS};// order is important !
-
-
-  public enum Type {i, f, s}
   public enum Operator {EQUALS, DIFFERENT, LESS, LESS_OR_EQUAL, GREATER, GREATER_OR_EQUAL}
 
+  /**
+   * The initial expression of the query (e.g. VARIANT:s=SNP DP:i>10 FREQ:f<0.01
+   */
+  final String expression;
+  /**
+   * The comparator operator (= != <= < >= >)
+   */
+  final Operator operator;
+  /**
+   * The key to look for (VARIANT, DP, FREQ,...)
+   */
+  final String key;
 
-  private final String expression;
-  private final Type type;
-  private final Operator operator;
-  private final String key;
-  private final String stringValue;
-  private final int intValue;
-  private final double floatValue;
-  private boolean evaluation = false;
+  /**
+   * The current evaluation of the expression
+   */
+  boolean evaluation = false;
 
-  public Evaluator(String expression) throws EvaluatorParsingException {
+  Object value;
+
+  Evaluator(String expression, Operator operator, String key) {
     this.expression = expression;
+    this.operator = operator;
+    this.key = key;
+  }
+
+  Evaluator(String expression, Operator operator, String key, Object value) {
+    this.expression = expression;
+    this.operator = operator;
+    this.key = key;
+    this.value = value;
+  }
+
+  public static Evaluator newEvaluator(Evaluator eval) {
+    if(eval instanceof StringEvaluator)
+      return new StringEvaluator((StringEvaluator) eval);
+    if(eval instanceof IntegerEvaluator)
+      return new IntegerEvaluator((IntegerEvaluator) eval);
+    if(eval instanceof DecimalEvaluator)
+      return new DecimalEvaluator((DecimalEvaluator) eval);
+    return null;
+  }
+
+  public static Evaluator newEvaluator(String expression) throws EvaluatorParsingException {
     if(expression.length() < 5)
       throw new EvaluatorParsingException("Invalid query ["+expression+"]");
-    Type type = Type.valueOf(expression.substring(0, 1));
-    String right = expression.substring(2);
+    char typeValue = expression.charAt(0);
 
+    String right = expression.substring(2);
     Operator operator = null;
     String key = null;
     String stringValue = null;
@@ -38,33 +69,25 @@ public class Evaluator {
       int idx = right.indexOf(op);
       if (idx > -1) {
         operator = Operator.valueOf(getOperatorName(op));
-        if(type == Type.s && operator != Operator.DIFFERENT && operator != Operator.EQUALS) //no arithmetic operator for strings
-          throw new EvaluatorParsingException("Invalid query ["+expression+"]");
         stringValue = right.substring(idx + op.length());
         key = right.substring(0, idx);
         break;
       }
     }
+
     if(operator == null)
-      throw new EvaluatorParsingException("Invalid query ["+expression+"]");
+      throw new EvaluatorParsingException("Invalid query ["+expression+"] could not find a valid operator");
 
-    this.type = type;
-    this.operator = operator;
-    this.key = key;
-    this.stringValue = stringValue;
-    int intV = -1;
-    double floatV = Double.NaN;
-    if(type == Type.i)
-      try {
-        intV = Integer.parseInt(stringValue);
-      } catch(NumberFormatException ignore){}
-    if(type == Type.f)
-      try {
-        floatV = Double.parseDouble(stringValue);
-      } catch(NumberFormatException ignore){}
-
-    this.intValue = intV;
-    this.floatValue = floatV;
+    switch(typeValue) {
+      case StringEvaluator.TYPE:
+        return new StringEvaluator(expression, operator, key, stringValue);
+      case IntegerEvaluator.TYPE:
+        return new IntegerEvaluator(expression, operator, key, stringValue);
+      case DecimalEvaluator.TYPE:
+        return new DecimalEvaluator(expression, operator, key, stringValue);
+      default :
+        throw new EvaluatorParsingException("Type ["+typeValue+"] unknown for ["+expression+"]");
+    }
   }
 
   public static String getOperatorName(String symbol){
@@ -87,70 +110,62 @@ public class Evaluator {
   }
 
   public void evaluate(String v) {
-    this.evaluation = doEvaluate(v);
+    this.evaluation = false;
+    if(v == null)
+      v = MISSING_STRING;
+    for(String s : v.split(",")) //if true for at least 1 value
+      if(!this.evaluation)
+        this.evaluation = doEvaluate(s);
   }
 
-  private boolean doEvaluate(String v) {
-    switch(type) {
-      case s:
-        return evalString(v);
-      case i:
-        return evalInt(Integer.parseInt(v));
-      case f:
-        return evalDouble(Double.parseDouble(v));
-    }
-    return false;
+  public final boolean doEvaluate(String v) {
+    return evaluate(compare(v), isMissing(v), operator);
   }
 
-  private boolean evalString(String v){
+  public abstract int compare(String v);
+  public final boolean isMissing(String v){
+    return MISSING_STRING.equals(v);
+  }
+
+  public static boolean evaluate(int compare, boolean isMissing, Operator operator) {
+    if(operator == Operator.EQUALS)
+      return compare == 0;
+    if(operator == Operator.DIFFERENT)
+      return compare != 0;
+
+    //This is never reached for strings
+    if(isMissing)
+      return false;
+
     switch(operator){
-      case EQUALS:
-        return this.stringValue.equals(v);
-      case DIFFERENT:
-        return !this.stringValue.equals(v);
-    }
-    return false;
-  }
-
-  private boolean evalInt(int i){
-    switch(operator){
-      case EQUALS:
-        return i == this.intValue;
-      case DIFFERENT:
-        return i != this.intValue;
       case LESS:
-        return i < this.intValue;
+        return compare < 0;
       case LESS_OR_EQUAL:
-        return i <= this.intValue;
+        return compare <= 0;
       case GREATER:
-        return i > this.intValue;
+        return compare > 0;
       case GREATER_OR_EQUAL:
-        return i >= this.intValue;
-    }
-    return false;
-  }
-
-  private boolean evalDouble(double d){
-    switch(operator){
-      case EQUALS:
-        return d == this.floatValue;
-      case DIFFERENT:
-        return d != this.floatValue;
-      case LESS:
-        return d < this.floatValue;
-      case LESS_OR_EQUAL:
-        return d <= this.floatValue;
-      case GREATER:
-        return d > this.floatValue;
-      case GREATER_OR_EQUAL:
-        return d >= this.floatValue;
+        return compare >= 0;
     }
     return false;
   }
 
   public String getKey() { return key; }
-
   public String getExpression() { return this.expression; }
-
   public boolean getEvaluation() { return this.evaluation; }
+
+  public Object getValue() { return value; }
+
+  public Operator getOperator() { return operator; }
+
+  @Override
+  public String toString() {
+    return "Evaluator{" +
+        "expression='" + expression + '\'' +
+        ", operator=" + operator +
+        ", key='" + key + '\'' +
+        ", Value='" + value + '\'' +
+        ", evaluation=" + evaluation +
+        '}';
+  }
 }

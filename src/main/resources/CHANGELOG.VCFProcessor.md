@@ -1,12 +1,15 @@
 # Changelog
+## 1.2.4 (2025-02-07)
+### core
+- **added** : utils package and its classes used by `InfoValueFilter`
+### filters
+- **implemented** : `InfoValueFilter` that filters VCF line based on INFO values
+
 ## 1.2.3 (2025-01-31)
 ### core
 - **moved** : some Functions changed package
-- **added** : utils package and its classes used by `InfoValueFilter`
 ### functions
 - **added** : `BedCoverageMerge` that measures the number of samples with a depth of coverage above a threshold
-### filters
-- **implemented** : `InfoValueFilter` that filters VCF line based on INFO values
 
 ## 1.2.2 (2025-01-21)
 ### core
