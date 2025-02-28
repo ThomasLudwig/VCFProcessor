@@ -25,6 +25,11 @@ public class Bed implements FileFormat {
     this(file.getAbsolutePath());
   }
 
+  public Bed() {
+    this.filename = null;
+    this.regions = new HashMap<>();
+  }
+
   public Bed(String filename) {
     Message.info("Start loading Bed file : " + filename);
     this.filename = filename;
@@ -64,7 +69,7 @@ public class Bed implements FileFormat {
     return ret;
   }
 
-  private void addRegion(Region r) {
+  public void addRegion(Region r) {
     int num = Variant.chromToNumber(r.getChrom());
     SortedList<Region> chrReg = this.regions.get(num);
 
@@ -156,6 +161,40 @@ public class Bed implements FileFormat {
     return ret;
   }
 
+  public boolean overlaps(Region target) {
+    //true if
+    //contains start
+    //contains end
+    //is after start && before end
+
+    ArrayList<Region> reg = this.regions.get(Variant.chromToNumber(target.getChrom()));
+
+    int low = 0;
+    int high = reg.size() - 1;
+    int previous = -1;
+    int current = 0;
+    while (low != high) {
+      current = (low + high) / 2;
+      if (current == previous) {
+        if (current == low)
+          low++;
+        current++;
+      }
+      Region r = reg.get(current);
+      //Message.debug("target "+pos+" value "+r.getStart()+";"+r.getEnd()+" current "+current+" low "+low+" high "+high);
+
+      if (r.overlap(target))
+        return true;
+      int compare = r.compareTo(target);
+      previous = current;
+      if (compare > 0)
+        high = current;
+      else
+        low = current;
+    }
+    return reg.get(current).overlap(target);
+  }
+
   public boolean contains(String chr, int pos) {
     Region target = new Region(chr, pos, pos, Region.Format.FULL_1_BASED);
     ArrayList<Region> reg = this.regions.get(Variant.chromToNumber(chr));
@@ -182,7 +221,6 @@ public class Bed implements FileFormat {
       else
         low = current;
     }
-
     return reg.get(current).contains(chr, pos);
   }
 

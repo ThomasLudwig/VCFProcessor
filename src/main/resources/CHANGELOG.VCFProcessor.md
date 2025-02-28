@@ -1,3 +1,13 @@
+## 1.2.5 (2025-02-28)
+### core
+- **optimized** : `VCF.bindToPed(Ped ped)`
+### functions
+- **optimized** : `ExtractPrivateToGroup`
+### filters
+- **optimized** : `PositionFilter`
+### graphs
+### other
+
 # Changelog
 ## 1.2.4 (2025-02-07)
 ### core
