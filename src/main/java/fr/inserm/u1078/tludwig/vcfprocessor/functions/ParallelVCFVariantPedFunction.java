@@ -27,6 +27,6 @@ public abstract class ParallelVCFVariantPedFunction<T> extends ParallelVCFVarian
 
   public final void setPed(Ped ped) {
     this.ped = ped;
-    this.getVCF().bindToPed(ped);
+    //this.getVCF().bindToPed(ped);
   }
 }

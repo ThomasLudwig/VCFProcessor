@@ -2,13 +2,12 @@ package fr.inserm.u1078.tludwig.vcfprocessor.filters.line;
 
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
-import fr.inserm.u1078.tludwig.maok.tools.StringTools;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.Bed;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Region;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  *
@@ -17,12 +16,12 @@ import java.util.ArrayList;
 public class PositionFilter extends LineFilter {
 
   private final boolean overlap;
-  private final ArrayList<Region> regions;
+  private final Bed bed;
 
   public PositionFilter(boolean keep, boolean overlap) {
     super(keep);
     this.overlap = overlap;
-    this.regions = new ArrayList<>();
+    this.bed = new Bed();
   }
 
   /**
@@ -135,6 +134,7 @@ public class PositionFilter extends LineFilter {
 
   public void addPositionFilenames(String... filenames) {
     for (String filename : filenames) {
+      Message.info("Loading positions from "+filename);
       String error = null;
       try (UniversalReader in = new UniversalReader(filename)){
         String line;
@@ -173,9 +173,7 @@ public class PositionFilter extends LineFilter {
     }
   }
 
-  public void add(Region r) {
-    this.regions.add(r);
-  }
+  public void add(Region r) { this.bed.addRegion(r); }
 
   @Override
   public boolean pass(VariantRecord record) {
@@ -185,6 +183,9 @@ public class PositionFilter extends LineFilter {
       for (String alt : record.getAlts())
         length = Math.max(length, alt.replace("-", "").length());
       Region target = new Region(record.getChrom(), start, start + length - 1, Region.Format.FULL_1_BASED);
+
+      return isKeep() == bed.overlaps(target);
+      /*
       if (isKeep()) {
         for (Region r : regions)
           if (target.overlap(r))
@@ -195,11 +196,10 @@ public class PositionFilter extends LineFilter {
           if (target.overlap(r))
             return false;
         return true;
-      }
+      }*/
     } else {
-      int chr = Variant.chromToNumber(record.getChrom());
-      int pos = record.getPos();
-      if (isKeep()) {
+      return isKeep() == bed.contains(record.getChrom(), record.getPos());
+      /*if (isKeep()) {
         for (Region r : regions)
           if (r.contains(chr, pos))
             return true;
@@ -209,7 +209,7 @@ public class PositionFilter extends LineFilter {
           if (r.contains(chr, pos))
             return false;
         return true;
-      }
+      }*/
     }
   }
 
@@ -220,6 +220,6 @@ public class PositionFilter extends LineFilter {
 
   @Override
   public String getDetails() {
-    return (this.isKeep() ? "Keep" : "Remove")+" positions"+(this.overlap ? " Overlapping" : "")+" : "+StringTools.startOf(5, regions);
+    return (this.isKeep() ? "Keep" : "Remove")+" positions"+(this.overlap ? " Overlapping" : "")+" : "+bed.getRegionSize()+" regions provided";
   }
 }

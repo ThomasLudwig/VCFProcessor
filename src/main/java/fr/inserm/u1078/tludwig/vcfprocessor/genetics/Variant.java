@@ -210,7 +210,7 @@ public class Variant implements Comparable<Variant> {
     return ret;
   }
 
-  private ArrayList<Integer> getNonStarAltAllelesAsList() {
+  public ArrayList<Integer> getNonStarAltAllelesAsList() {
     ArrayList<Integer> nonStarAltAlleles = new ArrayList<>();
     for(int a = 1; a < this.alleles.length; a++)
       if(!"*".equals(this.alleles[a]))

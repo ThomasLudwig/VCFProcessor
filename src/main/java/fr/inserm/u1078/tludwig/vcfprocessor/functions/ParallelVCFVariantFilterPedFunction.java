@@ -23,6 +23,6 @@ public abstract class ParallelVCFVariantFilterPedFunction extends ParallelVCFVar
 
   public final void setPed(Ped ped) {
     this.ped = ped;
-    this.getVCF().bindToPed(ped);
+    //this.getVCF().bindToPed(ped);
   }
 }

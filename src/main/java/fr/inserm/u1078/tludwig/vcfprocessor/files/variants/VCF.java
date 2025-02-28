@@ -57,6 +57,7 @@ public class VCF implements VariantProducer {
   private final BCF bcf;
   private VEPFormat vepFormat;
   private final TreeMap<Sample, Integer> sampleIndices;
+  private final TreeMap<String, Sample> samplesByID;
   private final AtomicInteger nbVariantsRead = new AtomicInteger(0);
   private final AtomicInteger nbVariantsFiltered = new AtomicInteger(0);
 
@@ -89,7 +90,7 @@ public class VCF implements VariantProducer {
   }
 
   public VCF(String filename, int mode, int step) throws VCFException, PedException {
-    Message.printDebuggingTrace("New VCF ["+filename+"]");
+    //Message.printDebuggingTrace("New VCF ["+filename+"]");
     this.readLock = new ReentrantLock();
     this.infoHeaders = new HashMap<>();
     this.formatHeaders = new HashMap<>();
@@ -98,6 +99,7 @@ public class VCF implements VariantProducer {
     this.step = step;
     this.headers = new ArrayList<>();
     this.sampleIndices = new TreeMap<>();
+    this.samplesByID = new TreeMap<>();
 
     //Process command line arguments
     this.commandParser = Main.getCommandParser();//TODO, a new commandParser is returned for each VCF files, see how it al plays out when there are filters and multiple VCF
@@ -215,8 +217,12 @@ public class VCF implements VariantProducer {
   private void initSamples() {
     this.ped = new Ped(this.originalSampleHeader.split("\t"));
     this.sampleIndices.clear();
-    for (int i = 0; i < this.ped.getSampleSize(); i++)
-      this.sampleIndices.put(this.ped.getSample(i), i);
+    this.samplesByID.clear();
+    for (int i = 0; i < this.ped.getSampleSize(); i++) {
+      Sample sample = this.ped.getSample(i);
+      this.sampleIndices.put(sample, i);
+      this.samplesByID.put(sample.getId(), sample);
+    }
   }
 
   /**
@@ -249,8 +255,10 @@ public class VCF implements VariantProducer {
     ArrayList<Sample> original = new ArrayList<>(sampleIndices.navigableKeySet());
 
     for (Sample sample : original)
-      if (excluded.contains(sample))
+      if (excluded.contains(sample)) {
         this.sampleIndices.remove(sample);
+        this.samplesByID.remove(sample.getId());
+      }
     ped.keepOnly(this.sampleIndices.navigableKeySet()); //ped is never null
   }
 
@@ -528,10 +536,7 @@ public class VCF implements VariantProducer {
   }
 
   public Sample getSample(String id){
-    for(Sample s : getSortedSamples())
-      if(s.getId().equals(id))
-        return s;
-    return null;
+    return samplesByID.get(id);
   }
 
   public int indexOfSample(Sample sample){
