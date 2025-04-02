@@ -141,6 +141,18 @@ public class Canonical implements Comparable<Canonical> {
     return this.chr + ":" + this.pos + ":" + this.length + ":" + this.allele;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) return false;
+    Canonical canonical = (Canonical) o;
+    return this.toString().equals(canonical.toString());
+  }
+
+  @Override
+  public int hashCode() {
+    return this.toString().hashCode();
+  }
+
   public boolean isSNP() {
     return length == 1 && !allele.startsWith("-") && allele.length() == 1;
   }

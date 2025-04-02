@@ -1,3 +1,12 @@
+## 1.2.6 (2025-04-02)
+### core
+- **fixed** : `Bed` NullPointerException in contains() and overlaps()
+### functions
+- **added** : `RAVAQOutput` that processes RAVAQ's output
+### filters
+### graphs
+### other
+
 ## 1.2.5 (2025-02-28)
 ### core
 - **optimized** : `VCF.bindToPed(Ped ped)`
