@@ -106,7 +106,8 @@ public class Bed implements FileFormat {
     //TODO how to manage Annotations ? Here everything is put to the first region
     SortedList<Region> tmp = new SortedList<>(new ArrayList<>(), SortedList.Strategy.ADD_FROM_END);
     SortedList<Region> reg = this.regions.get(n);
-
+    if(reg == null)
+      return;
     if (!reg.isEmpty()) {
       tmp.add(reg.get(0));
       for (int i = 1; i < reg.size(); i++) {
@@ -168,7 +169,8 @@ public class Bed implements FileFormat {
     //is after start && before end
 
     ArrayList<Region> reg = this.regions.get(Variant.chromToNumber(target.getChrom()));
-
+    if(reg == null)
+      return false;
     int low = 0;
     int high = reg.size() - 1;
     int previous = -1;
@@ -198,6 +200,8 @@ public class Bed implements FileFormat {
   public boolean contains(String chr, int pos) {
     Region target = new Region(chr, pos, pos, Region.Format.FULL_1_BASED);
     ArrayList<Region> reg = this.regions.get(Variant.chromToNumber(chr));
+    if(reg == null)
+      return false;
     int low = 0;
     int high = reg.size() - 1;
     int previous = -1;
