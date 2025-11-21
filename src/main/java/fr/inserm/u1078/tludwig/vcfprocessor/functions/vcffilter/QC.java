@@ -228,6 +228,8 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
           if (!line.isEmpty() && !line.startsWith("#")) {
             String theLine = line.split("#")[0];
             String[] f = theLine.split("\\s+");
+            if(f.length < 2)
+              throw new RuntimeException("Could not parse parameter line ["+line+"]");
             boolean enabled = !isDisabled(f[1]);
             switch (f[0].toUpperCase()) { //Process each no empty no comment line
               case KW_AC0 :

@@ -1,3 +1,13 @@
+## 1.2.7 (2025-11-19)
+### core
+### functions
+- **updated** : `RAVAQOutput` to include frequencies from groups and gnomAD
+- **added** : `PrepareGnomADFile` to prepare gnomAD files for `RAVAQOutput`
+- **addedd** : `Variant2Canonical` to convert chr:pos:ref:alt to Canonical
+### filters
+### graphs
+### other
+
 ## 1.2.6 (2025-04-02)
 ### core
 - **fixed** : `Bed` NullPointerException in contains() and overlaps()
