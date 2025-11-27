@@ -1,5 +1,6 @@
 ## 1.2.7 (2025-11-19)
 ### core
+- **removed** : HTSJDK now as a stand-alone project
 ### functions
 - **updated** : `RAVAQOutput` to include frequencies from groups and gnomAD
 - **added** : `PrepareGnomADFile` to prepare gnomAD files for `RAVAQOutput`
