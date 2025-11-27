@@ -4,6 +4,7 @@ import fr.inserm.u1078.tludwig.maok.NumberSeries;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.maok.SortedList;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
@@ -33,21 +34,7 @@ public class InbreedingCoeffDistribution extends ParallelVCFVariantFunction<Doub
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_NA;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return "Input file must contains Inbreeding Coeff. annotation";
-  }
+  public VCFPolicies getVCFPolicies() { return new VCFPolicies(VCFPolicies.MultiAllelicPolicy.NA, false, "Input file must contains Inbreeding Coeff. annotation");}
 
   @Override
   public String getOutputExtension() {

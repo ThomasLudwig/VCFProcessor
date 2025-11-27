@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPAnnotation;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
@@ -55,21 +56,7 @@ public class MaleFemale extends ParallelVCFVariantPedFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return true;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.onlyVEP(VCFPolicies.MultiAllelicPolicy.ALLELE_AS_LINE); }
 
   @SuppressWarnings("unused")
   @Override

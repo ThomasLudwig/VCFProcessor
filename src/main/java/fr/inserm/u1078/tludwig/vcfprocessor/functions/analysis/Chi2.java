@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 import fr.inserm.u1078.tludwig.maok.tools.MathTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
@@ -37,21 +38,7 @@ public class Chi2 extends ParallelVCFVariantPedFunction<Chi2.Chi2Analysis> {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.IGNORE_STAR_ALLELE_AS_LINE); }
 
   @Override
   public String getOutputExtension() {

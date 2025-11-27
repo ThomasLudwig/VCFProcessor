@@ -5,6 +5,7 @@ import fr.inserm.u1078.tludwig.maok.NumberSeries;
 import fr.inserm.u1078.tludwig.maok.SortedList;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.HashMap;
 
@@ -37,21 +38,7 @@ public class VQSLod extends ParallelVCFFunction<VQSLod.Analysis> {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_NA;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return "File must contain VQSLOD annotations";
-  }
+  public VCFPolicies getVCFPolicies() { return new VCFPolicies(VCFPolicies.MultiAllelicPolicy.NA, false, "File must contain VQSLOD annotations"); }
 
   @Override
   public String getOutputExtension() {

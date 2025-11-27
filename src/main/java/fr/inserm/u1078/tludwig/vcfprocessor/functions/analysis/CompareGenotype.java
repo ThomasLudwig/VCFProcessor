@@ -8,6 +8,7 @@ import fr.inserm.u1078.tludwig.maok.SortedList;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPedFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
@@ -53,21 +54,7 @@ public class CompareGenotype extends VCFPedFunction {//TODO parallelize like in 
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return "Alternate alleles are expected to be the same and in the same order in both files"; //TODO change implementation
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
+  public VCFPolicies getVCFPolicies() { return new VCFPolicies(VCFPolicies.MultiAllelicPolicy.NA, false, "Alternate alleles are expected to be the same, and in the same order in both file"); }
 
   @Override
   public String getOutputExtension() {

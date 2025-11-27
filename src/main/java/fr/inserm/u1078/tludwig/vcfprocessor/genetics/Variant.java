@@ -3,9 +3,8 @@ package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.maok.tools.ArrayTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.TreeSet;
+
+import java.util.*;
 
 /**
  * Variant from VCF
@@ -677,5 +676,30 @@ public class Variant implements Comparable<Variant> {
           ac[a]++;
       }
     this.updateACANAF(ac, an);
+  }
+
+  public Map<String, Double> getFrequencyByGroup(Map<String, Integer> groupSizes, int a) {
+    //TODO also frq with all alleles
+    //TODO account for ploidy
+    HashMap<String, Integer> acs = new HashMap<>();
+    HashMap<String, Double> afs = new HashMap<>();
+
+    for (Genotype genotype : this.genotypes) {
+      int[] g = genotype.getAlleles();
+      if(g != null) {
+        int count = (g[0] == a ? 1 : 0) + (g[1] == a ? 1 : 0);
+        if (count > 0)
+          acs.merge(genotype.getSample().getGroup(), count, Integer::sum);
+      }
+    }
+    for(String group : groupSizes.keySet()) {
+      Integer ac = acs.get(group);
+      Integer halfAN = groupSizes.get(group);
+      if(ac == null)
+        ac = 0;
+      double af = 0.5 * ac / halfAN;
+      afs.put(group, af);
+    }
+    return afs;
   }
 }

@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcftransform;
 import fr.inserm.u1078.tludwig.maok.tools.MathTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
@@ -31,21 +32,7 @@ public class MissingToRef extends ParallelVCFVariantFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_NA;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.NA); }
 
   @Override
   public String getOutputExtension() {

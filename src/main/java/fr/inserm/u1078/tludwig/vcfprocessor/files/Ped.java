@@ -8,6 +8,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Object Representing the content of a PED File
@@ -151,6 +153,13 @@ public class Ped implements FileFormat {
 
   public int getGroupSize(String group) {
     return this.samplesByGroup[this.getGroupIndex(group)].size();
+  }
+
+  public Map<String, Integer> getGroupSizes(){
+    Map<String, Integer> sizes = new TreeMap<>();
+    for(String group : getGroups())
+      sizes.put(group, this.getGroupSize(group));
+    return sizes;
   }
 
   /**

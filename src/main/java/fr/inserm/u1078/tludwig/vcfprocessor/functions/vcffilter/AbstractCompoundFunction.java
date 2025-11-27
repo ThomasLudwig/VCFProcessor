@@ -4,6 +4,7 @@ import fr.inserm.u1078.tludwig.maok.SortedList;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.BooleanParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
@@ -44,21 +45,7 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return true;
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_FILTER_ONE;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.onlyVEP(VCFPolicies.MultiAllelicPolicy.KEEP_IF_ONE_SATISFY); }
 
   @Override
   public String getOutputExtension() {

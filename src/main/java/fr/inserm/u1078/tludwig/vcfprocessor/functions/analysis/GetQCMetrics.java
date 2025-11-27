@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.StringParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Info;
@@ -63,21 +64,7 @@ public class GetQCMetrics extends ParallelVCFVariantFunction<GetQCMetrics.Values
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return "VCF Requires the following annotations QUAL_BY_DEPTH,INBREEDING_COEF,FS,SOR,MQ,READPOSRANKSUM,AD,PL,GT";
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_DROP;
-  }
+  public VCFPolicies getVCFPolicies() { return new VCFPolicies(VCFPolicies.MultiAllelicPolicy.DROP, false, "VCF Requires the following annotations QUAL_BY_DEPTH,INBREEDING_COEF,FS,SOR,MQ,READPOSRANKSUM,AD,PL,GT"); }
 
   @Override
   public String[] processInputVariant(Variant variant) {

@@ -4,6 +4,7 @@ import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Canonical;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
@@ -50,20 +51,9 @@ public class CountVariantsFoundIn extends ParallelVCFVariantFunction<CountVarian
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
-
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.IGNORE_STAR_ALLELE_AS_LINE); }
 
   private void loadReferenceVariants() {
     Message.info("Listing reference files from "+referenceFiles.getFilename());

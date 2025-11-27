@@ -4,6 +4,7 @@ import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.BooleanParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
@@ -15,7 +16,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
  * Checked for release on 2020-05-26
  * Unit Test defined on   2020-08-04
  */
-public class SetGenotypeFromProbability extends ParallelVCFFunction {
+public class SetGenotypeFromProbability extends ParallelVCFFunction<Object> {
 
   private final BooleanParameter overwrite = new BooleanParameter(OPT_OVER, "overwrite existing genotypes ?");
   
@@ -39,20 +40,7 @@ public class SetGenotypeFromProbability extends ParallelVCFFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_FORBIDDEN;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return "The input VCF file must contain Genotype Probability (GP=p1,p2,p3) for each genotype";
+  public VCFPolicies getVCFPolicies() { return new VCFPolicies(VCFPolicies.MultiAllelicPolicy.FORBIDDEN, false, "The input VCF file must contain Genotype Probability (GP=p1,p2,p3) for each genotype");
   }
 
   @Override

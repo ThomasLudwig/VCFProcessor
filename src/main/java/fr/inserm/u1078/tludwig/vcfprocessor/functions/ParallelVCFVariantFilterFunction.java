@@ -34,4 +34,9 @@ public abstract class ParallelVCFVariantFilterFunction extends ParallelVCFVarian
     super.end();
     Message.info("Total input lines : "+inputLines + " | Total output lines : " + outputLines + " | Dropped lines : "+(inputLines-outputLines));
   }
+
+  @Override
+  public final String getOutputExtension() {
+    return OUT_VCF;
+  }
 }

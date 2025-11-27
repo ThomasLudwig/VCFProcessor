@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFilterFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.StringParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
@@ -21,20 +22,9 @@ public class FilterNumericInfo extends ParallelVCFFilterFunction {
         .addItemize("\"VALUE=17.5\"","\"VALUE1>0|VALUE2>0\"","\"VALUE>20&VALUE<50\"");
   }
 
+  @SuppressWarnings("unused")
   @Override
-  public String getMultiallelicPolicy() {
-    return null;
-  }
-
-  @Override
-  public boolean needVEP() {
-    return false;
-  }
-
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.NA); }
 
   @Override
   public void begin() {

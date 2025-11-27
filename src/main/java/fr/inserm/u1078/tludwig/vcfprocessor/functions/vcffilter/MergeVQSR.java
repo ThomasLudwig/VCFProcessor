@@ -5,6 +5,7 @@ import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFHandling;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
@@ -30,14 +31,13 @@ public class MergeVQSR extends Function implements VCFHandling {
   @Override
   public final Description getDescription() {
     Description desc = this.getDesc();
-    if (this.needVEP())
+    if (getVCFPolicies().isNeedVEP())
       desc.addWarning("The input VCF File must have been previously annotated with vep.");
-    String custom = this.getCustomRequirement();
-    if (custom != null)
-      desc.addWarning(custom);
-    String multi = this.getMultiallelicPolicy();
-    if(!MULTIALLELIC_NA.equals(multi))
-      desc.addNote(PREFIX_MULTIALLELIC+multi);
+    for(String custom : getVCFPolicies().getCustomRequirements())
+      if (custom != null && !custom.isEmpty())
+        desc.addWarning(custom);
+    VCFPolicies.MultiAllelicPolicy multi = getVCFPolicies().getMultiAllelicPolicies();
+    if(!VCFPolicies.MultiAllelicPolicy.NA.equals(multi)) desc.addNote(multi.getDescription());
     return desc;
   }
 
@@ -52,19 +52,7 @@ public class MergeVQSR extends Function implements VCFHandling {
   }
 
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_FILTER_ONE;
-  }
-
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.KEEP_IF_ONE_SATISFY); }
 
   @SuppressWarnings("unused")
   @Override

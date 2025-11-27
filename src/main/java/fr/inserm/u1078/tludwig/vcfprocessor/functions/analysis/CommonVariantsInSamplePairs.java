@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.EnumParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
@@ -12,7 +13,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CommonVariantsInSamplePairs extends ParallelVCFVariantFunction<CommonVariantsInSamplePairs.Count> {
-  private EnumParameter processRef = new EnumParameter(OPT_REF, new String[]{"false", "true", "minor"}, "minor", "Also Process REF allele [0] ?");
+  private final EnumParameter processRef = new EnumParameter(OPT_REF, new String[]{"false", "true", "minor"}, "minor", "Also Process REF allele [0] ?");
 
   private static final int HETHETP = 0;
   private static final int HETHETS = 1;
@@ -55,20 +56,9 @@ public class CommonVariantsInSamplePairs extends ParallelVCFVariantFunction<Comm
     return OUT_TSV;
   }
 
+  @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
-
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.ALLELE_AS_LINE); }
 
   @Override
   public void begin() {

@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcftransform;
 import fr.inserm.u1078.tludwig.maok.tools.MathTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
@@ -15,7 +16,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
  * Checked for release on 2020-05-26
  * Unit Test defined on   2020-08-04
  */
-public class MissingToMajor extends ParallelVCFVariantFunction {
+public class MissingToMajor extends ParallelVCFVariantFunction<Object> {
 
   @Override
   public String getSummary() {
@@ -26,27 +27,15 @@ public class MissingToMajor extends ParallelVCFVariantFunction {
   @Override
   public Description getDesc() {
     return new Description("Replaces every missing genotype by the most frequent allele present")
-            .addLine("updates AC,AF,AN annotations")
-            .addLine("The genotype is homozygous to the most frequent allele A in the form  "+Description.code("A/A:0:0:0,0,0..."));
+        .addLine("updates AC,AF,AN annotations")
+        .addLine("The genotype is homozygous to the most frequent allele A in the form  "+Description.code("A/A:0:0:0,0,0..."))
+        .addLine("The major allele is the most frequent allele from ref and each alternate.");
+
   }
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return "The major allele is the most frequent allele from ref and each alternate.";
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.NA); }
 
   @Override
   public String getOutputExtension() {

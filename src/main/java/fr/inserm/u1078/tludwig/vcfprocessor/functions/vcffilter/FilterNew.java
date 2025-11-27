@@ -2,6 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFilterFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
@@ -28,26 +29,7 @@ public class FilterNew extends ParallelVCFVariantFilterFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return true;
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_FILTER_ONE;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
-
-  @Override
-  public String getOutputExtension() {
-    return OUT_VCF;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.onlyVEP(VCFPolicies.MultiAllelicPolicy.KEEP_IF_ONE_SATISFY); }
 
   @Override
   public String[] processInputVariantForFilter(Variant variant) {

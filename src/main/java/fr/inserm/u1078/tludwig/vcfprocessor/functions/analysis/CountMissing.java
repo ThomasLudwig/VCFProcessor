@@ -2,6 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.RatioParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
@@ -53,15 +54,7 @@ public class CountMissing extends ParallelVCFVariantPedFunction<boolean[][]> {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.NA); }
 
   @Override
   public String getOutputExtension() {
@@ -96,12 +89,6 @@ public class CountMissing extends ParallelVCFVariantPedFunction<boolean[][]> {
       out.add(name + T + kept + T + genotyped + T + missing + T + percent + T + ref[s] + T + alt[s]);
     }
     return out.toArray(new String[0]);
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_NA;
   }
 
   @Override

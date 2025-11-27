@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.TabixReader;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 /**
@@ -33,21 +34,7 @@ public class NumberOfLinesFromTabix extends VCFFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_NA;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return "The bgzipped VCF file FILENAME.vcf.gz must have an associated tabix file FILENAME.vcf.gz.tbi";
-  }
+  public VCFPolicies getVCFPolicies() { return new VCFPolicies(VCFPolicies.MultiAllelicPolicy.NA, false, "The bgzipped VCF file FILENAME.vcf.gz must have an associated tabix file FILENAME.vcf.gz.tbi");}
 
   @SuppressWarnings("unused")
   @Override

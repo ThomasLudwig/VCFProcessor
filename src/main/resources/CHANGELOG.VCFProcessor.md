@@ -1,3 +1,17 @@
+## 1.2.7 (2025-11-19)
+### core
+- **removed** : HTSJDK now as a stand-alone project
+### functions
+- **updated** : `RAVAQOutput` to include frequencies from groups and gnomAD
+- **added** : `PrepareGnomADFile` to prepare gnomAD files for `RAVAQOutput`
+- **added** : `Variant2Canonical` to convert chr:pos:ref:alt to Canonical
+- **added** : `RAVAQPrefilter` to filter variants that are filtered in GnomAD
+- **updated** : getOutputExtension() set the **VCF** for all VCFFilter functions
+- **added** : VCFPolicies
+### filters
+### graphs
+### other
+
 ## 1.2.6 (2025-04-02)
 ### core
 - **fixed** : `Bed` NullPointerException in contains() and overlaps()

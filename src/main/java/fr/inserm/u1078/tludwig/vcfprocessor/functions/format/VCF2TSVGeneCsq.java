@@ -4,6 +4,7 @@ import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.ConsequenceParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
@@ -44,12 +45,10 @@ public class VCF2TSVGeneCsq extends VCF2TSV { //TODO should not exist, use genes
             .addLine("Only the variants impacting a gene within the given list are displayed.")
             .addLine("Only the variants with consequence at least as severe as the one given are displayed.");
   }
-  
+
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return true;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.onlyVEP(VCFPolicies.MultiAllelicPolicy.NA); }
 
   @SuppressWarnings("unused")
   @Override

@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectoryParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
@@ -30,27 +31,13 @@ public class SplitFromDB extends VCFFunction { //TODO parallelize
   @Override
   public Description getDesc() {
     return new Description("Generates two new VCF files : ")
-            .addItemize(Description.bold("inDB.MYVCF.vcf")+" (with variants present in 1kG/GnomAD)",
+        .addItemize(Description.bold("inDB.MYVCF.vcf")+" (with variants present in 1kG/GnomAD)",
                 Description.bold("notInDB.MYVCF.vcf")+" (with variant absent from 1kG/GnomAD)");
   }
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return true;
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return "If at least one alternate allele satisfy all the conditions, the whole variant line is kept in \"inDB.MYVCF.vcf\".";
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.onlyVEP(VCFPolicies.MultiAllelicPolicy.KEEP_IF_ONE_SATISFY); }
 
   @Override
   public String getOutputExtension() {

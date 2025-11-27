@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 import fr.inserm.u1078.tludwig.maok.SortedList;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
@@ -31,18 +32,10 @@ public class DbSNPMismatch extends ParallelVCFVariantFunction<DbSNPMismatch.Mini
             .addLine("Output for the lines with discrepancies have the following format :")
             .addColumns(HEADERS);
   }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public boolean needVEP() {
-    return true;
-  }
 
   @SuppressWarnings("unused")
   @Override
-  public String getCustomRequirement() {
-    return null;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.onlyVEP(VCFPolicies.MultiAllelicPolicy.ANNOTATION_FOR_ALL); }
 
   @Override
   public String getOutputExtension() {
@@ -62,12 +55,6 @@ public class DbSNPMismatch extends ParallelVCFVariantFunction<DbSNPMismatch.Mini
     this.outputs = new SortedList<>(new ArrayList<>(), SortedList.Strategy.ADD_FROM_END);
   }
 
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return "RS IDs of every alternate allele are put in the ID field.";
-  }
-  
   @Override
   public String[] processInputVariant(Variant variant) {
     String id = variant.getId();

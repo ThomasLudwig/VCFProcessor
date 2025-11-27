@@ -6,6 +6,7 @@ import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.io.IOException;
@@ -45,24 +46,10 @@ public class AddDbSNP extends ParallelVCFFunction<Object> {
     return new Description("Adds dbSNP RS in ID field and INFO field")
             .addLine("Adds "+Description.code(KEY_RS)+" and "+Description.code(KEY_BUILD)+" in INFO field from the input file "+Description.code(refFile.getKey())+".");
   }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ANNOTATION_FOR_ALL; //TODO needs to be comma separated
-  }
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.ANNOTATION_FOR_ALL); }
 
   @Override
   public String getOutputExtension() {

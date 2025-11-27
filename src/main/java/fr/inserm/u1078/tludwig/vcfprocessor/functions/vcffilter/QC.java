@@ -9,6 +9,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.PedException;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.TSVFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
@@ -196,21 +197,7 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_NA;
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return "The VCF File must contain the following INFO : " + String.join(",", KEYS);
-  }
+  public VCFPolicies getVCFPolicies() { return new VCFPolicies(VCFPolicies.MultiAllelicPolicy.NA, false, "The VCF File must contain the following INFO : " + String.join(",", KEYS)); }
 
   @Override
   public String getOutputExtension() {
@@ -228,6 +215,8 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
           if (!line.isEmpty() && !line.startsWith("#")) {
             String theLine = line.split("#")[0];
             String[] f = theLine.split("\\s+");
+            if(f.length < 2)
+              throw new RuntimeException("Could not parse parameter line ["+line+"]");
             boolean enabled = !isDisabled(f[1]);
             switch (f[0].toUpperCase()) { //Process each no empty no comment line
               case KW_AC0 :

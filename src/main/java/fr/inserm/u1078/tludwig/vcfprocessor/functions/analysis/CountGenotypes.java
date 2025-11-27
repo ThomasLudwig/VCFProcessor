@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPAnnotation;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
@@ -16,7 +17,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
  * Checked for release on 2020-05-06
  * Unit Test defined on   2020-05-13
  */
-public class CountGenotypes extends ParallelVCFVariantPedFunction {
+public class CountGenotypes extends ParallelVCFVariantPedFunction<Override> {
 
   private int GRP;
 
@@ -38,15 +39,7 @@ public class CountGenotypes extends ParallelVCFVariantPedFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return true;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.onlyVEP(VCFPolicies.MultiAllelicPolicy.IGNORE_STAR_ALLELE_AS_LINE); }
 
   @Override
   public String getOutputExtension() {
@@ -73,12 +66,6 @@ public class CountGenotypes extends ParallelVCFVariantPedFunction {
     return new String[]{header1.substring(1), header2.toString()};
   }
 
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
-  }
-  
   @Override
   public String[] processInputVariant(Variant variant) {
     int[] nonStars = variant.getNonStarAltAllelesAsArray();

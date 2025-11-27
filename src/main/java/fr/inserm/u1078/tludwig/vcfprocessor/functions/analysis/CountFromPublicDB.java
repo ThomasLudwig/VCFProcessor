@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
@@ -43,15 +44,7 @@ public class CountFromPublicDB extends ParallelVCFVariantFunction<CountFromPubli
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return true;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.onlyVEP(VCFPolicies.MultiAllelicPolicy.IGNORE_STAR_ALLELE_AS_LINE); }
 
   @Override
   public String getOutputExtension() {
@@ -98,12 +91,6 @@ public class CountFromPublicDB extends ParallelVCFVariantFunction<CountFromPubli
   @Override
   public String[] getHeaders() {
     return new String[]{T + String.join(T, HEADER)};
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }
     
   @Override

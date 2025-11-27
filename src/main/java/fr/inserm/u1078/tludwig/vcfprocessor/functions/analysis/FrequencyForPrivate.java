@@ -3,9 +3,11 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+
 import java.util.ArrayList;
 
 /**
@@ -16,7 +18,7 @@ import java.util.ArrayList;
  * Checked for release on 2020-05-12
  * Unit Test defined on   2020-07-07
  */
-public class FrequencyForPrivate extends ParallelVCFVariantPedFunction {
+public class FrequencyForPrivate extends ParallelVCFVariantPedFunction<Object> {
 
   private int G;
 
@@ -34,15 +36,7 @@ public class FrequencyForPrivate extends ParallelVCFVariantPedFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return true;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.onlyVEP(VCFPolicies.MultiAllelicPolicy.IGNORE_STAR_ALLELE_AS_LINE); }
 
   @Override
   public String getOutputExtension() {
@@ -63,12 +57,6 @@ public class FrequencyForPrivate extends ParallelVCFVariantPedFunction {
       out.append(T + "Frq_").append(getPed().getGroups().get(i));
     out.append(T + "Consequences");
     return new String[]{out.toString()};
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }
 
   @Override

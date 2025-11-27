@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
@@ -44,9 +45,7 @@ public class StrictCompoundHeterozygous extends AbstractCompoundFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public String getCustomRequirement() {
-    return "This function expects a complete definition of the sample, where all cases are affected children and both their parents are identified controls.";
-  }
+  public VCFPolicies getVCFPolicies() { return new VCFPolicies(VCFPolicies.MultiAllelicPolicy.KEEP_IF_ONE_SATISFY, true, "This function expects a complete definition of the sample, where all cases are affected children and both their parents are identified controls."); }
 
   @SuppressWarnings("unused")
   @Override
