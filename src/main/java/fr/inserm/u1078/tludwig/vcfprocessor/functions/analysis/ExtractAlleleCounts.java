@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
@@ -16,7 +17,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
  * Checked for release on 2020-05-06
  * Unit Test defined on   2020-05-14
  */
-public class ExtractAlleleCounts extends ParallelVCFVariantFunction {
+public class ExtractAlleleCounts extends ParallelVCFVariantFunction<Object> {
   final String[] HEADERS = {"#CHROM","POS","ID","REF","ALT"};
   
   @Override
@@ -42,15 +43,7 @@ public class ExtractAlleleCounts extends ParallelVCFVariantFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.ALLELE_AS_LINE); }
 
   @SuppressWarnings("unused")
   @Override
@@ -61,12 +54,6 @@ public class ExtractAlleleCounts extends ParallelVCFVariantFunction {
     return new String[]{header.toString()};
   }
 
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
-  }
-  
   @Override
   public String[] processInputVariant(Variant variant) {
     String chr = variant.getChrom();

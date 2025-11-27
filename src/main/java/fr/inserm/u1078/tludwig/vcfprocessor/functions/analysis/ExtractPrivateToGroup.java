@@ -2,6 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
@@ -18,7 +19,7 @@ import java.util.ArrayList;
  * Unit Test defined on   2020-05-15
  * Last Tested on         2020-08-14
  */
-public class ExtractPrivateToGroup extends ParallelVCFVariantPedFunction {
+public class ExtractPrivateToGroup extends ParallelVCFVariantPedFunction<Object> {
   private static final String[] HEADER = {"#CHR","POS","GROUP","SAMPLES"};
   private int[] orderedSamples;
 
@@ -37,18 +38,6 @@ public class ExtractPrivateToGroup extends ParallelVCFVariantPedFunction {
             .addColumns(HEADER);
   }
 
-  @SuppressWarnings("unused")
-  @Override
-  public boolean needVEP() {
-    return false;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
-
   @Override
   public String getOutputExtension() {
     return OUT_TSV;
@@ -62,9 +51,7 @@ public class ExtractPrivateToGroup extends ParallelVCFVariantPedFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.IGNORE_STAR_ALLELE_AS_LINE); }
 
   @Override
   public void begin() {

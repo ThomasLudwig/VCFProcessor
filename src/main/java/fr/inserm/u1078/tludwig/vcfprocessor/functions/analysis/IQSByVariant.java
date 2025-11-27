@@ -13,6 +13,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCFException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction.Output;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.IntegerParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
@@ -85,21 +86,7 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_ALLELE_AS_LINE;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return "Extra information are available if the input file was annotated with VEP";
-  }
+  public VCFPolicies getVCFPolicies() { return new VCFPolicies(VCFPolicies.MultiAllelicPolicy.ALLELE_AS_LINE, false, "Extra information are available if the input file was annotated with VEP"); }
 
   @Override
   public String getOutputExtension() {

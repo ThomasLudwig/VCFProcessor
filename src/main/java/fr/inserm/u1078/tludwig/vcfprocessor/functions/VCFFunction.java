@@ -14,14 +14,13 @@ public abstract class VCFFunction extends Function implements VCFHandling {
   @Override
   public final Description getDescription() {
     Description desc = this.getDesc();
-    if (this.needVEP())
+    if (getVCFPolicies().isNeedVEP())
       desc.addWarning("The input VCF File must have been previously annotated with vep.");
-    String custom = this.getCustomRequirement();
-    if (custom != null)
-      desc.addWarning(custom);
-    String multi = this.getMultiallelicPolicy();
-    if(!MULTIALLELIC_NA.equals(multi))
-      desc.addNote(PREFIX_MULTIALLELIC+multi);
+    for(String custom : getVCFPolicies().getCustomRequirements())
+      if (custom != null && !custom.isEmpty())
+        desc.addWarning(custom);
+    VCFPolicies.MultiAllelicPolicy multi = getVCFPolicies().getMultiAllelicPolicies();
+    if(!VCFPolicies.MultiAllelicPolicy.NA.equals(multi)) desc.addNote(multi.getDescription());
     return desc;
   }
 }

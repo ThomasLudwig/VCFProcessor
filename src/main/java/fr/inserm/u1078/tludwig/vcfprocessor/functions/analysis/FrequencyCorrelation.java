@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectoryParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
@@ -20,7 +21,7 @@ import java.util.HashMap;
  * Checked for release on 2020-05-12
  * Unit Test defined on 2020-07-10 
  */
-public class FrequencyCorrelation extends ParallelVCFVariantFunction { //TODO really similar to CompareToGnomAD, but uses annotation instead of second VCF, GnomadAD should appears in title
+public class FrequencyCorrelation extends ParallelVCFVariantFunction<Object> { //TODO really similar to CompareToGnomAD, but uses annotation instead of second VCF, GnomadAD should appears in title
 
   final String[] HEADER = {"CHR", "POS", "REF", "ALT", "Local", "GnomAD"};
 
@@ -43,15 +44,7 @@ public class FrequencyCorrelation extends ParallelVCFVariantFunction { //TODO re
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return true;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.onlyVEP(VCFPolicies.MultiAllelicPolicy.IGNORE_STAR_ALLELE_AS_LINE); }
 
   @Override
   public String getOutputExtension() {
@@ -86,12 +79,6 @@ public class FrequencyCorrelation extends ParallelVCFVariantFunction { //TODO re
   public void end() {
     for (PrintWriter pw : out.values())
       pw.close();
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_IGNORE_STAR_ALLELE_AS_LINE;
   }
 
   @Override

@@ -6,6 +6,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.FastaException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Fasta;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FastaFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
@@ -16,7 +17,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
  * Checked for release on 2020-05-06
  * Unit Test defined on   2020-09-22 
  */
-public class CheckReference extends ParallelVCFFunction {
+public class CheckReference extends ParallelVCFFunction<Object> {
   private Fasta fasta;
 
   private final FastaFileParameter refFile = new FastaFileParameter();
@@ -37,22 +38,9 @@ public class CheckReference extends ParallelVCFFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return MULTIALLELIC_NA;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.DROP); }
 
   @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
-
   @Override
   public String getOutputExtension() {
     return OUT_TSV;

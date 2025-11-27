@@ -3,6 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcftransform;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.ConsequenceParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPAnnotation;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
@@ -31,28 +32,13 @@ public class FilterCsqExtractGene extends ParallelVCFVariantFunction {
   @Override
   public Description getDesc() {
     return new Description("Filters Variants according to consequence.")
-            .addLine("Replaces ID by gene_chr_pos.");
+        .addLine("Replaces ID by gene_chr_pos.")
+        .addLine("Only Ref and one alternate allele are Kept. The Kept alternate is (in this order) : 1. the most severe; 2. the most frequent in the file; 3. the first one.");
   }
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return true;
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return "Only Ref and one alternate allele are Kept. The Kept alternate is (in this order) : 1. the most severe; 2. the most frequent in the file; 3. the first one.";
-  }
-  
-  
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.onlyVEP(VCFPolicies.MultiAllelicPolicy.NA); }
 
   @Override
   public String getOutputExtension() {

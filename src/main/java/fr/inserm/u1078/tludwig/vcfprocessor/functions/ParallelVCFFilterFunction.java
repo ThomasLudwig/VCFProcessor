@@ -23,7 +23,7 @@ public abstract class ParallelVCFFilterFunction extends ParallelVCFFunction<Inte
   public abstract String[] processInputRecordForFilter(VariantRecord record);
 
   @Override
-  public String getOutputExtension() {
+  public final String getOutputExtension() {
     return OUT_VCF;
   }
 

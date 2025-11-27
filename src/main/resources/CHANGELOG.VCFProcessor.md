@@ -3,7 +3,10 @@
 ### functions
 - **updated** : `RAVAQOutput` to include frequencies from groups and gnomAD
 - **added** : `PrepareGnomADFile` to prepare gnomAD files for `RAVAQOutput`
-- **addedd** : `Variant2Canonical` to convert chr:pos:ref:alt to Canonical
+- **added** : `Variant2Canonical` to convert chr:pos:ref:alt to Canonical
+- **added** : `RAVAQPrefilter` to filter variants that are filtered in GnomAD
+- **updated** : getOutputExtension() set the **VCF** for all VCFFilter functions
+- **added** : VCFPolicies
 ### filters
 ### graphs
 ### other

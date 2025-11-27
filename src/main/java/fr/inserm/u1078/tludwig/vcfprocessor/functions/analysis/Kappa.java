@@ -7,6 +7,7 @@ import fr.inserm.u1078.tludwig.maok.NumberSeries;
 import fr.inserm.u1078.tludwig.maok.SortedList;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectoryParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.TSVFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParameter;
@@ -45,28 +46,15 @@ public class Kappa extends VCFFunction { //TODO parallelize like in IQS
   @Override
   public Description getDesc() {
     return new Description(this.getSummary())
-            .addLine("See : https://journals.sagepub.com/doi/abs/10.1177/001316446002000104?journalCode=epma and https://en.wikipedia.org/wiki/Cohen%27s_kappa")
-            .addLine("Output format is :")
-            .addColumns(HEADER);
+        .addLine("See : https://journals.sagepub.com/doi/abs/10.1177/001316446002000104?journalCode=epma and https://en.wikipedia.org/wiki/Cohen%27s_kappa")
+        .addLine("Output format is :")
+        .addColumns(HEADER)
+        .addLine("Results are given for the first alternate allele, which is expected to be the same in both files.");
   }
 
   @SuppressWarnings("unused")
   @Override
-  public boolean needVEP() {
-    return false;
-  }
-  
-  @SuppressWarnings("unused")
-  @Override
-  public String getMultiallelicPolicy() {
-    return "Results are given for the first alternate allele, why is expected to be the same in both files."; //TODO change implementation
-  }
-
-  @SuppressWarnings("unused")
-  @Override
-  public String getCustomRequirement() {
-    return null;
-  }
+  public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.NA); }
 
   @Override
   public String getOutputExtension() {
