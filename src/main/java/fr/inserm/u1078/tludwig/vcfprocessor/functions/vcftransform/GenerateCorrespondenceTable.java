@@ -5,8 +5,10 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.StringParameter;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.TSVFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.PGPBouncyCastle;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,7 +18,8 @@ import java.util.Random;
 
 public class GenerateCorrespondenceTable extends VCFFunction {
   private final StringParameter study = new StringParameter("--study", "PG", "2-3 letters symboizing the target study");
-  private final StringParameter ref = new StringParameter("--ref", "1kG", "2-3 letters symboizing the reference panel to anonymize");
+  private final StringParameter ref = new StringParameter(OPT_REF, "1kG", "2-3 letters symboizing the reference panel to anonymize");
+  private final TSVFileParameter table = new TSVFileParameter(OPT_TABLE, "mytable.D34DISH1.PGP.tsv", "The encrypted file containing the correspondence table");
 
   @Override
   public String getOutputExtension() {
@@ -51,8 +54,12 @@ public class GenerateCorrespondenceTable extends VCFFunction {
       hashes.add(i, getHash(hashes));
     }
 
+    //BufferedReader in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(encryptedTable)));
+    StringBuilder out  = new StringBuilder();
     for(int i = 0; i < samples.size(); i++)
-      System.out.println(prefix+hashes.get(i)+"\t"+samples.get(i));
+      out.append("\n").append(prefix+hashes.get(i)+"\t"+samples.get(i));
+
+    PGPBouncyCastle.writeEncryptedFile(table.getFilename(), out.substring(1).getBytes());
   }
 
   public static String getHash(Collection<String> hashes) {

@@ -1,16 +1,20 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcftransform;
 
-import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.TSVFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.PGPBouncyCastle;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -18,6 +22,7 @@ import java.util.regex.Pattern;
 
 public class ApplyCorrespondenceTable extends ParallelVCFFilterFunction {
   private final TSVFileParameter tableFile = new TSVFileParameter(OPT_TABLE, "MyCorrespondenceTable", "Encrypted file containing the correspondence table");
+  private final FileParameter keyFile = new TSVFileParameter("--key", "secret.OIE2S1PK.pgp", "The file containing the secret key");
   private Map<String, String> correspondence;
   private int[] fromTo;
 
@@ -35,7 +40,10 @@ public class ApplyCorrespondenceTable extends ParallelVCFFilterFunction {
     super.begin();
     correspondence = new LinkedHashMap<>();
     try {
-      UniversalReader in = tableFile.getReader();
+      byte[] encryptedTable = PGPBouncyCastle.readEncryptedFile(keyFile.getFilename(), tableFile.getFilename());
+
+      BufferedReader in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(encryptedTable)));
+
       String line;
       while ((line = in.readLine()) != null) {
         String[] f = line.split("\t");
