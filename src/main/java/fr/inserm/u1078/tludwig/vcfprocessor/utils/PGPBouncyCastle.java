@@ -41,6 +41,7 @@ public class PGPBouncyCastle {
   }
 
   public static void writeEncryptedFile(String filename, byte[] data) {
+    start();
     try {
       doWriteEncrypted(data,getPassPhrase(), filename);
     } catch(Exception e){
@@ -49,6 +50,7 @@ public class PGPBouncyCastle {
   }
 
   public static byte[] readEncryptedFile(String privateKeyFile, String filename) {
+    start();
     try {
       return doReadEncrypted(getPassPhrase(), privateKeyFile, filename);
     } catch(Exception e){
