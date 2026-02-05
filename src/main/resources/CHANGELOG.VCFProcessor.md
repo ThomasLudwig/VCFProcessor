@@ -2,7 +2,7 @@
 ### core
 ### functions
 - **added** : `GenerateCorrespondenceTable` Generate a Correspondence Table between a reference panel and an anonymized version
-- **added** : `ApplyCorrespondenceTable` Apply the Correspondence Table to a reference panel VCF
+- **added** : `ApplyCorrespondenceTable` Apply the Correspondence Table to a reference panel VCF.
 ### filters
 ### graphs
 ### other
