@@ -46,7 +46,7 @@ public class GenerateCorrespondenceTable extends VCFFunction {
     ArrayList<String> samples = new ArrayList<>();
     ArrayList<String> hashes = new ArrayList<>();
     for(Sample sample : vcf.getPed().getSamples()) {
-      int i = random.nextInt(samples.size());
+      int i = random.nextInt(samples.size() + 1);
       samples.add(i, sample.getId());
       hashes.add(i, getHash(hashes));
     }
