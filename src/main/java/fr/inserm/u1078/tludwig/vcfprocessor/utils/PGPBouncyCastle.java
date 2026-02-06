@@ -45,10 +45,12 @@ public class PGPBouncyCastle {
       second = readPassPhrase("Repeat that passphrase");
       if(first.equals(second))
         return first;
-      Message.error("Passphrases mismatch");
+      System.err.println("********************");
+      System.err.println("Passphrases mismatch");
+      System.err.println("********************");
     }
 
-    Message.die("Failed to create a passphrase");
+    Message.fatal("Failed to create a passphrase", true);
 
     return "";
   }
