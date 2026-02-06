@@ -40,7 +40,7 @@ public class FloatParameter extends Parameter {
   @Override
   public void parseParameter(String s) throws ParameterException {
     try {
-      this.value = new Double(s);
+      this.value = Double.parseDouble(s);
     } catch (Exception e) {
       throw new ParameterException("Value for " + this.getKey() + " must be an float");
     }

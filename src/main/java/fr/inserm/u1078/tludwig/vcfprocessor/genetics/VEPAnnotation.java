@@ -317,7 +317,7 @@ public class VEPAnnotation { //TODO rewrite this to be 100% compliant with vep91
 
   public int getAlleleNumber() {
     try {
-      return new Integer(this.getValue(VEPFormat.KEY_ALLELE_NUMBER));
+      return Integer.parseInt(this.getValue(VEPFormat.KEY_ALLELE_NUMBER));
     } catch (NumberFormatException e) {
       return -1;
     }

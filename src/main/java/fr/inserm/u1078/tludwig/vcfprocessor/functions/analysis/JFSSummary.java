@@ -70,7 +70,7 @@ public class JFSSummary extends Function {
     for (int i = 0; i <= N; i++) {
       String[] f = lines.get(i).split(T);
       for (int j = 0; j <= N; j++) {
-        count[i][j] = new Integer(f[j]);
+        count[i][j] = Integer.parseInt(f[j]);
         V += count[i][j];
       }
     }

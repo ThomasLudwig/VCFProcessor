@@ -698,7 +698,7 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
     //b) or recompute with AD/DP, per group : no need for annotation, more accurate
     /*for (String abhet : ("" + info.getAnnot(KEY_ABHET)).split(","))
       try {
-        double d = new Double(abhet);
+        double d = Double.parseDouble(abhet);
         if (Math.abs(0.5 - d) > MAX_ABHET_DEV) {
           filter += ";" + FILTER_ABHET;
           break;

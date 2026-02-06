@@ -1,12 +1,13 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.graphs;
 
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
-import java.io.IOException;
-import java.util.ArrayList;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.renderer.PaintScale;
 import org.jfree.data.xy.DefaultXYZDataset;
 import org.jfree.data.xy.XYZDataset;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Graph Function for JFS Results
@@ -56,7 +57,7 @@ public class JFSGraph extends HeatMapGraph {
         String[] f = line.split("\\s+", -1);
         int[] values = new int[f.length];
         for (int x = 0; x < f.length; x++){
-          int val = new Integer(f[x]);
+          int val = Integer.parseInt(f[x]);
           if(val > this.maxValue)
             this.maxValue = val;
           values[x] = val;

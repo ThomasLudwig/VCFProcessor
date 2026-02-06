@@ -285,7 +285,7 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
     String[] s = g.getValue("GP"/*, format*/).split(",");
     double[] d = new double[s.length];
     for (int i = 0; i < s.length; i++)
-      d[i] = new Double(s[i]);
+      d[i] = Double.parseDouble(s[i]);
     return d;
   }
 

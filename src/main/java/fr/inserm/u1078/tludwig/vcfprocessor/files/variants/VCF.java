@@ -856,7 +856,7 @@ public class VCF implements VariantProducer {
             break;
           case "number":
             try {
-              nb = new Integer(kv[1]);
+              nb = Integer.parseInt(kv[1]);
             } catch (NumberFormatException e) {
               switch (kv[1].toUpperCase()) {
                 case "A":

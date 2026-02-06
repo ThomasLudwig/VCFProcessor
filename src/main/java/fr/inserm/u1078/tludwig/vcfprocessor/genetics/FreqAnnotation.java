@@ -81,7 +81,7 @@ public class FreqAnnotation {
         String[] values = value.split(",", -1);
         for (int a = 0; a < nbAlt; a++)
             if (values[a] != null && !values[a].isEmpty())
-              this.frequencies[p][a] = new Double(values[a]);
+              this.frequencies[p][a] = Double.parseDouble(values[a]);
       }
     }    
   }

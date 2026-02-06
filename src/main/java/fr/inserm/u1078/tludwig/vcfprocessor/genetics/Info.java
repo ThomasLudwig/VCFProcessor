@@ -806,7 +806,7 @@ public class Info {
     String value = getAnnot(Info.INBREEDING_COEFF);
     if (value != null)
       try {
-        return new Double(value);
+        return Double.parseDouble(value);
       } catch (NumberFormatException ignore) {
         //Nothing
       }
@@ -835,7 +835,7 @@ public class Info {
       String[] vals = this.getValue(key).split(",");
       int[] ret = new int[vals.length];
       for(int i = 0; i < vals.length; i++)
-        ret[i] = new Integer(vals[i]);
+        ret[i] = Integer.parseInt(vals[i]);
       return ret;
     } catch (Exception ignore) { }
     return null;
@@ -843,7 +843,7 @@ public class Info {
   
   public int getInt(String key, int defaultValue){
     try {
-      return new Integer(this.getValue(key));
+      return Integer.parseInt(this.getValue(key));
     } catch (Exception ignore) { }
     return defaultValue;
   }

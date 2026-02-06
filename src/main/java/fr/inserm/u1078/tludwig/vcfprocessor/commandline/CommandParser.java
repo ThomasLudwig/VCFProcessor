@@ -682,21 +682,21 @@ public class CommandParser {
     String num = s.toLowerCase();
     if (num.endsWith("mb")) {
       num = num.substring(0, num.length() - 2);
-      return 1000000 * new Integer(num);
+      return 1000000 * Integer.parseInt(num);
     }
     if (num.endsWith("kb")) {
       num = num.substring(0, num.length() - 2);
-      return 1000 * new Integer(num);
+      return 1000 * Integer.parseInt(num);
     }
     if (num.endsWith("m")) {
       num = num.substring(0, num.length() - 1);
-      return 1000000 * new Integer(num);
+      return 1000000 * Integer.parseInt(num);
     }
     if (num.endsWith("k")) {
       num = num.substring(0, num.length() - 1);
-      return 1000 * new Integer(num);
+      return 1000 * Integer.parseInt(num);
     }
-    return new Integer(num.replaceAll("b", "b"));//TODO ???
+    return Integer.parseInt(num.replaceAll("b", "b"));//TODO ???
 
   }
 

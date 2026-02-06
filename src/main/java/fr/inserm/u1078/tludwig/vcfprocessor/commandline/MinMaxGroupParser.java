@@ -46,11 +46,11 @@ public class MinMaxGroupParser {
               switch (type) {
                 case TYPE_RATIO:
                   int nbS = this.indices.get(group).size();
-                  double rate = new Double(value.split(":")[1]);
+                  double rate = Double.parseDouble(value.split(":")[1]);
                   min = (int)(rate*nbS*2);
                   break;
                 case TYPE_UNBOUNDED:
-                  min = new Integer(value.split(":")[1]);
+                  min = Integer.parseInt(value.split(":")[1]);
                   break;
               }
             else
@@ -73,11 +73,11 @@ public class MinMaxGroupParser {
               switch (type) {
                 case TYPE_RATIO:
                   int nbS = this.indices.get(group).size();
-                  double rate = new Double(value.split(":")[1]);
+                  double rate = Double.parseDouble(value.split(":")[1]);
                   max = (int)(rate*nbS*2);
                   break;
                 case TYPE_UNBOUNDED:
-                  max = new Integer(value.split(":")[1]);
+                  max = Integer.parseInt(value.split(":")[1]);
                   break;
               }
             else
