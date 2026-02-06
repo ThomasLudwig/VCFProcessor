@@ -4,14 +4,16 @@ import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.DateTools;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
-import static fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description.LEFT_RIGHT_ARROW;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Fasta;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FastaFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+
 import java.util.Date;
+
+import static fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description.LEFT_RIGHT_ARROW;
 
 /**
  * Generates a VCF with Homozygous-to-Reference Genotypes for every given positions and each sample (Alternate is a transition A<->G, C<->T)
@@ -128,7 +130,7 @@ public class GenerateHomoRefForPosition extends Function { //TODO Parallelize
         out[VCF.IDX_CHROM] = f[VCF.IDX_CHROM];
         out[VCF.IDX_POS] = f[VCF.IDX_POS];
         out[VCF.IDX_ID] = ".";
-        out[VCF.IDX_REF] = "" + reference.getCharacterFor(out[VCF.IDX_CHROM], new Long(out[VCF.IDX_POS]));
+        out[VCF.IDX_REF] = "" + reference.getCharacterFor(out[VCF.IDX_CHROM], Long.parseLong(out[VCF.IDX_POS]));
         out[VCF.IDX_ALT] = "" + transition(out[VCF.IDX_REF].charAt(0));
         out[VCF.IDX_QUAL] = "2000";
         out[VCF.IDX_FILTER] = "PASS";

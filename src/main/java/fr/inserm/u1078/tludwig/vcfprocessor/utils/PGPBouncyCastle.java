@@ -97,13 +97,13 @@ public class PGPBouncyCastle {
 
     PGPKeyPair pgpKeyPair = new JcaPGPKeyPair(PGPPublicKey.RSA_GENERAL, kp, new Date());
 
-    PGPDigestCalculator sha256 =
+    PGPDigestCalculator sha1 =
         new JcaPGPDigestCalculatorProviderBuilder()
             .build()
-            .get(HashAlgorithmTags.SHA256);
+            .get(HashAlgorithmTags.SHA1);
 
     PBESecretKeyEncryptor encryptor =
-        new JcePBESecretKeyEncryptorBuilder(PGPEncryptedData.AES_256, sha256)
+        new JcePBESecretKeyEncryptorBuilder(PGPEncryptedData.AES_256, sha1)
             .setProvider("BC")
             .build(passphrase);
 
@@ -111,7 +111,7 @@ public class PGPBouncyCastle {
         PGPSignature.POSITIVE_CERTIFICATION,
         pgpKeyPair,
         identity,
-        sha256,
+        sha1,
         null,
         null,
         new JcaPGPContentSignerBuilder(pgpKeyPair.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1),
