@@ -81,7 +81,20 @@ public class PGPBouncyCastle {
   public static byte[] readEncryptedFile(String privateKeyFile, String filename) {
     start();
     try {
-      return doReadEncrypted(askPassPhrase(), privateKeyFile, filename);
+      PGPSecretKeyRingCollection secrets = new PGPSecretKeyRingCollection(PGPUtil.getDecoderStream(Files.newInputStream(Path.of(privateKeyFile))), new JcaKeyFingerprintCalculator());
+
+      int tries = 3;
+      PGPPrivateKey privateKey = null;
+      while(tries-- > 0){
+        try {
+          privateKey = extractPrivateKey(secrets, askPassPhrase().toCharArray());
+        } catch(Exception e){
+          System.err.println("Passphrase does not match encryption key. Try again.");
+        }
+      }
+      if(privateKey == null)
+        Message.fatal("Passphrase does not match encryption key", true);
+      return doReadEncrypted(privateKey, filename);
     } catch(Exception e){
       Message.fatal("Could not read encrypted file ["+filename+"]", e, true);
       return new byte[0];
@@ -107,14 +120,9 @@ public class PGPBouncyCastle {
     //Arrays.fill(passphrase, '\0');
   }
 
-  public static byte[] doReadEncrypted(String passphrase, String privateKeyFile, String encryptedFile) throws Exception {
-    PGPSecretKeyRingCollection secrets = new PGPSecretKeyRingCollection(PGPUtil.getDecoderStream(Files.newInputStream(Path.of(privateKeyFile))), new JcaKeyFingerprintCalculator());
-    PGPPrivateKey privateKey = extractPrivateKey(secrets, passphrase.toCharArray());
-
+  public static byte[] doReadEncrypted(PGPPrivateKey privateKey, String encryptedFile) throws Exception {
     byte[] encrypted = Files.readAllBytes(Path.of(encryptedFile));
-    byte[] plaintext = decrypt(encrypted, privateKey);
-
-    return plaintext;
+    return decrypt(encrypted, privateKey);
   }
 
 
