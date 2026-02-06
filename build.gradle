@@ -48,8 +48,8 @@ dependencies {
     implementation 'com.jtattoo:JTattoo:1.6.13'
     implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
     implementation 'org.jdom:jdom2:2.0.6.1'
-    implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.78'
-    implementation group: 'org.bouncycastle', name: 'bcpg-jdk18on', version: '1.78'
+    implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.83'
+    implementation group: 'org.bouncycastle', name: 'bcpg-jdk18on', version: '1.83'
 }
 
 tasks.register('Release', Jar) {

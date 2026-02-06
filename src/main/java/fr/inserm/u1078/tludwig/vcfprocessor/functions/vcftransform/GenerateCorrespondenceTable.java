@@ -19,7 +19,7 @@ import java.util.Random;
 public class GenerateCorrespondenceTable extends VCFFunction {
   private final StringParameter study = new StringParameter("--study", "PG", "2-3 letters symboizing the target study");
   private final StringParameter ref = new StringParameter(OPT_REF, "1kG", "2-3 letters symboizing the reference panel to anonymize");
-  private final TSVFileParameter table = new TSVFileParameter(OPT_TABLE, "mytable.D34DISH1.PGP.tsv", "The encrypted file containing the correspondence table");
+  private final TSVFileParameter table = new TSVFileParameter(OPT_TABLE, "mytable.PGP.tsv", "The encrypted file containing the correspondence table");
 
   @Override
   public String getOutputExtension() {
