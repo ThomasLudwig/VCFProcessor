@@ -40,13 +40,13 @@ public class PGPBouncyCastle {
     String first = "first";
     String second = "second";
     int tries = 5;
-    while(!first.equals(second) && tries-- > 0){
+    while(tries-- > 0){
       first = readPassPhrase("Please create a passphrase for this encryption key");
       second = readPassPhrase("Repeat that passphrase");
+      if(first.equals(second))
+        return first;
+      Message.error("Passphrases mismatch");
     }
-
-    if(first.equals(second))
-      return first;
 
     Message.die("Failed to create a passphrase");
 
@@ -64,7 +64,7 @@ public class PGPBouncyCastle {
           "No console available (are you running from an IDE or redirected stdin?)"
       );
     }
-    return String.copyValueOf(console.readPassword("%s", prompt));
+    return String.copyValueOf(console.readPassword("%s", prompt+": "));
   }
 
   public static void writeEncryptedFile(String filename, byte[] data) {
