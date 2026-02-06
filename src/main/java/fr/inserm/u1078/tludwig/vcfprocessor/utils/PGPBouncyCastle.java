@@ -114,7 +114,7 @@ public class PGPBouncyCastle {
         sha256,
         null,
         null,
-        new JcaPGPContentSignerBuilder(pgpKeyPair.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA256),
+        new JcaPGPContentSignerBuilder(pgpKeyPair.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1),
         encryptor
     );
   }
