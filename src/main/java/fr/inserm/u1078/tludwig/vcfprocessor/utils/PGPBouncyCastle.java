@@ -36,14 +36,41 @@ public class PGPBouncyCastle {
     return String.valueOf(session);
   }
 
-  public static String getPassPhrase(){
-    return "mypasword";
+  public static String createPassPhrase(){
+    String first = "first";
+    String second = "second";
+    int tries = 5;
+    while(!first.equals(second) && tries-- > 0){
+      first = readPassPhrase("Please create a passphrase for this encryption key");
+      second = readPassPhrase("Repeat that passphrase");
+    }
+
+    if(first.equals(second))
+      return first;
+
+    Message.die("Failed to create a passphrase");
+
+    return "";
+  }
+
+  public static String askPassPhrase(){
+    return readPassPhrase("Please enter the passphrase for this encryption key");
+  }
+
+  public static String readPassPhrase(String prompt){
+    Console console = System.console();
+    if (console == null) {
+      throw new IllegalStateException(
+          "No console available (are you running from an IDE or redirected stdin?)"
+      );
+    }
+    return String.copyValueOf(console.readPassword("%s", prompt));
   }
 
   public static void writeEncryptedFile(String filename, byte[] data) {
     start();
     try {
-      doWriteEncrypted(data,getPassPhrase(), filename);
+      doWriteEncrypted(data,createPassPhrase(), filename);
     } catch(Exception e){
       Message.fatal("Could not write encrypted file ["+filename+"]", e, true);
     }
@@ -52,7 +79,7 @@ public class PGPBouncyCastle {
   public static byte[] readEncryptedFile(String privateKeyFile, String filename) {
     start();
     try {
-      return doReadEncrypted(getPassPhrase(), privateKeyFile, filename);
+      return doReadEncrypted(askPassPhrase(), privateKeyFile, filename);
     } catch(Exception e){
       Message.fatal("Could not read encrypted file ["+filename+"]", e, true);
       return new byte[0];
