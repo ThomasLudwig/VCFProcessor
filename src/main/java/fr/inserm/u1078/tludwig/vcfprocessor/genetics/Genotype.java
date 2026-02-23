@@ -55,11 +55,13 @@ public class Genotype {
   public static int[] getAlleles(String geno) {
     if(geno.startsWith("."))
       return null;
-    String[] genos = geno.split("[/\\|]"); //split by / or |
+    String[] genos = geno.split("[/\\|]", -1); //split by / or |
     int[] all = new int[genos.length];
     for(int i = 0 ; i < all.length; i++) {
       try {
         all[i] = Integer.parseInt(genos[i]);
+        if(all[i] == 63)
+          Message.error("Genotype error : ["+geno+"]");
       } catch(NumberFormatException e){
         Message.error("Could not get alleles from the genotype ["+geno+"]");
       }
