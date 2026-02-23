@@ -1,4 +1,4 @@
-## 1.2.8 (2026-02-23**s**)
+## 1.2.8 (2026-02-23)
 ### core
 - **debug** : `Genotype` from haploid BCF/VCF files 
 ### functions
