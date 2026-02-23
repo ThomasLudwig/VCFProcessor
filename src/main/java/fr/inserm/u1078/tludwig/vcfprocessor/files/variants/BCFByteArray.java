@@ -44,13 +44,13 @@ public class BCFByteArray extends ByteArray {
     boolean allMissing = true;
     for(int i = 0 ; i < ad.getLength(); i++) {
       int v = readInt(ad.getType());
-      if( v == 0)
+      if( v == 0 || convert(v) == 63)
         sValues[i] = ".";
       else {
         allMissing = false;
         if(v % 2 == 1)
           phased = "|";
-        sValues[i] = "" + (((v/*&0xFE*/) >> 1)-1);
+        sValues[i] = "" + convert(v);
         if(sValues[i].equals("63")){
           Message.error("Error in genotypes");
           Message.error(ad.toString());
@@ -61,6 +61,10 @@ public class BCFByteArray extends ByteArray {
     if(allMissing)
       return ".";
     return String.join(phased, sValues);
+  }
+
+  public static int convert(int v){
+    return (((v/*&0xFE*/) >> 1)-1);
   }
 
   /**
