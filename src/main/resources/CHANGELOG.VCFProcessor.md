@@ -2,6 +2,7 @@
 ### core
 - **debug** : `Genotype` from haploid BCF/VCF files 
 ### functions
+- **fixed** : `SampleStats` NonStar managment 
 - **added** : `GenerateCorrespondenceTable` Generate a Correspondence Table between a reference panel and an anonymized version
 - **added** : `ApplyCorrespondenceTable` Apply the Correspondence Table to a reference panel VCF.
 ### filters

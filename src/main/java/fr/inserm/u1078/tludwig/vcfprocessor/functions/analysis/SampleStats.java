@@ -124,8 +124,8 @@ public class SampleStats extends ParallelVCFVariantPedFunction<SampleStats.Analy
 
     for (int i = 0 ; i < nonStar.length ; i++) {
       int a = nonStar[i];
-      ts[a] = variant.isTransition(a);
-      tv[a] = variant.isTransversion(a);
+      ts[i] = variant.isTransition(a);
+      tv[i] = variant.isTransversion(a);
     }
 
     for (int s = 0; s < S; s++) {
