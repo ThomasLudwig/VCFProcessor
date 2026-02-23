@@ -44,8 +44,10 @@ public class BCFByteArray extends ByteArray {
     boolean allMissing = true;
     for(int i = 0 ; i < ad.getLength(); i++) {
       int v = readInt(ad.getType());
-      if( v == 0 || convert(v) == 63)
+      if( v == 0)
         sValues[i] = ".";
+      if(convert(v) == 63)
+        sValues[i] = "remove";
       else {
         allMissing = false;
         if(v % 2 == 1)
@@ -60,7 +62,12 @@ public class BCFByteArray extends ByteArray {
     }
     if(allMissing)
       return ".";
-    return String.join(phased, sValues);
+    StringBuilder ret = new StringBuilder(sValues[0]);
+    for(int i = 1; i < sValues.length; i++)
+      if(!sValues[i].equals("remove"))
+        ret.append(phased).append(sValues[i]);
+
+    return ret.toString();
   }
 
   public static int convert(int v){
