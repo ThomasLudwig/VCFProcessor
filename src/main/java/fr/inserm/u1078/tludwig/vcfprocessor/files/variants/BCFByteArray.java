@@ -49,7 +49,7 @@ public class BCFByteArray extends ByteArray {
         allMissing = false;
         if(v % 2 == 1)
           phased = "|";
-        sValues[i] = "" + (((v/*&0xFE*/) >> 1)-1);
+        sValues[i] = "" + (((v&0xFE) >> 1)-1);
       }
     }
     if(allMissing)

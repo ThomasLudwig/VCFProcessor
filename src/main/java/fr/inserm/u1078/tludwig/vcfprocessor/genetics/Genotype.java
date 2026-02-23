@@ -57,21 +57,15 @@ public class Genotype {
       return null;
     String[] genos = geno.split("[/\\|]", -1); //split by / or |
     int[] all = new int[genos.length];
-    int last = 0;
     for(int i = 0 ; i < all.length; i++) {
       try {
         all[i] = Integer.parseInt(genos[i]);
-        if(all[i] < 63)
-          last = i;
       } catch(NumberFormatException e){
         Message.error("Could not get alleles from the genotype ["+geno+"]");
       }
     }
 
-    if(all.length == last) return all;
-    int[] sub = new int[last + 1];
-    System.arraycopy(all, 0, sub, 0, last + 1);
-    return sub;
+    return all;
   }
 
   public final void setTo(Genotype replacement) {
