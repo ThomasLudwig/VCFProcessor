@@ -400,5 +400,12 @@ public class BCFByteArray extends ByteArray {
     public DataType getType() {
       return type;
     }
+
+
+    @Override
+    public String toString() {
+      return length + " " + type;
+    }
   }
+
 }
