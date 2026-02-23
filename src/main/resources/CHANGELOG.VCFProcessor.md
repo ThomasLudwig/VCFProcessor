@@ -1,3 +1,14 @@
+## 1.2.8 (2026-02-23)
+### core
+- **debug** : `Genotype` from haploid BCF/VCF files 
+### functions
+- **fixed** : `SampleStats` NonStar managment 
+- **added** : `GenerateCorrespondenceTable` Generate a Correspondence Table between a reference panel and an anonymized version
+- **added** : `ApplyCorrespondenceTable` Apply the Correspondence Table to a reference panel VCF.
+### filters
+### graphs
+### other
+
 ## 1.2.7 (2025-11-19)
 ### core
 - **removed** : HTSJDK now as a stand-alone project

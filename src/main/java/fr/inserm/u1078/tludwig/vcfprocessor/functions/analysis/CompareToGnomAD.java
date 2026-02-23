@@ -144,7 +144,7 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
         String[] acs = info.substring(3).split(",");
         int[] ret = new int[acs.length];
         for(int i = 0 ; i < acs.length; i++)
-          ret[i] = new Integer(acs[i]);
+          ret[i] = Integer.parseInt(acs[i]);
         return ret;
     }
     return new int[]{-1};
@@ -153,7 +153,7 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
   private static int getAN(String[] infos){
     for(String info : infos)
       if(info.startsWith("AN="))
-        return new Integer(info.substring(3));    
+        return Integer.parseInt(info.substring(3));
     return -1;
   }
   

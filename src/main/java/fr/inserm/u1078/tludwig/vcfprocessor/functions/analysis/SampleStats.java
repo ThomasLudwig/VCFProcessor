@@ -122,9 +122,10 @@ public class SampleStats extends ParallelVCFVariantPedFunction<SampleStats.Analy
     variant.recomputeACAN();
     int[] acs = variant.getAC();
 
-    for (int a : nonStar) {
-      ts[a] = variant.isTransition(a);
-      tv[a] = variant.isTransversion(a);
+    for (int i = 0 ; i < nonStar.length ; i++) {
+      int a = nonStar[i];
+      ts[i] = variant.isTransition(a);
+      tv[i] = variant.isTransversion(a);
     }
 
     for (int s = 0; s < S; s++) {
@@ -141,20 +142,22 @@ public class SampleStats extends ParallelVCFVariantPedFunction<SampleStats.Analy
         //lDepths[s] = Math.max(geno.getSumAD(), geno.getDP()); //changed to get the same results as vcftools and bcftools
         if(geno.isHeterozygousDiploid())
           lHets[s]++;
-        for (int a : nonStar)
+        for (int i = 0 ; i < nonStar.length ; i++) {
+          int a = nonStar[i];
           if (geno.hasAllele(a)) {
             lVariants[s]++;
             int ac = geno.getCount(a);
-            if(ac == acs[a])
-              lSingletons[s] ++;
-            
-            if (ts[a])
+            if (ac == acs[a])
+              lSingletons[s]++;
+
+            if (ts[i])
               lTransitions[s]++;
-            else if (tv[a])
+            else if (tv[i])
               lTransversions[s]++;
             if (geno.isHomozygousOrHaploid())
               lHomAlts[s]++;
           }
+        }
       }
     }
     this.pushAnalysis(new Analysis(lTransitions, lTransversions, lHomAlts, lVariants, lHets, lDepths, lSingletons, lMissings));

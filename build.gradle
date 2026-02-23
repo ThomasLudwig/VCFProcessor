@@ -2,6 +2,12 @@ plugins {
     id 'java'
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
 group 'fr.inserm.u1078'
 version Version.getVersion()
 
@@ -48,6 +54,8 @@ dependencies {
     implementation 'com.jtattoo:JTattoo:1.6.13'
     implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
     implementation 'org.jdom:jdom2:2.0.6.1'
+    implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.83'
+    implementation group: 'org.bouncycastle', name: 'bcpg-jdk18on', version: '1.83'
 }
 
 tasks.register('Release', Jar) {
@@ -58,6 +66,11 @@ tasks.register('Release', Jar) {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
+
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+
     with jar
 }
 
