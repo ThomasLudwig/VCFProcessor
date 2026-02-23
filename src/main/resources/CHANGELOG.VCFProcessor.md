@@ -1,5 +1,6 @@
 ## 1.2.8 (2026-02-04)
 ### core
+- **debug** : `Genotype` from haploid BCF/VCF files
 ### functions
 - **added** : `GenerateCorrespondenceTable` Generate a Correspondence Table between a reference panel and an anonymized version
 - **added** : `ApplyCorrespondenceTable` Apply the Correspondence Table to a reference panel VCF.

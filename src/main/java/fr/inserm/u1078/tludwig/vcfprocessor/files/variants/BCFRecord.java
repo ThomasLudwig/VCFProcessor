@@ -1,6 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
+import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.AbstractRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.*;
 
@@ -382,8 +383,15 @@ public class BCFRecord extends VariantRecord {
     if (geno != null && !geno.isEmpty()) {
       int[] alleles = Genotype.getAlleles(geno);
       if(alleles != null)
-        for(int a : alleles)
-          acs[a]++;
+        for(int a : alleles){
+          try {
+            acs[a]++;
+          } catch(Exception e) {
+            Message.fatal("allelles = "+a, false);
+            Message.error("array:"+StringTools.join(",", alleles));
+            Message.die("Bye");
+          }
+        }
     }
     return acs;
   }
