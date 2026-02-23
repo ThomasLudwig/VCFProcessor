@@ -1,5 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
+import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.ByteArray;
 
 /**
@@ -49,7 +50,12 @@ public class BCFByteArray extends ByteArray {
         allMissing = false;
         if(v % 2 == 1)
           phased = "|";
-        sValues[i] = "" + (((v&0xFE) >> 1)-1);
+        sValues[i] = "" + (((v/*&0xFE*/) >> 1)-1);
+        if(sValues[i].equals("63")){
+          Message.error("Error in genotypes");
+          Message.error(ad.toString());
+          Message.die("error in genotypes");
+        }
       }
     }
     if(allMissing)
