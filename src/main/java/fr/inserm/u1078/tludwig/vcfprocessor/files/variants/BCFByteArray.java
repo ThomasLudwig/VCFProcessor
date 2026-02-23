@@ -46,7 +46,7 @@ public class BCFByteArray extends ByteArray {
       int v = readInt(ad.getType());
       if( v == 0)
         sValues[i] = ".";
-      if(convert(v) == 63)
+      else if(convert(v) == 63)
         sValues[i] = "remove";
       else {
         allMissing = false;
@@ -62,6 +62,7 @@ public class BCFByteArray extends ByteArray {
     }
     if(allMissing)
       return ".";
+
     StringBuilder ret = new StringBuilder(sValues[0]);
     for(int i = 1; i < sValues.length; i++)
       if(!sValues[i].equals("remove"))
