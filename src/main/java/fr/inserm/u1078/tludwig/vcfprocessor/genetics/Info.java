@@ -14,7 +14,7 @@ import java.util.*;
  */
 public class Info {
 
-  enum Type {String, Character, Integer, Float, Flag}
+  public enum Type {String, Character, Integer, Float, Flag}
 
   //TODO rewrite to parse correctly (type, number...) get from header, throw exception ....
   public static final String INFO_TYPE_INTEGER = "Integer";
