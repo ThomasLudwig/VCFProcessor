@@ -1,8 +1,18 @@
+## 1.2.9 (2026-03-12)
+### core
+- **optimized** : Gradle/maven
+- **added** : `ParallelVCFFunction.asOutput(VariantRecord)`
+- **addedd** : `Info.newHeader()`
+### functions
+### filters
+### graphs
+### other
+
 ## 1.2.8 (2026-02-23)
 ### core
-- **debug** : `Genotype` from haploid BCF/VCF files 
+- **debug** : `Genotype` from haploid BCF/VCF files
 ### functions
-- **fixed** : `SampleStats` NonStar managment 
+- **fixed** : `SampleStats` NonStar managment
 - **added** : `GenerateCorrespondenceTable` Generate a Correspondence Table between a reference panel and an anonymized version
 - **added** : `ApplyCorrespondenceTable` Apply the Correspondence Table to a reference panel VCF.
 ### filters

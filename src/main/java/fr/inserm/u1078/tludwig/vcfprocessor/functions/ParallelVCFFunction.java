@@ -94,6 +94,10 @@ public abstract class ParallelVCFFunction<T> extends VCFFunction {
     return new String[]{variant.toString()};
   }
 
+  public static String[] asOutput(VariantRecord variant){
+    return new String[]{variant.toString()};
+  }
+
   @SuppressWarnings("unused")
   @Override
   public final void executeFunction() throws Exception {

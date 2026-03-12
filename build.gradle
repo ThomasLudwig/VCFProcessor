@@ -12,9 +12,7 @@ group 'fr.inserm.u1078'
 version Version.getVersion()
 
 class Version{
-    Version(){
-
-    }
+    Version(){ }
 
     static String getVersion(){
         try {
@@ -36,29 +34,25 @@ class Version{
 
 repositories {
     ivy {
-        url 'https://lysine.univ-brest.fr/maven/'
-        patternLayout {
-            artifact 'artifact/[organisation]/[module]-[revision].[ext]'
-            ivy 'ivy/[organisation]/[module]/[revision]/ivy.xml'
-            m2compatible = true
-        }
+        url = uri('http://lysine.univ-brest.fr/maven/')
+        allowInsecureProtocol = true  // Required Gradle 7+
     }
     mavenCentral()
 }
 
 dependencies {
-    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
-    implementation group: 'fr.inserm.u1078', name: 'MaokLib', version: '1.0.6'
-    implementation group: 'fr.inserm.u1078', name: 'HTSJDKMaok', version: '1.0.0'
-    implementation group: 'jfree', name: 'jfreechart', version: '1.0.13'
+    //testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    implementation 'fr.inserm.u1078:MaokLib:1.0.7'
+    implementation 'fr.inserm.u1078:HTSJDKMaok:1.0.0'
+    implementation 'jfree:jfreechart:1.0.13'
     implementation 'com.jtattoo:JTattoo:1.6.13'
-    implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
+    implementation 'org.apache.commons:commons-math3:3.0'
     implementation 'org.jdom:jdom2:2.0.6.1'
-    implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.83'
-    implementation group: 'org.bouncycastle', name: 'bcpg-jdk18on', version: '1.83'
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.83'
+    implementation 'org.bouncycastle:bcpg-jdk18on:1.83'
 }
 
-tasks.register('Release', Jar) {
+tasks.register('release', Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes 'Main-Class': 'fr.inserm.u1078.tludwig.vcfprocessor.Run'
@@ -74,14 +68,14 @@ tasks.register('Release', Jar) {
     with jar
 }
 
-tasks.register('Deploy', Copy) {
+tasks.register('deploy', Copy) {
     from "build/libs"
     into "build/libs"
     include "/${rootProject.name}-${version}.jar"
     rename { String fileName -> fileName.replace("-${version}", "") }
 }
 
-Deploy.dependsOn(Release)
+deploy.dependsOn(release)
 
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
