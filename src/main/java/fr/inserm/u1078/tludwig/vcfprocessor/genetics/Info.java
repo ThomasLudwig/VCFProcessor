@@ -14,6 +14,8 @@ import java.util.*;
  */
 public class Info {
 
+  public enum Type {String, Character, Integer, Float, Flag}
+
   //TODO rewrite to parse correctly (type, number...) get from header, throw exception ....
   public static final String INFO_TYPE_INTEGER = "Integer";
   public static final String INFO_TYPE_FLOAT = "Float";
@@ -71,6 +73,63 @@ public class Info {
       return ret.substring(1);
     else
       return "";
+  }
+
+  /**
+   *
+   * @param id (required) the id of the info field
+   * @param number (required) 0,1,2,3... A=1 per alt allele, R=1 per allele including ref, G=1per possible genotype, .=variable
+   * @param type (required) String, Character, Integer, Float, Flag(Number=0)
+   * @param description (required) the description of the field
+   * @param source (optional)
+   * @param version (optional)
+   * @return
+   */
+  public static String newHeader(String id, String number, Type type, String description, String source, String version){
+    check(id, number, type);
+    final String outId = "ID="+id;
+    String outNumber = "Number="+number;
+    String outType = "Type="+type;
+    final String outDescription = "Description=\""+description+"\"";
+    final String outSource = "Description=\""+source+"\"";
+    final String outVersion = "Description=\""+version+"\"";
+    if(number.equals(0) || type==Type.Flag) {
+      outNumber = "Number=0";
+      outType = "Type="+Type.Flag;
+    }
+    String ret = "##INFO=<" + String.join(",", outId, outNumber, outType, outDescription);
+    if(source != null)
+      ret += ","+outSource;
+    if(version != null)
+      ret += ","+outVersion;
+    return ret + ">";
+  }
+
+  public static void check(String id, String number, Type type){
+    if(number.equals(0) && type != Type.Flag){
+      Message.warning("For new INFO ID ["+id+"] Type is ["+type+"] and should be ["+Type.Flag+"] when Number=0");
+    }
+    if(!number.equals(0) && type == Type.Flag){
+      Message.warning("For new INFO ID ["+id+"] Number is ["+number+"] and should be ["+0+"] when Type=["+type+"]");
+    }
+    boolean valid = false;
+    try{
+      int n =  Integer.parseInt(number);
+      valid = true;
+    } catch(NumberFormatException ignore){}
+    switch(number){
+      case "A":
+      case "R":
+      case "G":
+      case ".":
+        valid=true;
+        break;
+      default:
+        break;
+    }
+    if(!valid){
+      Message.warning("For new INFO ID ["+id+"] Number is ["+number+"] and should be a Number of one of A/R/G/.");
+    }
   }
 
   public final String getAnnot(String key) {
