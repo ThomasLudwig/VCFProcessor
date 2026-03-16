@@ -23,11 +23,11 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class ParallelVCFFunction<T> extends VCFFunction {
 
+
   public static final int QUEUE_DEPTH = 200;
   public static final int STEP = 10000;
 
   public static final String[] NO_OUTPUT = new String[]{};
-  public static final int WORKERS = Math.max(1, Math.min(8, Runtime.getRuntime().availableProcessors() - 3));//Number of workers, there must be one consumer and one reader
 
   private VCF vcf;
   private LinkedBlockingQueue<Output> outputLines;
@@ -101,13 +101,14 @@ public abstract class ParallelVCFFunction<T> extends VCFFunction {
   @SuppressWarnings("unused")
   @Override
   public final void executeFunction() throws Exception {
+    final int workers = isMonoThread() ? 1 : Math.max(1, Math.min(8, Runtime.getRuntime().availableProcessors() - 3));//Number of workers, there must be one consumer and one reader
     this.openVCF();
 
     this.begin();
     this.printHeaders();
-    this.outputLines = new LinkedBlockingQueue<>(20 * WORKERS);
+    this.outputLines = new LinkedBlockingQueue<>(20 * workers);
 
-    ExecutorService threadPool = Executors.newFixedThreadPool(WORKERS + 2, new WellBehavedThreadFactory());
+    ExecutorService threadPool = Executors.newFixedThreadPool(workers + 2, new WellBehavedThreadFactory());
 
 
     analyzer = new Analyzer();
@@ -117,7 +118,7 @@ public abstract class ParallelVCFFunction<T> extends VCFFunction {
       Reader reader = getVCF().getReaderAndStart();
       threadPool.submit(new Consumer());
 
-      for (int i = 0; i < WORKERS; i++)
+      for (int i = 0; i < workers; i++)
         threadPool.submit(new Worker(reader));
 
       threadPool.shutdown();

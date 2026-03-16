@@ -1,3 +1,11 @@
+## 1.2.10 (2026-03-15)
+### core
+- **added** : Possibility to run in monothread mode
+### functions
+### filters
+### graphs
+### other
+
 ## 1.2.9 (2026-03-12)
 ### core
 - **optimized** : Gradle/maven
