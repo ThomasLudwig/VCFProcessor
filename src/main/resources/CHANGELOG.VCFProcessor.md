@@ -1,6 +1,6 @@
 ## 1.2.10 (2026-03-15)
 ### core
-- **added** : Possibility to run in mono thread mode
+- **added** : Possibility to run in monothread mode
 ### functions
 ### filters
 ### graphs
