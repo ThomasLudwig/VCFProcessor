@@ -27,7 +27,6 @@ public abstract class SAMFunction<T> extends Function {
   private SAM sam;
   public static final int STEP1000000 = 1000000;
   public static final int QUEUE_DEPTH = 200;
-  public static final int WORKERS = Math.max(1, Math.min(8, Runtime.getRuntime().availableProcessors() - 3));//Number of workers, there must be one consumer and one reader
   private LinkedBlockingQueue<SAMFunction.Output> outputLines;
   private Analyzer analyzer;
 
@@ -42,15 +41,15 @@ public abstract class SAMFunction<T> extends Function {
   @SuppressWarnings("unused")
   @Override
   public final void executeFunction() throws Exception {
+    final int workers = isMonoThread() ? 1 : Math.max(1, Math.min(8, Runtime.getRuntime().availableProcessors() - 3));//Number of workers, there must be one consumer and one reader
     Bed bed = null; //TODO fetch
     this.openBAM(bed);
 
     this.begin();
     this.printHeaders();
-    this.outputLines = new LinkedBlockingQueue<>(20 * WORKERS);
+    this.outputLines = new LinkedBlockingQueue<>(20 * workers);
 
-    ExecutorService threadPool = Executors.newFixedThreadPool(WORKERS + 2, new WellBehavedThreadFactory());
-
+    ExecutorService threadPool = Executors.newFixedThreadPool(workers + 2, new WellBehavedThreadFactory());
 
     analyzer = new Analyzer();
     analyzer.start();
@@ -59,7 +58,7 @@ public abstract class SAMFunction<T> extends Function {
       SAM.Reader reader = getSAM().getReaderAndStart();
       threadPool.submit(new Consumer());
 
-      for (int i = 0; i < WORKERS; i++)
+      for (int i = 0; i < workers; i++)
         threadPool.submit(new Worker(reader));
 
       threadPool.shutdown();

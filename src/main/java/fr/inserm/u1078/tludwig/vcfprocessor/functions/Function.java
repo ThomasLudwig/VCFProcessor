@@ -32,6 +32,8 @@ import java.util.Date;
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 20 mai 2015
  */
 public abstract class Function {
+  private static boolean isMonoThread = false;
+
   public static final String OPT_REF = "--ref"; //TODO OPT as enum ? why, less flexible
   public static final String OPT_CPU = "--cpu";
   public static final String OPT_TPED = "--tped";
@@ -191,6 +193,9 @@ public abstract class Function {
   public static boolean isOutputBgzipped(){
     return BGZIPPED_OUTPUT;
   }
+
+  public static void setMonoThread(){ isMonoThread = true; }
+  public static boolean isMonoThread(){ return isMonoThread; }
 
   public final boolean start(String[] args) { //TODO not called, except through reflect... hard to debug
     StringBuilder msg = new StringBuilder();

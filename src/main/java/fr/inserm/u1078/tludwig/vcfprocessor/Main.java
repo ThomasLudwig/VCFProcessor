@@ -44,10 +44,11 @@ public class Main {
   public static final String KEY_SCRIPT = "--alltestingscripts";
   public static final String KEY_SCRIPTS = "--scriptsforfunction";
   public static final String KEY_DEBUG = "--debug";
+  public static final String KEY_MONO_THREAD = "--monothread";
   public static final String KEY_VERBOSE = "--verbose";
   public static final String KEY_GZ = "--gz";
   public static final String KEY_PLUGIN = "--plugin";
-  public static final String[] ALLOWED_KEYS = {KEY_DEBUG, KEY_VERBOSE, KEY_GZ, KEY_PLUGIN};
+  public static final String[] ALLOWED_KEYS = {KEY_DEBUG, KEY_MONO_THREAD, KEY_VERBOSE, KEY_GZ, KEY_PLUGIN};
 
   private static String[] args = null;
   private static final Date START = new Date();
@@ -242,6 +243,9 @@ public class Main {
           break;
         case KEY_GZ:
           Function.setOutputBgzipped();
+          break;
+        case KEY_MONO_THREAD:;
+          Function.setMonoThread();
           break;
       }
     }
