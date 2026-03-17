@@ -186,6 +186,7 @@ public class Genotype {
   public boolean isHomozygous(){
     return
         !isMissing()
+        && !isHaploid()
         && alleles[0] == alleles[1];
   }
   
