@@ -24,6 +24,7 @@ public class Variant implements Comparable<Variant> {
   private final GenotypeFormat format;
   private final Genotype[] genotypes;
   private final String[] alleles;
+  private final VariantType[] variantTypes;
   //private Effect[] effect = null; //TODO rewrite
 //  private StringTree tree = null;
   private int[] ac;
@@ -40,6 +41,7 @@ public class Variant implements Comparable<Variant> {
     format = null;
     genotypes = null;
     alleles = null;
+    variantTypes = null;
   }
 
   public Variant(String chrom, int pos, String id, String ref, String alt, String qual, String filter, Info info, GenotypeFormat format, Genotype[] genotypes) throws VariantException {
@@ -55,7 +57,7 @@ public class Variant implements Comparable<Variant> {
     this.alleles = new String[alter.length + 1];
     this.alleles[0] = ref;
     this.ac = new int[alleles.length];
-    
+
     this.an = 0;
 
     for (int i = 0 ; i < genotypes.length; i++) {
@@ -70,6 +72,9 @@ public class Variant implements Comparable<Variant> {
           }
     }
     System.arraycopy(alter, 0, alleles, 1, alter.length);
+    variantTypes = new VariantType[alleles.length];
+    for(int a = 0 ; a < alleles.length ; a++)
+      variantTypes[a] = getVariantType(alleles[0], alleles[a]);
 //    this.effect = new Effect[this.alleles.length];
     this.link();
   }
@@ -565,35 +570,7 @@ public class Variant implements Comparable<Variant> {
     return Ped.getGroups(this.getSamplesWithAllele(a));
   }
 
-  public boolean isTransition(int allele) {
-    String al = this.alleles[allele].toUpperCase();
-    switch (this.alleles[0].toUpperCase()) {
-      case "A":
-        return al.equals("G");
-      case "C":
-        return al.equals("T");
-      case "G":
-        return al.equals("A");
-      case "T":
-        return al.equals("C");
-      default:
-        return false;
-    }
-  }
-
-  public boolean isTransversion(int allele) {
-    String al = this.alleles[allele].toUpperCase();
-    switch (this.alleles[0].toUpperCase()) {
-      case "A":
-      case "G":
-        return al.equals("C") || al.equals("T");
-      case "C":
-      case "T":
-        return al.equals("A") || al.equals("G");
-      default :
-        return false;
-    }
-  }
+  public VariantType getVariantType(int allele){ return variantTypes[allele]; }
 
   public Canonical getCanonical(int allele) {
     return new Canonical(this.getChromNumber(), this.getPos(), this.getRef(), this.getAllele(allele));
@@ -702,4 +679,28 @@ public class Variant implements Comparable<Variant> {
     }
     return afs;
   }
+
+  public static VariantType getVariantType(String ref, String alt) {
+    String r = ref.toUpperCase();
+    String a = alt.toUpperCase();
+
+    if(r.equals(a))
+      return VariantType.REF;
+    if(a.equals("*"))
+      return VariantType.STAR;
+    if(r.length() > a.length())
+      return VariantType.DELETION;
+    if(r.length() < a.length())
+      return VariantType.INSERTION;
+
+    return switch (r) {
+      case "A" -> "G".equals(a) ? VariantType.TRANSITION : VariantType.TRANSVERSION;
+      case "G" -> "A".equals(a) ? VariantType.TRANSITION : VariantType.TRANSVERSION;
+      case "T" -> "C".equals(a) ? VariantType.TRANSITION : VariantType.TRANSVERSION;
+      case "C" -> "T".equals(a) ? VariantType.TRANSITION : VariantType.TRANSVERSION;
+      default -> VariantType.UNKNOWN;
+    };
+  }
+
+  public enum VariantType{REF, STAR, INSERTION, DELETION, TRANSITION, TRANSVERSION, UNKNOWN};
 }

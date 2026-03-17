@@ -201,10 +201,8 @@ public class VCF implements VariantProducer {
 
     int kept = originalSampleNb - filtered.size();
     Message.info("Sample kept : " + kept + "/" + originalSampleNb);
-    if (kept == 0)
-      Message.warning("No Samples left in the VCF file");
+    Message.warning(kept == 0, "No Samples left in the VCF file");
       //throw new VCFException("No sample remaining after filtering");
-
   }
 
   public String getFilename() {

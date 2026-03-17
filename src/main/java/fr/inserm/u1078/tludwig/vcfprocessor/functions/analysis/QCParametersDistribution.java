@@ -200,8 +200,7 @@ public class QCParametersDistribution extends ParallelVCFVariantPedFunction<QCPa
           found = true;
           break;
         }
-      if (!found)
-        Message.warning("Input VCF seems to be missing the following annotation [" + key + "]");
+      Message.warning(!found, "Input VCF seems to be missing the following annotation [" + key + "]");
     }
   }
 

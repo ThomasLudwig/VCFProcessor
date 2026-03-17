@@ -85,11 +85,9 @@ public class CheckReference extends ParallelVCFFunction<Object> {
     if (onlySNVs) {
       try {
         char vcfRef = ref.charAt(0);
-        if(!isValid(vcfRef))
-          Message.warning("Unexpected vcf allele ["+vcfRef+"]");
+        Message.warning(!isValid(vcfRef), "Unexpected vcf allele ["+vcfRef+"]");
         char fastaRef = fasta.getCharacterFor(chrom, pos);
-        if(!isValid(fastaRef))
-          Message.warning("Unexpected fasta allele ["+fastaRef+"]");
+        Message.warning(!isValid(fastaRef), "Unexpected fasta allele ["+fastaRef+"]");
         if (vcfRef != fastaRef)
           return new String[]{chrom + T + pos + T + vcfRef + T + fastaRef};
       } catch (FastaException ex) {

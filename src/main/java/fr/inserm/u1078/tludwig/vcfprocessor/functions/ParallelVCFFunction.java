@@ -123,8 +123,7 @@ public abstract class ParallelVCFFunction<T> extends VCFFunction {
 
       threadPool.shutdown();
 
-      if(!threadPool.awaitTermination(300, TimeUnit.DAYS))
-        Message.error("Thread reached its timeout");
+      Message.error(!threadPool.awaitTermination(300, TimeUnit.DAYS), "Thread reached its timeout");
     } catch (InterruptedException ignore) { }
 
     analyzer.willEnd();
@@ -305,8 +304,7 @@ public abstract class ParallelVCFFunction<T> extends VCFFunction {
     }
 
     private boolean process(Output out) {
-      if (out.n % STEP == 0)
-        Message.info(progression("variants", out.n, vcf.getFilename(), start));
+      Message.info(out.n % STEP == 0, progression("variants", out.n, vcf.getFilename(), start));
 
       if(out.isEOF()){
         Message.info(progression("variants", out.n-1, vcf.getFilename(), start));

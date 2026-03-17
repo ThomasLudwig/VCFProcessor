@@ -92,8 +92,7 @@ public class PGPBouncyCastle {
           System.err.println("Passphrase does not match encryption key. Try again.");
         }
       }
-      if(privateKey == null)
-        Message.fatal("Passphrase does not match encryption key", true);
+      Message.asserts(privateKey != null, "Passphrase does not match encryption key");
       return doReadEncrypted(privateKey, filename);
     } catch(Exception e){
       Message.fatal("Could not read encrypted file ["+filename+"]", e, true);

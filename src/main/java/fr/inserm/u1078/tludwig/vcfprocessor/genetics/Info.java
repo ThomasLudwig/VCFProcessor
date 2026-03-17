@@ -46,9 +46,9 @@ public class Info {
       String value = null;
       if (kv.length == 2)
         value = kv[1];
-      if (!infoMap.containsKey(key)) {
+      if (!infoMap.containsKey(key))
         infoMap.put(key, value);
-      } else
+      else
         Message.warning("Duplicate key [" + kv[0] + "] found for info [" + merge(infoFields) + "]");
 
       if (kv[0].equals(CSQ_PREFIX) && kv.length > 1 && kv[1] != null)
@@ -106,12 +106,9 @@ public class Info {
   }
 
   public static void check(String id, String number, Type type){
-    if(number.equals(0) && type != Type.Flag){
-      Message.warning("For new INFO ID ["+id+"] Type is ["+type+"] and should be ["+Type.Flag+"] when Number=0");
-    }
-    if(!number.equals(0) && type == Type.Flag){
-      Message.warning("For new INFO ID ["+id+"] Number is ["+number+"] and should be ["+0+"] when Type=["+type+"]");
-    }
+    Message.warning(number.equals(0) && type != Type.Flag, "For new INFO ID ["+id+"] Type is ["+type+"] and should be ["+Type.Flag+"] when Number=0");
+    Message.warning(!number.equals(0) && type == Type.Flag, "For new INFO ID ["+id+"] Number is ["+number+"] and should be ["+0+"] when Type=["+type+"]");
+
     boolean valid = false;
     try{
       int n =  Integer.parseInt(number);
@@ -127,9 +124,7 @@ public class Info {
       default:
         break;
     }
-    if(!valid){
-      Message.warning("For new INFO ID ["+id+"] Number is ["+number+"] and should be a Number of one of A/R/G/.");
-    }
+    Message.warning(!valid, "For new INFO ID ["+id+"] Number is ["+number+"] and should be a Number of one of A/R/G/.");
   }
 
   public final String getAnnot(String key) {

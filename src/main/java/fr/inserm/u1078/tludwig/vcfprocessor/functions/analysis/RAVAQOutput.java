@@ -125,8 +125,7 @@ public class RAVAQOutput extends ParallelVCFVariantPedFunction<RAVAQOutput.Varia
     int kept = 0;
     while((line = in.readLine()) != null){
       count++;
-      if(count%10000 == 0)
-        Message.info("Loaded " + kept+"/"+count + " GnomAD variants from " + filename);
+      Message.info(count%10000 == 0, "Loaded " + kept+"/"+count + " GnomAD variants from " + filename);
       PrepareGnomADFile.GnomAD gnomAD = new PrepareGnomADFile.GnomAD(line);
       if(variantNames.containsKey(gnomAD.getCanonical())) {
         gnomad.put(gnomAD.getCanonical(), gnomAD);

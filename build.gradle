@@ -42,7 +42,7 @@ repositories {
 
 dependencies {
     //testImplementation group: 'junit', name: 'junit', version: '4.13.2'
-    implementation 'fr.inserm.u1078:MaokLib:1.0.7'
+    implementation 'fr.inserm.u1078:MaokLib:1.0.8'
     implementation 'fr.inserm.u1078:HTSJDKMaok:1.0.0'
     implementation 'jfree:jfreechart:1.0.13'
     implementation 'com.jtattoo:JTattoo:1.6.13'

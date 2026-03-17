@@ -55,8 +55,7 @@ public class BAMCoverage  extends Function {
 
       threadPool.shutdown();
 
-      if(!threadPool.awaitTermination(300, TimeUnit.DAYS))
-        Message.error("Thread reached its timeout");
+      Message.error(!threadPool.awaitTermination(300, TimeUnit.DAYS), "Thread reached its timeout");
     } catch (InterruptedException ignore) { }
   }
 

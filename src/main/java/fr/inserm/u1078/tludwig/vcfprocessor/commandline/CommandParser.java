@@ -25,9 +25,7 @@ import java.util.HashMap;
  */
 public class CommandParser {
   //TODO every command line filters must be listed as INFO lines
-  //TODO case insensitive
   //TODO famFilter must be created before filters that depends on it
-  //TODO if there are args that start with - or -- but are unknown ==> WARNING
 
   private final String[] args;
   private final ArrayList<String> keys;
@@ -83,9 +81,8 @@ public class CommandParser {
     for (String arg : args)
       if (arg != null && arg.startsWith("--")){
         String low = arg.toLowerCase();
-        if(!allowedKeys.contains(low))
-          Message.warning("unknown argument ["+arg+"] in command line.");
-        if (keyList.contains(low))//TODO not detected 
+        Message.warning(!allowedKeys.contains(low), "unknown argument ["+arg+"] in command line.");
+        if (keyList.contains(low))//TODO not detected
           Message.warning("duplicate key [" + arg + "] in command line. Only the first one will be processed");
         else
           keyList.add(low);
@@ -696,7 +693,7 @@ public class CommandParser {
       num = num.substring(0, num.length() - 1);
       return 1000 * Integer.parseInt(num);
     }
-    return Integer.parseInt(num.replaceAll("b", "b"));//TODO ???
+    return Integer.parseInt(num.replaceAll("b", ""));
 
   }
 

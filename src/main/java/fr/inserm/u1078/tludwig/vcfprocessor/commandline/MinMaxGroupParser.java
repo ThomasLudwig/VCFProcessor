@@ -56,8 +56,7 @@ public class MinMaxGroupParser {
             else
               Message.warning("Unknown Group name [" + group + "] for filter [" + keyMin + "]");
 
-            if (minMap.containsKey(group))
-              Message.warning("Duplicate group [" + group + "] for argument [" + keyMin + "]");
+            Message.warning(minMap.containsKey(group), "Duplicate group [" + group + "] for argument [" + keyMin + "]");
             minMap.put(group, min);
           }
         } catch (Exception e) {
@@ -83,8 +82,7 @@ public class MinMaxGroupParser {
             else
               Message.warning("Unknown Group name [" + group + "] for filter [" + keyMax + "]");
 
-            if (maxMap.containsKey(group))
-              Message.warning("Duplicate group [" + group + "] for argument [" + keyMax + "]");
+            Message.warning(maxMap.containsKey(group), "Duplicate group [" + group + "] for argument [" + keyMax + "]");
             maxMap.put(group, max);
           }
         } catch (Exception e) {

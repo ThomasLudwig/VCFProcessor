@@ -79,10 +79,8 @@ public class MergeVQSR extends Function implements VCFHandling {
           process(snp, indel);
         } else {
           run = false;
-          if (snp != null)
-            Message.error("Reached end of INDEL file before reaching end of SNP file");
-          if (indel != null)
-            Message.error("Reached end of SNP file before reaching end of INDEL file");
+          Message.error(snp != null, "Reached end of INDEL file before reaching end of SNP file");
+          Message.error(indel != null, "Reached end of SNP file before reaching end of INDEL file");
         }
       }
       Message.info(progression("variants", count, snpFile.getFilename()+" / "+indelFile.getFilename(),start));

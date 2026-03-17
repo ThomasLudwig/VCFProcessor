@@ -97,8 +97,7 @@ public class VEPFormat {
         found = true;
         break;
       }
-    if(!found)
-      Message.error("VEP annotations must contain ["+KEY_ALLELE_NUMBER+"]");
+    Message.error(!found, "VEP annotations must contain ["+KEY_ALLELE_NUMBER+"]");
   }
 
   public static VEPFormat createVepFormat(String line) {
