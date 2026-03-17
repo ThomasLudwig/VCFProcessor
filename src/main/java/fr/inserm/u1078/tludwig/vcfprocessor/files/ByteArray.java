@@ -94,7 +94,6 @@ public class ByteArray {
    * @return the value [-2^15;2^15 - 1]
    */
   public short readLittleEndianSInt16() { //faster implementation than ava.nio.ByteBuffer.wrap().getInt()
-    //TODO short ?
     int i = readLittleEndianUInt16();
     return i < 32768 ? (short)i : (short)(i-65536);
   }

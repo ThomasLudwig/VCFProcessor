@@ -81,8 +81,7 @@ public class ExtractCanonical extends ParallelVCFFunction {
     }
 
     Message.warning("Missing AC annotation for line [" + record + "]");
-    if (AN == null)
-      Message.die("Missing AN annotations for record ["+record+"]");
+    Message.asserts(AN != null, "Missing AN annotations for record ["+record+"]");
     if ("0".equals(AN))
       return AC0;
     if (AF == null)

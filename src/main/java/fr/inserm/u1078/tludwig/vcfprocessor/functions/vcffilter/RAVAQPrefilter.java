@@ -89,8 +89,7 @@ public class RAVAQPrefilter extends ParallelVCFVariantFilterPedFunction {
     int count = 0;
     while((line = in.readLine()) != null){
       count++;
-      if(count%10000 == 0)
-        Message.info("Loaded " + count + " GnomAD variants from " + filename);
+      Message.info(count%10000 == 0, "Loaded " + count + " GnomAD variants from " + filename);
       PrepareGnomADFile.GnomAD gnomAD = new PrepareGnomADFile.GnomAD(line);
       gnomad.put(gnomAD.getCanonical(), gnomAD);
     }

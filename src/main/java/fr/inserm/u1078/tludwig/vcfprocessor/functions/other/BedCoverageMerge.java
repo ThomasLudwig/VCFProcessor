@@ -67,8 +67,7 @@ public class BedCoverageMerge extends Function {
         batchPool.submit(batch);
       }
       batchPool.shutdown();
-      if(!batchPool.awaitTermination(300, TimeUnit.DAYS))
-        Message.error("Thread reached its timeout");
+      Message.error(!batchPool.awaitTermination(300, TimeUnit.DAYS), "Thread reached its timeout");
       boolean ignore;
       if(s > 1)
         for(Batch batch : batchesList.get(s-1)) {
@@ -374,8 +373,7 @@ public class BedCoverageMerge extends Function {
           threadPool.submit(new Worker(output, bed, chr, getMinDepth()));
 
         threadPool.shutdown();
-        if(!threadPool.awaitTermination(300, TimeUnit.DAYS))
-          Message.error("Thread reached its timeout");
+        Message.error(!threadPool.awaitTermination(300, TimeUnit.DAYS), "Thread reached its timeout");
       }
     }
 

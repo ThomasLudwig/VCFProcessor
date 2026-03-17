@@ -63,8 +63,7 @@ public abstract class SAMFunction<T> extends Function {
 
       threadPool.shutdown();
 
-      if(!threadPool.awaitTermination(300, TimeUnit.DAYS))
-        Message.error("Thread reached its timeout");
+      Message.error(!threadPool.awaitTermination(300, TimeUnit.DAYS), "Thread reached its timeout");
     } catch (InterruptedException ignore) { }
 
     analyzer.willEnd();
@@ -287,8 +286,7 @@ public abstract class SAMFunction<T> extends Function {
     }
 
     private boolean process(SAMFunction.Output out) {
-      if (out.n % STEP1000000 == 0)
-        Message.info(progression("alignments", out.n, sam.getFilename(), start));
+      Message.info(out.n % STEP1000000 == 0, progression("alignments", out.n, sam.getFilename(), start));
 
       if(out.isEOF()){
         Message.info(progression("alignments", out.n-1, sam.getFilename(), start));

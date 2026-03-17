@@ -145,8 +145,7 @@ public class PositionFilter extends LineFilter {
             if(error == null)
               error = e.getMessage();
           }
-        if (error != null)
-          Message.warning("Some lines could not be read in file [" + filename + "]. Valid line formats are " + String.join("|", POSITION_FILE_FORMATS)+"\nFirst Error :"+error);
+        Message.warning(error != null, "Some lines could not be read in file [" + filename + "]. Valid line formats are " + String.join("|", POSITION_FILE_FORMATS)+"\nFirst Error :"+error);
       } catch (IOException ioe) {
         Message.warning("Problem while reading file [" + filename + "] : " + ioe.getMessage());
       }
@@ -165,8 +164,7 @@ public class PositionFilter extends LineFilter {
             if(error == null)
               error = e.getMessage();
           }
-        if (error != null)
-          Message.warning("Some lines could not be read in bed file [" + filename + "]. Line format is chr[tab]start[tab]end"+"\nFirst Error :"+error);
+        Message.warning(error != null, "Some lines could not be read in bed file [" + filename + "]. Line format is chr[tab]start[tab]end"+"\nFirst Error :"+error);
       } catch (IOException ioe) {
         Message.warning("Problem while reading bed file [" + filename + "] : " + ioe.getMessage());
       }

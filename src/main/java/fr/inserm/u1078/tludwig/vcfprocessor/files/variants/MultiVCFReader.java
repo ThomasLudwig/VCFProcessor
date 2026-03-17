@@ -82,10 +82,8 @@ public class MultiVCFReader {
             } catch (InterruptedException ignore) { }
           }
         }
-        if (data1.record == null)
-          Message.info("Reached end of file " + vcf1.getFilename());
-        if (data2.record == null)
-          Message.info("Reached end of file " + vcf2.getFilename());
+        Message.info(data1.record == null, "Reached end of file " + vcf1.getFilename());
+        Message.info(data2.record == null, "Reached end of file " + vcf2.getFilename());
       } catch (VCFException e){
         Message.fatal("There was a problem while reading the VCF file", e, true);
       }

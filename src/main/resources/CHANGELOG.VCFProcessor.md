@@ -1,4 +1,14 @@
-## 1.2.10 (2026-03-15)
+## 1.2.11 (2026-03-17)
+### core
+- **added** : `Message` conditional info/error/waring/fatal...
+- **added** :  `Variant.VairantType` enum{STAR, REF, INSERTION, DELETION, TRANSITION, TRANSVERSION}
+### functions
+- **fixed** : `SampleStats` '1/1' genotypes cannot be singleton anymore. Added Haploids count
+### filters
+### graphs
+### other
+
+## 1.2.10 (2026-03-16)
 ### core
 - **added** : Possibility to run in monothread mode
 ### functions

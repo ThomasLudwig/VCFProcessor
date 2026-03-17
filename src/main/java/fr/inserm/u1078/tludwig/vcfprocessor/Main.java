@@ -200,7 +200,6 @@ public class Main {
     }
 
     Message.info("Will look for plugins in " + pDir);
-
     for (String plugin : FunctionFactory.initPlugins(pDir))
       Message.info("Plugin : " + plugin);
 

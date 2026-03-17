@@ -135,8 +135,7 @@ public class IQSBySample extends VCFPedFunction {
 
     Message.info("All variants have been loaded");
     threadPool.shutdown();
-    if(!threadPool.awaitTermination(100, TimeUnit.DAYS))
-      Message.error("Timeout reached");
+    Message.error(!threadPool.awaitTermination(100, TimeUnit.DAYS), "Timeout reached");
     double dur = DateTools.duration(start);
     Message.info(done + " common variants processed in " +dur + "s (" + (int)(done / dur) + " v/s)");
   }

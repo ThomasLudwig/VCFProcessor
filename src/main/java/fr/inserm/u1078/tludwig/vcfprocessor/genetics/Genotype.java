@@ -174,6 +174,20 @@ public class Genotype {
         return false;
     return true;
   }
+
+  public boolean isHomozygousToAlt(){
+    return isHomozygous() && hasAlternate();
+  }
+
+  public boolean isHomozygousToAlt(int a){
+    return isHomozygous() && hasAllele(a);
+  }
+
+  public boolean isHomozygous(){
+    return
+        !isMissing()
+        && alleles[0] == alleles[1];
+  }
   
   public boolean isHomozygousOrHaploid(int al){
     if(this.isMissing())
@@ -195,6 +209,10 @@ public class Genotype {
     if(this.nbChrom != 2)
       return false;
     return this.alleles[0] != this.alleles[1];
+  }
+
+  public boolean isHaploid() {
+    return this.nbChrom == 1;
   }
 
   public boolean hasAlternate() {

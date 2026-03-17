@@ -534,8 +534,7 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
           found = true;
           break;
         }
-      if (!found)
-        Message.warning("Input VCF seems to be missing the following annotation [" + key + "]");
+      Message.warning(!found, "Input VCF seems to be missing the following annotation [" + key + "]");
     }
 
     getVCF().addFilter(FILTER_CALLRATE, "Call rate < " + this.minCallRate + " in any group");

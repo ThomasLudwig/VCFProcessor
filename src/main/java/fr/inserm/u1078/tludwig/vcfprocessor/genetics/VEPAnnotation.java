@@ -49,7 +49,6 @@ public class VEPAnnotation { //TODO rewrite this to be 100% compliant with vep91
         Message.warning(message);
         Message.debug(message, new AnnotationException(message));
       }
-
       return null;
     }
     return values[idx];
