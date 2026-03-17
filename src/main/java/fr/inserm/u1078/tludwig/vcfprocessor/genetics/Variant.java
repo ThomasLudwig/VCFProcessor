@@ -72,9 +72,9 @@ public class Variant implements Comparable<Variant> {
           }
     }
     System.arraycopy(alter, 0, alleles, 1, alter.length);
-    variantTypes = new VariantType[alter.length];
-    for(int a = 1 ; a < alleles.length ; a++)
-      variantTypes[a-1] = getVariantType(alleles[0], alleles[a]);
+    variantTypes = new VariantType[alleles.length];
+    for(int a = 0 ; a < alleles.length ; a++)
+      variantTypes[a] = getVariantType(alleles[0], alleles[a]);
 //    this.effect = new Effect[this.alleles.length];
     this.link();
   }
