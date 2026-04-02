@@ -41,7 +41,7 @@ public class BCFByteArray extends ByteArray {
   public String readGTValues(ArrayDescription ad) throws BCFException {
     String[] sValues = new String[ad.getLength()];
     String phased = "/";
-    //boolean allMissing = true;
+
     for(int i = 0 ; i < ad.getLength(); i++) {
       final int v = readInt(ad.getType());
       final int convert = convert(v);
@@ -54,17 +54,11 @@ public class BCFByteArray extends ByteArray {
       } else {
         if (v % 2 == 1)
           phased = "|";
-        if(convert == -1)
-          sValues[i] = ".";
-        else {
-          //allMissing = false;
-          sValues[i] = "" + convert;
-        }
+        sValues[i] = convert == -1
+            ? "."
+            : "" + convert;
       }
     }
-
-    /*if(allMissing)
-      return ".";*/
 
     StringBuilder ret = new StringBuilder(sValues[0]);
     for(int i = 1; i < sValues.length; i++)
@@ -75,8 +69,6 @@ public class BCFByteArray extends ByteArray {
   }
 
   public static int convert(int v){ return (((v/*&0xFE*/) >> 1)-1); }
-
-  public static int convert2(int v){ return (((v&0xFE) >> 1)-1); }
 
   /**
    * Reads values form a Genotype Field

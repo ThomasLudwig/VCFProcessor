@@ -24,8 +24,7 @@ public class Sandbox {
   public static void main(String[] args) throws Exception {
     for(int i = 0; i < 256; i++) {
       int c1 = BCFByteArray.convert(i);
-      int c2 = BCFByteArray.convert2(i);
-      System.out.println(i+"["+c1+"] ["+c2+"]");
+      System.out.println(i+"["+c1+"]");
     }
     //testDiv();
     /*int[] sizes = {1,2,3,4,5,6,7,8,9,15,16,17,20,63,64,65};
