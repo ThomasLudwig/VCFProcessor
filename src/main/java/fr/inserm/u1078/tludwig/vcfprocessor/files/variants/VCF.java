@@ -827,7 +827,7 @@ public class VCF implements VariantProducer {
     private final String type;
     private final int number;
 
-    public static final int NUMBER_ALLELES = -9;
+    public static final int NUMBER_ALLELES = -9; //TODO use enum ?
     public static final int NUMBER_ALTS = -8;
     public static final int NUMBER_GENOTYPES = -7;
     public static final int NUMBER_UNKNOWN = -6;

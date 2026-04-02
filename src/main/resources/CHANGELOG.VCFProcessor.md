@@ -1,3 +1,12 @@
+## 1.2.12 (2026-04-02)
+### core
+- **fixed** : `BCF` : binary representation of ".|." was misinterpreted as ".|-1"
+### functions
+- **fixed** : `SplitMultiAllelic` : computation methods for PL etc on haploid genotypes
+### filters
+### graphs
+### other
+
 ## 1.2.11 (2026-03-17)
 ### core
 - **added** : `Message` conditional info/error/waring/fatal...

@@ -9,14 +9,13 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  * Print Stats about each sample (Mean Depths, TS/TV Het/HomAlt).
  * 
- * @author Thomas E. Ludwig (INSERM - U1078) 
+ * @author Thomas E. Ludwig (INSERM - U1078)
  * Started on             2015-11-23
  * Checked for release on 2020-05-12
  * Unit Test defined on   2020-07-08
@@ -38,7 +37,7 @@ public class SampleStats extends ParallelVCFVariantPedFunction<SampleStats.Analy
 
   private ArrayList<Sample> samples;
 
-  public static final String[] HEADERS = {"Sample","Group","Sites","Genotyped","Missing","%Missing","MeanDepths","Variants", "Singletons","TS","TV","TS/TV","Het","HetRatio","HomAlt","Haploid"};
+  public static final String[] HEADERS = {"Sample", "Group", "Sites", "Genotyped", "Missing", "%Missing", "MeanDepths", "Variants", "Singletons", "TS", "TV", "TS/TV", "Het", "HetRatio", "HomAlt", "Haploid"};
 
   @Override
   public String getSummary() {
@@ -136,11 +135,12 @@ public class SampleStats extends ParallelVCFVariantPedFunction<SampleStats.Analy
       Sample sample = samples.get(s);
       Genotype geno = variant.getGenotype(sample);
       Message.asserts(geno != null, "No genotype found for [" + samples.get(s).getId() + "] " + variant.shortString());
+
       lDepths[s] = geno.getDP(); //changed to get the same results as vcftools and bcftools (take dp of missing genotype, but if dp itself is missing does not fall back on sumAD)
       if (geno.isMissing())
         lMissings[s] = true;
       else {
-        //lDepths[s] = Math.max(geno.getSumAD(), geno.getDP()); //changed to get the same results as vcftools and bcftools
+        // lDepths[s] = Math.max(geno.getSumAD(), geno.getDP()); // changed to get the same results as vcftools and bcftools
         if(geno.isHeterozygousDiploid())
           lHets[s]++;
         if(geno.isHaploid() && geno.hasAlternate())
@@ -151,7 +151,7 @@ public class SampleStats extends ParallelVCFVariantPedFunction<SampleStats.Analy
           if (geno.hasAllele(a)) {
             lVariants[s]++;
             if (1== acs[a])
-            //if (geno.getCount(a) == acs[a]) //check is 1/1 is indeed a singleton
+            // if (geno.getCount(a) == acs[a]) // check is 1/1 is indeed a singleton
               lSingletons[s]++;
             if (tstv.get(a) == Variant.VariantType.TRANSITION)
               lTransitions[s]++;
