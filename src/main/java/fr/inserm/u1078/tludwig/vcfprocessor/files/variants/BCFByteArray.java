@@ -42,9 +42,11 @@ public class BCFByteArray extends ByteArray {
     String[] sValues = new String[ad.getLength()];
     String phased = "/";
     boolean allMissing = true;
+    String debug = "";
     for(int i = 0 ; i < ad.getLength(); i++) {
       int v = readInt(ad.getType());
-      if( v <= 0)
+      debug += ";"+v;
+      if( v == 0)
         sValues[i] = ".";
       else if(convert(v) == 63)
         sValues[i] = "remove";
@@ -60,6 +62,7 @@ public class BCFByteArray extends ByteArray {
         }
       }
     }
+
     if(allMissing)
       return ".";
 
@@ -67,6 +70,8 @@ public class BCFByteArray extends ByteArray {
     for(int i = 1; i < sValues.length; i++)
       if(!sValues[i].equals("remove"))
         ret.append(phased).append(sValues[i]);
+
+    Message.debug(ret.toString().startsWith("0|-1"), "Genotype "+debug);
 
     return ret.toString();
   }
