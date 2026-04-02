@@ -2,6 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.test;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.ByteArray;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.BCFByteArray;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Canonical;
 
 import java.nio.ByteBuffer;
@@ -21,7 +22,12 @@ import java.util.List;
 public class Sandbox {
 
   public static void main(String[] args) throws Exception {
-    testDiv();
+    for(int i = 0; i < 256; i++) {
+      int c1 = BCFByteArray.convert(i);
+      int c2 = BCFByteArray.convert2(i);
+      System.out.println(i+"["+c1+"] ["+c2+"]");
+    }
+    //testDiv();
     /*int[] sizes = {1,2,3,4,5,6,7,8,9,15,16,17,20,63,64,65};
     for(int size : sizes)
       divide(size, 4);*/

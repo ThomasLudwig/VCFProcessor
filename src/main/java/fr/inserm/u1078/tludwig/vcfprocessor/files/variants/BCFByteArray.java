@@ -41,44 +41,42 @@ public class BCFByteArray extends ByteArray {
   public String readGTValues(ArrayDescription ad) throws BCFException {
     String[] sValues = new String[ad.getLength()];
     String phased = "/";
-    boolean allMissing = true;
-    String debug = "";
+    //boolean allMissing = true;
     for(int i = 0 ; i < ad.getLength(); i++) {
-      int v = readInt(ad.getType());
-      debug += ";"+v;
-      if( v == 0)
-        sValues[i] = ".";
-      else if(convert(v) == 63)
+      final int v = readInt(ad.getType());
+      final int convert = convert(v);
+
+      if(convert >= 63) {
         sValues[i] = "remove";
-      else {
-        allMissing = false;
-        if(v % 2 == 1)
+        Message.error("Error in genotypes");
+        Message.error(ad.toString());
+        Message.die("error in genotypes");
+      } else {
+        if (v % 2 == 1)
           phased = "|";
-        sValues[i] = "" + convert(v);
-        if(sValues[i].equals("63")){
-          Message.error("Error in genotypes");
-          Message.error(ad.toString());
-          Message.die("error in genotypes");
+        if(convert == -1)
+          sValues[i] = ".";
+        else {
+          //allMissing = false;
+          sValues[i] = "" + convert;
         }
       }
     }
 
-    if(allMissing)
-      return ".";
+    /*if(allMissing)
+      return ".";*/
 
     StringBuilder ret = new StringBuilder(sValues[0]);
     for(int i = 1; i < sValues.length; i++)
       if(!sValues[i].equals("remove"))
         ret.append(phased).append(sValues[i]);
 
-    Message.debug(ret.toString().startsWith("0|-1"), "Genotype "+debug);
-
     return ret.toString();
   }
 
-  public static int convert(int v){
-    return (((v&0xFE) >> 1)-1);
-  }
+  public static int convert(int v){ return (((v/*&0xFE*/) >> 1)-1); }
+
+  public static int convert2(int v){ return (((v&0xFE) >> 1)-1); }
 
   /**
    * Reads values form a Genotype Field
