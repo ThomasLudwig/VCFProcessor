@@ -44,7 +44,7 @@ public class BCFByteArray extends ByteArray {
     boolean allMissing = true;
     for(int i = 0 ; i < ad.getLength(); i++) {
       int v = readInt(ad.getType());
-      if( v == 0)
+      if( v <= 0)
         sValues[i] = ".";
       else if(convert(v) == 63)
         sValues[i] = "remove";
@@ -72,7 +72,7 @@ public class BCFByteArray extends ByteArray {
   }
 
   public static int convert(int v){
-    return (((v&0xFE) >> 1)-1);
+    return (((v/*&0xFE*/) >> 1)-1);
   }
 
   /**
