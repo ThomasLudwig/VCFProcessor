@@ -144,7 +144,7 @@ public class Genotype {
   }
 
   /**
-   * returns true if all alleles are the same (1, 2 or more chromosomes) and this allele isn't ref
+   * returns true if all alleles are the same (1, 2 or more chromosomes) and this allele isn't ref.
    * @return true if homozygous/haploid to alt
    */
   public boolean isHomozygousOrHaploidToAlt() {

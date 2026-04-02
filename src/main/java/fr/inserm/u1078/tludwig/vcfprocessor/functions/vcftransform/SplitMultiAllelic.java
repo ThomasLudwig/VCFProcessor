@@ -137,6 +137,11 @@ public class SplitMultiAllelic extends ParallelVCFFunction {
       gt = g[0].split("\\|");
     }
 
+    if(gt.length > 2) {
+      Message.warning("This function can only process a ploidy of 2 maximum");
+      return ".";
+    }
+
     //process GT
     for (int i = 0; i < gt.length; i++){
       if(gt[i].equals(allele+""))
@@ -175,7 +180,10 @@ public class SplitMultiAllelic extends ParallelVCFFunction {
                 Message.warning("Could not split genotype annotation [" + genotype + "] with format [" + format + "] for allele [" + alt + "]");
                 return genotype;
               } else{
-                g[i] = v[0]+","+v[pls.get("0/"+allele)]+","+v[pls.get(allele+"/"+allele)]; //TODO if PL is updated, should GQ be updated also ?, i don't think so, because 1) gq is already affected, 2) genotype will not really change              
+                final boolean haploid = gt.length == 1;
+                g[i] = haploid
+                    ? v[0]+","+v[allele]
+                    : v[0]+","+v[pls.get("0/"+allele)]+","+v[pls.get(allele+"/"+allele)]; //TODO if PL is updated, should GQ be updated also ?, i don't think so, because 1) gq is already affected, 2) genotype will not really change
               }
               break;
             default:
