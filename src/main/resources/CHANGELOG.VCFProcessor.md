@@ -1,7 +1,8 @@
 ## 1.2.12 (2026-04-02)
 ### core
+- **fixed** : `BCF` : binary representation of ".|." was misinterpreted as ".|-1"
 ### functions
-- **fixed** : `SplitMultiAllelic` : ArrayOutOfBoundException
+- **fixed** : `SplitMultiAllelic` : computation methods for PL etc on haploid genotypes
 ### filters
 ### graphs
 ### other
