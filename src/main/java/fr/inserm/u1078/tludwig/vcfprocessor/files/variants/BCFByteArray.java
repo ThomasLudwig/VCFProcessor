@@ -72,7 +72,7 @@ public class BCFByteArray extends ByteArray {
   }
 
   public static int convert(int v){
-    return (((v/*&0xFE*/) >> 1)-1);
+    return (((v&0xFE) >> 1)-1);
   }
 
   /**
