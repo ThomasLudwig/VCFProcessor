@@ -73,9 +73,14 @@ public class BCFHeader {
             break;
         }
       } else if(line.startsWith("#CHROM")) {
-        String[] f = line.split("\t");
-        rawSampleNames = new String[f.length - VCF.IDX_SAMPLE];
-        System.arraycopy(f, 9, rawSampleNames, 0, rawSampleNames.length);
+        String[] f = line.split("\t",-1);
+        if(f.length < VCF.IDX_SAMPLE) {
+          //no samples in the file
+          rawSampleNames = new String[0];
+        } else {
+          rawSampleNames = new String[f.length - VCF.IDX_SAMPLE];
+          System.arraycopy(f, VCF.IDX_SAMPLE, rawSampleNames, 0, rawSampleNames.length);
+        }
       }
     }
     gtIndex = values.indexOf("GT");

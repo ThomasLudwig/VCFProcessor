@@ -1,3 +1,11 @@
+## 1.2.13 (2026-04-20)
+### core
+- **fixed** : `BCFHeader` : managing files without samples
+### functions
+### filters
+### graphs
+### other
+
 ## 1.2.12 (2026-04-02)
 ### core
 - **fixed** : `BCF` : binary representation of ".|." was misinterpreted as ".|-1"
