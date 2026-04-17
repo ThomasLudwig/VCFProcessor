@@ -1,6 +1,5 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
-import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.ByteArray;
 
 /**
@@ -48,9 +47,7 @@ public class BCFByteArray extends ByteArray {
 
       if(convert >= 63) {
         sValues[i] = "remove";
-        Message.error("Error in genotypes");
-        Message.error(ad.toString());
-        Message.die("error in genotypes");
+        throw new BCFException("Error while trying to read a genotype, converted value above 62. Int="+v+" converted="+convert+" ad["+ad+"]");
       } else {
         if (v % 2 == 1)
           phased = "|";
