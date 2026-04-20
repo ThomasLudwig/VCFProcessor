@@ -21,7 +21,7 @@ public class BCFByteArray extends ByteArray {
   public static final int MISSING_INT32 = 0x8000000;
   public static final int MISSING_FLOAT = 0x7F800001;
   public static final int MISSING_CHAR = 0x00;
-
+  public static final int MISSING_TYPE_STRING = 0x07;
 
   /**
    * Constructor
@@ -113,16 +113,20 @@ public class BCFByteArray extends ByteArray {
    * @return the array of integers
    * @throws BCFException if the buffer can't be read
    */
-  public int[] readTypedInts() throws BCFException {
+  public int[] readTypedInts(boolean missingasminus1) throws BCFException {
     ArrayDescription ad = readArrayDescription();
     int[] ints = new int[ad.getLength()];
     for(int i = 0 ; i < ad.getLength(); i++) {
       switch (ad.getType()) {
         case INT8:
           ints[i] = readUInt8();
+          if(missingasminus1 && ints[i] == MISSING_INT8)
+            ints[i] = -1;
           break;
         case INT16:
           ints[i] = readLittleEndianUInt16();
+          if(missingasminus1 && ints[i] == MISSING_INT16)
+            ints[i] = -1;
           break;
         case INT32:
           ints[i] = readLittleEndianSInt32();

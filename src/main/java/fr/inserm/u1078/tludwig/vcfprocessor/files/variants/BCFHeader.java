@@ -7,8 +7,6 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,10 +28,8 @@ public class BCFHeader {
   private final CommandParser commandParser;
   private final ArrayList<LineFilter> lineFilters;
 
-
   private String[] rawSampleNames;
   private Sample[] rawSamples;
-
 
   /**
    * Reads a BCF Header from an InputStream
@@ -44,13 +40,13 @@ public class BCFHeader {
     this.vcf = vcf;
     this.commandParser = vcf.getCommandParser();
     values = new ArrayList<>();
+    values.add(-1, "."); //Missing values as "."
+    values.add(0, "PASS"); //the 0th String values is always (FILTER)PASS
     contigs = new ArrayList<>();
     // Read the header length
-    int headerLength = ByteBuffer.wrap(in.readNBytes(4)).order(ByteOrder.LITTLE_ENDIAN).getInt();
-    byte[] header = in.readNBytes(headerLength);
-    String hString = new String(header);
-
-    this.headerLines = hString.split("\n", -1);
+    final int headerLength = BCF.read4Uint(in);
+    final String header = BCF.readString(in, headerLength);
+    this.headerLines = header.split("\n", -1);
     // Decode the header as needed
     for(String line : this.headerLines) {
       if(line.startsWith("##")){
