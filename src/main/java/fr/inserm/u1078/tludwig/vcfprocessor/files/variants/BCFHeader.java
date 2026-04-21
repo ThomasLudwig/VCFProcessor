@@ -40,7 +40,7 @@ public class BCFHeader {
     this.vcf = vcf;
     this.commandParser = vcf.getCommandParser();
     values = new ArrayList<>();
-    values.add(-1, "."); //Missing values as "."
+    //values.add(-1, "."); //Missing values as "."
     values.add(0, "PASS"); //the 0th String values is always (FILTER)PASS
     contigs = new ArrayList<>();
     // Read the header length
