@@ -1,5 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
+import fr.inserm.u1078.tludwig.maok.tools.Message;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
