@@ -44,7 +44,7 @@ public class BCFHeader {
     values.add(0, "PASS"); //the 0th String values is always (FILTER)PASS
     contigs = new ArrayList<>();
     // Read the header length
-    final int headerLength = BCF.read4Uint(in);
+    final int headerLength = BCF.read32Uint(in);
     final String header = BCF.readString(in, headerLength);
     this.headerLines = header.split("\n", -1);
     // Decode the header as needed
