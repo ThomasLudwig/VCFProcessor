@@ -208,7 +208,7 @@ public class BCFRecord extends VariantRecord {
     }
 
     //first line = keys
-    //next lines values, one line per sample
+    //next lines = values, one line per sample
     String[][] ret = new String[nSample + 1][nFormat];
     // Parse FORMAT fields
     for (int i = 0; i < nFormat; i++) {

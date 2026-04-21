@@ -20,6 +20,12 @@ public class BCFByteArray extends ByteArray {
   public static final int MISSING_INT16 = 0x8000;
   public static final int MISSING_INT32 = 0x8000000;
   public static final int MISSING_FLOAT = 0x7F800001;
+  public static final int MISSING_FLOAT_END_OF_VECTOR = 0x7F800002;
+  public static final int MISSING_FLOAT_RESERVED_3 = 0x7F800003;
+  public static final int MISSING_FLOAT_RESERVED_4 = 0x7F800004;
+  public static final int MISSING_FLOAT_RESERVED_5 = 0x7F800005;
+  public static final int MISSING_FLOAT_RESERVED_6 = 0x7F800006;
+  public static final int MISSING_FLOAT_RESERVED_7 = 0x7F800007;
   public static final int MISSING_CHAR = 0x00;
   public static final int MISSING_TYPE_STRING = 0x07;
 
@@ -38,7 +44,32 @@ public class BCFByteArray extends ByteArray {
    * @throws BCFException if the buffer can't be read
    */
   public String readGTValues(ArrayDescription ad) throws BCFException {
-    String[] sValues = new String[ad.getLength()];
+    /*
+     * A Genotype (GT) field is encoded in a typed integer vector (can be 8, 16, or even 32 bit if necessary)
+     *   with the number of elements equal to the maximum ploidy among all samples at a site.
+     * For one individual,
+     *   each integer in the vector is organized as (allele+1) << 1 | phased
+     *   where allele is set to −1 if the allele in GT is a dot ‘.’ (thus the higher bits are all 0).
+     * The vector is padded with the END OF VECTOR values if the GT having fewer ploidy.
+     * We note specifically that except for the END OF VECTOR byte, no other negative values are allowed in the GT array.
+     * Examples:
+     * 0/1                    in standard format (0 + 1) << 1 | 0 followed by (1 + 1) << 1 | 0     0x02 04
+     * 0/1, 1/1, and 0/0      three samples encoded consecutively                                  0x02 04 04 04 02 02
+     * 0 | 1                  (1+1) << 1 | 1 = 0x05 preceded by the standard first byte value      0x02 0x02 05
+     * ./.                    where both alleles are missing                                       0x00 00
+     * 0                      as a haploid it is represented by a single byte                      0x02
+     * 1                      as a haploid it is represented by a single byte                      0x04
+     * 0/1/2                  is tetraploid, with alleles                                          0x02 04 06
+     * 0/1 | 2                is tetraploid with a single phased allele                            0x02 04 07
+     * 0 and 0/1              pad out the final allele for the haploid individual                  0x02 81 02 04
+     */
+
+    //String[] sValues = new String[ad.getLength()];
+    StringBuilder ret = new StringBuilder();
+    for(int i = 0; i < ad.getLength(); i++)
+      ret.append(readGTValue(readInt(ad.getType())));
+
+    /* BEFORE 2026-04-21 REWRITE
     String phased = "/";
 
     for(int i = 0 ; i < ad.getLength(); i++) {
@@ -61,8 +92,17 @@ public class BCFByteArray extends ByteArray {
     for(int i = 1; i < sValues.length; i++)
       if(!sValues[i].equals("remove"))
         ret.append(phased).append(sValues[i]);
+    */
+    return ret.substring(1);
+  }
 
-    return ret.toString();
+  private String readGTValue(int v) throws BCFException {
+    if(v < 0) //end of vector byte 0x81 OR 0x80 01 OR 0x80 00 00 01
+      return ""; //use to note 1 in a diploid context 1 -> 1_
+    final char phase = v % 2 == 0 ? '/' : '|';
+    final int c = v/2 - 1;
+    final String g = c == -1 ? "." : ""+c;
+    return phase + g;
   }
 
   public static int convert(int v){ return (((v/*&0xFE*/) >> 1)-1); }
