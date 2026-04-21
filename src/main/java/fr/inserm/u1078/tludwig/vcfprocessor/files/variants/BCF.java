@@ -72,7 +72,7 @@ public class BCF implements VariantProducer {
   }
 
   public static int read8Uint(InputStream in) throws IOException {
-    return ByteBuffer.wrap(in.readNBytes(1)).order(ByteOrder.LITTLE_ENDIAN).getInt();
+    return in.readNBytes(1)[0];
   }
 
   public static int read32Uint(InputStream in) throws IOException {
