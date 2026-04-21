@@ -15,6 +15,12 @@ import java.util.HashMap;
  * Representation of the BCF File Header
  */
 public class BCFHeader {
+  private static final String IDX_REGEX= ",IDX=\\d+"; // ,IDX=n with n a positive integer
+  public static final String FILTER = "FILTER";
+  public static final String INFO = "INFO";
+  public static final String FORMAT = "FORMAT";
+  public static final String CONTIG = "contig";
+
   private final ArrayList<String> values;
   private final ArrayList<String> contigs;
   private final String[] headerLines;
@@ -47,20 +53,21 @@ public class BCFHeader {
     final int headerLength = BCF.read32Uint(in);
     final String header = BCF.readString(in, headerLength);
     this.headerLines = header.split("\n", -1);
+    removeExplicitIndexes(this.headerLines);
     // Decode the header as needed
     for(String line : this.headerLines) {
       if(line.startsWith("##")){
         String[] f = line.substring(2).split(",")[0].split("=");
         switch(f[0]){
-          case "FILTER":
-          case "FORMAT":
-          case "INFO":
+          case FILTER:
+          case FORMAT:
+          case INFO:
             if(!f[1].equals("<ID"))
               throw new IOException("Line seems malformed ["+line+"]");
             if(!this.values.contains(f[2]))
               this.values.add(f[2]);
             break;
-          case "contig":
+          case CONTIG:
             if(!f[1].equals("<ID"))
               throw new IOException("Line seems malformed ["+line+"]");
             this.contigs.add(f[2]);
@@ -86,6 +93,18 @@ public class BCFHeader {
     Arrays.fill(this.keepFormat, true);
     this.lineFilters = new ArrayList<>();
     this.parseCommandLine();
+  }
+
+  private static void removeExplicitIndexes(String[] lines) {
+    for(int i = 0; i < lines.length; i++)
+      lines[i] = removeExplicitIndexes(lines[i]);
+  }
+
+  private static String removeExplicitIndexes(String line) {
+    for(String s : new String[]{FILTER, FORMAT, INFO, CONTIG})
+      if(line.startsWith("##"+s))
+        return line.replaceFirst(IDX_REGEX, "");
+    return line;
   }
 
   public VCF getVCF() {

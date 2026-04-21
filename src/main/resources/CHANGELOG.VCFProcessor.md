@@ -1,4 +1,4 @@
-## 1.2.13 (2026-04-20)
+## 1.2.13 (2026-04-21)
 ### core
 - **fixed** : `BCFHeader` : managing files without samples
 ### functions
