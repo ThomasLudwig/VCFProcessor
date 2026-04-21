@@ -51,8 +51,8 @@ public class BCF implements VariantProducer {
       if (!magic.equals(BCF_MAGIC_STRING))
         throw new BCFException(BCFException.BCFE_NO_MAGIC);
 
-      majorVersion = read4Uint(in);
-      minorVersion = read4Uint(in);
+      majorVersion = read8Uint(in);
+      minorVersion = read8Uint(in);
       if(majorVersion < 2 || minorVersion < 1)
         throw new BCFException(BCFException.BCFE_UNSUPPORTED_VERSION+": "+getVersion());
 
@@ -71,7 +71,11 @@ public class BCF implements VariantProducer {
     return new String(string);
   }
 
-  public static int read4Uint(InputStream in) throws IOException {
+  public static int read8Uint(InputStream in) throws IOException {
+    return ByteBuffer.wrap(in.readNBytes(1)).order(ByteOrder.LITTLE_ENDIAN).getInt();
+  }
+
+  public static int read32Uint(InputStream in) throws IOException {
     return ByteBuffer.wrap(in.readNBytes(4)).order(ByteOrder.LITTLE_ENDIAN).getInt();
   }
 
@@ -82,8 +86,8 @@ public class BCF implements VariantProducer {
    */
   public RawVariantRecordData readNext() throws IOException {
     try {
-      final int leftSize = read4Uint(in);
-      final int rightSize = read4Uint(in);
+      final int leftSize = read32Uint(in);
+      final int rightSize = read32Uint(in);
       final byte[] chromToInfo = in.readNBytes(leftSize);
       final byte[] formatGenotypes = in.readNBytes(rightSize);
       return new RawVariantRecordData(new BCFByteArray(chromToInfo), new BCFByteArray(formatGenotypes));
