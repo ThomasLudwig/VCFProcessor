@@ -155,10 +155,13 @@ public class BCFRecord extends VariantRecord {
    * @return the filter names
    */
   private String[] getFilters(int[] filtersID) {
+    if(filtersID.length == 0)
+      return new String[]{"."};
     String[] filters = new String[filtersID.length];
     for(int i = 0 ; i < filtersID.length; i++)
         filters[i] = header.getKeyName(filtersID[i]);
     return filters;
+
   }
 
   /**
