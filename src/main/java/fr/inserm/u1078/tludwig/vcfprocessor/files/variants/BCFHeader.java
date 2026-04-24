@@ -107,9 +107,7 @@ public class BCFHeader {
     return line;
   }
 
-  public VCF getVCF() {
-    return vcf;
-  }
+  public VCF getVCF() { return vcf; }
 
   public synchronized Sample[] getRawSamples() {
     if(rawSamples == null) {
@@ -210,43 +208,33 @@ public class BCFHeader {
    * @param idx - the index of the INFO in the header
    * @return true if it is kept
    */
-  public boolean isInfoKept(int idx){
-    return this.keepInfo[idx];
-  }
+  public boolean isInfoKept(int idx){ return this.keepInfo[idx]; }
 
   /**
    * Gets the name of the field with the given index
    * @param key - the index
    * @return the field name
    */
-  public String getKeyName(int key) {
-    return this.values.get(key);
-  }
+  public String getKeyName(int key) { return this.values.get(key); }
 
   /**
    * Gets the name of the Contig with the given index
    * @param key - the index
    * @return the Contig name
    */
-  public String getContig(int key) {
-    return this.contigs.get(key);
-  }
+  public String getContig(int key) { return this.contigs.get(key); }
 
   /**
    * Get the index of the GT field
    * @return the index of the GT field
    */
-  public int getGTIndex(){
-    return this.gtIndex;
-  }
+  public int getGTIndex(){ return this.gtIndex; }
 
   /**
    * Gets the Header Lines
    * @return the header Lines (array of Strings, 1 per line) in the VCF Format
    */
-  public String[] getHeaderLines() {
-    return headerLines;
-  }
+  public String[] getHeaderLines() { return headerLines; }
 
   private int next = 0;
 
@@ -255,9 +243,9 @@ public class BCFHeader {
    * @return the next header line, or null if none is available
    */
   public String getNextHeaderLine() {
-    if(next >= headerLines.length)
-      return null;
-    return headerLines[next++];
+    return next < headerLines.length
+        ? headerLines[next++]
+        : null;
   }
 
   public boolean pass(BCFRecord r){
