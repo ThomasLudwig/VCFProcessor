@@ -1,8 +1,10 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
+import fr.inserm.u1078.tludwig.maok.tools.Message;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -14,7 +16,9 @@ import java.util.zip.ZipException;
  * The header is store and the record lines can be fetched on demand.
  */
 public class BCF implements VariantProducer {
-  public static final String BCF_MAGIC_STRING = "BCF\2\2";
+  public static final String BCF_MAGIC_STRING = "BCF";
+  private int majorVersion = -1;
+  private int minorVersion = -1 ;
   private final BCFHeader header;
   private final BufferedInputStream in;
   private final VCF vcf;
@@ -29,6 +33,7 @@ public class BCF implements VariantProducer {
   public BCF(String filename, VCF vcf) throws IOException, BCFException {
     this.vcf = vcf;
     this.in = this.checkValid(filename);
+    Message.info("Opened "+getVersion()+" file ["+filename+"]");
     this.header = new BCFHeader(in, vcf);
   }
 
@@ -42,14 +47,36 @@ public class BCF implements VariantProducer {
   private BufferedInputStream checkValid(String filename) throws IOException, BCFException {
     try {
       BufferedInputStream in = new BufferedInputStream(new GZIPInputStream(new FileInputStream(filename)));
-      byte[] magic = in.readNBytes(5);
-      String magicString = new String(magic);
-      if (!magicString.equals(BCF_MAGIC_STRING))
+      String magic = readString(in, 3);
+      if (!magic.equals(BCF_MAGIC_STRING))
         throw new BCFException(BCFException.BCFE_NO_MAGIC);
+
+      majorVersion = read8Uint(in);
+      minorVersion = read8Uint(in);
+      if(majorVersion < 2 || minorVersion < 1)
+        throw new BCFException(BCFException.BCFE_UNSUPPORTED_VERSION+": "+getVersion());
+
       return in;
     } catch(ZipException e) {
       throw new BCFException(BCFException.BCFE_NOT_GZIP, e);
     }
+  }
+
+  public String getVersion() {
+    return BCF_MAGIC_STRING+"v"+majorVersion+"."+minorVersion;
+  }
+
+  public static String readString(InputStream in, int length) throws IOException {
+    byte[] string = in.readNBytes(length);
+    return new String(string);
+  }
+
+  public static int read8Uint(InputStream in) throws IOException {
+    return in.readNBytes(1)[0];
+  }
+
+  public static int read32Uint(InputStream in) throws IOException {
+    return ByteBuffer.wrap(in.readNBytes(4)).order(ByteOrder.LITTLE_ENDIAN).getInt();
   }
 
   /**
@@ -59,10 +86,10 @@ public class BCF implements VariantProducer {
    */
   public RawVariantRecordData readNext() throws IOException {
     try {
-      int leftSize = ByteBuffer.wrap(in.readNBytes(4)).order(ByteOrder.LITTLE_ENDIAN).getInt();
-      int rightSize = ByteBuffer.wrap(in.readNBytes(4)).order(ByteOrder.LITTLE_ENDIAN).getInt();
-      byte[] chromToInfo = in.readNBytes(leftSize);
-      byte[] formatGenotypes = in.readNBytes(rightSize);
+      final int leftSize = read32Uint(in);
+      final int rightSize = read32Uint(in);
+      final byte[] chromToInfo = in.readNBytes(leftSize);
+      final byte[] formatGenotypes = in.readNBytes(rightSize);
       return new RawVariantRecordData(new BCFByteArray(chromToInfo), new BCFByteArray(formatGenotypes));
     } catch(BufferUnderflowException bue){
       return null;

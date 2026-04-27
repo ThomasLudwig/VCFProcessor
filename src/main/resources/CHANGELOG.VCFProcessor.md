@@ -1,3 +1,13 @@
+## 1.2.13 (2026-04-27)
+### core
+- **fixed** : `BCFHeader` : managing files without samples
+- **fixed ** : BCFv2.2 compliance
+### functions
+- **added** : `FilterSignletonOnAC`:Keeps only variants where at least 1 allele is a singleton, based on the AC annotation.
+### filters
+### graphs
+### other
+
 ## 1.2.12 (2026-04-02)
 ### core
 - **fixed** : `BCF` : binary representation of ".|." was misinterpreted as ".|-1"

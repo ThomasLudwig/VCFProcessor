@@ -39,8 +39,9 @@ public class BCFRecord extends VariantRecord {
     this.chrom = readChrom(inCommon);
     // Parse Pos
     this.pos = readPos(inCommon);
-    //Ignore (don't understand the use of this variable)
-    inCommon.readLittleEndianSInt32();
+
+    // Length of the record as projected onto the reference sequence.
+    final int rLen = inCommon.readLittleEndianSInt32();
     // Parse Qual
     this.qual = readQual(inCommon);
 
@@ -107,6 +108,7 @@ public class BCFRecord extends VariantRecord {
    * @throws BCFException if the array can't be parsed
    */
   private String readID(BCFByteArray in) throws BCFException {
+    //TODO 2026-04-20 typed_String if byte = 0x07 => "." else read n char
     String ret = in.readValues();
     return ret == null ? "." : ret;
   }
@@ -143,7 +145,8 @@ public class BCFRecord extends VariantRecord {
    */
   private int[] readFiltersID(BCFByteArray in) throws BCFException {
     // Parse FILTER
-    return in.readTypedInts();
+    //TODO 2026-04-20 handle missing values (ex int8:128) as "."
+    return in.readTypedInts(true);
   }
 
   /**
@@ -152,14 +155,16 @@ public class BCFRecord extends VariantRecord {
    * @return the filter names
    */
   private String[] getFilters(int[] filtersID) {
+    if(filtersID.length == 0)
+      return new String[]{"."};
     String[] filters = new String[filtersID.length];
-    for(int i = 0 ; i < filtersID.length; i++){
-      if(filtersID[i] == 0)
-        filters[i] = "PASS";
-      else
-        filters[i] = header.getKeyName(filtersID[i]);
-    }
+    for(int i = 0 ; i < filtersID.length; i++)
+      filters[i] = filtersID[i] == 0
+          ? "PASS"
+          : header.getKeyName(filtersID[i]);
+
     return filters;
+
   }
 
   /**
@@ -203,7 +208,7 @@ public class BCFRecord extends VariantRecord {
     }
 
     //first line = keys
-    //next lines values, one line per sample
+    //next lines = values, one line per sample
     String[][] ret = new String[nSample + 1][nFormat];
     // Parse FORMAT fields
     for (int i = 0; i < nFormat; i++) {

@@ -1,16 +1,15 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.test;
-
+/*
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.ByteArray;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.BCFByteArray;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Canonical;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
+*/
 /**
  * XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  *
@@ -22,10 +21,11 @@ import java.util.List;
 public class Sandbox {
 
   public static void main(String[] args) throws Exception {
-    for(int i = 0; i < 256; i++) {
+    /*for(int i = 0; i < 256; i++) {
       int c1 = BCFByteArray.convert(i);
       System.out.println(i+"["+c1+"]");
-    }
+    }*/
+    testBytes();
     //testDiv();
     /*int[] sizes = {1,2,3,4,5,6,7,8,9,15,16,17,20,63,64,65};
     for(int size : sizes)
@@ -43,6 +43,8 @@ public class Sandbox {
 
     System.out.println(bp.getFinalExpression());
     System.out.println(bp.evaluate());*/
+
+
 
     /*
 
@@ -187,6 +189,19 @@ public class Sandbox {
     //testList();
   }
 
+  private static void testBytes(){
+/*
+  public static final int MISSING_INT8 = 0x80;
+  public static final int MISSING_INT16 = 0x8000;
+  public static final int MISSING_INT32 = 0x8000000;
+  public static final int MISSING_FLOAT = 0x7F800001;
+  public static final int MISSING_CHAR = 0x00;
+  public static final int MISSING_TYPE_STRING = 0x07;
+ */
+    int v = (short)(0xff & 0x80);
+    System.err.println("Value for 0x80 is ["+v+"]");
+  }
+/*
   public static void testDiv() {
     for(int batch : new int[]{1,2,3,4,5,6,8,12}){
       for(int cpu : new int[]{1,2,4,6,8,12}){
@@ -197,7 +212,8 @@ public class Sandbox {
       }
     }
   }
-
+*/
+  /*
   public static void testList(){
     HashMap<String, List<Integer>> map = new HashMap<>();
     List<Integer> first = new ArrayList<>();
@@ -220,13 +236,14 @@ public class Sandbox {
     for(int i : fin)
       System.out.println("list : "+i);
   }
+*/
 
-
+  /*
   public static void decodeFloat(byte[] data){
     int i = getInt32(new byte[]{data[3],data[2],data[1],data[0]});
     float f = Float.intBitsToFloat(i);
     System.out.println(ByteArray.hex(data)+" ->  "+i+" -> "+f +" | "+ ByteBuffer.wrap(data).order(ByteOrder.BIG_ENDIAN).getFloat());
-  }
+  }*/
 
   public static int getIntBuffered(byte[] data) {
     return java.nio.ByteBuffer.wrap(data).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
@@ -313,7 +330,7 @@ public class Sandbox {
       System.out.println(i+"["+b+"] -> "+v1+" | "+v2);
     }
   }
-
+/*
   public static void testCanonical(){
     String[] variants = {"1\t100\t.\tCT\tCA,CCT,C"};
     for(String variant : variants){
@@ -322,8 +339,9 @@ public class Sandbox {
       for(Canonical canonical : canonicals)
         Message.info("\t--> "+canonical.toString());
     }
-
   }
+
+ */
 
   private static void testAssert(int i){
     assert i > 0 : i+" is not positive !" ;

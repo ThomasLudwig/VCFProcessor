@@ -7,8 +7,6 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,6 +15,12 @@ import java.util.HashMap;
  * Representation of the BCF File Header
  */
 public class BCFHeader {
+  private static final String IDX_REGEX= ",IDX=\\d+"; // ,IDX=n with n a positive integer
+  public static final String FILTER = "FILTER";
+  public static final String INFO = "INFO";
+  public static final String FORMAT = "FORMAT";
+  public static final String CONTIG = "contig";
+
   private final ArrayList<String> values;
   private final ArrayList<String> contigs;
   private final String[] headerLines;
@@ -30,10 +34,8 @@ public class BCFHeader {
   private final CommandParser commandParser;
   private final ArrayList<LineFilter> lineFilters;
 
-
   private String[] rawSampleNames;
   private Sample[] rawSamples;
-
 
   /**
    * Reads a BCF Header from an InputStream
@@ -44,27 +46,28 @@ public class BCFHeader {
     this.vcf = vcf;
     this.commandParser = vcf.getCommandParser();
     values = new ArrayList<>();
+    //values.add(-1, "."); //Missing values as "."
+    //values.add(0, "PASS"); //the 0th String values is always (FILTER)PASS
     contigs = new ArrayList<>();
     // Read the header length
-    int headerLength = ByteBuffer.wrap(in.readNBytes(4)).order(ByteOrder.LITTLE_ENDIAN).getInt();
-    byte[] header = in.readNBytes(headerLength);
-    String hString = new String(header);
-
-    this.headerLines = hString.split("\n", -1);
+    final int headerLength = BCF.read32Uint(in);
+    final String header = BCF.readString(in, headerLength);
+    this.headerLines = header.split("\n", -1);
+    removeExplicitIndexes(this.headerLines);
     // Decode the header as needed
     for(String line : this.headerLines) {
       if(line.startsWith("##")){
         String[] f = line.substring(2).split(",")[0].split("=");
         switch(f[0]){
-          case "FILTER":
-          case "FORMAT":
-          case "INFO":
+          case FILTER:
+          case FORMAT:
+          case INFO:
             if(!f[1].equals("<ID"))
               throw new IOException("Line seems malformed ["+line+"]");
             if(!this.values.contains(f[2]))
               this.values.add(f[2]);
             break;
-          case "contig":
+          case CONTIG:
             if(!f[1].equals("<ID"))
               throw new IOException("Line seems malformed ["+line+"]");
             this.contigs.add(f[2]);
@@ -73,9 +76,14 @@ public class BCFHeader {
             break;
         }
       } else if(line.startsWith("#CHROM")) {
-        String[] f = line.split("\t");
-        rawSampleNames = new String[f.length - VCF.IDX_SAMPLE];
-        System.arraycopy(f, 9, rawSampleNames, 0, rawSampleNames.length);
+        String[] f = line.split("\t",-1);
+        if(f.length < VCF.IDX_SAMPLE) {
+          //no samples in the file
+          rawSampleNames = new String[0];
+        } else {
+          rawSampleNames = new String[f.length - VCF.IDX_SAMPLE];
+          System.arraycopy(f, VCF.IDX_SAMPLE, rawSampleNames, 0, rawSampleNames.length);
+        }
       }
     }
     gtIndex = values.indexOf("GT");
@@ -87,9 +95,19 @@ public class BCFHeader {
     this.parseCommandLine();
   }
 
-  public VCF getVCF() {
-    return vcf;
+  private static void removeExplicitIndexes(String[] lines) {
+    for(int i = 0; i < lines.length; i++)
+      lines[i] = removeExplicitIndexes(lines[i]);
   }
+
+  private static String removeExplicitIndexes(String line) {
+    for(String s : new String[]{FILTER, FORMAT, INFO, CONTIG})
+      if(line.startsWith("##"+s))
+        return line.replaceFirst(IDX_REGEX, "");
+    return line;
+  }
+
+  public VCF getVCF() { return vcf; }
 
   public synchronized Sample[] getRawSamples() {
     if(rawSamples == null) {
@@ -190,43 +208,33 @@ public class BCFHeader {
    * @param idx - the index of the INFO in the header
    * @return true if it is kept
    */
-  public boolean isInfoKept(int idx){
-    return this.keepInfo[idx];
-  }
+  public boolean isInfoKept(int idx){ return this.keepInfo[idx]; }
 
   /**
    * Gets the name of the field with the given index
    * @param key - the index
    * @return the field name
    */
-  public String getKeyName(int key) {
-    return this.values.get(key);
-  }
+  public String getKeyName(int key) { return this.values.get(key); }
 
   /**
    * Gets the name of the Contig with the given index
    * @param key - the index
    * @return the Contig name
    */
-  public String getContig(int key) {
-    return this.contigs.get(key);
-  }
+  public String getContig(int key) { return this.contigs.get(key); }
 
   /**
    * Get the index of the GT field
    * @return the index of the GT field
    */
-  public int getGTIndex(){
-    return this.gtIndex;
-  }
+  public int getGTIndex(){ return this.gtIndex; }
 
   /**
    * Gets the Header Lines
    * @return the header Lines (array of Strings, 1 per line) in the VCF Format
    */
-  public String[] getHeaderLines() {
-    return headerLines;
-  }
+  public String[] getHeaderLines() { return headerLines; }
 
   private int next = 0;
 
@@ -235,9 +243,9 @@ public class BCFHeader {
    * @return the next header line, or null if none is available
    */
   public String getNextHeaderLine() {
-    if(next >= headerLines.length)
-      return null;
-    return headerLines[next++];
+    return next < headerLines.length
+        ? headerLines[next++]
+        : null;
   }
 
   public boolean pass(BCFRecord r){

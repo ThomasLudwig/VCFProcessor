@@ -1,7 +1,5 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
-import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.BCFByteArray;
-
 public class RawVariantRecordData {
   private final String line;
   private final BCFByteArray inCommon;
@@ -17,7 +15,6 @@ public class RawVariantRecordData {
     this.line = null;
     this.inCommon = inCommon;
     this.inFormatGeno = inFormatGeno;
-
   }
 
   public String getLine() {

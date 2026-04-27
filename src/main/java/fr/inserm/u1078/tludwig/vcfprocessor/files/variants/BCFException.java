@@ -5,6 +5,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.FileFormatException;
 public class BCFException extends FileFormatException {
 
   public static final String BCFE_NO_MAGIC = "Not a valid BCF2 file (no BCF Magic String)";
+  public static final String BCFE_UNSUPPORTED_VERSION = "Unsupported BCF version";
+
   public static final String BCFE_NOT_GZIP= "Not a valid BCF2 file (not GZIP format)";
 
   public static final String BCFE_UNEXPECTED_TYPE = "Unexpected type";
