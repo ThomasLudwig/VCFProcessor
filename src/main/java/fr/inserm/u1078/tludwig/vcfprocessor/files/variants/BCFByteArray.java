@@ -220,7 +220,7 @@ public class BCFByteArray extends ByteArray {
     };
 
     if(isMissing(v, type))
-      return ".";
+      return ",.";
     if(isEndOfVector(v, type))
       return "";
     if(type == DataType.FLOAT)
