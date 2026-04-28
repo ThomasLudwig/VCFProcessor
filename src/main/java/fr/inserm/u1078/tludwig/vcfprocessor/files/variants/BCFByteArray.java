@@ -93,7 +93,7 @@ public class BCFByteArray extends ByteArray {
     for(int i = 0; i < ad.getLength(); i++) {
       final int v = readSignedInt(ad.getType());
       final String gt = readGTValue(v);
-      Message.debug("Interpreted "+i+"["+v+"] as \""+gt+"\"");
+      //Message.debug("Interpreted "+i+"["+v+"] as \""+gt+"\"");
       ret.append(gt);
     }
     return ret.substring(1);
