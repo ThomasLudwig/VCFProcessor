@@ -388,10 +388,12 @@ public class BCFRecord extends VariantRecord {
       int[] alleles = Genotype.getAlleles(geno);
       if(alleles != null)
         for(int a : alleles){
-          try { acs[a]++; } catch(Exception e) {
-            Message.error("Could not increment acs["+a+"], index is outside bounds [0;"+(alts.length)+"]");
-            Message.fatal("alleles array:"+StringTools.join(",", alleles)+"from genotype["+geno+"]", e, false);
-            Message.die("Bye");
+          try { acs[a]++; } catch(ArrayIndexOutOfBoundsException e) {
+            String message = "Variant ["+getChrom()+","+getPos()+","+getID()+","+getRef()+","+getAltString()+"]" +
+                ", for the "+s+"th sample:" +
+                "\nCould not increment acs["+a+"], index is outside bounds [0;"+(alts.length)+"]" +
+                "\nalleles array:"+StringTools.join(",", alleles)+"from genotype["+geno+"]";
+            Message.fatal(message, e, true);
           }
         }
     }
