@@ -205,8 +205,9 @@ public class BCFByteArray extends ByteArray {
       if(!v.isEmpty() && !",.".equals(v))
         empty = false;
     }
-    if(empty)
+    if(empty || ret.isEmpty())
       return ".";
+
     return ret.substring(1);
   }
 
