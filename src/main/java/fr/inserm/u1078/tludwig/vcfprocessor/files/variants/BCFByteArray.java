@@ -1,5 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
+import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.ByteArray;
 
 /**
@@ -102,6 +103,7 @@ public class BCFByteArray extends ByteArray {
     final char phase = v % 2 == 0 ? '/' : '|';
     final int c = v/2 - 1;
     final String g = c == -1 ? "." : ""+c;
+    Message.debug("Interpreted [] as \""+phase+g+"\"");
     return phase + g;
   }
 

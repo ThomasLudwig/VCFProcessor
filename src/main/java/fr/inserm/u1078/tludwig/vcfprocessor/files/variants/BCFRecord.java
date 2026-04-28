@@ -62,7 +62,7 @@ public class BCFRecord extends VariantRecord {
     // Parse INFO fields
     this.info = readInfo(inCommon, nInfo);
     // Parse genotypes
-    this.genoValues = readFormatGenotypes(inFormatGeno, nFormat, nSample);
+    this.genoValues = readFormatAndGenotypes(inFormatGeno, nFormat, nSample);
     this.selectedSamples = new ArrayList<>();
     Sample[] rawSamples = header.getRawSamples();
 
@@ -201,7 +201,7 @@ public class BCFRecord extends VariantRecord {
    * Missing/filtered values are stored as "."
    * @throws BCFException if the byte array can't be parsed
    */
-  private String[][] readFormatGenotypes(BCFByteArray in, int nFormat, int nSample) throws BCFException {
+  private String[][] readFormatAndGenotypes(BCFByteArray in, int nFormat, int nSample) throws BCFException {
     if (in == null || !header.pass(this)) {
       this.filter(header.getVCF());
       return null;
