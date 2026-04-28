@@ -3,6 +3,8 @@ package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.ByteArray;
 
+import javax.xml.crypto.Data;
+
 /**
  * Encapsulation of a Byte Array and a pointer, with methods to parse data from a BCF File
  */
@@ -18,15 +20,36 @@ public class BCFByteArray extends ByteArray {
   public static final int FLOAT = 5;
   public static final int CHAR = 7;*/
   public static final int MISSING_INT8 = 0x80;
-  public static final int MISSING_INT16 = 0x8000;
+  public static final int END_OF_VECTOR_INT8 = 0x81;
+  public static final int RESERVED_INT8_2 = 0x82;
+  public static final int RESERVED_INT8_3 = 0x83;
+  public static final int RESERVED_INT8_4 = 0x84;
+  public static final int RESERVED_INT8_5 = 0x85;
+  public static final int RESERVED_INT8_6 = 0x86;
+  public static final int RESERVED_INT8_7 = 0x87;
+  public static final int MISSING_INT16 = 0x800;
+  public static final int END_OF_VECTOR_INT16 = 0x8001;
+  public static final int RESERVED_INT16_2 = 0x8002;
+  public static final int RESERVED_INT16_3 = 0x8003;
+  public static final int RESERVED_INT16_4 = 0x8004;
+  public static final int RESERVED_INT16_5 = 0x8005;
+  public static final int RESERVED_INT16_6 = 0x8006;
+  public static final int RESERVED_INT16_7 = 0x8007;
   public static final int MISSING_INT32 = 0x8000000;
+  public static final int END_OF_VECTOR_INT32 = 0x8000001;
+  public static final int RESERVED_INT32_2 = 0x80000002;
+  public static final int RESERVED_INT32_3 = 0x80000003;
+  public static final int RESERVED_INT32_4 = 0x80000004;
+  public static final int RESERVED_INT32_5 = 0x80000005;
+  public static final int RESERVED_INT32_6 = 0x80000006;
+  public static final int RESERVED_INT32_7 = 0x80000007;
   public static final int MISSING_FLOAT = 0x7F800001;
-  public static final int MISSING_FLOAT_END_OF_VECTOR = 0x7F800002;
-  public static final int MISSING_FLOAT_RESERVED_3 = 0x7F800003;
-  public static final int MISSING_FLOAT_RESERVED_4 = 0x7F800004;
-  public static final int MISSING_FLOAT_RESERVED_5 = 0x7F800005;
-  public static final int MISSING_FLOAT_RESERVED_6 = 0x7F800006;
-  public static final int MISSING_FLOAT_RESERVED_7 = 0x7F800007;
+  public static final int END_OF_VECTOR_FLOAT = 0x7F800002;
+  public static final int RESERVED_FLOAT_3 = 0x7F800003;
+  public static final int RESERVED_FLOAT_4 = 0x7F800004;
+  public static final int RESERVED_FLOAT_5 = 0x7F800005;
+  public static final int RESERVED_FLOAT_6 = 0x7F800006;
+  public static final int RESERVED_FLOAT_7 = 0x7F800007;
   public static final int MISSING_CHAR = 0x00;
   public static final int MISSING_TYPE_STRING = 0x07;
 
@@ -73,31 +96,6 @@ public class BCFByteArray extends ByteArray {
       Message.debug("Interpreted "+i+"["+v+"] as \""+gt+"\"");
       ret.append(gt);
     }
-
-    /* BEFORE 2026-04-21 REWRITE
-    String phased = "/";
-
-    for(int i = 0 ; i < ad.getLength(); i++) {
-      final int v = readInt(ad.getType());
-      final int convert = convert(v);
-
-      if(convert >= 63) {
-        sValues[i] = "remove";
-        throw new BCFException("Error while trying to read a genotype, converted value above 62. Int="+v+" converted="+convert+" ad["+ad+"]");
-      } else {
-        if (v % 2 == 1)
-          phased = "|";
-        sValues[i] = convert == -1
-            ? "."
-            : "" + convert;
-      }
-    }
-
-    StringBuilder ret = new StringBuilder(sValues[0]);
-    for(int i = 1; i < sValues.length; i++)
-      if(!sValues[i].equals("remove"))
-        ret.append(phased).append(sValues[i]);
-    */
     return ret.substring(1);
   }
 
@@ -113,44 +111,18 @@ public class BCFByteArray extends ByteArray {
   public static int convert(int v){ return (((v/*&0xFE*/) >> 1)-1); }
 
   /**
-   * Reads values form a Genotype Field
-   * @param ad - the type and number of values
-   * @return values as in a VCF file
-   * @throws BCFException if the buffer can't be read
-   */
-  public String readValuesFromSampleField(ArrayDescription ad) throws BCFException {
-    switch (ad.getType()){
-      case INT8:
-        return readInts8AsString(ad.getLength());
-      case INT16:
-        return readInts16AsString(ad.getLength());
-      case INT32:
-        return readInts32AsString(ad.getLength());
-      case FLOAT:
-        return readFloatsAsString(ad.getLength());
-      case CHAR:
-        return readCharsAsString(ad.getLength());
-    }
-    return null;
-  }
-
-  /**
    * Reads an integer of a priori unknown type
    * @return the integer
    * @throws BCFException if the buffer can't be read
    */
   public int readTypedInt() throws BCFException {
     DataType dt = readArrayDescription().getType();
-    switch (dt) {
-      case INT8:
-        return readUInt8();
-      case INT16:
-        return readLittleEndianUInt16();
-      case INT32:
-        return readLittleEndianSInt32();
-      default:
-        throw new BCFException.UnexpectedTypeException(dt);
-    }
+    return switch (dt) {
+      case INT8 -> readUInt8();
+      case INT16 -> readLittleEndianUInt16();
+      case INT32 -> readLittleEndianSInt32();
+      default -> throw new BCFException.UnexpectedTypeException(dt);
+    };
   }
 
   /**
@@ -188,104 +160,72 @@ public class BCFByteArray extends ByteArray {
    * @return true if it is a missing value
    */
   public static boolean isMissing(int value, DataType type) {
-    //TODO 2024-06-20 why are there 2 missing values for integers ?
-    switch(type){
-      case INT8:
-        return value == MISSING_INT8 || (value-1) == MISSING_INT8;
-      case INT16:
-        return value == MISSING_INT16 || (value-1) == MISSING_INT16;
-      case INT32:
-        return value == MISSING_INT32 || (value-1) == MISSING_INT32;
-      case FLOAT:
-        return value == MISSING_FLOAT;
-      case CHAR:
-        return value == MISSING_CHAR;
-    }
-    //never reached
-    return false;
+    return switch (type) {
+      case INT8 -> value == MISSING_INT8;
+      case INT16 -> value == MISSING_INT16;
+      case INT32 -> value == MISSING_INT32;
+      case FLOAT -> value == MISSING_FLOAT;
+      case CHAR -> value == MISSING_CHAR;
+      default ->
+        //never reached
+          false;
+    };
   }
 
   /**
-   * Reads and array of INT8 integers
-   * @param l - the number of values to read
+   * Checks if a value is an "end-of-vector value"
+   * @param value - the value to check
+   * @param type - the type to consider
+   * @return true if it is a missing value
+   */
+  public static boolean isEndOfVector(int value, DataType type) {
+    return switch (type) {
+      case INT8 -> value == END_OF_VECTOR_INT8;
+      case INT16 -> value == END_OF_VECTOR_INT16;
+      case INT32 -> value == END_OF_VECTOR_INT32;
+      case FLOAT -> value == END_OF_VECTOR_FLOAT;
+      case CHAR -> value == MISSING_CHAR;
+      default ->
+        //never reached
+          false;
+    };
+  }
+
+  /**
+   * Reads and array of numeric values
+   * @param ad - the array description
    * @return a String representation of the values (comma separated)
    */
-  private String readInts8AsString(int l) {
+  private String readValuesAsString(ArrayDescription ad) {
     boolean empty = true;
     StringBuilder ret = new StringBuilder();
-    for(int i = 0 ; i < l; i++){
-      int v = readUInt8();
-      if(isMissing(v, DataType.INT8))
-        ret.append(",.");
-      else {
-        ret.append(",").append(v);
+    for(int i = 0 ; i < ad.getLength(); i++){
+      String v = readValueFromVectorAsString(ad.getType());
+      ret.append(v);
+      if(!v.isEmpty() && !",.".matches(v))
         empty = false;
-      }
     }
     if(empty)
       return ".";
     return ret.substring(1);
   }
 
-  /**
-   * Reads and array of INT16 integers
-   * @param l - the number of values to read
-   * @return a String representation of the values (comma separated)
-   */
-  private String readInts16AsString(int l) {
-    boolean empty = true;
-    StringBuilder ret = new StringBuilder();
-    for(int i = 0 ; i < l; i++){
-      int v = readLittleEndianUInt16();
-      if(isMissing(v, DataType.INT16))
-        ret.append(",.");
-      else {
-        ret.append(",").append(v);
-        empty = false;
-      }
-    }
-    if(empty)
-      return ".";
-    return ret.substring(1);
-  }
+  private String readValueFromVectorAsString(DataType type) {
+      int v = switch(type) {
+      case INT8 -> readUInt8();
+      case INT16 -> readLittleEndianUInt16();
+      case INT32,FLOAT -> readLittleEndianSInt32();
+      default -> MISSING_INT32;
+    };
 
-  /**
-   * Reads and array of INT32 integers
-   * @param l - the number of values to read
-   * @return a String representation of the values (comma separated)
-   */
-  private String readInts32AsString(int l) {
-    boolean empty = true;
-    StringBuilder ret = new StringBuilder();
-    for(int i = 0 ; i < l; i++){
-      int v = readLittleEndianSInt32();
-      if(isMissing(v, DataType.INT32))
-        ret.append(",.");
-      else {
-        ret.append(",").append(v);
-        empty = false;
-      }
-    }
-    if(empty)
+    if(isMissing(v, type))
       return ".";
-    return ret.substring(1);
-  }
+    if(isEndOfVector(v, type))
+      return "";
+    if(type == DataType.FLOAT)
+      return ","+rawFloatToFloat(v);
 
-  /**
-   * Reads a String
-   * @param l the maximum number of chars in the String
-   * @return the String (or "." if empty)
-   */
-  private String readCharsAsString(int l) {
-    StringBuilder ret = new StringBuilder();
-    for(int i = 0 ; i < l; i++) {
-      byte b = readByte();
-      if(!isMissing(b, DataType.CHAR))
-        ret.append((char)b);
-    }
-    if(ret.length() < 1)
-      return ".";
-    return ret.toString();
+    return ","+v;
   }
 
   /**
@@ -306,6 +246,23 @@ public class BCFByteArray extends ByteArray {
     if(nRet.replace(",","").replace(".","").isEmpty())
       return ".";
     return nRet;
+  }
+
+  /**
+   * Reads a String
+   * @param l the maximum number of chars in the String
+   * @return the String (or "." if empty)
+   */
+  private String readCharsAsString(int l) {
+    StringBuilder ret = new StringBuilder();
+    for(int i = 0 ; i < l; i++) {
+      byte b = readByte();
+      if(!isMissing(b, DataType.CHAR))
+        ret.append((char)b);
+    }
+    if(ret.isEmpty())
+      return ".";
+    return ret.toString();
   }
 
   /**
@@ -330,27 +287,19 @@ public class BCFByteArray extends ByteArray {
 
   /**
    * Reads a list of values of a priori unknown type and length
-   * @return the string representation of the values
+   * @param ad - the type and number of values, can be null
+   * @return values as in a VCF file
    * @throws BCFException if the buffer can't be read
    */
-  public String readValues() throws BCFException {
-    ArrayDescription ad = readArrayDescription();
+  public String readValues(ArrayDescription ad) throws BCFException {
+    //if no add is provided, read one
+    if(ad == null)
+      ad = readArrayDescription();
     if(ad.getLength() == 0)
       return null;
-    switch(ad.getType()){
-      case INT8:
-        return readInts8AsString(ad.getLength());
-      case INT16:
-        return readInts16AsString(ad.getLength());
-      case INT32:
-        return readInts32AsString(ad.getLength());
-      case FLOAT:
-        return readFloatsAsString(ad.getLength());
-      case CHAR:
-        return readString(ad.getLength());
-      default :
-        return null;
-    }
+    if(ad.getType() == DataType.CHAR)
+      return readCharsAsString(ad.getLength());
+    return readValuesAsString(ad);
   }
 
   /**
@@ -360,16 +309,12 @@ public class BCFByteArray extends ByteArray {
    * @throws BCFException if the buffer can't be read
    */
   private int readInt(DataType t) throws BCFException {
-    switch (t) {
-      case INT8:
-        return readUInt8();
-      case INT16:
-        return readLittleEndianUInt16();
-      case INT32:
-        return readLittleEndianSInt32();
-      default:
-        throw new BCFException.UnexpectedTypeException(t);
-    }
+    return switch (t) {
+      case INT8 -> readUInt8();
+      case INT16 -> readLittleEndianUInt16();
+      case INT32 -> readLittleEndianSInt32();
+      default -> throw new BCFException.UnexpectedTypeException(t);
+    };
   }
 
   /**
@@ -379,16 +324,12 @@ public class BCFByteArray extends ByteArray {
    * @throws BCFException if the buffer can't be read
    */
   private int readSignedInt(DataType t) throws BCFException {
-    switch (t) {
-      case INT8:
-        return readSInt8();
-      case INT16:
-        return readLittleEndianSInt16();
-      case INT32:
-        return readLittleEndianSInt32();
-      default:
-        throw new BCFException.UnexpectedTypeException(t);
-    }
+    return switch (t) {
+      case INT8 -> readSInt8();
+      case INT16 -> readLittleEndianSInt16();
+      case INT32 -> readLittleEndianSInt32();
+      default -> throw new BCFException.UnexpectedTypeException(t);
+    };
   }
 
   /**

@@ -109,7 +109,7 @@ public class BCFRecord extends VariantRecord {
    */
   private String readID(BCFByteArray in) throws BCFException {
     //TODO 2026-04-20 typed_String if byte = 0x07 => "." else read n char
-    String ret = in.readValues();
+    String ret = in.readValues(null);
     return ret == null ? "." : ret;
   }
 
@@ -120,7 +120,7 @@ public class BCFRecord extends VariantRecord {
    * @throws BCFException if the array can't be parsed
    */
   private String readRef(BCFByteArray in) throws BCFException {
-    return in.readValues();
+    return in.readValues(null);
   }
 
   /**
@@ -133,7 +133,7 @@ public class BCFRecord extends VariantRecord {
   private String[] readAlts(BCFByteArray in, int nAlt) throws BCFException {
     String[] ret = new String[nAlt];
     for(int i = 0 ; i < nAlt; i++)
-      ret[i] = in.readValues();
+      ret[i] = in.readValues(null);
     return ret;
   }
 
@@ -181,7 +181,7 @@ public class BCFRecord extends VariantRecord {
       int key = in.readTypedInt();
       String keyString = header.getKeyName(key);
       if(header.isInfoKept(key)) {
-        String value = in.readValues();
+        String value = in.readValues(null);
         ret.add(new String[]{keyString, value});
       } else {
         in.skipValues();
@@ -222,7 +222,7 @@ public class BCFRecord extends VariantRecord {
           ret[1 + s][i] = in.readGTValues(ad);
       else if(header.isFormatKept(key))
         for (int s = 0; s < nSample; s++)
-          ret[1 + s][i] = in.readValuesFromSampleField(ad);
+          ret[1 + s][i] = in.readValues(ad);
       else {
         for (int s = 0; s < nSample; s++)
           ret[1 + s][i] = ".";
