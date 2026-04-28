@@ -202,7 +202,7 @@ public class BCFByteArray extends ByteArray {
     for(int i = 0 ; i < ad.getLength(); i++){
       String v = readValueFromVectorAsString(ad.getType());
       ret.append(v);
-      if(!v.isEmpty() && !",.".matches(v))
+      if(!v.isEmpty() && !",.".equals(v))
         empty = false;
     }
     if(empty)
