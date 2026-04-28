@@ -67,8 +67,12 @@ public class BCFByteArray extends ByteArray {
 
     //String[] sValues = new String[ad.getLength()];
     StringBuilder ret = new StringBuilder();
-    for(int i = 0; i < ad.getLength(); i++)
-      ret.append(readGTValue(readInt(ad.getType())));
+    for(int i = 0; i < ad.getLength(); i++) {
+      final int v = readInt(ad.getType());
+      final String gt = readGTValue(v);
+      Message.debug("Interpreted "+i+"["+v+"] as \""+gt+"\"");
+      ret.append(gt);
+    }
 
     /* BEFORE 2026-04-21 REWRITE
     String phased = "/";
@@ -103,7 +107,6 @@ public class BCFByteArray extends ByteArray {
     final char phase = v % 2 == 0 ? '/' : '|';
     final int c = v/2 - 1;
     final String g = c == -1 ? "." : ""+c;
-    Message.debug("Interpreted [] as \""+phase+g+"\"");
     return phase + g;
   }
 
