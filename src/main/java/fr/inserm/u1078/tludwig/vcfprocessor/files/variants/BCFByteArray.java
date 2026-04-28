@@ -205,9 +205,10 @@ public class BCFByteArray extends ByteArray {
       if(!v.isEmpty() && !",.".equals(v))
         empty = false;
     }
-    if(empty)
-      return ".";
-    return ret.substring(1);
+
+    return empty
+        ? "."
+        : ret.substring(1);
   }
 
   private String readValueFromVectorAsString(DataType type) {
