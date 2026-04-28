@@ -68,7 +68,7 @@ public class BCFByteArray extends ByteArray {
     //String[] sValues = new String[ad.getLength()];
     StringBuilder ret = new StringBuilder();
     for(int i = 0; i < ad.getLength(); i++) {
-      final int v = readInt(ad.getType());
+      final int v = readSignedInt(ad.getType());
       final String gt = readGTValue(v);
       Message.debug("Interpreted "+i+"["+v+"] as \""+gt+"\"");
       ret.append(gt);
@@ -365,6 +365,25 @@ public class BCFByteArray extends ByteArray {
         return readUInt8();
       case INT16:
         return readLittleEndianUInt16();
+      case INT32:
+        return readLittleEndianSInt32();
+      default:
+        throw new BCFException.UnexpectedTypeException(t);
+    }
+  }
+
+  /**
+   * Reads a sgined integer from the buffer
+   * @param t - the Type of INT
+   * @return - the value
+   * @throws BCFException if the buffer can't be read
+   */
+  private int readSignedInt(DataType t) throws BCFException {
+    switch (t) {
+      case INT8:
+        return readSInt8();
+      case INT16:
+        return readLittleEndianSInt16();
       case INT32:
         return readLittleEndianSInt32();
       default:
