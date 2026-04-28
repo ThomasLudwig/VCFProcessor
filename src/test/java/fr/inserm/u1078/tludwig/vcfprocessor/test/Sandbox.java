@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 */
+
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.BCFByteArray;
+
 /**
  * XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  *
@@ -198,8 +201,10 @@ public class Sandbox {
   public static final int MISSING_CHAR = 0x00;
   public static final int MISSING_TYPE_STRING = 0x07;
  */
-    int v = (short)(0xff & 0x80);
-    System.err.println("Value for 0x80 is ["+v+"]");
+    int v1 =-2147483648;
+    int v2 = BCFByteArray.MISSING_INT32;
+
+    System.out.println(v1+","+v2+" ==> "+(v1==v2)+ " "+(v1-v2));
   }
 /*
   public static void testDiv() {
