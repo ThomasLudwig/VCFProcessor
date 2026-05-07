@@ -11,7 +11,7 @@ import java.util.*;
 
 public class SampleSet {
   private final Sample[] inputSamples;
-  private Sample[] outputSamples;
+  private final Sample[] outputSamples;
 
   //Warning Samples cannot be used as HashMap keys
   //Mutation a Sample (changing the group, sex, etc.) would break the Hash
@@ -65,10 +65,10 @@ public class SampleSet {
     Message.debug("Generating output samples...");
     for(Sample input : this.inputSamples) {
       Message.debug("Input Sample "+input);
-      if (!isFiltered.contains(input)) {
+      if (!isFiltered.contains(input.getId())) {
         Message.debug(input+" is not filtered");
         ret[outputIndex] = input;
-        Integer inputIndex = inputIndices.get(input);
+        Integer inputIndex = inputIndices.get(input.getId());
         Message.debug("From "+inputIndex+" to "+outputIndex);
         this.outputSampleIndices[outputIndex] = inputIndex;
         this.outputSampleIDs[outputIndex] = input.getId();
@@ -89,10 +89,10 @@ public class SampleSet {
 
   public Sample getSample(String id) { return samplesByID.get(id); }
 
-  public Integer getInputIndex(Sample sample) { return inputIndices.get(sample); }
+  public Integer getInputIndex(Sample sample) { return inputIndices.get(sample.getId()); }
 
   public Integer getOutputIndex(Sample sample) {
-    Integer ret = outputIndices.get(sample);
+    Integer ret = outputIndices.get(sample.getId());
     return ret == null ? -1 : ret;
   }
 
@@ -146,7 +146,7 @@ public class SampleSet {
   }
 
   private void filter(Sample sample, SampleFilter filter) {
-    if (!isFiltered.contains(sample) && !(filter.pass(sample))) {
+    if (!isFiltered.contains(sample.getId()) && !(filter.pass(sample))) {
       Message.verbose("Sample [" + sample.getId() + "] has been filtered out by " + filter.getClass().getSimpleName());
       this.isFiltered.add(sample.getId());
     }
@@ -155,7 +155,7 @@ public class SampleSet {
   private ArrayList<String> getUnfilteredSampleIDs(){
     ArrayList<String> ret = new ArrayList<>();
     for (Sample sample : this.inputSamples)
-      if (!isFiltered.contains(sample))
+      if (!isFiltered.contains(sample.getId()))
         ret.add(sample.getId());
     return ret;
   }
