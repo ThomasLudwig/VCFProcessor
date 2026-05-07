@@ -13,18 +13,21 @@ public class SampleSet {
   private final Sample[] inputSamples;
   private Sample[] outputSamples;
 
-  private final HashMap<Sample, Integer> inputIndices;
+  //Warning Samples cannot be used as HashMap keys
+  //Mutation a Sample (changing the group, sex, etc.) would break the Hash
+
+  private final HashMap<String, Integer> inputIndices;
   private final HashMap<String, Sample> samplesByID;
 
-  private final ArrayList<Sample> isFiltered;
-  private final HashMap<Sample, Integer> outputIndices;
+  private final ArrayList<String> isFiltered;
+  private final HashMap<String, Integer> outputIndices;
   private String[] outputSampleIDs;
   private int[] outputSampleIndices;
 
   private final VCF vcf;
   private Ped ped;
 
-  public SampleSet(VCF vcf) {
+  public SampleSet(VCF vcf, Ped ped) {
     this.vcf = vcf;
     //process intput (parsing)
     inputIndices = new HashMap<>();
@@ -48,7 +51,7 @@ public class SampleSet {
     for(int i = 0; i < samples.size(); i++) {
       ret[i] = samples.get(i);
       Message.debug("Add ["+ret[i]+"] -> "+i);
-      this.inputIndices.put(ret[i], i);
+      this.inputIndices.put(ret[i].getId(), i);
       this.samplesByID.put(ret[i].getId(), ret[i]);
     }
     return ret;
@@ -69,7 +72,7 @@ public class SampleSet {
         Message.debug("From "+inputIndex+" to "+outputIndex);
         this.outputSampleIndices[outputIndex] = inputIndex;
         this.outputSampleIDs[outputIndex] = input.getId();
-        outputIndices.put(input, outputIndex++);
+        outputIndices.put(input.getId(), outputIndex++);
       } else
         Message.debug(input+" is already filtered");
     }
@@ -145,7 +148,7 @@ public class SampleSet {
   private void filter(Sample sample, SampleFilter filter) {
     if (!isFiltered.contains(sample) && !(filter.pass(sample))) {
       Message.verbose("Sample [" + sample.getId() + "] has been filtered out by " + filter.getClass().getSimpleName());
-      this.isFiltered.add(sample);
+      this.isFiltered.add(sample.getId());
     }
   }
 
@@ -233,6 +236,7 @@ public class SampleSet {
   public void bindToPed(Ped ped) {
     Message.verbose("Binding ped file [" + ped.getFilename() + "] to VCF file [" + vcf.getFilename() + "]");
     this.ped = ped;
+    //TODO update stored sample
 
     List<Sample> keep = this.applyPedSamples();
     ped.keepOnly(keep);

@@ -121,6 +121,7 @@ public class Ped implements FileFormat {
       this.samplesByGroup[group].add(sample);
     }
   }
+
   @SuppressWarnings("unchecked")
   private void updateSampleByGroup() {
     this.samplesByGroup = new ArrayList[this.groups.size()];
