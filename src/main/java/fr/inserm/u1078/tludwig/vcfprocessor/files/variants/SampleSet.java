@@ -47,6 +47,7 @@ public class SampleSet {
     Sample[] ret = new Sample[samples.size()];
     for(int i = 0; i < samples.size(); i++) {
       ret[i] = samples.get(i);
+      Message.debug("Add ["+ret[i]+"] -> "+i);
       this.inputIndices.put(ret[i], i);
       this.samplesByID.put(ret[i].getId(), ret[i]);
     }
