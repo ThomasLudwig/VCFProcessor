@@ -58,14 +58,20 @@ public class SampleSet {
     this.outputSampleIDs = new String[ret.length];
     this.outputSampleIndices = new int[ret.length];
     int outputIndex = 0;
-    for(Sample input : this.inputSamples)
-      if(!isFiltered.contains(input)) {
-        Sample s = ret[outputIndex] = input;
+    Message.debug("Generating output samples...");
+    for(Sample input : this.inputSamples) {
+      Message.debug("Input Sample "+input);
+      if (!isFiltered.contains(input)) {
+        Message.debug(input+" is not filtered");
+        ret[outputIndex] = input;
         Integer inputIndex = inputIndices.get(input);
+        Message.debug("From "+inputIndex+" to "+outputIndex);
         this.outputSampleIndices[outputIndex] = inputIndex;
-        this.outputSampleIDs[outputIndex] = s.getId();
-        outputIndices.put(s, outputIndex++);
-      }
+        this.outputSampleIDs[outputIndex] = input.getId();
+        outputIndices.put(input, outputIndex++);
+      } else
+        Message.debug(input+" is already filtered");
+    }
     return ret;
   }
 
