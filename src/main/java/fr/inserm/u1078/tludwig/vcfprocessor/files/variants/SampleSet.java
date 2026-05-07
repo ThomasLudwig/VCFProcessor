@@ -28,7 +28,6 @@ public class SampleSet {
   private Ped ped;
 
   public SampleSet(VCF vcf) {
-    Message.debug("Is this contrustor called several times ?");
     this.vcf = vcf;
     //process intput (parsing)
     inputIndices = new HashMap<>();
@@ -45,7 +44,6 @@ public class SampleSet {
    * The indexes are the index of samples, not of column in the VCF line
    */
   private Sample[] initSamples() {
-    Message.debug("Is this init called several times ?");
     this.ped = new Ped(vcf.getOriginalChromToSampleHeader().split("\t",-1));
     ArrayList<Sample> samples = ped.getSamples();
     Sample[] ret = new Sample[samples.size()];
@@ -59,24 +57,19 @@ public class SampleSet {
   }
 
   private Sample[] generateOutput() {
-    Message.debug("Is this outputor called several times ?");
     Sample[] ret = new Sample[this.inputSamples.length - isFiltered.size()];
     this.outputSampleIDs = new String[ret.length];
     this.outputSampleIndices = new int[ret.length];
     int outputIndex = 0;
-    Message.debug("Generating output samples...");
     for(Sample input : this.inputSamples) {
-      Message.debug("Input Sample "+input);
       if (!isFiltered.contains(input.getId())) {
-        Message.debug(input+" is not filtered");
         ret[outputIndex] = input;
         Integer inputIndex = inputIndices.get(input.getId());
         Message.debug("From "+inputIndex+" to "+outputIndex);
         this.outputSampleIndices[outputIndex] = inputIndex;
         this.outputSampleIDs[outputIndex] = input.getId();
         outputIndices.put(input.getId(), outputIndex++);
-      } else
-        Message.debug(input+" is already filtered");
+      }
     }
     return ret;
   }
