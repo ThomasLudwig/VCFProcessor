@@ -10,8 +10,6 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
-import java.util.Collection;
-
 /**
  * Creates a bed file of the positions where at least one sample has 2 SNVs that could be in the same triplet (regardless of the reading frame)
  * 
@@ -23,7 +21,7 @@ import java.util.Collection;
  */
 public class ExtractNeighbours extends VCFFunction {
 
-  private Collection<Sample> samples = null;
+  private Sample[] samples = null;
 
   @Override
   public String getSummary() {
@@ -54,28 +52,26 @@ public class ExtractNeighbours extends VCFFunction {
   public void executeFunction() throws Exception {
     VCF vcf = this.vcfFile.getVCF(VCF.STEP10000);
     Reader reader = vcf.getReaderAndStart();
-    samples = vcf.getSortedSamples();
+    samples = vcf.getSampleSet().getOutputSamples();
     VariantRecord previous = reader.nextRecord();
     VariantRecord current;
     if (previous != null)
       while ((current = reader.nextRecord()) != null) {
-        compare(previous, current, vcf);
+        compare(previous, current);
         previous = current;
       }
   }
 
-  private void compare(VariantRecord previousW, VariantRecord currentW, VCF vcf) {
-    VariantRecord p = previousW;
-    VariantRecord c = currentW;
-    if (!p.getChrom().equals(c.getChrom()))
+  private void compare(VariantRecord previousW, VariantRecord currentW) {
+    if (!previousW.getChrom().equals(currentW.getChrom()))
       return;
-    int posP = p.getPos();
-    int posC = c.getPos();
+    int posP = previousW.getPos();
+    int posC = currentW.getPos();
     int dist = posC - posP;
     if (dist == 1 || dist == 2)
       try {
-        Variant previous = previousW.createVariant(vcf);
-        Variant current = currentW.createVariant(vcf);
+        Variant previous = previousW.createVariant();
+        Variant current = currentW.createVariant();
         if (previous.isSNP() && current.isSNP())
           for (Sample sample : samples)
             if (previous.getGenotype(sample).hasAlternate() && current.getGenotype(sample).hasAlternate()) {

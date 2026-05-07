@@ -1,5 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files;
 
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
+
 public class AbstractRecord {
   public static final String T = "\t";
   private boolean isFiltered = false;

@@ -18,12 +18,12 @@ public class MinMaxGroupParser {
   public static final int TYPE_RATIO = 1;
   public static final int TYPE_UNBOUNDED = 2;
   private final ArrayList<String> groups;
-  private final HashMap<String, IntegerInterval> map;
+  private final HashMap<String, Integer[]> mapMinMax;
   private final HashMap<String, ArrayList<Integer>> indices;
 
   MinMaxGroupParser(Argument argMin, Argument argMax, HashMap<String, String[]> options, VCF vcf, int type) {
     this.groups = new ArrayList<>();
-    this.map = new HashMap<>();
+    this.mapMinMax = new HashMap<>();
     this.indices = new HashMap<>();
 
     final String keyMin = argMin.getKey();
@@ -34,8 +34,8 @@ public class MinMaxGroupParser {
 
     if (options.containsKey(keyMin.toLowerCase()) || options.containsKey(keyMax.toLowerCase())) {
 
-      for (String group : vcf.getPed().getGroups())
-        indices.put(group, vcf.getMatrixForGroup(group));
+      for (String group : vcf.getSampleSet().getPed().getGroups())
+        indices.put(group, vcf.getSampleSet().getMatrixForGroup(group));
 
       if (options.containsKey(keyMin.toLowerCase()))
         try {
@@ -102,7 +102,7 @@ public class MinMaxGroupParser {
         if (maxMap.containsKey(group))
           max = maxMap.get(group);
           
-        map.put(group, new IntegerInterval(min, max));
+        mapMinMax.put(group, new Integer[]{min, max});
       }
     }
   }
@@ -120,11 +120,11 @@ public class MinMaxGroupParser {
   }
 
   public int getMin(String group) {
-    return this.map.get(group).getMin();
+    return this.mapMinMax.get(group)[0];
   }
 
   public int getMax(String group) {
-    return this.map.get(group).getMax();
+    return this.mapMinMax.get(group)[1];
   }
 
   public ArrayList<Integer> getIndices(String group) {
@@ -134,32 +134,4 @@ public class MinMaxGroupParser {
   public boolean isValid() {
     return !this.groups.isEmpty();
   }
-
-  private static class IntegerInterval {
-
-    private int min;
-    private int max;
-
-    IntegerInterval(int min, int max) {
-      this.min = min;
-      this.max = max;
-    }
-
-    public int getMin() {
-      return min;
-    }
-
-    public void setMin(int min) {
-      this.min = min;
-    }
-
-    public int getMax() {
-      return max;
-    }
-
-    public void setMax(int max) {
-      this.max = max;
-    }
-  }
-
 }

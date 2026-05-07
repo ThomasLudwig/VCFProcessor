@@ -16,7 +16,7 @@ public abstract class ParallelVCFVariantFunction<T> extends ParallelVCFFunction<
     if(record == null)
       return null;
     try{
-      Variant variant = record.createVariant(getVCF());
+      Variant variant = record.createVariant();
       if (variant != null)
         return this.processInputVariant(variant);
     } catch(VCFException e){

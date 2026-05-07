@@ -42,7 +42,7 @@ public class FoundInAllCases extends ParallelVCFVariantFilterPedFunction {
   @Override
   public void begin() {
     super.begin();
-    this.cases = this.getVCF().getPed().getCases();
+    this.cases = this.getVCF().getSampleSet().getPed().getCases();
   }
 
   @Override

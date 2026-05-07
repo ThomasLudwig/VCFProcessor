@@ -5,39 +5,44 @@ import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.AbstractRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.GenotypeFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Info;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 
 public abstract class VariantRecord extends AbstractRecord {
+  private final VCF vcf;
 
+  public VariantRecord(VCF vcf) { this.vcf = vcf; }
 
-  public abstract Variant createVariant(VCF vcf) throws VCFException;
+  public VCF getVCF() { return vcf; }
 
-  public final boolean applyNonVariantFilters(VCF vcf) throws VCFException {
+  public abstract Variant createVariant() throws VCFException;
+
+  public final boolean applyNonVariantFilters() throws VCFException {
     //Already filtered
     if(isFiltered())
       return true;
-    //removing unwanted individuals
-    this.applySampleFilters(vcf);
+    //removing unwanted individuals, automatically done
+    //this.applySampleFilters();
 
-    boolean hasFilteredGenotypes = this.applyGenotypeFilters(vcf);
+    boolean hasFilteredGenotypes = this.applyGenotypeFilters();
     //update line (missing samples or genotypes impact AC,AF,AN
-    if (hasFilteredGenotypes || !vcf.getCommandParser().getSampleFilters().isEmpty())
+    if (hasFilteredGenotypes || !getVCF().getCommandParser().getSampleFilters().isEmpty())
       if (updateACANAF()) {//if all ACs are 0, drop the line
-        this.filter(vcf);
+        this.filter(getVCF());
         return true;
       }
 
-    return this.applyLineFilters(vcf);
+    return this.applyLineFilters();
   }
 
-  public abstract void applySampleFilters(VCF vcf) throws VCFException;
+  //public abstract void applySampleFilters() throws VCFException;
 
-  public boolean applyGenotypeFilters(VCF vcf) {
+  public boolean applyGenotypeFilters() {
     //apply genotype filters ++ Must be called before lineFilter (max missing geno is part of line filters)
     boolean hasFilteredGenotypes = false;
-    if (!vcf.getCommandParser().getGenotypeFilters().isEmpty()) {
+    if (!getVCF().getCommandParser().getGenotypeFilters().isEmpty()) {
       String[] formatFields = this.getFormats();
-      for (GenotypeFilter filter : vcf.getCommandParser().getGenotypeFilters()) {
+      for (GenotypeFilter filter : getVCF().getCommandParser().getGenotypeFilters()) {
         filter.setFormat(formatFields);
         for (int i = 1; i < this.getNumberOfSamples(); i++)
           if (!filter.pass(this.getGenotypeSplit(i))) { //TODO only send the relevant values (if DP and GQ, everything will be split and send twice)
@@ -51,17 +56,16 @@ public abstract class VariantRecord extends AbstractRecord {
 
   /**
    *
-   * @param vcf
    * @return true if the variant is filtered
    */
-  public boolean applyLineFilters(VCF vcf) {
+  public boolean applyLineFilters() {
     //applying line filters
-    if (!vcf.getCommandParser().getLineFilters().isEmpty()) {
+    if (!getVCF().getCommandParser().getLineFilters().isEmpty()) {
       /*if (f == null)
         f = filteredLine.split(T);*/
-      for (LineFilter filter : vcf.getCommandParser().getLineFilters())
+      for (LineFilter filter : getVCF().getCommandParser().getLineFilters())
         if (!filter.pass(this)) {
-          this.filter(vcf);
+          this.filter(getVCF());
           return true;
         }
     }
@@ -124,7 +128,7 @@ public abstract class VariantRecord extends AbstractRecord {
 
   public abstract void setGenotypeToMissing(int sample);
 
-  public abstract int getNumberOfSamples();
+  public final int getNumberOfSamples() { return getVCF().getNumberOfSamples(); }
   public abstract String[] asFields();
   public abstract String getChrom();
   public abstract void setChrom(String chrom);
@@ -153,7 +157,7 @@ public abstract class VariantRecord extends AbstractRecord {
   public abstract void setFilters(String filters);
   public abstract String getFiltersString();
   public abstract String getInfoString();
-  public abstract String[][] getInfo();
+  public abstract String[][] getInfoFields();
   public abstract String getInfo(String key);
   public abstract void addInfo(String key, String value);
   public void addInfo(String[] kv){
@@ -162,6 +166,12 @@ public abstract class VariantRecord extends AbstractRecord {
   public abstract void clearInfo();
   public abstract String[] getFormats();
   public abstract String getFormatString();
+
+  /**
+   * Return the info fields as an Info Object, in order to build a variant
+   * @return the Info object
+   */
+  public Info getInfo(){ return new Info(getInfoFields(), getVCF()); }
 
   public String getGT(int sample){
     return getGenotypeValue(sample, 0);

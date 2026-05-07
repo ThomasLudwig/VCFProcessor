@@ -1,5 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
+import fr.inserm.u1078.tludwig.maok.tools.MathTools;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.AbstractRecord;
@@ -21,10 +22,10 @@ public class BCFRecord extends VariantRecord {
   private String[] filters;
   private String[][] info; //TODO replace with HashMap ???
 
-  private final String[][] genoValues;
-
+  private final String[][] filteredGenoValues;
+/*
   private final ArrayList<IndexedSample> selectedSamples;
-
+*/
   /**
    * Parses a BCF Record from 2 byte array
    * @param header - the header of the BCF file
@@ -33,6 +34,7 @@ public class BCFRecord extends VariantRecord {
    * @throws BCFException if the Record can't be parsed from the arrays
    */
   public BCFRecord(BCFHeader header, BCFByteArray inCommon, BCFByteArray inFormatGeno) throws BCFException {
+    super(header.getVCF());
     this.header = header;
 
     // Parse Chrom
@@ -62,7 +64,9 @@ public class BCFRecord extends VariantRecord {
     // Parse INFO fields
     this.info = readInfo(inCommon, nInfo);
     // Parse genotypes
-    this.genoValues = readFormatAndGenotypes(inFormatGeno, nFormat, nSample);
+
+    this.filteredGenoValues = applySampleFilters(readFormatAndGenotypes(inFormatGeno, nFormat, nSample));
+    /*
     this.selectedSamples = new ArrayList<>();
     Sample[] rawSamples = header.getRawSamples();
 
@@ -70,7 +74,7 @@ public class BCFRecord extends VariantRecord {
       throw new BCFException.SampleNumberException(rawSamples.length, nSample);
 
     for(int i = 0 ; i < nSample; i++)
-      this.selectedSamples.add(new IndexedSample(i, rawSamples[i]));
+      this.selectedSamples.add(new IndexedSample(i, rawSamples[i]));*/
   }
 
   /**
@@ -88,18 +92,14 @@ public class BCFRecord extends VariantRecord {
    * @param in the array to parse
    * @return the position
    */
-  private int readPos(BCFByteArray in) {
-    return 1 + in.readLittleEndianSInt32();
-  }
+  private int readPos(BCFByteArray in) { return 1 + in.readLittleEndianSInt32(); }
 
   /**
    * Reads the quality of the variant
    * @param in the array to parse
    * @return the quality as a String
    */
-  private String readQual(BCFByteArray in) {
-    return in.readFloatsAsString(1);
-  }
+  private String readQual(BCFByteArray in) { return in.readFloatsAsString(1); }
 
   /**
    * Reads the ID of the variants
@@ -119,9 +119,7 @@ public class BCFRecord extends VariantRecord {
    * @return the REF allele
    * @throws BCFException if the array can't be parsed
    */
-  private String readRef(BCFByteArray in) throws BCFException {
-    return in.readValues(null);
-  }
+  private String readRef(BCFByteArray in) throws BCFException { return in.readValues(null); }
 
   /**
    * Reads the alternate alleles of the variant
@@ -194,7 +192,7 @@ public class BCFRecord extends VariantRecord {
    * Reads the FORMAT/GENOTYPES fields
    * @param in the array to parse
    * @param nFormat the number of format fields
-   * @param nSample the number of samples
+   * @param nSample the number of samples (prefilter)
    * @return null if variants is field, String[][nSample + 1][nFormat] otherwise<br/>
    * return[0] is the array of FORMAT names<br/>
    * return[X] is the array of values for the Xth samples (1-based)<br/>
@@ -203,7 +201,7 @@ public class BCFRecord extends VariantRecord {
    */
   private String[][] readFormatAndGenotypes(BCFByteArray in, int nFormat, int nSample) throws BCFException {
     if (in == null || !header.pass(this)) {
-      this.filter(header.getVCF());
+      this.filter(getVCF());
       return null;
     }
 
@@ -232,6 +230,23 @@ public class BCFRecord extends VariantRecord {
     return ret;
   }
 
+  private String[][] applySampleFilters(String[][] raw) {
+    if(raw == null || raw.length == 0)
+      return raw;
+
+    final int nFormat = raw[0].length;
+    final int[] outIndices = getVCF().getSampleSet().getOutputSampleIndices();
+    final String[][] ret = new String[outIndices.length + 1][nFormat];
+
+    System.arraycopy(raw[0], 0, ret[0], 0, nFormat);
+
+    for(int out = 0 ; out < outIndices.length; out ++) {
+      final int in = outIndices[out];
+      System.arraycopy(raw[in + 1], 0, ret[out + 1], 0, nFormat);
+    }
+    return ret;
+  }
+
   /**
    * Return the Leftmost columns of the Record (CHROM through INFO)
    * @return the columns as a String Array
@@ -254,12 +269,9 @@ public class BCFRecord extends VariantRecord {
    * @return the columns as a String Array
    */
   private String[] getRightColumns() {
-    String[] right = new String[1 + selectedSamples.size()];
-    right[0] = String.join(":", genoValues[0]);
-    for(int i = 0; i < selectedSamples.size(); i++){
-      int s = selectedSamples.get(i).getIndex();
-      right[i + 1] = String.join(":", genoValues[s]);
-    }
+    String[] right = new String[1 + getNumberOfSamples()];
+    for(int i = 0; i < right.length + 1; i++)
+      right[i] = String.join(":", filteredGenoValues[i]);
     return right;
   }
 
@@ -267,10 +279,7 @@ public class BCFRecord extends VariantRecord {
    * Conversion of a BCF Record to a VCF String for the variant
    * @return the line
    */
-  @Override
-  public String toString() {
-    return String.join(AbstractRecord.T, asFields());
-  }
+  @Override public String toString() { return String.join(AbstractRecord.T, asFields()); }
 
   public String[] asFields() {
     String[] left = this.getLeftColumns();
@@ -291,15 +300,9 @@ public class BCFRecord extends VariantRecord {
     return String.join(";", infos);
   }
 
-  @Override
-  public String[] getFormats() {
-    return this.genoValues[0];
-  }
+  @Override public String[] getFormats() { return this.filteredGenoValues[0]; }
 
-  @Override
-  public String getFormatString() {
-    return String.join(":", getFormats());
-  }
+  @Override public String getFormatString() { return String.join(":", getFormats()); }
 
   /**
    * Conversion of a BCF Record to a VCF String for the variant, limited to a number of samples
@@ -309,10 +312,10 @@ public class BCFRecord extends VariantRecord {
   @Override
   public String summary(int max) {
     StringBuilder sb = new StringBuilder(String.join(AbstractRecord.T, getLeftColumns()));
-    if(genoValues == null)
+    if(filteredGenoValues == null)
       sb.append("\t").append("----");
     else {
-      int nbSample = genoValues.length - 1;
+      int nbSample = filteredGenoValues.length - 1;
       int lim = Math.min(max, nbSample);
       for (int i = 0; i <= lim; i++)
         sb.append("\t").append(String.join(":", getFormatAndGenotypes()[i]));
@@ -322,22 +325,22 @@ public class BCFRecord extends VariantRecord {
     return sb.toString();
   }
 
-  public Variant createVariant(VCF vcf) throws VCFException {
+  public Variant createVariant() throws VCFException {
     if(this.isFiltered())
       return null;
-    NavigableSet<Sample> sampleIndices = vcf.getSampleIndices().navigableKeySet();
-    int nbSamples = sampleIndices.size();
+    //NavigableSet<Sample> sampleIndices = vcf.getSampleIndices().navigableKeySet();
+    int nbSamples = getNumberOfSamples();
     if (nbSamples == 0) //TODO allow this somehow
-      throw new VCFException(vcf, "Could not create variant (list of selected sample is empty)", this);
-    if (genoValues.length < 1 + nbSamples)
-      throw new VCFException(vcf, "Could not create variant (not enough fields " + (genoValues.length - 1) + "/" + nbSamples + " samples)", this);
+      throw new VCFException(getVCF(), "Could not create variant (list of selected sample is empty)", this);
+    if (filteredGenoValues.length < 1 + nbSamples)
+      throw new VCFException(getVCF(), "Could not create variant (not enough fields " + (filteredGenoValues.length - 1) + "/" + nbSamples + " samples)", this);
     try {
       List<Integer> kept = getKeptFormatIndices();
-      GenotypeFormat format = getFormat(vcf, kept);
-      Genotype[] genotypes = getGenotypes(vcf, format, kept);
-      return new Variant(chrom, pos, id, ref, String.join(",", alts), qual, String.join(",", filters), getInfo(vcf), format, genotypes);
+      GenotypeFormat format = getFormat(kept);
+      Genotype[] genotypes = getGenotypes(format, kept);
+      return new Variant(chrom, pos, id, ref, String.join(",", alts), qual, String.join(",", filters), getInfo(), format, genotypes);
     } catch (Exception e) {
-      throw new VCFException(vcf, "Could not create variant", this, e);
+      throw new VCFException(getVCF(), "Could not create variant", this, e);
     }
   }
 
@@ -373,16 +376,21 @@ public class BCFRecord extends VariantRecord {
   public int[] getAllACs() {
     int[] acs = new int[1 + alts.length];
 
-    for(IndexedSample s : selectedSamples){
-      int[] counts = getAC(s.getIndex());
+    for(int s = 0; s < getNumberOfSamples(); s++) {
+      int[] counts = getAC(s);
       for(int i = 0; i < 1 + alts.length; i++)
         acs[i] += counts[i];
     }
     return acs;
   }
 
+  /**
+   *
+   * @param s 0-base sample index
+   * @return
+   */
   private int[] getAC(int s){
-    String geno = this.genoValues[s][0];
+    String geno = this.filteredGenoValues[s + 1][0];
     int[] acs = new int[alts.length + 1];
     if (geno != null && !geno.isEmpty()) {
       int[] alleles = Genotype.getAlleles(geno);
@@ -400,131 +408,66 @@ public class BCFRecord extends VariantRecord {
     return acs;
   }
 
-  @Override
-  public int getNumberOfSamples() {
-    return this.selectedSamples.size();
-  }
-
-  @Override
-  public void applySampleFilters(VCF vcf) throws VCFException {
-    if(genoValues == null)
-      return;
-    if ((vcf.getCommandParser().getSampleFilters().isEmpty()))
-      return;
-    final TreeMap<Sample , Integer> sampleIndices = vcf.getSampleIndices();
-    this.selectedSamples.clear();
-    NavigableSet<Sample> samples = sampleIndices.navigableKeySet();
-    int max = genoValues.length;
-    for (Sample sample : samples) {
-      int idx = sampleIndices.get(sample);
-      if(idx >= max)
-        throw new VCFException(vcf, "Could not Filter Samples (not enough fields: " + (genoValues.length - 1) + " samples)", this);
-
-      selectedSamples.add(new IndexedSample(idx, sample));
-    }
-  }
-
   /**
    * Gets the Chromosome of the variant
    * @return the chromosome as a String (contig name)
    */
-  public String getChrom() {
-    return chrom;
-  }
+  public String getChrom() { return chrom; }
 
 
-  @Override
-  public void setChrom(String chrom) {
-    this.chrom = chrom;
-  }
+  @Override public void setChrom(String chrom) { this.chrom = chrom; }
 
   /**
    * Gets the position of the variant
    * @return the position (1-based)
    */
-  public int getPos() {
-    return pos;
-  }
+  public int getPos() { return pos; }
 
-  @Override
-  public void setPos(int pos) {
-    this.pos = pos;
-  }
+  @Override public void setPos(int pos) { this.pos = pos; }
 
   /**
    * Gets the ID of the variant
    * @return the ID
    */
-  public String getID() {
-    return id;
-  }
+  public String getID() { return id; }
 
-  @Override
-  public void setID(String id) {
-    this.id = id;
-  }
+  @Override public void setID(String id) { this.id = id; }
 
   /**
    * Gets the reference allele of the variant
    * @return the REF
    */
-  public String getRef() {
-    return ref;
-  }
+  public String getRef() { return ref; }
 
-  @Override
-  public void setRef(String ref) {
-    this.ref = ref;
-  }
+  @Override public void setRef(String ref) { this.ref = ref; }
 
-  @Override
-  public void setAlt(String alts) {
-    this.alts = alts.split(",");
-  }
+  @Override public void setAlt(String alts) { this.alts = alts.split(","); }
 
-  @Override
-  public void setQual(String qual) {
-    this.qual = qual;
-  }
+  @Override public void setQual(String qual) { this.qual = qual; }
 
-  @Override
-  public String getAltString() {
-    return String.join(",", alts);
-  }
+  @Override public String getAltString() { return String.join(",", alts); }
 
   /**
    * Gets the alternate alleles of the variant
    * @return array of alternate alleles
    */
-  public String[] getAlts() {
-    return alts;
-  }
+  public String[] getAlts() { return alts; }
 
   /**
    * Gets the quality of the variant
    * @return a String representation of the float values, or "." if missing
    */
-  public String getQual() {
-    return qual;
-  }
+  public String getQual() { return qual; }
 
-  @Override
-  public String getFiltersString() {
-    return String.join(",", filters);
-  }
+  @Override public String getFiltersString() { return String.join(",", filters); }
 
   /**
    * Gets the filters of the variant
    * @return array of filter names
    */
-  public String[] getFilters() {
-    return filters;
-  }
+  public String[] getFilters() { return filters; }
 
-  @Override
-  public void clearFilters() {
-    this.filters = new String[0];
-  }
+  @Override public void clearFilters() { this.filters = new String[0]; }
 
   @Override
   public void addFilter(String filter) {
@@ -538,18 +481,13 @@ public class BCFRecord extends VariantRecord {
     this.filters = newFilters;
   }
 
-  @Override
-  public void setFilters(String filters) {
-    this.filters = filters.split(";");
-  }
+  @Override public void setFilters(String filters) { this.filters = filters.split(";"); }
 
   /**
    * Gets the INFO fields of the variant (minus the filtered ones)
    * @return an array of {KEY, VALUE}. VALUE can be null
    */
-  public String[][] getInfo() {
-    return info;
-  }
+  public String[][] getInfoFields() { return info; }
 
   /**
    * Gets the value for the INFO filed with the given key
@@ -563,15 +501,6 @@ public class BCFRecord extends VariantRecord {
     return null;
   }
 
-  /**
-   * Return the info fields as an Info Object, in order to build a variant
-   * @param vcf the VCF file
-   * @return the Info object
-   */
-  public Info getInfo(VCF vcf){
-    return new Info(info, vcf);
-  }
-
   @Override
   public void addInfo(String key, String value) {
     String[][] newInfo = new String[this.info.length + 1][2];
@@ -580,10 +509,7 @@ public class BCFRecord extends VariantRecord {
     this.info = newInfo;
   }
 
-  @Override
-  public void clearInfo() {
-    this.info = new String[0][0];
-  }
+  @Override public void clearInfo() { this.info = new String[0][0]; }
 
   /**
    * Gets the FORMAT and GENOTYPES values for the variant
@@ -592,34 +518,17 @@ public class BCFRecord extends VariantRecord {
    * return[X] is the array of values for the Xth samples (1-based)<br/>
    * Missing/filtered values are stored as "."
    */
-  public String[][] getFormatAndGenotypes() {
-    return genoValues;
-  }
+  public String[][] getFormatAndGenotypes() { return filteredGenoValues; }
 
-  @Override
-  public String getGenotypeValue(int sample, int field) {
-    return genoValues[selectedSamples.get(sample).getIndex()][field];
-  }
+  @Override public String getGenotypeValue(int sample, int field) { return filteredGenoValues[sample + 1][field]; }
 
-  @Override
-  public void updateGT(int sample, String value) {
-    genoValues[selectedSamples.get(sample).getIndex()][0] = value;
-  }
+  @Override public void updateGT(int sample, String value) { filteredGenoValues[sample + 1][0] = value; }
 
-  @Override
-  public String getGenotypeString(int sample) {
-    return String.join(":", getGenotypeSplit(sample));
-  }
+  @Override public String getGenotypeString(int sample) { return String.join(":", getGenotypeSplit(sample)); }
 
-  @Override
-  public String[] getGenotypeSplit(int sample) {
-    return genoValues[selectedSamples.get(sample).getIndex()];
-  }
+  @Override public String[] getGenotypeSplit(int sample) { return filteredGenoValues[sample + 1]; }
 
-  @Override
-  public void setGenotypeToMissing(int sample) {
-    Arrays.fill(genoValues[selectedSamples.get(sample).getIndex()], ".");
-  }
+  @Override public void setGenotypeToMissing(int sample) { Arrays.fill(filteredGenoValues[sample + 1], "."); }
 
   @Override
   public String[] getGenotypeValues(int field) {
@@ -639,38 +548,43 @@ public class BCFRecord extends VariantRecord {
 
   public List<Integer> getKeptFormatIndices() throws BCFException {
     ArrayList<Integer> ret = new ArrayList<>();
-    for(int i = 0 ; i < genoValues[0].length; i++)
-      if (header.isFormatKept(genoValues[0][i]))
+    for(int i = 0 ; i < filteredGenoValues[0].length; i++)
+      if (header.isFormatKept(filteredGenoValues[0][i]))
         ret.add(i);
     return ret;
   }
 
-  public GenotypeFormat getFormat(VCF vcf, List<Integer> keptFormatIndices) {
-    if (vcf.checkMode(VCF.MODE_QUICK_GENOTYPING))
+  public GenotypeFormat getFormat(List<Integer> keptFormatIndices) {
+    if (getVCF().checkMode(VCF.MODE_QUICK_GENOTYPING))
       return new GenotypeFormat("GT");
     String[] keptFormat = new String[keptFormatIndices.size()];
     for(int i = 0 ; i < keptFormatIndices.size(); i++)
-      keptFormat[i] = genoValues[0][keptFormatIndices.get(i)];
+      keptFormat[i] = filteredGenoValues[0][keptFormatIndices.get(i)];
     return new GenotypeFormat(keptFormat);
   }
 
-  public Genotype[] getGenotypes(VCF vcf, GenotypeFormat format, List<Integer> keptFormatIndices) throws BCFException {
-    Genotype[] genotypes = new Genotype[this.selectedSamples.size()];
+  /**
+   * @param format composed of the kept subformats
+   * @param keptFormatIndices the indices of subformats to keep
+   * @return the variant's genotypes
+   * @throws BCFException
+   */
+  public Genotype[] getGenotypes(GenotypeFormat format, List<Integer> keptFormatIndices) throws BCFException {
+    Genotype[] genotypes = new Genotype[getNumberOfSamples()];
 
-    for(int i = 0; i < this.selectedSamples.size(); i++){
-      Sample sample = this.selectedSamples.get(i).getSample();
+    for(int i = 0; i < this.getNumberOfSamples(); i++){
+      Sample sample = this.getVCF().getSampleSet().getOutputSamples()[i];
       if(sample == null)
-        Message.die("Sample is null for i=" + i +" -> "+this.selectedSamples.get(i)+"\nVariants\n"+this.summary(10));
+        Message.die("Sample is null for i=" + i + "\nVariants\n" + this.summary(10));
 
-      int s = this.selectedSamples.get(i).getIndex();
       String geno;
-      if (vcf.checkMode(VCF.MODE_QUICK_GENOTYPING))
-        geno = genoValues[s][0];
+      if (getVCF().checkMode(VCF.MODE_QUICK_GENOTYPING))
+        geno = filteredGenoValues[i + 1][0];
       else {
         StringBuilder sb = new StringBuilder();
         for (Integer keptFormatIndex : keptFormatIndices)
-          sb.append(":").append(genoValues[s][keptFormatIndex]);
-        if(sb.length() > 0)
+          sb.append(":").append(filteredGenoValues[i + 1][keptFormatIndex]);
+        if(!sb.isEmpty())
           geno = sb.substring(1);
         else
           geno = "";
@@ -680,28 +594,5 @@ public class BCFRecord extends VariantRecord {
         throw new BCFException.NullGenotypeException(sample == null ? "null" : sample.toString());
     }
     return genotypes;
-  }
-
-  private static class IndexedSample {
-    private final int index;
-    private final Sample sample;
-
-    public IndexedSample(int index, Sample sample) {
-      this.index = index + 1;
-      this.sample = sample;
-    }
-
-    public int getIndex() {
-      return index;
-    }
-
-    public Sample getSample() {
-      return sample;
-    }
-
-    @Override
-    public String toString() {
-      return "[col (1-based) "+index+" "+sample.getId()+"]";
-    }
   }
 }

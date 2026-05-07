@@ -5,12 +5,8 @@ import fr.inserm.u1078.tludwig.maok.tools.DateTools;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.Main;
 import fr.inserm.u1078.tludwig.vcfprocessor.commandline.CommandParser;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.PedException;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.SampleFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.VariantFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.sample.FamFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.filters.sample.MaxSampleFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPFormat;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
@@ -49,15 +45,17 @@ public class VCF implements VariantProducer {
   public static final int QUEUE_DEPTH = 200;
 
   private final ArrayList<String> headers;
-  private String originalSampleHeader;
+
+  private String originalChromToSampleHeader;
 
   private final String filename;
   private final CommandParser commandParser;
   private final UniversalReader in;
   private final BCF bcf;
   private VEPFormat vepFormat;
-  private final TreeMap<Sample, Integer> sampleIndices;
-  private final TreeMap<String, Sample> samplesByID;
+  /*private final TreeMap<Sample, Integer> sampleIndices;
+  private final TreeMap<String, Sample> samplesByID;*/
+  private final SampleSet sampleSet;
   private final AtomicInteger nbVariantsRead = new AtomicInteger(0);
   private final AtomicInteger nbVariantsFiltered = new AtomicInteger(0);
 
@@ -68,8 +66,6 @@ public class VCF implements VariantProducer {
   public static final int STEP_OFF = -1;
   public static final int STEP10000 = 10000;
   private final int step;
-
-  private Ped ped;
 
   private final int mode;
 
@@ -98,8 +94,8 @@ public class VCF implements VariantProducer {
     this.mode = mode;
     this.step = step;
     this.headers = new ArrayList<>();
-    this.sampleIndices = new TreeMap<>();
-    this.samplesByID = new TreeMap<>();
+    /*this.sampleIndices = new TreeMap<>();
+    this.samplesByID = new TreeMap<>();*/
 
     //Process command line arguments
     this.commandParser = Main.getCommandParser();//TODO, a new commandParser is returned for each VCF files, see how it al plays out when there are filters and multiple VCF
@@ -112,7 +108,6 @@ public class VCF implements VariantProducer {
     try {
       tmpBCF = new BCF(this.filename, this);
     } catch(BCFException ignore){
-      //nothing
     } catch (IOException e) {
       throw new VCFException(this, "Could not Read BCF/VCF File", e);
     }
@@ -127,14 +122,10 @@ public class VCF implements VariantProducer {
     } else
       in = null;
     readHeaders();
-    this.initSamples();
-    this.filterSamples();
-    this.commandParser.processSampleDependantArguments(this, this.getPed());
-    this.commandParser.printSummary();
-  }
 
-  public Ped getPed() {
-    return ped;
+    this.sampleSet = new SampleSet(this);
+    this.commandParser.processSampleDependantArguments(this, this.getSampleSet().getPed());
+    this.commandParser.printSummary();
   }
 
   public InfoFormatHeader getInfoHeader(String name) {
@@ -145,128 +136,18 @@ public class VCF implements VariantProducer {
     return this.formatHeaders.get(name);
   }
 
-  private void filterSamples() {
-    int originalSampleNb = this.getNumberOfSamples();
-    FamFilter famFilter = null;
-    MaxSampleFilter maxSampleFilter = null;
-    ArrayList<SampleFilter> sampleFilters = new ArrayList<>();
-
-    for (SampleFilter filter : this.commandParser.getSampleFilters())
-      if (filter instanceof FamFilter)
-        famFilter = (FamFilter) filter;
-      else if (filter instanceof MaxSampleFilter)
-        maxSampleFilter = (MaxSampleFilter) filter;
-      else
-        sampleFilters.add(filter);
-
-    ArrayList<Sample> filtered = new ArrayList<>();
-
-    //First apply famFilter
-    if (famFilter != null) {
-      for (Sample sample : this.getSortedSamples())
-        if (!famFilter.pass(sample)) {
-          Message.verbose("Sample [" + sample.getId() + "] has been filtered out by " + famFilter.getClass().getSimpleName());
-          filtered.add(sample);
-        }
-      //has to be last of the block
-      this.bindToPed(famFilter.getFam());
-    }
-    //apply all filter        
-    for (Sample sample : this.getSortedSamples())
-      if (!filtered.contains(sample))
-        for (SampleFilter filter : sampleFilters)
-          if (!(filter.pass(sample))) {
-            Message.verbose("Sample [" + sample.getId() + "] has been filtered out by " + filter.getClass().getSimpleName());
-            filtered.add(sample);
-            break;
-          }
-
-    //Last apply maxSampleFilter
-    if (maxSampleFilter != null) {
-      ArrayList<String> keptSoFar = new ArrayList<>();
-      for (Sample sample : this.getSortedSamples())
-        if (!filtered.contains(sample))
-          keptSoFar.add(sample.getId());
-
-      maxSampleFilter.setSamples(keptSoFar);
-      for (Sample sample : this.getSortedSamples())
-        if (!filtered.contains(sample))
-          if (!(maxSampleFilter.pass(sample))) {
-            Message.verbose("Sample [" + sample.getId() + "] has been filtered out by " + maxSampleFilter.getClass().getSimpleName());
-            filtered.add(sample);
-          }
-    }
-
-    this.removeSamples(filtered);
-
-    int kept = originalSampleNb - filtered.size();
-    Message.info("Sample kept : " + kept + "/" + originalSampleNb);
-    Message.warning(kept == 0, "No Samples left in the VCF file");
-      //throw new VCFException("No sample remaining after filtering");
-  }
-
   public String getFilename() {
     return this.filename;
   }
 
-  /**
-   * The indexes are the index of samples, not of column in the VCF line
-   */
-  private void initSamples() {
-    this.ped = new Ped(this.originalSampleHeader.split("\t"));
-    this.sampleIndices.clear();
-    this.samplesByID.clear();
-    for (int i = 0; i < this.ped.getSampleSize(); i++) {
-      Sample sample = this.ped.getSample(i);
-      this.sampleIndices.put(sample, i);
-      this.samplesByID.put(sample.getId(), sample);
-    }
-  }
-
-  /**
-   * Doesn't remove the samples anymore, this will be done from the famFilter
-   *
-   * @param ped the ped file to bind
-   */
-  public void bindToPed(Ped ped) {
-    Message.verbose("Binding ped file [" + ped.getFilename() + "] to VCF file [" + this.getFilename() + "]");
-    this.ped = ped;
-
-    List<Sample> keep = this.applyPedSamples();
-    ped.keepOnly(keep);
-    //ped.keepOnly(this.sampleIndices.navigableKeySet());
-  }
-
-  private List<Sample> applyPedSamples(){
-    List<Sample> keep = new ArrayList<>();
-    for (Sample pedSample : ped.getSamples()) {
-      Sample s = this.getSample(pedSample.getId());
-      if(s != null) {
-        s.apply(pedSample);
-        keep.add(s);
-      }
-    }
-    return keep;
-  }
-
-  public void removeSamples(Collection<Sample> excluded) {
-    ArrayList<Sample> original = new ArrayList<>(sampleIndices.navigableKeySet());
-
-    for (Sample sample : original)
-      if (excluded.contains(sample)) {
-        this.sampleIndices.remove(sample);
-        this.samplesByID.remove(sample.getId());
-      }
-    ped.keepOnly(this.sampleIndices.navigableKeySet()); //ped is never null
-  }
 
 
   private String getNextHeaderLine() throws IOException {
-    if(bcf == null)
-      return in.readLine();
-    else
-      return bcf.getNextHeaderLine();
+    return bcf == null
+        ? in.readLine()
+        : bcf.getNextHeaderLine();
   }
+
   private void readHeaders() throws VCFException {
     String line;
     try {
@@ -290,7 +171,7 @@ public class VCF implements VariantProducer {
 
         if (line.startsWith(CHROM_HEADER)) {
           this.headers.add(getStamp());
-          this.originalSampleHeader = line;
+          this.originalChromToSampleHeader = line;
           break; //only read headers, break when reading the last line, which is always #CHROM
         }
         this.headers.add(line);
@@ -318,21 +199,16 @@ public class VCF implements VariantProducer {
   @Override
   public RawVariantRecordData readNext() throws IOException {
     String line = in.readLine();
-    if(line == null)
-      return null;
-    return new RawVariantRecordData(line);
+    return line == null ? null : new RawVariantRecordData(line);
   }
 
   @Override
   public VariantRecord build(RawVariantRecordData record) throws VCFException {
-    return new VCFRecord(record.getLine(), VCF.this);
+    return new VCFRecord(record.getLine(), this);
   }
 
   private RawVariantRecordData readRecordFromUnderlyingStructure() throws BCFException, IOException {
-    if(bcf == null) {
-      return this.readNext();
-    }
-    return bcf.readNext();
+    return bcf == null ? this.readNext(): bcf.readNext();
   }
 
   private RawVariantRecordData readNextPhysicalRecord() throws VCFException {
@@ -356,7 +232,6 @@ public class VCF implements VariantProducer {
   public IndexedRecord getNextNumberedRecord() {
     return this.getReaderWithoutStarting().nextIndexedRecord();
   }
-
 
   /**
    * Use using this method does not fully exploit the parallelism
@@ -402,9 +277,10 @@ public class VCF implements VariantProducer {
     return Variant.compare(f[0], Integer.parseInt(f[1]), chrom, pos) >= 0;
   }
 
-  public String getSampleHeader() {
+    public String getSampleHeader() {
     StringBuilder ret = new StringBuilder(String.join(T, "#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT"));
-    for (Sample sample : this.sampleIndices.navigableKeySet())
+    //for (Sample sample : this.sampleIndices.navigableKeySet())
+    for (Sample sample : this.sampleSet.getOutputSamples())
       ret.append(T).append(sample.getId());
     return ret.toString();
   }
@@ -465,7 +341,7 @@ public class VCF implements VariantProducer {
       throw new VCFException(this, "Could not create variant from a null VariantRecord");
     boolean pass = true;
     //TODO here check if is filtered ? or before
-    Variant variant = record.createVariant(this);
+    Variant variant = record.createVariant();
     for (VariantFilter variantFilter : commandParser.getVariantFilters())
       if (!variantFilter.pass(variant)) {
         pass = false;
@@ -489,16 +365,12 @@ public class VCF implements VariantProducer {
     }
   }
 
+  public SampleSet getSampleSet() { return sampleSet; }
+
   public static ArrayList<String> commonSamples(VCF file1, VCF file2) {
-    ArrayList<String> ret = new ArrayList<>();
-    Collection<Sample> samples2 = file2.getSortedSamples();
-    for (Sample sample : file1.getSortedSamples())
-      for (Sample s : samples2)
-        if (sample.getId().equals(s.getId())) {
-          ret.add(sample.getId());
-          break;
-        }
-    return ret;
+    if(file1 == null || file2 == null)
+      return new ArrayList();
+    return SampleSet.commonOutputSamples(file1.getSampleSet(), file2.getSampleSet());
   }
 
   public ArrayList<String> getHeadersWithoutSamples() {
@@ -506,14 +378,14 @@ public class VCF implements VariantProducer {
   }
 
   public int getNumberOfSamples() {
-    return sampleIndices.size();
+    return sampleSet.getOutputSize();
   }
 
   /*
   public NavigableSet<Sample> getUnsortedSamples() {
     return sampleIndices.navigableKeySet();
   }*/
-
+/*
   public List<Sample> getSortedSamples(){
     ArrayList<Sample> ret = new ArrayList<>();
     for(Sample sample : sampleIndices.navigableKeySet()){
@@ -531,10 +403,11 @@ public class VCF implements VariantProducer {
         ret.add(sample);
     }
     return ret;
-  }
+  }*/
 
   public Sample getSample(String id){
-    return samplesByID.get(id);
+    //return samplesByID.get(id);
+    return sampleSet.getSample(id);
   }
 
   public int indexOfSample(Sample sample){
@@ -542,13 +415,14 @@ public class VCF implements VariantProducer {
   }
 
   public int indexOfSample(String sampleID){
-    int i = 0;
+    /*int i = 0;
     for(Sample sample : this.sampleIndices.navigableKeySet()){
       if(sample.getId().equals(sampleID))
         return i;
       i++;
     }
-    return -1;
+    return -1;*/
+    return sampleSet.getOutputIndex(sampleID);
   }
 
   public boolean has1kGAnnotation() {
@@ -600,39 +474,22 @@ public class VCF implements VariantProducer {
     return false;
   }
 
-  public CommandParser getCommandParser() {
-    return commandParser;
-  }
+  public CommandParser getCommandParser() { return commandParser; }
 
+  public String getOriginalChromToSampleHeader() { return originalChromToSampleHeader; }
+
+  public void setOriginalChromToSampleHeader(String header) { this.originalChromToSampleHeader = header; }
+
+  /*
   public TreeMap<Sample, Integer> getSampleIndices() {
     return sampleIndices;
-  }
+  }*/
 
-  public AtomicInteger getNbVariantsRead() {
-    return nbVariantsRead;
-  }
+  public AtomicInteger getNbVariantsRead() { return nbVariantsRead; }
 
   /*public AtomicInteger getNbVariantsFiltere() {
     return nbVariantsFiltered;
   }*/
-
-  /**
-   * Gets the indices of samples for the given group
-   *
-   * @param group the group to consider
-   * @return the list of indices for the samples in the group
-   */
-  public ArrayList<Integer> getMatrixForGroup(String group) {
-    Message.debug("Looking for " + group);
-    ArrayList<Integer> members = new ArrayList<>();
-    if (group == null || group.isEmpty())
-      return members;
-    for (Sample sample : sampleIndices.navigableKeySet())
-      if (group.equals(sample.getGroup()))
-        members.add(this.sampleIndices.get(sample));
-    Message.debug(members.size() + " members found for " + group);
-    return members;
-  }
 
   /*
    * Return a Variant 'original' line, edited to add extra info fields
@@ -687,16 +544,7 @@ public class VCF implements VariantProducer {
     return this.uniqLineReader;
   }
 
-  public boolean hasSample(String id) {
-    for (Sample sample : this.getSortedSamples())
-      if (sample.getId().equals(id))
-        return true;
-    return false;
-  }
-
-  public void filter() {
-    nbVariantsFiltered.incrementAndGet();
-  }
+  public void filter() { nbVariantsFiltered.incrementAndGet(); }
 
   public class IndexedRecord {
     public final int index;
@@ -777,9 +625,7 @@ public class VCF implements VariantProducer {
 
     public VariantRecord nextRecord() {
       IndexedRecord n = nextIndexedRecord();
-      if(n == null)
-        return null;
-      return n.getRecord();
+      return n == null ? null : n.getRecord();
     }
 
     public IndexedRecord nextIndexedRecord() {
@@ -798,7 +644,7 @@ public class VCF implements VariantProducer {
             int speed = (int) (consumed / dur);
             Message.info(consumed + "/" + read + " variants read from " + filename + " in " + dur + "s (" + speed + " v/s)");
           }
-          record.applyNonVariantFilters(VCF.this);
+          record.applyNonVariantFilters();
         } else {
           try {
             readLock.lock();
@@ -821,7 +667,6 @@ public class VCF implements VariantProducer {
   }
 
   public static class InfoFormatHeader {
-
     private final String name;
     private final String description;
     private final String type;

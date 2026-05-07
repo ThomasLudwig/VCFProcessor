@@ -57,7 +57,7 @@ public class AddWorstAndCanonicalConsequence extends ParallelVCFFunction<Object>
   @Override
   public String[] processInputRecord(VariantRecord record) {
     int nbAllele = 1 + record.getAlts().length;
-    Info info = new Info(record.getInfo(), getVCF());
+    Info info = record.getInfo();
     StringBuilder worstCsq = new StringBuilder();
     StringBuilder canonicalCsq = new StringBuilder();
     StringBuilder worstGene = new StringBuilder();

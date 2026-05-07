@@ -34,8 +34,10 @@ public class BCFHeader {
   private final CommandParser commandParser;
   private final ArrayList<LineFilter> lineFilters;
 
+  /*
   private String[] rawSampleNames;
   private Sample[] rawSamples;
+   */
 
   /**
    * Reads a BCF Header from an InputStream
@@ -76,6 +78,8 @@ public class BCFHeader {
             break;
         }
       } else if(line.startsWith("#CHROM")) {
+        vcf.setOriginalChromToSampleHeader(line);
+        /*
         String[] f = line.split("\t",-1);
         if(f.length < VCF.IDX_SAMPLE) {
           //no samples in the file
@@ -83,7 +87,10 @@ public class BCFHeader {
         } else {
           rawSampleNames = new String[f.length - VCF.IDX_SAMPLE];
           System.arraycopy(f, VCF.IDX_SAMPLE, rawSampleNames, 0, rawSampleNames.length);
-        }
+        }*/
+        /*
+          for(int i = VCF.IDX_SAMPLE; i < f.length ; i++)
+            this.vcf.getSampleSet().add(new Sample(f[i]));*/
       }
     }
     gtIndex = values.indexOf("GT");
@@ -108,7 +115,7 @@ public class BCFHeader {
   }
 
   public VCF getVCF() { return vcf; }
-
+/*
   public synchronized Sample[] getRawSamples() {
     if(rawSamples == null) {
       rawSamples = new Sample[rawSampleNames.length];
@@ -116,7 +123,7 @@ public class BCFHeader {
         rawSamples[i] = vcf.getSample(rawSampleNames[i]);
     }
     return rawSamples;
-  }
+  }*/
 
   private void parseCommandLine(){
     parseLineArgument();

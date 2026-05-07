@@ -51,7 +51,7 @@ public class StrictCompoundHeterozygous extends AbstractCompoundFunction {
   @Override
   public void begin() {
     super.begin();
-    Ped ped = this.getVCF().getPed();
+    Ped ped = this.getVCF().getSampleSet().getPed();
     this.cases = new int[ped.getCases().size()];
     this.parents = new int[ped.getCases().size()][2];
     if (this.cases.length == 0)

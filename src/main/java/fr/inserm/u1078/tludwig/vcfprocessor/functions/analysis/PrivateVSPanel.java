@@ -98,9 +98,9 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
     }
   }
 
-  private void browseReference() throws Exception {    
+  private void browseReference() throws Exception {
     VCF ref = this.refFile.getVCF(VCF.MODE_QUICK_GENOTYPING, 10000);
-    N = ref.getPed().getSampleSize();
+    N = ref.getNumberOfSamples();
     this.count = new int[C][N];
     
     int n = N / 2; //TODO ???
@@ -112,8 +112,7 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
     }
     
     ref.getReaderAndStart();
-    ArrayList<Sample> samples = new ArrayList<>(ref.getSortedSamples());
-    
+
     Message.info("Processing  Ref VCF for " + N + " samples");
 
     Variant variant;
@@ -126,7 +125,7 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
           MiniVariant found = this.variants[chrom].get(index);
 
           for (int s = 0; s < N; s++) {
-            Sample sample = samples.get(this.sampleIndices.get(s));
+            Sample sample = ref.getSampleSet().getOutputSamples()[this.sampleIndices.get(s)];
             Genotype g = variant.getGenotype(sample);
             if (g.hasAllele(a)) {
               for (int level : found.consequences)

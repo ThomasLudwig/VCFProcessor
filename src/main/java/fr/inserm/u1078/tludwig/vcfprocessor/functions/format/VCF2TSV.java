@@ -92,7 +92,7 @@ public class VCF2TSV extends ParallelVCFFunction {
 
   @Override
   public String[] processInputRecord(VariantRecord record) {
-    ArrayList<String[]> veps = getVEPs(record.getInfo());
+    ArrayList<String[]> veps = getVEPs(record.getInfoFields());
     //ArrayList<String[]> frexs = new ArrayList<>();
 
     /*

@@ -147,7 +147,7 @@ public class VCF2HTML extends ParallelVCFFunction {
 
   @Override
   public String[] processInputRecord(VariantRecord record) {
-    String[][] inf = record.getInfo();
+    String[][] inf = record.getInfoFields();
     /*String[] infs = f[7].split(";");*/
     StringBuilder infoSB = new StringBuilder(inf[0][0]);
     if(inf[0][1] != null)

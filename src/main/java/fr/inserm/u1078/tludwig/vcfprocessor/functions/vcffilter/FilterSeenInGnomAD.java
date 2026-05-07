@@ -27,7 +27,7 @@ public class FilterSeenInGnomAD extends ParallelVCFFilterFunction {
 
   @Override
   public String[] processInputRecordForFilter(VariantRecord record) {
-    for(String[] info : record.getInfo()){
+    for(String[] info : record.getInfoFields()){
       if(GENOME.equals(info[0]) && getAN(info[1]) > 0)
         return NO_OUTPUT;
       if(EXOME.equals(info[0]) && getAN(info[1]) > 0)

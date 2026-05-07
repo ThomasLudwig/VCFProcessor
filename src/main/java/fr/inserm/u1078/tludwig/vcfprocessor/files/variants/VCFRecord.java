@@ -11,43 +11,42 @@ import java.util.TreeMap;
 
 public class VCFRecord extends VariantRecord {
   private final String[] left;
-  private final ArrayList<String> right;
+  private final String[] filteredRight;
 
   private final String missing;
 
   public VCFRecord(String line, VCF vcf) throws VCFException {
+    super(vcf);
     if (line.charAt(0) == '#')
-      throw new VCFException(vcf, "Could not create VCFRecord from the following line\n" + line);
+      throw new VCFException(getVCF(), "Could not create VCFRecord from the following line\n" + line);
     String[] f = line.split(AbstractRecord.T);
-    right = new ArrayList<>();
     left = new String[VCF.IDX_FORMAT]; //format is outside the boundaries
     System.arraycopy(f, 0, left, 0, VCF.IDX_FORMAT);
-    right.addAll(Arrays.asList(f).subList(VCF.IDX_FORMAT, f.length));
+    final int nbSamples = f.length - VCF.IDX_SAMPLE;
+    String[] rawRight = new String[nbSamples + 1];
+    System.arraycopy(f, VCF.IDX_FORMAT, rawRight, 0, nbSamples + 1);
+    filteredRight = applySampleFilters(rawRight);
     this.missing = buildMissing();
   }
 
   @Override
   public String toString() {
-    return String.join(AbstractRecord.T, left) + AbstractRecord.T + String.join(AbstractRecord.T, right);
+    return String.join(AbstractRecord.T, left) + AbstractRecord.T + String.join(AbstractRecord.T, filteredRight);
   }
 
   @Override
   public String summary(int max) {
-    int lim = Math.min(max, right.size() - 1);
+    int lim = Math.min(max, filteredRight.length - 1);
     String[] summary = new String[1 + lim];
-    for (int i = 0; i <= lim; i++){
-      summary[i] = right.get(i);
-    }
+    System.arraycopy(filteredRight, 0, summary, 0, lim + 1);
     return String.join(AbstractRecord.T, left) + AbstractRecord.T + String.join(AbstractRecord.T, summary);
   }
 
   @Override
   public String[] asFields() {
-    String[] ret = new String[left.length + right.size()];
+    String[] ret = new String[left.length + filteredRight.length];
     System.arraycopy(left, 0, ret, 0, left.length);
-
-    for(int i = 0; i < right.size(); i++)
-      ret[left.length + i] = right.get(i);
+    System.arraycopy(filteredRight, 0, ret, left.length, filteredRight.length);
     return ret;
   }
 
@@ -155,7 +154,7 @@ public class VCFRecord extends VariantRecord {
   }
 
   @Override
-  public String[][] getInfo() {
+  public String[][] getInfoFields() {
     String[] f = getInfoString().split(";");
     String[][] ret = new String[f.length][2];
     for(int i = 0 ; i < f.length; i++) {
@@ -203,29 +202,22 @@ public class VCFRecord extends VariantRecord {
 
   @Override
   public String getFormatString() {
-    if(right.isEmpty())
+    if(filteredRight.length == 0)
       return ""; //TODO might have VCF without format/genotypes (ie gnomAD)
-    return right.get(0);
+    return filteredRight[0];
   }
 
   @Override
-  public int getNumberOfSamples() {
-    return Math.max(right.size() - 1, 0);
-  }
-
-  @Override
-  public Variant createVariant(VCF vcf) throws VCFException {
+  public Variant createVariant() throws VCFException {
     if(this.isFiltered())
       return null;
-    String filename = vcf.getFilename();
-    NavigableSet<Sample> sampleIndices = vcf.getSampleIndices().navigableKeySet();
-    int nbSamples = sampleIndices.size();
-    if (nbSamples == 0) //TODO allow this somehow
-      throw new VCFException(vcf, "Could not create variant (list of selected sample is empty)", this);
-
+    //NavigableSet<Sample> sampleIndices = getVCF().getSampleIndices().navigableKeySet();
+    if (getNumberOfSamples() == 0) //TODO allow this somehow
+      throw new VCFException(getVCF(), "Could not create variant (list of selected sample is empty)", this);
+/*
     if (this.getNumberOfSamples() < 1) //format + at least 1 sample
-      throw new VCFException(vcf, "Could not create variant (not enough fields " + this.getNumberOfSamples() + "/" + nbSamples + " samples)", this);
-
+      throw new VCFException(getVCF(), "Could not create variant (not enough fields " + this.getNumberOfSamples() + "/" + nbSamples + " samples)", this);
+*/
     try {
       String chrom = left[VCF.IDX_CHROM];
       int pos = Integer.parseInt(left[VCF.IDX_POS]);
@@ -234,43 +226,35 @@ public class VCFRecord extends VariantRecord {
       String alt = left[VCF.IDX_ALT];
       String qual = left[VCF.IDX_QUAL];
       String filter = left[VCF.IDX_FILTER];
-      Info info = new Info(getInfo(), vcf);
-      GenotypeFormat format = vcf.checkMode(VCF.MODE_QUICK_GENOTYPING) ? new GenotypeFormat("GT") : new GenotypeFormat(right.get(0));
+      Info info = getInfo();
+      GenotypeFormat format = getVCF().checkMode(VCF.MODE_QUICK_GENOTYPING) ? new GenotypeFormat("GT") : new GenotypeFormat(filteredRight[0]);
 
       //limit to selected samples : in fact, there is nothing to do because de input line has already been altered by SampleFilters
-      Genotype[] genotypes = new Genotype[nbSamples];
-      int i = 0;
-      for(Sample sample : sampleIndices){
-        int index = 1 + i;
-        String geno = right.get(index);//right index, because line has already been cut
-        if (vcf.checkMode(VCF.MODE_QUICK_GENOTYPING))
+      Genotype[] genotypes = new Genotype[getNumberOfSamples()];
+      final Sample[] samples = getVCF().getSampleSet().getOutputSamples();
+      for(int i = 0 ; i < samples.length; i++) {
+        String geno = filteredRight[i+1];//right index, because line has already been cut
+        if (getVCF().checkMode(VCF.MODE_QUICK_GENOTYPING))
           geno = geno.split(":")[0];
-        genotypes[i] = new Genotype(geno, format, sample);//right index, because samples has already been reduces
-        i++;
+        genotypes[i] = new Genotype(geno, format, samples[i]);//right index, because samples has already been reduced
       }
       return new Variant(chrom, pos, id, ref, alt, qual, filter, info, format, genotypes);
     } catch (VariantException | NumberFormatException e) {
-      throw new VCFException(vcf, "Could not create variant ("+ e.getMessage()+")", this, e);
+      throw new VCFException(getVCF(), "Could not create variant ("+ e.getMessage()+")", this, e);
     }
   }
 
-  @Override
-  public void applySampleFilters(VCF vcf) throws VCFException {
-    if ((vcf.getCommandParser().getSampleFilters().isEmpty()))
-      return;
+  private String[] applySampleFilters(String[] rawRight) {
+    if(rawRight.length == 0)
+      return new String[0];
 
-    final TreeMap<Sample , Integer> sampleIndices = vcf.getSampleIndices();
-    final ArrayList<String> newRight = new ArrayList<>();
-    newRight.add(getFormatString()); //Adding format
-    for (Sample sample : sampleIndices.navigableKeySet()) {
-      int idx = sampleIndices.get(sample) + 1;
-      if(idx >= right.size())
-        throw new VCFException(vcf, "Could not create variant (not enough fields: "+(right.size() - 1)+" samples)", this);
-      newRight.add(right.get(idx));
-    }
+    int[] indices = getVCF().getSampleSet().getOutputSampleIndices();
+    String[] ret = new String[1 + indices.length];
+    ret[0] = rawRight[0];
+    for(int i = 0 ; i < indices.length; i++)
+      ret[i + 1] = rawRight[indices[i]];
 
-    right.clear();
-    right.addAll(newRight);
+    return ret;
   }
 
   @Override
@@ -309,8 +293,8 @@ public class VCFRecord extends VariantRecord {
   public int[] getAllACs() {
     int[] acs = new int[1 + left[VCF.IDX_ALT].split(",").length];
 
-    for (int i = 1; i < right.size(); i++) {
-      String geno = right.get(i).split(":")[0];
+    for (int i = 1; i < filteredRight.length; i++) {
+      String geno = filteredRight[i].split(":")[0];
       if (geno != null && !geno.isEmpty()) {
         int[] alleles = Genotype.getAlleles(geno);
         if(alleles != null)
@@ -328,18 +312,18 @@ public class VCFRecord extends VariantRecord {
 
   @Override
   public void updateGT(int sample, String value) {
-    String[] g = getGenotypeString(sample).split(":");
+    String[] g = getGenotypeSplit(sample);
     g[0] = value;
-    right.set(sample + 1, String.join(":", g));
+    filteredRight[sample + 1] = String.join(":", g);
   }
 
   @Override
   public void setGenotypeToMissing(int sample) {
-    right.set(sample + 1, this.missing);
+    filteredRight[sample + 1] = this.missing;
   }
 
   private String buildMissing(){
-    if(right.isEmpty())
+    if(filteredRight.length == 0)
       return ".";
 
     String[] f = new String[getFormats().length];
@@ -349,7 +333,7 @@ public class VCFRecord extends VariantRecord {
 
   @Override
   public String getGenotypeString(int s) {
-    return right.get(s + 1);
+    return filteredRight[s + 1];
   }
 
   @Override

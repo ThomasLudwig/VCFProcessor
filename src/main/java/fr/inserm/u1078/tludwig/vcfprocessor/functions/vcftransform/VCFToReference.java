@@ -107,7 +107,7 @@ public class VCFToReference extends ParallelVCFFunction<Boolean> {
         record.updateGT(i, revert(record.getGT(i)));
 
       //TODO what about info (fields are flipped)  ex AD, AC, ....
-      Variant v = record.createVariant(getVCF());
+      Variant v = record.createVariant();
       v.recomputeACAN();
       
       return asOutput(v);

@@ -43,7 +43,7 @@ public class DeNovoRecessive extends ParallelVCFVariantFilterPedFunction {
   @SuppressWarnings("unused")
   @Override
   public void begin() {
-    Ped ped = this.getVCF().getPed();
+    Ped ped = this.getVCF().getSampleSet().getPed();
     super.begin();
     if (ped.getCases().size() != 1)
       Message.die("There should be exactly 1 case (child of 2 controls)");

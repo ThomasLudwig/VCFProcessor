@@ -56,7 +56,7 @@ public class ExtractCanonical extends ParallelVCFFunction {
   }
 
   public boolean[] areACPositive(VariantRecord record){
-    String[][] infoField = record.getInfo();
+    String[][] infoField = record.getInfoFields();
     int l = record.getAlts().length;
     boolean[] AC0 = new boolean[l]; //initialized to false
 

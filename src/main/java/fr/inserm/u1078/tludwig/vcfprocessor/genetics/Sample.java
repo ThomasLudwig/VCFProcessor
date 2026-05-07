@@ -1,7 +1,5 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Objects;
 
 public class Sample implements Comparable<Sample> {
@@ -53,30 +51,21 @@ public class Sample implements Comparable<Sample> {
   public boolean equals(Object obj) {
     if(obj == null)
       return false;
-    if(obj instanceof Sample){
-      Sample that = (Sample)obj;
-
-      if(!isEqual(this.fid,that.fid))
+    if(obj instanceof Sample that){
+      if(!Objects.equals(this.fid,that.fid))
         return false;
-      if(!isEqual(this.id,that.id))
+      if(!Objects.equals(this.id,that.id))
         return false;
-      if(!isEqual(this.mid,that.mid))
+      if(!Objects.equals(this.mid,that.mid))
         return false;
-      if(!isEqual(this.pid,that.pid))
+      if(!Objects.equals(this.pid,that.pid))
         return false;
-      if(!isEqual(this.group,that.group))
+      if(!Objects.equals(this.group,that.group))
         return false;
       
       return(this.sex == that.sex && this.phenotype == that.phenotype);
     }
     return false;
-  }
-  
-  private static boolean isEqual(String s1, String s2){
-    if(s1 == null)
-      return s2 == null;
-    else
-      return s1.equals(s2);
   }
 
   public void setFid(String fid) {
@@ -147,18 +136,6 @@ public class Sample implements Comparable<Sample> {
   public String toString() {
     String T = "\t";
     return this.fid + T + this.id + T + this.pid + T + this.mid + T + this.sex + T + this.phenotype + T + this.group;
-  }
-
-  public static ArrayList<String> getCommonIDs(Collection<Sample> lefts, Collection<Sample> rights) {
-    ArrayList<String> rightIDs = new ArrayList<>();
-    for (Sample right : rights)
-      rightIDs.add(right.getId());
-    ArrayList<String> common = new ArrayList<>();
-    for (Sample left : lefts)
-      if (rightIDs.contains(left.getId()))
-        common.add(left.getId());
-
-    return common;
   }
 
   public void apply(Sample pedSample) {

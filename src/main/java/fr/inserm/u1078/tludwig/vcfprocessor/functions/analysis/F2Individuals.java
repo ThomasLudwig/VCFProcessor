@@ -34,7 +34,7 @@ public class F2Individuals extends ParallelVCFVariantPedFunction<F2Individuals.F
   private int[][] f2snpOld;
   private int[][] f2snpNew;
   private int total;
-  private ArrayList<Sample> samples;
+  private Sample[] samples;
 
   @Override
   public String getSummary() {
@@ -74,8 +74,8 @@ public class F2Individuals extends ParallelVCFVariantPedFunction<F2Individuals.F
   @SuppressWarnings("unused")
   @Override
   public void begin() {
-    samples = new ArrayList<>(getVCF().getSortedSamples());
-    total = samples.size();
+    samples = getVCF().getSampleSet().getOutputSamples();
+    total = samples.length;
     this.f2all = new int[total][total + 1];
     this.f2old = new int[total][total + 1];
     this.f2new = new int[total][total + 1];
@@ -94,9 +94,9 @@ public class F2Individuals extends ParallelVCFVariantPedFunction<F2Individuals.F
         return; //two allele in the same person -> not f2
       if (c == 1)
         if (++found == 1)
-          first = this.samples.indexOf(geno.getSample());
+          first = this.getVCF().getSampleSet().getOutputIndex(geno.getSample());
         else
-          second = this.samples.indexOf(geno.getSample());
+          second = this.getVCF().getSampleSet().getOutputIndex(geno.getSample());
 
       if (found > 2) //more than two allele -> not f2
         return;
@@ -201,7 +201,7 @@ public class F2Individuals extends ParallelVCFVariantPedFunction<F2Individuals.F
       out.println(line);
 
       for (int f = 0; f < total; f++) {
-        line = new LineBuilder(this.samples.get(f).getId());
+        line = new LineBuilder(this.samples[f].getId());
         for (int s = 0; s <= total; s++)
           line.addColumn(f2[f][s]);
         out.println(line);

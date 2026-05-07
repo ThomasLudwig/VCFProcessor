@@ -2,7 +2,6 @@ package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF.Reader;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThread;
 
@@ -26,7 +25,7 @@ public class MultiVCFReader {
   public MultiVCFReader(VCF vcf1, VCF vcf2) {
     this.vcf1 = vcf1;
     this.vcf2 = vcf2;
-    this.commonsSamples = Sample.getCommonIDs(vcf1.getSortedSamples(), vcf2.getSortedSamples());
+    this.commonsSamples = SampleSet.commonOutputSamples(vcf1.getSampleSet(), vcf2.getSampleSet());
 
     this.reader1 = vcf1.getReaderWithoutStarting();
     new ReaderWrapper(reader1, vcf1.getFilename()).start();

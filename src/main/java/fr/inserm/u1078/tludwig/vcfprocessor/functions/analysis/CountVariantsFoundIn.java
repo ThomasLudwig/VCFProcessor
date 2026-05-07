@@ -110,7 +110,7 @@ public class CountVariantsFoundIn extends ParallelVCFVariantFunction<CountVarian
       int nbSamples = this.getVCF().getNumberOfSamples();
       samples = new String[nbSamples];
       int i = 0;
-      for(Sample sample : this.getVCF().getSortedSamples())
+      for(Sample sample : this.getVCF().getSampleSet().getOutputSamples())
         samples[i++] = sample.getId();
       this.counts = new int[24][nbSamples + 1][1 + IS_SNP + IS_SINGLETON + IS_IN_REFERENCE]; //chrom, samples, type
     } catch(Exception e) {

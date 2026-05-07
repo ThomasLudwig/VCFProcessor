@@ -1,6 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 
 import java.io.BufferedReader;
@@ -80,7 +81,7 @@ public class Ped implements FileFormat {
     this.filename = "from.vcf.file";
     samples = new ArrayList<>();
     
-    for(int i = 9; i < vcfHeaders.length; i++)
+    for(int i = VCF.IDX_SAMPLE; i < vcfHeaders.length; i++)
       samples.add(new Sample(vcfHeaders[i], vcfHeaders[i], null, null, 0, 0, NO_GROUP));
    
     groups = new ArrayList<>();
@@ -196,9 +197,7 @@ public class Ped implements FileFormat {
     return this.samples.size();
   }
 
-  public ArrayList<Sample> getSamples() {
-    return this.samples;
-  }
+  public ArrayList<Sample> getSamples() { return this.samples; }
 
   public ArrayList<Sample> getSamplesForGroup(String group){
     int idx = this.groups.indexOf(group);
@@ -270,9 +269,9 @@ public class Ped implements FileFormat {
     for (Sample s : samples) {
       if (s.getPhenotype() == 0)
         ret0.add(s);
-      if (s.getPhenotype() == 1)
+      if (s.getPhenotype() == PHENO_UNAFFECTED)
         ret1.add(s);
-      if (s.getPhenotype() == 2)
+      if (s.getPhenotype() == PHENO_AFFECTED)
         ret2.add(s);
     }
 
@@ -291,9 +290,9 @@ public class Ped implements FileFormat {
     for (Sample s : samples) {
       if (s.getPhenotype() == 0)
         ret0.add(s);
-      if (s.getPhenotype() == 1)
+      if (s.getPhenotype() == PHENO_UNAFFECTED)
         ret1.add(s);
-      if (s.getPhenotype() == 2)
+      if (s.getPhenotype() == PHENO_AFFECTED)
         ret2.add(s);
     }
 
@@ -312,9 +311,9 @@ public class Ped implements FileFormat {
     for (Sample s : samples) {
       if (s.getSex() == 0)
         ret0.add(s);
-      if (s.getSex() == 1)
+      if (s.getSex() == SEX_MALE)
         ret1.add(s);
-      if (s.getSex() == 2)
+      if (s.getSex() == SEX_FEMALE)
         ret2.add(s);
     }
 
@@ -333,9 +332,9 @@ public class Ped implements FileFormat {
     for (Sample s : samples) {
       if (s.getSex() == 0)
         ret0.add(s);
-      if (s.getSex() == 1)
+      if (s.getSex() == SEX_MALE)
         ret1.add(s);
-      if (s.getSex() == 2)
+      if (s.getSex() == SEX_FEMALE)
         ret2.add(s);
     }
 

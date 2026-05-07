@@ -505,14 +505,14 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
     if ("null".equals(this.pedFile.getFilename())) {
       String group = "NO_GROUP";
       ArrayList<String> ss = new ArrayList<>();
-      for (Sample sample : getVCF().getSortedSamples())
+      for (Sample sample : getVCF().getSampleSet().getOutputSamples())
         ss.add(sample.getId());
       this.samples.put(group, ss);
     } else {
       try {
         ped = this.pedFile.getPed();
-        this.getVCF().bindToPed(ped);
-        for (Sample sample : getVCF().getSortedSamples()) {
+        this.getVCF().getSampleSet().bindToPed(ped);
+        for (Sample sample : getVCF().getSampleSet().getOutputSamples()) {
           String group = sample.getGroup()/* + sample.getPhenotype()*/;
           sample.setGroup(group);
           ped.getSample(sample.getId()).setGroup(group);

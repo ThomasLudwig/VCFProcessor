@@ -1,5 +1,11 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
+/**
+ * This class represent a raw data has it is read from the VCF/BCF file
+ * It is
+ * - either a String line from the VCF file
+ * - or two BCFByteArrays from the BCF file
+ */
 public class RawVariantRecordData {
   private final String line;
   private final BCFByteArray inCommon;

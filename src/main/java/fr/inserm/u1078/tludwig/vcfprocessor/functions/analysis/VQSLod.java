@@ -81,7 +81,7 @@ public class VQSLod extends ParallelVCFFunction<VQSLod.Analysis> {
   @Override
   public String[] processInputRecord(VariantRecord record) {
     String tr = record.getFiltersString();
-    String[][] info = record.getInfo();
+    String[][] info = record.getInfoFields();
     for(String[] kv : info)
       if(kv[0].equals(VQSLOD))
         this.pushAnalysis(new Analysis(tr, Double.parseDouble(kv[1])));

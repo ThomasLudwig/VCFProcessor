@@ -26,7 +26,7 @@ public class InfoTagsFilter extends LineFilter {
 
   @Override
   public boolean pass(VariantRecord record) {
-    String[][] f = record.getInfo();
+    String[][] f = record.getInfoFields();
     ArrayList<String> keys = new ArrayList<>();
     for (String[] info : f)
       keys.add(info[0]);

@@ -72,7 +72,7 @@ public class CommonVariantsInSamplePairs extends ParallelVCFVariantFunction<Comm
 
     this.SAMPLES = new String[S];
     int s = 0;
-    for(Sample sample : this.getVCF().getSortedSamples())
+    for(Sample sample : this.getVCF().getSampleSet().getOutputSamples())
       SAMPLES[s++] = sample.getId();
     this.counts = new AtomicInteger[P][TOTAL + 1];
     for(int i = 0 ; i < this.counts.length; i++)

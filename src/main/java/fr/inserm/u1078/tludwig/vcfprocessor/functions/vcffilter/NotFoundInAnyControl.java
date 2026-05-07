@@ -41,7 +41,7 @@ public class NotFoundInAnyControl extends ParallelVCFVariantFilterPedFunction {
   @Override
   public void begin() {
     super.begin();
-    this.controls = this.getVCF().getPed().getControls();
+    this.controls = this.getVCF().getSampleSet().getPed().getControls();
   }
 
   @Override

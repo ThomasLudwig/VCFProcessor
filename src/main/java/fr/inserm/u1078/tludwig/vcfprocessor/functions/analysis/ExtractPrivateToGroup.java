@@ -56,8 +56,8 @@ public class ExtractPrivateToGroup extends ParallelVCFVariantPedFunction<Object>
   @Override
   public void begin() {
     super.begin();
-    ArrayList<Sample>[] samples = getVCF().getPed().getSamplesByGroup();
-    final int N = getVCF().getPed().getSampleSize();
+    ArrayList<Sample>[] samples = getVCF().getSampleSet().getPed().getSamplesByGroup();
+    final int N = getVCF().getNumberOfSamples();
     this.orderedSamples = new int[N];
     int n = 0;
     while(n < N){

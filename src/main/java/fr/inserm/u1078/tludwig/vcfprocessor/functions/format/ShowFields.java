@@ -76,7 +76,7 @@ public class ShowFields extends ParallelVCFVariantFunction {
       } else if (key.toLowerCase().startsWith(PREFIX_GENO)) {
         String genoQuery = key.split(":")[1];
         String[] ks = genoQuery.split(";");
-        for (Sample sample : this.getVCF().getSortedSamples())
+        for (Sample sample : this.getVCF().getSampleSet().getOutputSamples())
           for (String k : ks)
             sb.addColumn(sample.getId()).append(":").append(k);
       } else {

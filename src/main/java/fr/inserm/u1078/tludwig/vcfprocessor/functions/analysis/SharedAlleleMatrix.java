@@ -30,7 +30,7 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction<SharedAlleleM
   private int[][] snp05;
   private int[][] snp1;
   private int[][] snp5;
-  private List<Sample> samples;
+  private Sample[] samples;
 
   @Override
   public String getSummary() {
@@ -56,8 +56,8 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction<SharedAlleleM
   @SuppressWarnings("unused")
   @Override
   public void begin() {
-    samples = getVCF().getSortedSamples();
-    int N = samples.size();
+    samples = getVCF().getSampleSet().getOutputSamples();
+    int N = samples.length;
 
     this.snpNew = new int[N][N];
     this.snp05 = new int[N][N];
@@ -149,7 +149,7 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction<SharedAlleleM
         StringBuilder l1 = new StringBuilder(lNew.toString());
         StringBuilder l5 = new StringBuilder(lNew.toString());
 
-        for (int c = 0; c < samples.size(); c++) {
+        for (int c = 0; c < samples.length; c++) {
           lNew.append(T).append(snpNew[l][c]);
           l05.append(T).append(snp05[l][c]);
           l1.append(T).append(snp1[l][c]);
