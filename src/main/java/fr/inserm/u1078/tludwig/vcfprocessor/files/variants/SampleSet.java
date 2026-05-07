@@ -27,7 +27,7 @@ public class SampleSet {
   private final VCF vcf;
   private Ped ped;
 
-  public SampleSet(VCF vcf, Ped ped) {
+  public SampleSet(VCF vcf) {
     this.vcf = vcf;
     //process intput (parsing)
     inputIndices = new HashMap<>();
