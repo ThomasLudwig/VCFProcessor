@@ -55,10 +55,17 @@ public class SampleSet {
 
   private Sample[] generateOutput() {
     Sample[] ret = new Sample[this.inputSamples.length - isFiltered.size()];
-    int i = 0;
+    this.outputSampleIDs = new String[ret.length];
+    this.outputSampleIndices = new int[ret.length];
+    int outputIndex = 0;
     for(Sample input : this.inputSamples)
-      if(!isFiltered.contains(input))
-        outputIndices.put(ret[i] = input, i++);
+      if(!isFiltered.contains(input)) {
+        Sample s = ret[outputIndex] = input;
+        Integer inputIndex = inputIndices.get(input);
+        this.outputSampleIndices[outputIndex] = inputIndex;
+        this.outputSampleIDs[outputIndex] = s.getId();
+        outputIndices.put(s, outputIndex++);
+      }
     return ret;
   }
 
