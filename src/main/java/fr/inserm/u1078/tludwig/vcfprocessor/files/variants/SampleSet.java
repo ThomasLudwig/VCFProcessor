@@ -38,8 +38,7 @@ public class SampleSet {
     //process output (filter samples)
     isFiltered = new ArrayList<>();
     outputIndices = new HashMap<>();
-    this.filterSamples();
-    this.outputSamples = generateOutput();
+    this.outputSamples = this.filterSamples();
   }
 
   /**
@@ -200,7 +199,7 @@ public class SampleSet {
     return ped;
   }
 
-  private void filterSamples() {
+  private Sample[] filterSamples() {
     FamFilter famFilter = null;
     MaxSampleFilter maxSampleFilter = null;
     ArrayList<SampleFilter> sampleFilters = new ArrayList<>();
@@ -224,11 +223,12 @@ public class SampleSet {
     //Last apply maxSampleFilter
     applyFilter(maxSampleFilter);
 
-    generateOutput();
+    Sample[] ret = generateOutput();
 
     Message.info("Sample kept : " + getOutputSize() + "/" + getInputSize());
     Message.warning(getOutputSize() == 0 && getInputSize() > 0, "No Samples left in the VCF file");
     //throw new VCFException("No sample remaining after filtering");
+    return ret;
   }
 
   /**
