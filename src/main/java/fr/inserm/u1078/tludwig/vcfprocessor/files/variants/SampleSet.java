@@ -72,9 +72,9 @@ public class SampleSet {
       }
     }
 
-    for(int i = 0; i < outputSamples.length; i++) {
+    for(int i = 0; i < ret.length; i++)
       Message.debug("["+i+"] : "+ret[i]+"["+outputIndices.get(ret[i].getId())+"]["+outputSampleIndices[i]+"]");
-    }
+
     Message.die("STOP");
     return ret;
   }
