@@ -40,7 +40,7 @@ public class SampleSet {
     this.outputSamples = this.filterSamples();
 
     for(int i = 0; i < outputSamples.length; i++) {
-      Message.debug("["+i+"] : "+outputSamples[i]+"["+outputIndices.get(i)+"]["+outputSampleIndices[i]+"]");
+      Message.debug("["+i+"] : "+outputSamples[i]+"["+outputIndices.get(outputSamples[i])+"]["+outputSampleIndices[i]+"]");
     }
     Message.die("STOP");
   }
