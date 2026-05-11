@@ -49,7 +49,6 @@ public class SampleSet {
     Sample[] ret = new Sample[samples.size()];
     for(int i = 0; i < samples.size(); i++) {
       ret[i] = samples.get(i);
-      Message.debug("Add ["+ret[i]+"] -> "+i);
       this.inputIndices.put(ret[i].getId(), i);
       this.samplesByID.put(ret[i].getId(), ret[i]);
     }
@@ -65,17 +64,11 @@ public class SampleSet {
       if (!isFiltered.contains(input.getId())) {
         ret[outputIndex] = input;
         Integer inputIndex = inputIndices.get(input.getId());
-        Message.debug("From "+inputIndex+" to "+outputIndex);
         this.outputSampleIndices[outputIndex] = inputIndex;
         this.outputSampleIDs[outputIndex] = input.getId();
         outputIndices.put(input.getId(), outputIndex++);
       }
     }
-
-    for(int i = 0; i < ret.length; i++)
-      Message.debug("["+i+"] : "+ret[i]+"["+outputIndices.get(ret[i].getId())+"]["+outputSampleIndices[i]+"]");
-
-    Message.die("STOP");
     return ret;
   }
 

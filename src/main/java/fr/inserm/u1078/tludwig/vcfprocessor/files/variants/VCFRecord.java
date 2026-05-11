@@ -253,7 +253,7 @@ public class VCFRecord extends VariantRecord {
     String[] filtered = new String[1 + indices.length];
     filtered[0] = rawRight[0];
     for(int i = 0 ; i < indices.length; i++)
-      filtered[i + 1] = rawRight[indices[i]];
+      filtered[i + 1] = rawRight[indices[i] + 1];
 
     return filtered;
   }
