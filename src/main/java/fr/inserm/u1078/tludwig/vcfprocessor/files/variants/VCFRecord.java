@@ -25,11 +25,7 @@ public class VCFRecord extends VariantRecord {
     final int nbSamples = f.length - VCF.IDX_SAMPLE;
     String[] rawRight = new String[nbSamples + 1];
     System.arraycopy(f, VCF.IDX_FORMAT, rawRight, 0, nbSamples + 1);
-    int hash = line.hashCode();
-    Message.debug("["+hash+"]Left:"+String.join(",", left));
-    Message.debug("["+hash+"]rawRight:"+String.join(",", rawRight));
     filteredRight = applySampleFilters(rawRight);
-    Message.debug("["+hash+"]filteredRight:"+String.join(",", filteredRight));
     this.missing = buildMissing();
   }
 
@@ -253,12 +249,13 @@ public class VCFRecord extends VariantRecord {
       return new String[0];
 
     int[] indices = getVCF().getSampleSet().getOutputSampleIndices();
-    String[] ret = new String[1 + indices.length];
-    ret[0] = rawRight[0];
-    for(int i = 0 ; i < indices.length; i++)
-      ret[i + 1] = rawRight[indices[i]];
 
-    return ret;
+    String[] filtered = new String[1 + indices.length];
+    filtered[0] = rawRight[0];
+    for(int i = 0 ; i < indices.length; i++)
+      filtered[i + 1] = rawRight[indices[i]];
+
+    return filtered;
   }
 
   @Override

@@ -38,6 +38,11 @@ public class SampleSet {
     isFiltered = new ArrayList<>();
     outputIndices = new HashMap<>();
     this.outputSamples = this.filterSamples();
+
+    for(int i = 0; i < outputSamples.length; i++) {
+      Message.debug("["+i+"] : "+outputSamples[i]+"["+outputIndices.get(i)+"]["+outputSampleIndices[i]+"]");
+    }
+    Message.die("STOP");
   }
 
   /**
