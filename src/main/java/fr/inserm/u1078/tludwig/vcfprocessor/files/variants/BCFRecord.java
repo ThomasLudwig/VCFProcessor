@@ -265,12 +265,12 @@ public class BCFRecord extends VariantRecord {
   }
 
   /**
-   * Return the rightmost columnq of the Record (FORMAT and samples)
+   * Return the rightmost columns of the Record (FORMAT and samples)
    * @return the columns as a String Array
    */
   private String[] getRightColumns() {
-    String[] right = new String[1 + getNumberOfSamples()];
-    for(int i = 0; i < right.length + 1; i++)
+    String[] right = new String[filteredGenoValues.length];
+    for(int i = 0; i < right.length; i++)
       right[i] = String.join(":", filteredGenoValues[i]);
     return right;
   }
