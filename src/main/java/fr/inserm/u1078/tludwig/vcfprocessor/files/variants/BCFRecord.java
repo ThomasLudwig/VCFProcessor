@@ -294,9 +294,9 @@ public class BCFRecord extends VariantRecord {
   @Override
   public String getInfoString() {
     String[] infos = new String[info.length];
-    for(int i = 0 ; i < info.length; i++) {
+    for(int i = 0 ; i < info.length; i++)
       infos[i] = info[i][1] == null ? info[i][0] : info[i][0] + "=" + info[i][1];
-    }
+
     return String.join(";", infos);
   }
 

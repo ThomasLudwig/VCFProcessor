@@ -85,7 +85,7 @@ public abstract class VariantRecord extends AbstractRecord {
       an += a;
 
     //replace old values of AC/AN/AF if present
-    String newAN = "AN=" + an;
+    String newAN = ""+an;
 
     int sumAC = 0;
     for (int alt = 1; alt < ac.length; alt++) {
