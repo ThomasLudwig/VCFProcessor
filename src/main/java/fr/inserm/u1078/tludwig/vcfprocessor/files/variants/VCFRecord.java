@@ -269,15 +269,15 @@ public class VCFRecord extends VariantRecord {
       switch (kv[0]) {
         case "AC":
           replacedAC = true;
-          info[i] = "AC=" + newAC;
+          info[i] = kv[0] + "=" + newAC;
           break;
         case "AF":
           replacedAF = true;
-          info[i] = "AF=" + newAF;
+          info[i] = kv[0] + "=" + newAF;
           break;
         case "AN":
           replacedAN = true;
-          info[i] = newAN;
+          info[i] = kv[0] + "=" + newAN;
           break;
         default:
           break;
