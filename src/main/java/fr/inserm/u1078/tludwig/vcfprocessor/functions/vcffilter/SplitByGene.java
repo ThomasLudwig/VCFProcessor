@@ -5,7 +5,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectoryParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.io.File;
 import java.io.PrintWriter;
@@ -56,7 +56,7 @@ public class SplitByGene extends VCFFunction { //TODO parallelize
     Variant variant;
     while ((variant = vcf.getUnparallelizedNextVariant()) != null) {
       ArrayList<String> localGenes = new ArrayList<>();
-      for (String gene : variant.getGeneList())
+      for (String gene : variant.getInfo().getVEPInfo().getAllGenes())
         if (!localGenes.contains(gene)) {
           if (variantsByGenes.containsKey(gene)) {
             variantsByGenes.get(gene).add(variant.toString());

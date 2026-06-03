@@ -4,7 +4,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.RatioParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 /**
@@ -38,7 +38,7 @@ public class FilterGnomADNFEFrequency extends ParallelVCFVariantFilterFunction {
   @Override
   public String[] processInputVariantForFilter(Variant variant) {
     for(int a = 1 ; a < variant.getAlleleCount(); a++)
-      if(variant.getInfo().getFreqGnomadNFEVEP(a) <= this.frq.getFloatValue())
+      if(variant.getInfo().getVEPInfo().getgnomAD_NFE_AF(a) <= this.frq.getFloatValue())
         return asOutput(variant);
     return NO_OUTPUT;
   }

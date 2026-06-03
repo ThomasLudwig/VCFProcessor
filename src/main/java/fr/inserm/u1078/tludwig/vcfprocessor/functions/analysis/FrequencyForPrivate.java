@@ -4,8 +4,8 @@ import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 import java.util.ArrayList;
@@ -63,7 +63,7 @@ public class FrequencyForPrivate extends ParallelVCFVariantPedFunction<Object> {
   public String[] processInputVariant(Variant variant) {
     ArrayList<String> outs = new ArrayList<>();
     for (int a : variant.getNonStarAltAllelesAsArray())
-      if (!variant.getInfo().isIn1KgVEP(a) && !variant.getInfo().isInDBSNPVEP(a) && !variant.getInfo().isInGnomADVEP(a)) {
+      if (!variant.getInfo().getVEPInfo().isIn1kg(a) && !variant.getInfo().getVEPInfo().hasExistingVariants(a) && !variant.getInfo().getVEPInfo().isInGnomAD(a)) {
         int[] countByGroup = new int[G];
         int[] totalInGroup = new int[G];
         int count = 0;
@@ -89,7 +89,7 @@ public class FrequencyForPrivate extends ParallelVCFVariantPedFunction<Object> {
         out.addColumn(count / (1d * total));
         for (int g = 0; g < G; g++)
           out.addColumn(countByGroup[g] / (1d * totalInGroup[g]));
-        out.addColumn(String.join(",", variant.getInfo().getConsequencesSplit(a)));
+        out.addColumn(String.join(",", variant.getInfo().getVEPInfo().getAllConsequences(a)));
         outs.add(out.toString());
       }
     return outs.toArray(new String[0]);

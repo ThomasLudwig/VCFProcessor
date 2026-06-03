@@ -1,4 +1,4 @@
-package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
+package fr.inserm.u1078.tludwig.vcfprocessor.genetics.alignments;
 
 public class Tag {
   private final String key;

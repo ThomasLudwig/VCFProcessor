@@ -10,10 +10,11 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.PedException;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter.QC;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Info;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.InfoColumn;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.HasMetricsAnnotation;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 import java.util.ArrayList;
@@ -193,63 +194,34 @@ public class QCParametersDistribution extends ParallelVCFVariantPedFunction<QCPa
 
     fisherET = new FisherExactTest(getVCF().getNumberOfSamples());
 
-    for (String key : KEYS) {
-      boolean found = false;
-      for (String header : getVCF().getHeadersWithoutSamples())
-        if (header.startsWith("##INFO=<ID=" + key + ",")) {
-          found = true;
-          break;
-        }
-      Message.warning(!found, "Input VCF seems to be missing the following annotation [" + key + "]");
-    }
+    for (String key : KEYS) //TODO only check if filter is enabled
+      Message.warning(!getVCF().hasAnnotation(key), "Input VCF seems to be missing the following annotation [" + key + "]");
   }
 
   @Override
   public String[] processInputVariant(Variant variant) {
-    Info info = variant.getInfo();
+    InfoColumn infoColumn = variant.getInfo();
     Analysis a = new Analysis();
 
-    try {
-      a.qd = Double.parseDouble(info.getAnnot(KEY_QD));
-    } catch (Exception ignore) { }
-    try {
-      a.inbreeding = Double.parseDouble(info.getAnnot(KEY_INBREEDING));
-    } catch (Exception ignore) { }
-    try {
-      a.mqranksum = Double.parseDouble(info.getAnnot(KEY_MQRANKSUM));
-    } catch (Exception ignore) { }
+    a.qd = infoColumn.getQD();
+    a.inbreeding = infoColumn.getInbreedingCoeff();
+    a.mqranksum = infoColumn.getMQRankSum();
 
     if (variant.hasSNP()) {
-      try {
-        a.fs_snp = Double.parseDouble(info.getAnnot(KEY_FS));
-      } catch (Exception ignore) { }
-      try {
-        a.sor_snp = Double.parseDouble(info.getAnnot(KEY_SOR));
-      } catch (Exception ignore) { }
-      try {
-        a.mq_snp = Double.parseDouble(info.getAnnot(KEY_MQ));
-      } catch (Exception ignore) { }
-      try {
-        a.rprs_snp = Double.parseDouble(info.getAnnot(KEY_READPOSRANKSUM));
-      } catch (Exception ignore) { }
+      a.fs_snp = infoColumn.getFS();
+      a.sor_snp = infoColumn.getSOR();
+      a.mq_snp = infoColumn.getMQ();
+      a.rprs_snp = infoColumn.getReadPosRankSum();
     } else {
-      try {
-        a.fs_indel = Double.parseDouble(info.getAnnot(KEY_FS));
-      } catch (Exception ignore) { }
-      try {
-        a.sor_indel = Double.parseDouble(info.getAnnot(KEY_SOR));
-      } catch (Exception ignore) { }
-      try {
-        a.mq_indel = Double.parseDouble(info.getAnnot(KEY_MQ));
-      } catch (Exception ignore) { }
-      try {
-        a.rprs_indel = Double.parseDouble(info.getAnnot(KEY_READPOSRANKSUM));
-      } catch (Exception ignore) { }
+      a.fs_indel = infoColumn.getFS();
+      a.sor_indel = infoColumn.getSOR();
+      a.mq_indel = infoColumn.getMQ();
+      a.rprs_indel = infoColumn.getReadPosRankSum();
     }
 
     double nbHQ = 0;
-    double[] called = new double[this.samples.keySet().size()];
-    double[] total = new double[this.samples.keySet().size()];
+    double[] called = new double[this.samples.size()];
+    double[] total = new double[this.samples.size()];
     int i = 0;
     for (String group : this.samples.keySet()) {
       total[i] = this.samples.get(group).size();
@@ -318,7 +290,6 @@ public class QCParametersDistribution extends ParallelVCFVariantPedFunction<QCPa
   }
 
   public static class Analysis {
-
     Double qd = null;
     Double inbreeding = null;
     Double mqranksum = null;

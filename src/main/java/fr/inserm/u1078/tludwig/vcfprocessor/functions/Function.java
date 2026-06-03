@@ -72,7 +72,7 @@ public abstract class Function {
   public static final String OPT_GENE = "--gene";
   public static final String OPT_HOMO = "--homo";
   public static final String OPT_MISSING = "--missing";
-    public static final String OPT_NO_HOMO = "--nohomo";
+  public static final String OPT_NO_HOMO = "--nohomo";
   public static final String OPT_MODE = "--mode";
   public static final String OPT_TYPE = "--type";
   public static final String OPT_POP = "--pop";

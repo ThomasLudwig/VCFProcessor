@@ -1,8 +1,10 @@
-package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
+package fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants;
 
 import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.maok.tools.ArrayTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.*;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.AnnotationException;
 
 import java.util.*;
 
@@ -20,7 +22,7 @@ public class Variant implements Comparable<Variant> {
   private final String id;
   private final String qual;
   private String filter;
-  private final Info info;
+  private final InfoColumn infoColumn;
   private final GenotypeFormat format;
   private final Genotype[] genotypes;
   private final String[] alleles;
@@ -37,20 +39,20 @@ public class Variant implements Comparable<Variant> {
     id = null;
     qual = null;
     filter = null;
-    info = null;
+    infoColumn = null;
     format = null;
     genotypes = null;
     alleles = null;
     variantTypes = null;
   }
 
-  public Variant(String chrom, int pos, String id, String ref, String alt, String qual, String filter, Info info, GenotypeFormat format, Genotype[] genotypes) throws VariantException {
+  public Variant(String chrom, int pos, String id, String ref, String alt, String qual, String filter, InfoColumn infoColumn, GenotypeFormat format, Genotype[] genotypes) throws VariantException {
     this.chrom = chrom;
     this.pos = pos;
     this.id = id;
     this.qual = qual;
     this.filter = filter;
-    this.info = info;
+    this.infoColumn = infoColumn;
     this.format = format;
     this.genotypes = genotypes;
     String[] alter = alt.split(",");
@@ -81,7 +83,7 @@ public class Variant implements Comparable<Variant> {
 
   private void link() throws VariantException {
     try {
-      this.info.setVariant(this);
+      this.infoColumn.setVariant(this);
     } catch (AnnotationException e) {
       throw new VariantException("Multiple variants for the same annotation for variant " + chrom + ":" + pos + " " + this.getRef() + "/" + this.getAlt(), e);
     }
@@ -148,7 +150,7 @@ public class Variant implements Comparable<Variant> {
     ret[4] = this.getAlt();
     ret[5] = this.qual;
     ret[6] = this.filter;
-    ret[7] = this.info.toString();
+    ret[7] = this.infoColumn.toString();
     ret[8] = this.format.toString();
     for (int i = 0; i < this.genotypes.length; i++)
       ret[9 + i] = this.genotypes[i].toString();
@@ -157,7 +159,7 @@ public class Variant implements Comparable<Variant> {
   
   @Override
   public String toString() { // should return the line that was used to construct the variant .... NO ! that would ignore updates
-    String[] left = {chrom, pos+"", id, getRef(), getAlt(),this.getQual(), this.getFilter(), this.info.toString(), this.format.toString()};
+    String[] left = {chrom, pos+"", id, getRef(), getAlt(),this.getQual(), this.getFilter(), this.infoColumn.toString(), this.format.toString()};
     LineBuilder ret = new LineBuilder(String.join(T, left));
     for (Genotype genotype : genotypes)
       ret.addColumn(genotype);
@@ -259,40 +261,6 @@ public class Variant implements Comparable<Variant> {
     return ret;
   }
 
-  public String[] getGeneList(int allele) {
-    ArrayList<String> tmpGeneList = info.getSYMBOLs(allele);
-    if (tmpGeneList.isEmpty())
-      return null;
-
-    TreeSet<String> geneList = new TreeSet<>();
-    for(String gene : tmpGeneList)
-      if(!gene.isEmpty())
-        geneList.add(gene);
-    
-    return geneList.toArray(new String[0]);
-  }
-  
-  public String[] getGeneList() {
-    ArrayList<String> tmpGeneList = info.getSYMBOLs();
-    if (tmpGeneList.isEmpty())
-      return null;
-
-    TreeSet<String> geneList = new TreeSet<>();
-    for(String gene : tmpGeneList)
-      if(!gene.isEmpty())
-        geneList.add(gene);
-    
-    return geneList.toArray(new String[0]);
-  }
-
-  public String getGenes() {
-    String[] list = this.getGeneList();
-    if (list == null)
-      return null;
-
-    return String.join(",", list);
-  }
-  
   public int[] getAC() {
     return ac;
   }
@@ -370,9 +338,13 @@ public class Variant implements Comparable<Variant> {
   private static final double N2 = 1 / (N * N);
   private static final double A = LS * LS + LP * LP * N2 - 1;
 
+  /*
+  DEAD CODE ?
+
+
   public double getMyScore(int allele) {
-    double p = this.info.getPolyPhenScore(allele);
-    double s = 1 - this.info.getSiftScore(allele);
+    double p = this.infoColumn.getPolyPhenScore(allele);
+    double s = 1 - this.infoColumn.getSiftScore(allele);
     double score;
 
     if (s < .5 * p)
@@ -402,7 +374,7 @@ public class Variant implements Comparable<Variant> {
     if (s < MYSCORE_SEVERE)
       return 2;
     return 3;
-  }
+  }*/
 
   /**
    * Gets the total number of alleles
@@ -489,8 +461,8 @@ public class Variant implements Comparable<Variant> {
     this.filter = filter;
   }
 
-  public Info getInfo() {
-    return info;
+  public InfoColumn getInfo() {
+    return infoColumn;
   }
 
   public GenotypeFormat getFormat() {
@@ -627,7 +599,7 @@ public class Variant implements Comparable<Variant> {
   }
 
   public void addInfo(String inf) {
-    this.info.addInfo(inf);
+    this.infoColumn.addInfo(inf);
   }
 
   private void updateACANAF(int[] ac, int an) {

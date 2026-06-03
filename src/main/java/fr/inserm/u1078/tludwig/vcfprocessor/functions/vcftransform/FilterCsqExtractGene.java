@@ -5,9 +5,9 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.ConsequenceParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPAnnotation;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPAnnotation;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.HashMap;
 
@@ -47,7 +47,7 @@ public class FilterCsqExtractGene extends ParallelVCFVariantFunction {
 
   @Override
   public String[] processInputVariant(Variant variant) {
-    HashMap<Integer, VEPAnnotation> annotations = variant.getInfo().getWorstAnnotationsByAllele();
+    HashMap<Integer, VEPAnnotation> annotations = variant.getInfo().getVEPInfo().getWorstAnnotationsByAllele();
 
     int worst = 1;
     int worstCsq = VEPConsequence.getWorstConsequence(annotations.get(1)).getLevel();

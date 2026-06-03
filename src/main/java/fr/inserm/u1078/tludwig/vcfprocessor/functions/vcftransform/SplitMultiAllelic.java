@@ -2,12 +2,14 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcftransform;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
+import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.InfoDefinition;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
-import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF.InfoFormatHeader;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -80,9 +82,12 @@ public class SplitMultiAllelic extends ParallelVCFFunction {
       out[VCF.IDX_POS] = newPosRefAlt[0];
       out[VCF.IDX_REF] = newPosRefAlt[1];
       out[VCF.IDX_ALT] = newPosRefAlt[2];
-      String[] outInfos = new String[infos.length];
-      for (int i = 0; i < outInfos.length; i++)
-        outInfos[i] = convertInfo(infos[i], a);
+      ArrayList<String> outInfos = new ArrayList<>();
+      for (String info : infos) {
+        String newInfo = convertInfo(info, a);
+        if (newInfo != null) //DROP unmanageable info fields
+          outInfos.add(newInfo);
+      }
 
       out[VCF.IDX_INFO] = String.join(";", outInfos);
 
@@ -99,24 +104,40 @@ public class SplitMultiAllelic extends ParallelVCFFunction {
   private String convertInfo(String info, int allele) {
     //for each info, keep as is, or split if number=A or R
     String[] f = info.split("=");
-    InfoFormatHeader header = this.getVCF().getInfoHeader(f[0]);
-    if (header == null || header.getNumber() == InfoFormatHeader.NUMBER_NONE)
+    InfoDefinition header = this.getVCF().getInfoHeader(f[0]);
+    //Possibilities :
+    //public static final String TAG_NUMBER_UNKNOWN = ".";
+    //public static final String TAG_NUMBER_ALTS = "A";
+    //public static final String TAG_NUMBER_ALLELES = "R";
+    //public static final String TAG_NUMBER_GENOTYPES = "G";
+    //Integer
+
+    //A -> keep n
+    //R -> keep 0 and n
+    //G -> keep ?????
+    //default : as is
+
+    if (header == null)
       return info;
 
     String[] v = f[1].split(",");
     switch (header.getNumber()) {
-      case InfoFormatHeader.NUMBER_ALLELES:
+      case InfoDefinition.VALUE_NUMBER_ALLELES:
         if (v.length <= allele + 1) {
           Message.warning("Could not split info [" + info + "] for allele [" + allele + "]");
-          return info;
+          String[] split =  v[1].split(",");
+          return f[0]+"="+v[0]+","+v[allele];
         }
         return f[0] + "=" + v[0] + "," + v[allele];
-      case InfoFormatHeader.NUMBER_ALTS:
+      case InfoDefinition.VALUE_NUMBER_ALTS:
         if (v.length <= allele) {
           Message.warning("Could not split info [" + info + "] for allele [" + allele + "]");
-          return info;
+          return f[0]+"="+v[allele];
         }
         return f[0] + "=" + v[allele];
+      case InfoDefinition.VALUE_NUMBER_GENOTYPES:
+        //Needs a different implementation for PL,GL,GP
+        return null; //TODO Implement in the FUTURE
       default:
         return info;
     }
@@ -156,26 +177,26 @@ public class SplitMultiAllelic extends ParallelVCFFunction {
     for (int i = 1; i < f.length && i < g.length; i++)
       if (!g[i].equals(".")) {
         String[] v = g[i].split(",");
-        InfoFormatHeader header = this.getVCF().getFormatHeader(f[i]);
+        InfoDefinition header = this.getVCF().getInfoHeader(f[i]);
         if (header == null)
           Message.warning("Undefined Genotype Format [" + f[i] + "]");
         else
           switch (header.getNumber()) {
-            case InfoFormatHeader.NUMBER_ALLELES:
+            case InfoDefinition.VALUE_NUMBER_ALLELES:
               if (v.length <= allele) {
                 Message.warning("Could not split genotype annotation [" + genotype + "] with format [" + format + "] for allele [" + alt + "]");
                 return genotype;
               } else
                 g[i] = v[0] + "," + v[allele];
               break;
-            case InfoFormatHeader.NUMBER_ALTS:
+            case InfoDefinition.VALUE_NUMBER_ALTS:
               if (v.length <= alt) {
                 Message.warning("Could not split genotype annotation [" + genotype + "] with format [" + format + "] for allele [" + alt + "]");
                 return genotype;
               } else
                 g[i] = v[alt];
               break;
-            case InfoFormatHeader.NUMBER_GENOTYPES:
+            case InfoDefinition.VALUE_NUMBER_GENOTYPES:
               if (v.length <= allele) {
                 Message.warning("Could not split genotype annotation [" + genotype + "] with format [" + format + "] for allele [" + alt + "]");
                 return genotype;

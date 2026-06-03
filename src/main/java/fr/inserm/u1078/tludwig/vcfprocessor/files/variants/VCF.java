@@ -7,9 +7,9 @@ import fr.inserm.u1078.tludwig.vcfprocessor.Main;
 import fr.inserm.u1078.tludwig.vcfprocessor.commandline.CommandParser;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.PedException;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.VariantFilter;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.GeneticsException;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPFormat;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThread;
 
 import java.io.IOException;
@@ -37,7 +37,6 @@ public class VCF implements VariantProducer {
   public static final int IDX_FORMAT = 8;
   public static final int IDX_SAMPLE = 9;
 
-  private static final String VEP_HEADER = "##INFO=<ID=CSQ,";
   private static final String INFO_HEADER = "##INFO=";
   private static final String FORMAT_HEADER = "##FORMAT=";
   private static final String CHROM_HEADER = "#CHROM";
@@ -52,7 +51,7 @@ public class VCF implements VariantProducer {
   private final CommandParser commandParser;
   private final UniversalReader in;
   private final BCF bcf;
-  private VEPFormat vepFormat;
+
   /*private final TreeMap<Sample, Integer> sampleIndices;
   private final TreeMap<String, Sample> samplesByID;*/
   private final SampleSet sampleSet;
@@ -74,8 +73,9 @@ public class VCF implements VariantProducer {
 
   private final Lock readLock;
 
-  private final HashMap<String, InfoFormatHeader> infoHeaders;
-  private final HashMap<String, InfoFormatHeader> formatHeaders;
+  private final HashMap<String, InfoDefinition> infoHeaders;
+  private final HashMap<String, FormatDefinition> formatHeaders;
+
 
   public VCF(String filename, int step) throws VCFException, PedException {
     this(filename, VCF.MODE_NORMAL, step);
@@ -128,19 +128,24 @@ public class VCF implements VariantProducer {
     this.commandParser.printSummary();
   }
 
-  public InfoFormatHeader getInfoHeader(String name) {
+  public InfoDefinition getInfoHeader(String name) {
     return this.infoHeaders.get(name);
   }
 
-  public InfoFormatHeader getFormatHeader(String name) {
+  public boolean hasVEPAnnotations() {
+    for(InfoDefinition info : this.infoHeaders.values())
+      if(info instanceof VEPInfoDefinition)
+        return true;
+    return false;
+  }
+
+  public FormatDefinition getFormatHeader(String name) {
     return this.formatHeaders.get(name);
   }
 
   public String getFilename() {
     return this.filename;
   }
-
-
 
   private String getNextHeaderLine() throws IOException {
     return bcf == null
@@ -154,20 +159,19 @@ public class VCF implements VariantProducer {
       while ((line = getNextHeaderLine()) != null) {
         if (line.charAt(0) != '#')
           throw new VCFException(this, "No sample list found in vcf file");
+        try {
+          if (line.startsWith(INFO_HEADER)) {
+            InfoDefinition infoHeader = InfoDefinition.parseLine(line);
+            this.infoHeaders.put(infoHeader.getId(), infoHeader);
+          }
 
-        if (line.startsWith(INFO_HEADER)) {
-          InfoFormatHeader infoHeader = new InfoFormatHeader(line);
-          this.infoHeaders.put(infoHeader.getName(), infoHeader);
+          if (line.startsWith(FORMAT_HEADER)) {
+            FormatDefinition formatHeader = FormatDefinition.parseLine(line);
+            this.formatHeaders.put(formatHeader.getId(), formatHeader);
+          }
+        } catch(GeneticsException exception) {
+          throw new VCFException(this, "Could not parse VCF header", exception);
         }
-
-        if (line.startsWith(FORMAT_HEADER)) {
-          InfoFormatHeader infoHeader = new InfoFormatHeader(line);
-          this.formatHeaders.put(infoHeader.getName(), infoHeader);
-        }
-
-        if (line.startsWith(VEP_HEADER))
-          if (VEPFormat.isValid(line))
-            vepFormat = VEPFormat.createVepFormat(line);
 
         if (line.startsWith(CHROM_HEADER)) {
           this.headers.add(getStamp());
@@ -353,10 +357,6 @@ public class VCF implements VariantProducer {
     return null;
   }
 
-  public VEPFormat getVepFormat() {
-    return vepFormat;
-  }
-
   public void close() {
     try {
       in.close();
@@ -425,54 +425,27 @@ public class VCF implements VariantProducer {
     return sampleSet.getOutputIndex(sampleID);
   }
 
-  public boolean has1kGAnnotation() {
-    for (String header : this.headers)
-      if (header.startsWith("##INFO=<ID=CSQ") && header.contains("GMAF"))
+  public boolean hasAnnotation(String key){ return this.getInfoHeader(key) != null; }
+
+  public boolean hasVEPAnnotation(String key){
+    InfoDefinition def = getInfoHeader("CSQ");
+    if(def == null)
+      return false;
+    String[] words = def.getDescription().split(" ");
+    String[] keys = words[words.length - 1].split("\\|", -1);
+    for(String k : keys)
+      if(k.equals(key))
         return true;
     return false;
   }
 
-  public boolean has1kGEurAnnotation() {
-    for (String header : this.headers)
-      if (header.startsWith("##INFO=<ID=CSQ") && header.contains("EUR_MAF"))
-        return true;
-    return false;
-  }
-
-  public boolean hasExACAnnotation() {
-    for (String header : this.headers)
-      if (header.startsWith("##INFO=<ID=CSQ") && header.contains("ExAC_AF"))
-        return true;
-    return false;
-  }
-
-  public boolean hasExACNFEAnnotation() {
-    for (String header : this.headers)
-      if (header.startsWith("##INFO=<ID=CSQ") && header.contains("ExAC_AF_NFE"))
-        return true;
-    return false;
-  }
-
-  public boolean hasESPAnnotation() {
-    for (String header : this.headers)
-      if (header.startsWith("##INFO=<ID=ESP") && header.contains("ESP_AF"))
-        return true;
-    return false;
-  }
-
-  public boolean hasESPEAAnnotation() {
-    for (String header : this.headers)
-      if (header.startsWith("##INFO=<ID=ESP") && header.contains("ESP_EA_AF"))
-        return true;
-    return false;
-  }
-
-  public boolean hasFREXAnnotation() {
-    for (String header : this.headers)
-      if (header.startsWith("##INFO=<ID=FREX") && header.contains("FrEx_AF"))
-        return true;
-    return false;
-  }
+  public boolean has1kGAnnotation() { return hasVEPAnnotation("AF"); }
+  public boolean has1kGEurAnnotation() { return hasVEPAnnotation("EUR_AF"); }
+  public boolean hasExACAnnotation() { return hasVEPAnnotation("ExAC_AF"); }
+  public boolean hasExACNFEAnnotation() { return hasVEPAnnotation("ExAC_AF_NFE"); }
+  public boolean hasESPAnnotation() { return hasVEPAnnotation("ESP_AF"); }
+  public boolean hasESPEAAnnotation() { return hasVEPAnnotation("ESP_EA_AF"); }
+  public boolean hasFREXAnnotation() { return hasAnnotation("FREX"); }
 
   public CommandParser getCommandParser() { return commandParser; }
 
@@ -663,93 +636,6 @@ public class VCF implements VariantProducer {
       } catch (InterruptedException ignore) { }
 
       return next;
-    }
-  }
-
-  public static class InfoFormatHeader {
-    private final String name;
-    private final String description;
-    private final String type;
-    private final int number;
-
-    public static final int NUMBER_ALLELES = -9; //TODO use enum ?
-    public static final int NUMBER_ALTS = -8;
-    public static final int NUMBER_GENOTYPES = -7;
-    public static final int NUMBER_UNKNOWN = -6;
-    public static final int NUMBER_NONE = 0;
-
-    public InfoFormatHeader(String line) {
-      String[] f = line.split("<")[1].split(">")[0].split(",");
-      String id = "";
-      String desc = "";
-      int nb = 0;
-      String typ = "Flag";
-
-      for (String s : f) {
-        String[] kv = s.split("=");
-        switch (kv[0].toLowerCase()) {
-          case "id":
-            id = kv[1];
-            break;
-          case "type":
-            typ = kv[1];
-            break;
-          case "description":
-            desc = kv[1];
-            break;
-          case "number":
-            try {
-              nb = Integer.parseInt(kv[1]);
-            } catch (NumberFormatException e) {
-              switch (kv[1].toUpperCase()) {
-                case "A":
-                  nb = NUMBER_ALTS;
-                  break;
-                case "R":
-                  nb = NUMBER_ALLELES;
-                  break;
-                case "G":
-                  nb = NUMBER_GENOTYPES;
-                  break;
-                case ".":
-                  nb = NUMBER_UNKNOWN;
-                  break;
-                default:
-                  Message.warning("Unknown Number of values for INFO field : [" + line + "]");
-                  nb = NUMBER_UNKNOWN;
-              }
-            }
-            break;
-        }
-      }
-
-      this.name = id;
-      this.description = desc;
-      this.type = typ;
-      this.number = nb;
-    }
-
-    private InfoFormatHeader(String name, String description, String type, int number) {
-      this.name = name;
-      this.description = description;
-      this.type = type;
-      this.number = number;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public String getDescription() {
-      return description;
-    }
-
-    public String getType() {
-      return type;
-    }
-
-    public int getNumber() {
-      return number;
     }
   }
 

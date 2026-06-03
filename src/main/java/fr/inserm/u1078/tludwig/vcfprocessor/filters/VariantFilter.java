@@ -1,6 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.filters;
 
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 
 /**
  *

@@ -3,11 +3,9 @@ package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.AbstractRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.*;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.NavigableSet;
-import java.util.TreeMap;
 
 public class VCFRecord extends VariantRecord {
   private final String[] left;
@@ -226,7 +224,7 @@ public class VCFRecord extends VariantRecord {
       String alt = left[VCF.IDX_ALT];
       String qual = left[VCF.IDX_QUAL];
       String filter = left[VCF.IDX_FILTER];
-      Info info = getInfo();
+      InfoColumn infoColumn = getInfo();
       GenotypeFormat format = getVCF().checkMode(VCF.MODE_QUICK_GENOTYPING) ? new GenotypeFormat("GT") : new GenotypeFormat(filteredRight[0]);
 
       //limit to selected samples : in fact, there is nothing to do because de input line has already been altered by SampleFilters
@@ -238,7 +236,7 @@ public class VCFRecord extends VariantRecord {
           geno = geno.split(":")[0];
         genotypes[i] = new Genotype(geno, format, samples[i]);//right index, because samples has already been reduced
       }
-      return new Variant(chrom, pos, id, ref, alt, qual, filter, info, format, genotypes);
+      return new Variant(chrom, pos, id, ref, alt, qual, filter, infoColumn, format, genotypes);
     } catch (VariantException | NumberFormatException e) {
       throw new VCFException(getVCF(), "Could not create variant ("+ e.getMessage()+")", this, e);
     }

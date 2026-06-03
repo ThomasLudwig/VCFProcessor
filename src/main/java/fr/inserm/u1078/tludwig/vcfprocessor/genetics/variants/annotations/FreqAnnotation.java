@@ -1,4 +1,6 @@
-package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
+package fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations;
+
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.InfoColumn;
 
 /**
  *
@@ -63,27 +65,20 @@ public class FreqAnnotation {
 
   private final double[][] frequencies;
 
-  public FreqAnnotation(Info info) {
+  public FreqAnnotation(InfoColumn infoColumn) {
     int nbAlt = 1;
 
-    for (String pop : POPS) {
-      String value = info.getAnnot(pop);
-      if (value != null) {
-        String[] values = value.split(",", -1);
-        nbAlt = Math.max(nbAlt, values.length);
-      }
-    }
+    for (String pop : POPS)
+      nbAlt = Math.max(nbAlt, infoColumn.getInfoField(pop).getValuesAsStrings().length);
+
     this.frequencies = new double[POPS.length][nbAlt];
     
     for(int p = 0 ; p < POPS.length; p++){
-      String value = info.getAnnot(POPS[p]);
-      if(value != null){
-        String[] values = value.split(",", -1);
-        for (int a = 0; a < nbAlt; a++)
-            if (values[a] != null && !values[a].isEmpty())
-              this.frequencies[p][a] = Double.parseDouble(values[a]);
-      }
-    }    
+      String[] values = infoColumn.getInfoField(POPS[p]).getValuesAsStrings();
+      for (int a = 0; a < nbAlt; a++)
+          if (values[a] != null && !values[a].isEmpty())
+            this.frequencies[p][a] = Double.parseDouble(values[a]);
+    }
   }
 
   public int getIndex(String pop) {

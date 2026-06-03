@@ -6,11 +6,10 @@ import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.BooleanParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+
+import java.util.*;
 
 /**
  * Abstract class extended by function looking for Compound Heterozygous Variants
@@ -74,10 +73,10 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
   @Override
   public final String[] processInputVariant(Variant variant) {
     Genotype[] genos = variant.getGenotypes();
-    HashMap<Integer, String[]> genesByAllele = new HashMap<>();
+    HashMap<Integer, Set<String>> genesByAllele = new HashMap<>();
     for (int a = 1; a < variant.getAlleles().length; a++)
       if (isValidCandidate(genos, a)) // Is the allele is a valid candidate, keep it
-        genesByAllele.put(a, variant.getGeneList(a));
+        genesByAllele.put(a, variant.getInfo().getVEPInfo().getAllGenes(a));
 
     if (!genesByAllele.isEmpty())
       this.pushAnalysis(new Analysis(variant, genesByAllele));
@@ -88,7 +87,7 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
   @Override
   public final void processAnalysis(Analysis analysis) {
     Variant variant = analysis.getVariant();
-    HashMap<Integer, String[]> genesByAllele = analysis.genesByAllele;
+    HashMap<Integer, Set<String>> genesByAllele = analysis.genesByAllele;
     kept++;
 
     for (int allele : genesByAllele.keySet())
@@ -103,9 +102,9 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
 
   public static class Analysis {
     private final Variant variant;
-    private final HashMap<Integer, String[]> genesByAllele;
+    private final HashMap<Integer, Set<String>> genesByAllele;
 
-    public Analysis(Variant variant, HashMap<Integer, String[]> genesByAllele) {
+    public Analysis(Variant variant, HashMap<Integer, Set<String>> genesByAllele) {
       this.variant = variant;
       this.genesByAllele = genesByAllele;
     }
@@ -114,7 +113,7 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
       return variant;
     }
 
-    public HashMap<Integer, String[]> getGenesByAllele() {
+    public HashMap<Integer, Set<String>> getGenesByAllele() {
       return genesByAllele;
     }
   }

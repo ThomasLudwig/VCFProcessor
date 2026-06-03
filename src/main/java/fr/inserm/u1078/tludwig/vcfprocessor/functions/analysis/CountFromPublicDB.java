@@ -4,7 +4,7 @@ import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 /**
@@ -96,7 +96,7 @@ public class CountFromPublicDB extends ParallelVCFVariantFunction<CountFromPubli
   @Override
   public String[] processInputVariant(Variant variant) {
     for (int a : variant.getNonStarAltAllelesAsArray())
-      this.pushAnalysis(new CountAnalysis(variant.isSNP(a), variant.getInfo().isInDBSNPVEP(a), variant.getInfo().isIn1KgVEP(a), variant.getInfo().isInGnomADVEP(a)));
+      this.pushAnalysis(new CountAnalysis(variant.isSNP(a), variant.getInfo().getVEPInfo().hasExistingVariants(a), variant.getInfo().getVEPInfo().isIn1kg(a), variant.getInfo().getVEPInfo().isInGnomAD(a)));
     return NO_OUTPUT;
   }
   

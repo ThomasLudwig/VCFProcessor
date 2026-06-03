@@ -3,8 +3,8 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
 
@@ -75,7 +75,7 @@ public class PrivateAndShared extends ParallelVCFVariantPedFunction<PrivateAndSh
   @Override
   public String[] processInputVariant(Variant variant) {
     for (int a : variant.getNonStarAltAllelesAsArray())
-      if (!variant.getInfo().isInDBSNPVEP(a)) {
+      if (!variant.getInfo().getVEPInfo().hasExistingVariants(a)) {
         ArrayList<Integer> gps = new ArrayList<>();
         boolean isShared = false;
         boolean[] found = new boolean[groups.size()]; //initialized to false

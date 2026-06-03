@@ -4,8 +4,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.ConsequenceParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 /**
@@ -38,7 +38,7 @@ public class FilterConsequenceLevel extends ParallelVCFVariantFilterFunction {
 
   @Override
   public String[] processInputVariantForFilter(Variant variant) {
-    return VEPConsequence.getWorstConsequence(variant.getInfo().getWorstVEPAnnotation()).getLevel() >= this.leastCsq.getConsequenceLevel() ? asOutput(variant) : NO_OUTPUT;
+    return VEPConsequence.getWorst(variant.getInfo().getVEPInfo().getAllVEPAnnotations()).getLevel() >= this.leastCsq.getConsequenceLevel() ? asOutput(variant) : NO_OUTPUT;
   }
 
   @Override

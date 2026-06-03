@@ -12,10 +12,11 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunct
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.TSVFileParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Info;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.InfoColumn;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.HasMetricsAnnotation;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 import java.io.IOException;
@@ -53,15 +54,7 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
   public static final String FILTER_AC0 = "AC0";
   public static final String FILTER_AF1 = "AF1";
 
-  public static final String KEY_QD = "QD";
-  public static final String KEY_FS = "FS";
-  public static final String KEY_SOR = "SOR";
-  public static final String KEY_MQ = "MQ";
-  public static final String KEY_READPOSRANKSUM = "ReadPosRankSum";
-  public static final String KEY_INBREEDING = "InbreedingCoeff";
-  public static final String KEY_MQRANKSUM = "MQRankSum";
-
-  public static final String[] KEYS = new String[]{KEY_QD, KEY_FS, KEY_SOR, KEY_MQ, KEY_READPOSRANKSUM, KEY_INBREEDING, KEY_MQRANKSUM};
+  public static final String[] KEYS = new String[]{HasMetricsAnnotation.QD, HasMetricsAnnotation.FS, HasMetricsAnnotation.SOR, HasMetricsAnnotation.MQ, HasMetricsAnnotation.READPOSRANKSUM, HasMetricsAnnotation.INBREEDING_COEFF, HasMetricsAnnotation.MQRANKSUM};
 
   public static final double MIN_QD = 2;
   public static final double MAX_ABHET_DEV = 0.25;
@@ -527,25 +520,18 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
 
     fisherET = new FisherExactTest(getVCF().getNumberOfSamples());
 
-    for (String key : KEYS) {
-      boolean found = false;
-      for (String header : getVCF().getHeadersWithoutSamples())
-        if (header.startsWith("##INFO=<ID=" + key + ",")) {
-          found = true;
-          break;
-        }
-      Message.warning(!found, "Input VCF seems to be missing the following annotation [" + key + "]");
-    }
+    for (String key : KEYS) //TODO only check if filter is enabled
+      Message.warning(!getVCF().hasAnnotation(key), "Input VCF seems to be missing the following annotation [" + key + "]");
 
     getVCF().addFilter(FILTER_CALLRATE, "Call rate < " + this.minCallRate + " in any group");
     getVCF().addFilter(FILTER_CALLRATE_DISTRIBUTION, "Fisher’s exact test comparing number of missing genotypes between groups significant at p <= " + this.minFisherCallRate);
-    getVCF().addFilter(FILTER_QUAL_BY_DEPTH, "Qual by depth (" + KEY_QD + ") < " + this.minQD + " or missing");
-    getVCF().addFilter(FILTER_INBREEDING_COEF, "Inbreeding coefficient (" + KEY_INBREEDING + ") < " + this.minInbreeding);
-    getVCF().addFilter(FILTER_MQRANKSUM, KEY_MQRANKSUM + " (Z-score From Wilcoxon rank sum test of Alt vs. Ref read mapping qualities) either < " + this.minMQRankSum + " or missing");
-    getVCF().addFilter(FILTER_FS, KEY_FS + " (phred-scaled p-value using Fisher's exact test to detect strand bias) > " + this.maxFS_SNP + " for SNPs or > " + this.maxFS_Indel + " for indels or missing");
-    getVCF().addFilter(FILTER_SOR, KEY_SOR + " (Symmetric Odds Ratio of 2x2 contingency table to detect strand bias) > " + this.maxSOR_SNP + " for SNPs or > " + this.maxSOR_Indel + " for indels or missing");
-    getVCF().addFilter(FILTER_MQ, KEY_MQ + " (overall mapping quality of reads supporting a variant call) < " + this.minMQ_SNP + " for SNPs or < " + this.minMQ_Indel + " for indels or missing");
-    getVCF().addFilter(FILTER_READPOSRANKSUM, KEY_READPOSRANKSUM + " (Z-score from Wilcoxon rank sum test of Alt vs. Ref read position bias) either < " + this.minRPRS_SNP + " for SNP or < " + this.minRPRS_Indel + " for indels");
+    getVCF().addFilter(FILTER_QUAL_BY_DEPTH, "Qual by depth (" + HasMetricsAnnotation.QD + ") < " + this.minQD + " or missing");
+    getVCF().addFilter(FILTER_INBREEDING_COEF, "Inbreeding coefficient (" + HasMetricsAnnotation.INBREEDING_COEFF + ") < " + this.minInbreeding);
+    getVCF().addFilter(FILTER_MQRANKSUM, HasMetricsAnnotation.MQRANKSUM + " (Z-score From Wilcoxon rank sum test of Alt vs. Ref read mapping qualities) either < " + this.minMQRankSum + " or missing");
+    getVCF().addFilter(FILTER_FS, HasMetricsAnnotation.FS + " (phred-scaled p-value using Fisher's exact test to detect strand bias) > " + this.maxFS_SNP + " for SNPs or > " + this.maxFS_Indel + " for indels or missing");
+    getVCF().addFilter(FILTER_SOR, HasMetricsAnnotation.SOR + " (Symmetric Odds Ratio of 2x2 contingency table to detect strand bias) > " + this.maxSOR_SNP + " for SNPs or > " + this.maxSOR_Indel + " for indels or missing");
+    getVCF().addFilter(FILTER_MQ, HasMetricsAnnotation.MQ + " (overall mapping quality of reads supporting a variant call) < " + this.minMQ_SNP + " for SNPs or < " + this.minMQ_Indel + " for indels or missing");
+    getVCF().addFilter(FILTER_READPOSRANKSUM, HasMetricsAnnotation.READPOSRANKSUM + " (Z-score from Wilcoxon rank sum test of Alt vs. Ref read position bias) either < " + this.minRPRS_SNP + " for SNP or < " + this.minRPRS_Indel + " for indels");
     //getVCF().addFilter(FILTER_LOWQUAL, "Proportion of genotypes with (" + this.minDP + " <= SUM(AD) <= " + this.maxDP + " and a genotype quality (GQ) >= " + this.minGQ + ") < " + this.minHQRatio);
     getVCF().addFilter(FILTER_ALT_LOWQUAL, "Number of genotypes carrying an alternative allele with (" + this.minDP + " <= SUM(AD) <= " + this.maxDP + " and a genotype quality (GQ) >= " + this.minGQ + ") < " + this.minAltHQ);
     getVCF().addFilter(FILTER_ABHET, "Mean allelic balance calculated over heterozygous genotypes was within [" + (0.5 - this.maxABHetDev) + "-" + (0.5 + this.maxABHetDev) + "] in each group (if heterozygous genotypes called)");
@@ -571,35 +557,35 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
   @Override
   public String[] processInputVariant(Variant variant) {
     Export export = new Export(variant);
-    Info info = variant.getInfo();
+    InfoColumn infoColumn = variant.getInfo();
     StringBuilder theAB = new StringBuilder();
 
     //DONE Qual by depth (QD) ≥ 2
     if (this.enableMinQD)
       try {
-        double d = Double.parseDouble(info.getAnnot(KEY_QD));
+        double d = infoColumn.getQD();
         if (d < this.minQD)
           export.qualByDepth = d + "";
-      } catch (NullPointerException | NumberFormatException e) {
+      } catch (NullPointerException e) {
         export.qualByDepth = MISSING;
       }
 
     //DONE Inbreeding coefficient (InbreedingCoeff) either ≥(-0.8) or not calculated
     if (this.enableMinInbreeding)
       try {
-        double d = Double.parseDouble(info.getAnnot(KEY_INBREEDING));
+        double d = infoColumn.getInbreedingCoeff();
         if (d < this.minInbreeding)
           export.inbreedingCoef = d + "";
-      } catch (NullPointerException | NumberFormatException e) {
+      } catch (NullPointerException e) {
         //Nothing
       }
     //DONE MQRankSum (Z-score From Wilcoxon rank sum test of Alt vs. Ref read mapping qualities) either ≥(-12.5) or not calculated
     if (this.enableMinMQRankSum)
       try {
-        double d = Double.parseDouble(info.getAnnot(KEY_MQRANKSUM));
+        double d = infoColumn.getMQRankSum();
         if (d < this.minMQRankSum)
           export.mqRankSum = d + "";
-      } catch (NullPointerException | NumberFormatException e) {
+      } catch (NullPointerException e) {
         //Nothing
       }
 
@@ -611,74 +597,74 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
       //FS (phred-scaled p-value using Fisher's exact test to detect strand bias) ≤60 for SNPs or ≤200 for indels
       if (enableMaxFSSNP)
         try {
-          double d = Double.parseDouble(info.getAnnot(KEY_FS));
+          double d = infoColumn.getFS();
           if (d > this.maxFS_SNP)
             export.fs = d + "";
-        } catch (NullPointerException | NumberFormatException e) {
+        } catch (NullPointerException e) {
           export.fs = MISSING;
         }
       //SOR (Symmetric Odds Ratio of 2x2 contingency table to detect strand bias) ≤3 for SNPs or ≤10 for indels
       if (enableMaxSORSNP)
         try {
-          double d = Double.parseDouble(info.getAnnot(KEY_SOR));
+          double d = infoColumn.getSOR();
           if (d > this.maxSOR_SNP)
             export.sor = d + "";
-        } catch (NullPointerException | NumberFormatException e) {
+        } catch (NullPointerException e) {
           export.sor = MISSING;
         }
       //MQ (overall mapping quality of reads supporting a variant call) ≥40 for SNPs or ≥10 for indels
       if (enableMinMQSNP)
         try {
-          double d = Double.parseDouble(info.getAnnot(KEY_MQ));
+          double d = infoColumn.getMQ();
           if (d < minMQ_SNP)
             export.mq = d + "";
-        } catch (NullPointerException | NumberFormatException e) {
+        } catch (NullPointerException e) {
           export.mq = MISSING;
         }
       //ReadPosRankSum (Z-score from Wilcoxon rank sum test of Alt vs. Ref read position bias) either ≥(-8) for SNP or ≥(-20) for indels, or not calculated
       if (enableMinRPRSSNP)
         try {
-          double d = Double.parseDouble(info.getAnnot(KEY_READPOSRANKSUM));
+          double d = infoColumn.getReadPosRankSum();
           if (d < minRPRS_SNP)
             export.readPosRankSum = d + "";
-        } catch (NullPointerException | NumberFormatException e) {
+        } catch (NullPointerException e) {
           //Nothing
         }
     } else {
       //FS (phred-scaled p-value using Fisher's exact test to detect strand bias) ≤60 for SNPs or ≤200 for indels
       if (enableMaxFSIndel)
         try {
-          double d = Double.parseDouble(info.getAnnot(KEY_FS));
+          double d = infoColumn.getFS();
           if (d > maxFS_Indel)
             export.fs = d + "";
-        } catch (NullPointerException | NumberFormatException e) {
+        } catch (NullPointerException e) {
           export.fs = MISSING;
         }
       //SOR (Symmetric Odds Ratio of 2x2 contingency table to detect strand bias) ≤3 for SNPs or ≤10 for indels
       if (enableMaxSORIndel)
         try {
-          double d = Double.parseDouble(info.getAnnot(KEY_SOR));
+          double d = infoColumn.getSOR();
           if (d > maxSOR_Indel)
             export.sor = d + "";
-        } catch (NullPointerException | NumberFormatException e) {
+        } catch (NullPointerException e) {
           export.sor = MISSING;
         }
       //MQ (overall mapping quality of reads supporting a variant call) ≥40 for SNPs or ≥10 for indels
       if (enableMinMQIndel)
         try {
-          double d = Double.parseDouble(info.getAnnot(KEY_MQ));
+          double d = infoColumn.getMQ();
           if (d < minMQ_Indel)
             export.mq = d + "";
-        } catch (NullPointerException | NumberFormatException e) {
+        } catch (NullPointerException e) {
           export.mq = MISSING;
         }
       //ReadPosRankSum (Z-score from Wilcoxon rank sum test of Alt vs. Ref read position bias) either ≥(-8) for SNP or ≥(-20) for indels, or not calculated
       if (enableMinRPRSIndel)
         try {
-          double d = Double.parseDouble(info.getAnnot(KEY_READPOSRANKSUM));
+          double d = infoColumn.getReadPosRankSum();
           if (d < minRPRS_Indel)
             export.readPosRankSum = d + "";
-        } catch (NullPointerException | NumberFormatException e) {
+        } catch (NullPointerException e) {
           //Nothing
         }
     }

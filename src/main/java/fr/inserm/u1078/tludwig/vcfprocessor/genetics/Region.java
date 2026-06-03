@@ -1,5 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+
 /**
  * In this class everything is done as [1-based;1-based]
  * In Bed File : [0-based;0-based[ or [0-based;1-based]

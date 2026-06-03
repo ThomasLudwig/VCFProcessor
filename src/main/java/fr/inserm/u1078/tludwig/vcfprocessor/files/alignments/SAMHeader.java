@@ -2,7 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.files.alignments;
 
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 
 import java.io.IOException;
 import java.io.InputStream;

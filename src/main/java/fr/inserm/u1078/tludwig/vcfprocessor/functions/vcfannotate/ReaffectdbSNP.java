@@ -4,8 +4,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPFormat;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPVariantIDFacade;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 /**
@@ -26,7 +26,7 @@ public class ReaffectdbSNP extends ParallelVCFVariantFunction<Object> {
   @SuppressWarnings("unused")
   @Override
   public Description getDesc() {
-    return new Description("Takes the rs numbers from the "+Description.italic(VEPFormat.KEY_EXISTING_VARIATION)+" annotation (from vep) and adds them to the ID column of the VCF. Puts \".\" if no RS has been found ");
+    return new Description("Takes the rs numbers from the "+Description.italic(VEPVariantIDFacade.EXISTING_VARIATION.getId())+" annotation (from vep) and adds them to the ID column of the VCF. Puts \".\" if no RS has been found ");
   }
 
   @SuppressWarnings("unused")
@@ -41,7 +41,7 @@ public class ReaffectdbSNP extends ParallelVCFVariantFunction<Object> {
   @Override
   public String[] processInputVariant(Variant variant) {
     String[] f = variant.getFields();
-    String rs = variant.getInfo().getRSs();
+    String rs = String.join(",", variant.getInfo().getVEPInfo().getRSs());
     if(rs == null)
       rs = ".";
     

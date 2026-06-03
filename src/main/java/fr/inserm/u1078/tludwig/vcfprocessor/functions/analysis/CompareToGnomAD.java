@@ -9,9 +9,9 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Canonical;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPAnnotation;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPAnnotation;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -121,7 +121,7 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
         String qual = variant.getFilter();
         if (variant.isHQ(true, 10, 20, .8, "PASS"))
           qual = "HQ";
-        Map<String, VEPAnnotation> csqGenes = variant.getInfo().getWorstVEPAnnotationsByGene(a);
+        Map<String, VEPAnnotation> csqGenes = VEPConsequence.getWorstVEPAnnotationsByGene(variant.getInfo().getVEPInfo().getVEPAnnotations(a));
         VEPConsequence worst = VEPConsequence.getWorst(csqGenes.values());
         ArrayList<String> genes = new ArrayList<>();
         for(String gene: csqGenes.keySet()){

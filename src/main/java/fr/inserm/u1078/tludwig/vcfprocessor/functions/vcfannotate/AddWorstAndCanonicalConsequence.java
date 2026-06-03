@@ -4,8 +4,9 @@ import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Info;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPAnnotation;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.InfoColumn;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPAnnotation;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 /**
@@ -57,14 +58,14 @@ public class AddWorstAndCanonicalConsequence extends ParallelVCFFunction<Object>
   @Override
   public String[] processInputRecord(VariantRecord record) {
     int nbAllele = 1 + record.getAlts().length;
-    Info info = record.getInfo();
+    InfoColumn infoColumn = record.getInfo();
     StringBuilder worstCsq = new StringBuilder();
     StringBuilder canonicalCsq = new StringBuilder();
     StringBuilder worstGene = new StringBuilder();
     StringBuilder canonicalGene = new StringBuilder();
     for (int a = 1; a < nbAllele; a++) {
-      VEPAnnotation worst = info.getWorstVEPAnnotation(a);
-      VEPAnnotation canon = info.getCanonicalVEPAnnotation(a);
+      VEPAnnotation worst = VEPConsequence.getWorstVEPAnnotation(infoColumn.getVEPInfo().getVEPAnnotations(a));
+      VEPAnnotation canon = infoColumn.getVEPInfo().getCanonicalVEPAnnotation(a);
       worstCsq.append(",").append(worst.getConsequence());
       worstGene.append(",").append(worst.getSYMBOL());
       canonicalCsq.append(",").append(canon.getConsequence());

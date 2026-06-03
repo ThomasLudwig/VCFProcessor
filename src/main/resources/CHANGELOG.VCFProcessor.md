@@ -1,4 +1,4 @@
-## 1.3.0 (2026-05-07)
+## 1.3.0 (2026-06-03)
 ### core
 - **fixed** : More BCFv2.2 Compliance issues
 - **fixed** : Huge Bug. In output, Samples were (wrongfully) sorted in header, but not in body.
@@ -29,7 +29,7 @@
 
 ## 1.2.11 (2026-03-17)
 ### core
-- **added** : `Message` conditional info/error/waring/fatal...
+- **added** : `Message` conditional infoColumn/error/waring/fatal...
 - **added** :  `Variant.VairantType` enum{STAR, REF, INSERTION, DELETION, TRANSITION, TRANSVERSION}
 ### functions
 - **fixed** : `SampleStats` '1/1' genotypes cannot be singleton anymore. Added Haploids count

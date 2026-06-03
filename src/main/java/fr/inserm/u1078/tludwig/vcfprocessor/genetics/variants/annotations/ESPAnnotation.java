@@ -1,4 +1,4 @@
-package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
+package fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations;
 
 import fr.inserm.u1078.tludwig.maok.tools.ArrayTools;
 

@@ -1,7 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files.alignments;
 
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Cigar;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Tag;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.alignments.Cigar;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.alignments.Tag;
 
 import java.util.ArrayList;
 

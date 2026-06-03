@@ -3,11 +3,13 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
-import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.ListParameter;
+import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.ListEnumParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.RatioParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPFormat;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPFrequencyFacade;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+
+import java.util.ArrayList;
 
 /**
  * Keeps only variants with frequencies below the threshold in all the selected populations.
@@ -20,13 +22,11 @@ import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 public class FilterFrequencies extends ParallelVCFVariantFilterFunction { 
 
   private final RatioParameter threshold = new RatioParameter(OPT_THRESHOLD, "maximum frequency in any population");
-  private final ListParameter pops = new ListParameter(OPT_POP, "pop1,pop2,...,popN","List example of Populations to test (from "+String.join(", ", VEPFormat.FREQUENCY_KEYS)+")");
-  //private final ListEnumParameter pops = new ListEnumParameter(OPT_POP, VEPFormat.FREQUENCY_KEYS, "pop1,pop2,...,popN","List of Populations to test (from "+String.join(", ", VEPFormat.FREQUENCY_KEYS)+")");
+  //private final ListParameter pops = new ListParameter(OPT_POP, "pop1,pop2,...,popN","List example of Populations to test (from "+String.join(", ", VEPFrequencyFacade.getAllKeys())+")");
+  private final ListEnumParameter pops = new ListEnumParameter(OPT_POP, VEPFrequencyFacade.ALL_FREQUENCIES.keySet().toArray(new String[0]), "pop1,pop2,...,popN","List of Populations to test (from "+String.join(", ", VEPFrequencyFacade.ALL_FREQUENCIES.keySet())+")");
 
   @Override
-  public String getSummary() {
-    return "Keeps only variants with frequencies below the threshold in all of the selected populations.";
-  }
+  public String getSummary() { return "Keeps only variants with frequencies below the threshold in all of the selected populations."; }
 
   @SuppressWarnings("unused")
   @Override
@@ -39,9 +39,15 @@ public class FilterFrequencies extends ParallelVCFVariantFilterFunction {
   @Override
   public VCFPolicies getVCFPolicies() { return VCFPolicies.onlyVEP(VCFPolicies.MultiAllelicPolicy.KEEP_IF_ONE_SATISFY); }
 
+  @Override
+  public void begin() {
+    super.begin();
+    //TODO check pops
+  }
+
   private boolean kept(Variant v, int a){
     for(String pop : pops.getList())
-      if(v.getInfo().getFrequency(pop, a) > this.threshold.getFloatValue())
+      if(v.getInfo().getVEPInfo().getFrequency(pop, a) > this.threshold.getFloatValue())
         return false;
     return true;
   }

@@ -3,7 +3,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
 
 /**
  *

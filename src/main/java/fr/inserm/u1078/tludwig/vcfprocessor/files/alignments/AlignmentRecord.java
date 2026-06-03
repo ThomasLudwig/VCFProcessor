@@ -2,9 +2,9 @@ package fr.inserm.u1078.tludwig.vcfprocessor.files.alignments;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.files.AbstractRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.SAMLineFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Alignment;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Cigar;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Tag;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.alignments.Alignment;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.alignments.Cigar;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.alignments.Tag;
 
 public abstract class AlignmentRecord extends AbstractRecord {
 

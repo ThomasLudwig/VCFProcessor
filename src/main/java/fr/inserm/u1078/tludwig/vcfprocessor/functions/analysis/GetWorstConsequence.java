@@ -3,8 +3,9 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPAnnotation;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPAnnotation;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 /**
@@ -53,7 +54,7 @@ public class GetWorstConsequence extends ParallelVCFVariantFunction {
     String[] outs = new String[nonStar.length];
     for (int i = 0 ; i < nonStar.length; i++) {
       int a = nonStar[i];
-      VEPAnnotation csqGene = variant.getInfo().getWorstVEPAnnotation(a);
+      VEPAnnotation csqGene = VEPConsequence.getWorstVEPAnnotation(variant.getInfo().getVEPInfo().getVEPAnnotations(a));
       outs[i] = variant.getChrom() + T + variant.getPos() + T + variant.getId() + T + variant.getRef() + T + variant.getAllele(a) + T + csqGene.getConsequence() + T + csqGene.getSYMBOL();
     }
     return outs;

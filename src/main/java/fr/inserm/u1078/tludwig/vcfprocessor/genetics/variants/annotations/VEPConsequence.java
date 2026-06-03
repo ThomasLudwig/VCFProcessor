@@ -1,8 +1,10 @@
-package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
+package fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -116,15 +118,34 @@ public enum VEPConsequence {
     ArrayList<String> csqs = new ArrayList<>();
     for (VEPAnnotation vep : veps)
       if (vep.getSYMBOL().equalsIgnoreCase(symbol))
-        csqs.add(vep.getConsequence());
+        csqs.add(vep.getWorstConsequence());
     return getWorstConsequence(csqs.toArray(new String[0]));
   }
 
   public static VEPConsequence getWorst(Collection<VEPAnnotation> veps) {
     ArrayList<String> csqs = new ArrayList<>();
     for (VEPAnnotation vep : veps)
-      csqs.add(vep.getConsequence());
+      csqs.add(vep.getWorstConsequence());
     return getWorstConsequence(csqs.toArray(new String[0]));
+  }
+
+  static VEPAnnotation getWorstVEPAnnotation(VEPAnnotation... veps){
+    if(veps == null)
+      return null;
+    VEPAnnotation worst = null;
+    int level = -1;
+    for(VEPAnnotation vep : veps){
+      if(worst == null)
+        worst = vep;
+      else {
+        int current = VEPConsequence.getWorstConsequence(vep).getLevel();
+        if(current > level){
+          level = current;
+          worst = vep;
+        }
+      }
+    }
+    return worst;
   }
 
   public static VEPConsequence getWorstConsequence(VEPAnnotation vep) {
@@ -135,12 +156,48 @@ public enum VEPConsequence {
     return getWorstConsequence(csqs.toArray(new String[0]));
   }
 
+  public static Map<String, VEPAnnotation> getWorstVEPAnnotationsByGene(Collection<VEPAnnotation> veps){
+    Map<String, VEPAnnotation> ret = new HashMap<>();
+    for(String symbol : VEPLocationFacade.getDistinctSymbols(veps)){
+      ret.put(symbol, getWorstVEPAnnotation(veps, symbol));
+    }
+    return ret;
+  }
+
+  public static VEPAnnotation getWorstVEPAnnotation(Collection<VEPAnnotation> veps, String symbol) {
+    VEPAnnotation worst = null;
+    int level = -999;
+    for(VEPAnnotation vep : veps){
+      if(symbol.equalsIgnoreCase(vep.getSYMBOL())){
+        if(worst == null){
+          level = VEPConsequence.getWorstConsequence(vep).getLevel();
+          worst = vep;
+        }
+        else {
+          int current = VEPConsequence.getWorstConsequence(vep).getLevel();
+          if(current > level){
+            level = current;
+            worst = vep;
+          }
+        }
+      }
+    }
+    return worst;
+  }
+
+  public static VEPAnnotation getWorstVEPAnnotation(Collection<VEPAnnotation> veps) {
+    if(veps == null || veps.isEmpty())
+      return null;
+
+    return getWorstVEPAnnotation(veps.toArray(new VEPAnnotation[0]));
+  }
+
   public static VEPConsequence getWorstConsequence(String... csqs) {
     VEPConsequence worstCsq = VEPConsequence.EMPTY;
 
     for (String unsplits : csqs)
-      for (String csq : unsplits.split("\\&")) {
-        VEPConsequence vc = VEPConsequence.getConsequence(csq);
+      for (String csq : unsplits.split("&")) {
+        VEPConsequence vc = getConsequence(csq);
 
         if (vc != null){
           if (vc.getLevel() > worstCsq.getLevel())

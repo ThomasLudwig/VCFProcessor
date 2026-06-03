@@ -3,10 +3,11 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Set;
 import java.util.TreeSet;
 
 /**
@@ -17,7 +18,7 @@ import java.util.TreeSet;
  * Checked for release on 2020-05-12
  * Unit Test defined on   2020-07-07
  */
-public class GeneList extends ParallelVCFVariantFunction<String[]> {
+public class GeneList extends ParallelVCFVariantFunction<Set<String>> {
 
   TreeSet<String> genes;
 
@@ -64,14 +65,14 @@ public class GeneList extends ParallelVCFVariantFunction<String[]> {
 
   @Override
   public String[] processInputVariant(Variant variant) {
-    pushAnalysis(variant.getGeneList());
+    pushAnalysis(variant.getInfo().getVEPInfo().getAllSYMBOLs());
     return NO_OUTPUT;
   }
 
   @SuppressWarnings("unused")
   @Override
-  public void processAnalysis(String[] analysis) {
-    Collections.addAll(genes, analysis);
+  public void processAnalysis(Set<String> analysis) {
+    genes.addAll(analysis);
   }
   
   @Override

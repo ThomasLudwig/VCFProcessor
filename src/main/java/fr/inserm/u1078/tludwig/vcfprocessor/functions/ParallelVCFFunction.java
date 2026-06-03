@@ -6,7 +6,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF.Reader;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCFException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThread;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThreadFactory;
 
@@ -84,6 +84,10 @@ public abstract class ParallelVCFFunction<T> extends VCFFunction {
 
   public void openVCF() throws VCFException, PedException {
     this.setVCF(this.vcfFile.getVCF(VCF.STEP_OFF));
+    //TODO, here the VCF is OPEN check if VEP is present if needed
+    VCF vcf =  this.getVCF();
+    Message.fatal(this.getVCFPolicies().isNeedVEP() &&! vcf.hasVEPAnnotations(), "The ["+this.getClass().getSimpleName()+"] function requires the input VCF file to have a VEP annotation.\n" +
+        "No VEP annotation found in ["+vcf.getFilename()+"]", false);
   }
 
   public final void setVCF(VCF vcf) {

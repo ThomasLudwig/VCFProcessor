@@ -7,9 +7,9 @@ import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPAnnotation;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPAnnotation;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 import java.io.IOException;
@@ -107,7 +107,7 @@ public class NumberOfCsqPerGene extends ParallelVCFVariantFunction<NumberOfCsqPe
   @Override
   public String[] processInputVariant(Variant variant) {
     for(int a : variant.getNonStarAltAllelesAsArray()){
-      Map<String, VEPAnnotation> worsts = variant.getInfo().getWorstVEPAnnotationsByGene(a);
+      Map<String, VEPAnnotation> worsts = VEPConsequence.getWorstVEPAnnotationsByGene(variant.getInfo().getVEPInfo().getVEPAnnotations(a));
       for (String gene : worsts.keySet()) {
         if(table.containsKey(gene)){
           VEPConsequence csq = VEPConsequence.getWorstConsequence(worsts.get(gene));

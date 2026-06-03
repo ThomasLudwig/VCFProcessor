@@ -4,9 +4,10 @@ import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPAnnotation;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPAnnotation;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 /**
@@ -79,7 +80,7 @@ public class CountGenotypes extends ParallelVCFVariantPedFunction<Override> {
         counts[i + 1][d]++;
         counts[0][d]++;
       }
-      VEPAnnotation worst = variant.getInfo().getWorstVEPAnnotation(a);
+      VEPAnnotation worst = VEPConsequence.getWorstVEPAnnotation(variant.getInfo().getVEPInfo().getVEPAnnotations(a));
       LineBuilder line = new LineBuilder(variant.getChrom());
       line.addColumn(variant.getPos());
       line.addColumn(variant.getRef());

@@ -4,7 +4,7 @@ import fr.inserm.u1078.tludwig.maok.SortedList;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
 
@@ -58,7 +58,7 @@ public class DbSNPMismatch extends ParallelVCFVariantFunction<DbSNPMismatch.Mini
   @Override
   public String[] processInputVariant(Variant variant) {
     String id = variant.getId();
-    String rs = variant.getInfo().getRSs();
+    String rs = String.join(",", variant.getInfo().getVEPInfo().getRSs());
     if(rs == null || rs.isEmpty())
       rs = ".";
 

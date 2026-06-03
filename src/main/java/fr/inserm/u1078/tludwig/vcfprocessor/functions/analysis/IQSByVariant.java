@@ -16,9 +16,10 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.IntegerParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPAnnotation;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPAnnotation;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThread;
 
@@ -215,27 +216,27 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
     for (int i = 1; i < v.getAlleles().length; i++)
       if (v.getAllele(i).equals(allele))
         a = i;
-    Map<String, VEPAnnotation> worst = v.getInfo().getWorstVEPAnnotationsByGene(a);
+    Map<String, VEPAnnotation> worst = VEPConsequence.getWorstVEPAnnotationsByGene(v.getInfo().getVEPInfo().getVEPAnnotations(a));
     //TODO get the worst annotation for each gene and process
 
     for (String gene : worst.keySet()) {
       VEPAnnotation annot = worst.get(gene);
       LineBuilder prefix = new LineBuilder(v.getChrom());
       prefix.addColumn(v.getPos())
-              .addColumn(annot.getExisting_variation().replace("&", ","))
+              .addColumn(String.join(",", annot.getExisting_variation()))
               .addColumn(v.getRef())
               .addColumn(allele)
               .addColumn(gene)
               .addColumn(annot.getConsequence())
               .addColumn(v.getAlleleFrequencyPresent(a))
-              .addColumn(annot.getGNOMAD_NFE_AF())
-              .addColumn(annot.getMAF_AF())
+              .addColumn(Math.max(annot.getgnomADe_NFE_AF(), annot.getgnomADg_NFE_AF()))
+              .addColumn(annot.getMAX_AF())
               .addColumn(annot.getMAX_AF_POPS());
       ret.add(prefix);
     }
 
     if (ret.isEmpty()) {
-      ArrayList<VEPAnnotation> veps = v.getInfo().getVEPAnnotations(a);
+      ArrayList<VEPAnnotation> veps = v.getInfo().getVEPInfo().getVEPAnnotations(a);
       LineBuilder prefix = new LineBuilder(v.getChrom());
       
       String rs = "";
@@ -245,9 +246,9 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
       if(veps !=null && !veps.isEmpty()){
         VEPAnnotation first = veps.get(0);
         if(first != null){
-          rs = first.getExisting_variation();
-          nfe = first.getGNOMAD_NFE_AF();
-          maxAF = first.getMAF_AF();
+          rs = String.join(",", first.getExisting_variation());
+          nfe = ""+Math.max(first.getgnomADe_NFE_AF(), first.getgnomADg_NFE_AF());
+          maxAF = first.getMAX_AF()+"";
           maxPop = first.getMAX_AF_POPS();
         }
       }

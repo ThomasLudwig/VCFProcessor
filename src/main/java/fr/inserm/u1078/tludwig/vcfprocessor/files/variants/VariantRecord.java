@@ -5,8 +5,8 @@ import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.AbstractRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.GenotypeFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Info;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.InfoColumn;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 
 public abstract class VariantRecord extends AbstractRecord {
   private final VCF vcf;
@@ -171,7 +171,7 @@ public abstract class VariantRecord extends AbstractRecord {
    * Return the info fields as an Info Object, in order to build a variant
    * @return the Info object
    */
-  public Info getInfo(){ return new Info(getInfoFields(), getVCF()); }
+  public InfoColumn getInfo(){ return new InfoColumn(getInfoFields(), getVCF()); }
 
   public String getGT(int sample){
     return getGenotypeValue(sample, 0);

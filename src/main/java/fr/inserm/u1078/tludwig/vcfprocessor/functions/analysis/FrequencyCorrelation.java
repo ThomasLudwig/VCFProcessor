@@ -5,8 +5,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectoryParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -92,10 +92,10 @@ public class FrequencyCorrelation extends ParallelVCFVariantFunction<Object> { /
         String alt = variant.getAlleles()[a];
         double local = variant.getAlleleFrequencyTotal(a);
         if (local != 0) {
-          double gnomad = variant.getInfo().getFreqGnomadVEP(a);
+          double gnomad = variant.getInfo().getVEPInfo().getgnomAD_AF(a);
           String line = chr + T + pos + T + ref + T + alt + T + local + T + gnomad;
-          for (int level : variant.getInfo().getConsequenceLevels(a))
-            ret.add(level+"¤"+line);
+          for (VEPConsequence csq : variant.getInfo().getVEPInfo().getAllVEPConsequences(a))
+            ret.add(csq.getLevel()+"¤"+line);
         }
       }
     return ret.toArray(new String[0]);

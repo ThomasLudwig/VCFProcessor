@@ -5,7 +5,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectoryParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.io.PrintWriter;
 
@@ -62,7 +62,7 @@ public class SplitFromDB extends VCFFunction { //TODO parallelize
       boolean in = false;
 
       for (int a = 1; a < variant.getAlleles().length; a++)
-        if (variant.getInfo().isIn1KgVEP(a) || variant.getInfo().isInGnomADVEP(a)) {
+        if (variant.getInfo().getVEPInfo().isIn1kg(a) || variant.getInfo().getVEPInfo().isInGnomAD(a)) {
           in = true;
           break;
         }

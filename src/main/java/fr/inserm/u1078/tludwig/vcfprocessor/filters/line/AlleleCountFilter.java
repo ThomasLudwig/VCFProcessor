@@ -4,7 +4,7 @@ import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.commandline.MinMaxGroupParser;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 
 import java.util.ArrayList;
 

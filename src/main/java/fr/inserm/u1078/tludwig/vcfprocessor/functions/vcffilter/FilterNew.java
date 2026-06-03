@@ -3,7 +3,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 /**
@@ -34,7 +34,7 @@ public class FilterNew extends ParallelVCFVariantFilterFunction {
   @Override
   public String[] processInputVariantForFilter(Variant variant) {
     for (int a = 1; a < variant.getAlleles().length; a++)
-      if (variant.getInfo().isInDBSNPVEP(a) || variant.getInfo().isIn1KgVEP(a) || variant.getInfo().isInGnomADVEP(a))
+      if (variant.getInfo().getVEPInfo().hasExistingVariants(a) || variant.getInfo().getVEPInfo().isIn1kg(a) || variant.getInfo().getVEPInfo().isInGnomAD(a))
         return NO_OUTPUT;
 
     return asOutput(variant);

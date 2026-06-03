@@ -2,7 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.filters.line;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.LineFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 
 /**
  *

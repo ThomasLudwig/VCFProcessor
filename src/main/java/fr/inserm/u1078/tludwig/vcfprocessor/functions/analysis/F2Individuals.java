@@ -7,13 +7,12 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunct
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.StringParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectoryParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 /**
  * Computes F2 data by samples and not by groups (Each sample is its own group).
@@ -106,7 +105,7 @@ public class F2Individuals extends ParallelVCFVariantPedFunction<F2Individuals.F
       return;
 
     //Ok so we have exactly 2 allele
-    this.pushAnalysis(new F2IAnalysis(variant.getInfo().isInDBSNPVEP(a), variant.isSNP(a), first, second));
+    this.pushAnalysis(new F2IAnalysis(variant.getInfo().getVEPInfo().hasExistingVariants(a), variant.isSNP(a), first, second));
   }
 
   @Override

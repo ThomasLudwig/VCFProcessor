@@ -1,10 +1,12 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
-import fr.inserm.u1078.tludwig.maok.tools.MathTools;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.AbstractRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.*;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.GenotypeFormat;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 
 import java.util.*;
 

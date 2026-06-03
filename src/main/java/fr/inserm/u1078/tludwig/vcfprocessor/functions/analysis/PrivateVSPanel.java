@@ -4,15 +4,16 @@ import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Check how many of the variants from the input file are filtered as Already_existing when adding samples from the reference file
@@ -77,7 +78,7 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
       int chrom = variant.getChromNumber();
       for (int a : variant.getNonStarAltAllelesAsArray()) {
         this.variants[chrom].add(new MiniVariant(variant, a));
-        for (int level : variant.getInfo().getConsequenceLevels(a))
+        for (int level : variant.getInfo().getVEPInfo().getAllConsequenceLevels(a))
           total[level]++;
       }
     }
@@ -146,14 +147,14 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
     private final int position;
     private final String ref;
     private final String alt;
-    private final ArrayList<Integer> consequences;
+    private final Set<Integer> consequences;
 
     MiniVariant(Variant variant, int allele) {
       this.chrom = variant.getChromNumber();
       this.position = variant.getPos();
       this.ref = variant.getRef();
       this.alt = variant.getAlleles()[allele];
-      this.consequences = variant.getInfo().getConsequenceLevels(allele);
+      this.consequences = variant.getInfo().getVEPInfo().getAllConsequenceLevels(allele);
     }
 
     @Override
@@ -163,8 +164,7 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
 
     @Override
     public boolean equals(Object obj) {
-      if (obj instanceof MiniVariant) {
-        MiniVariant var = (MiniVariant) obj;
+      if (obj instanceof MiniVariant var) {
         return this.chrom == var.chrom
                 && this.position == var.position
                 && this.ref.equals(var.ref)

@@ -5,9 +5,9 @@ import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.StringParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Info;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.InfoColumn;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 
 import java.io.FileWriter;
@@ -99,15 +99,15 @@ public class GetQCMetrics extends ParallelVCFVariantFunction<GetQCMetrics.Values
       pl2.println(pl[0]+T+pl[1]+T+pl[2]);
     qual.println(v.getQual());
 
-    if(v.getInbreedingCoef() != Double.NEGATIVE_INFINITY)
+    if(v.getInbreedingCoef() != null)
       inbreedingCoef.println(v.getInbreedingCoef());
-    if(v.getFs() != Double.NEGATIVE_INFINITY)
+    if(v.getFs() != null)
       fs.println(v.getFs());
-    if(v.getSor() != Double.NEGATIVE_INFINITY)
+    if(v.getSor() != null)
       sor.println(v.getSor());
-    if(v.getMq() != Double.NEGATIVE_INFINITY)
+    if(v.getMq() != null)
       mq.println(v.getMq());
-    if(v.getReadPosRankSum() != Double.NEGATIVE_INFINITY)
+    if(v.getReadPosRankSum() != null)
       readPosRankSum.println(v.getReadPosRankSum());
   }
 
@@ -128,7 +128,7 @@ public class GetQCMetrics extends ParallelVCFVariantFunction<GetQCMetrics.Values
       pl1 = new PrintWriter(new FileWriter(filename.getStringValue() + "PL1" + ".txt"));
       pl2 = new PrintWriter(new FileWriter(filename.getStringValue() + "PL2" + ".txt"));
       qual = new PrintWriter(new FileWriter(filename.getStringValue() + "QUAL" + ".txt"));
-      inbreedingCoef = new PrintWriter(new FileWriter(filename.getStringValue() + Info.INBREEDING_COEFF + ".txt"));
+      inbreedingCoef = new PrintWriter(new FileWriter(filename.getStringValue() + InfoColumn.INBREEDING_COEFF + ".txt"));
       fs = new PrintWriter(new FileWriter(filename.getStringValue() + "FS" + ".txt"));
       sor = new PrintWriter(new FileWriter(filename.getStringValue() + "SOR" + ".txt"));
       mq = new PrintWriter(new FileWriter(filename.getStringValue() + "MQ" + ".txt"));
@@ -176,12 +176,12 @@ public class GetQCMetrics extends ParallelVCFVariantFunction<GetQCMetrics.Values
     private final ArrayList<int[]>[] pl;
 
     //Variants values
-    private final double qual;
-    private final double inbreedingCoef;
-    private final double fs;
-    private final double sor;
-    private final double mq;
-    private final double readPosRankSum;
+    private final Double qual;
+    private final Double inbreedingCoef;
+    private final Double fs;
+    private final Double sor;
+    private final Double mq;
+    private final Double readPosRankSum;
 
     @SuppressWarnings("unchecked")
     Values(Variant variant){
@@ -206,62 +206,26 @@ public class GetQCMetrics extends ParallelVCFVariantFunction<GetQCMetrics.Values
         }
       }
 
-      this.qual = parseValue(variant.getQual(), "QUAL");
-      this.inbreedingCoef = parseValue(Info.INBREEDING_COEFF);
-      this.fs = parseValue("FS");
-      this.sor = parseValue("SOR");
-      this.mq = parseValue("MQ");
-      this.readPosRankSum = parseValue("ReadPosRankSum");
-    }
-
-    private double parseValue(String key){
-      return parseValue(variant.getInfo().getValue(key), key);
-    }
-
-    private double parseValue(String val, String type){
-      double v = Double.NEGATIVE_INFINITY;
+      Double q = null;
       try{
-        v = Double.parseDouble(val);
-      } catch(NumberFormatException | NullPointerException e) {
-        Message.warning("Unable to parse "+type+" ["+val+"] for variant ["+variant.shortString()+"]");
-      }
-      return v;
+        q = Double.parseDouble(variant.getQual());
+      } catch(NumberFormatException ignore){}
+      this.qual = q;
+      this.inbreedingCoef = variant.getInfo().getInbreedingCoeff();
+      this.fs = variant.getInfo().getFS();
+      this.sor = variant.getInfo().getSOR();
+      this.mq = variant.getInfo().getMQ();
+      this.readPosRankSum = variant.getInfo().getReadPosRankSum();
     }
 
-    public int[] getGT() {
-      return gt;
-    }
-
-    public ArrayList<int[]>[] getAd() {
-      return ad;
-    }
-
-    public ArrayList<int[]>[] getPl() {
-      return pl;
-    }
-
-    public double getQual() {
-      return qual;
-    }
-
-    public double getInbreedingCoef() {
-      return inbreedingCoef;
-    }
-
-    public double getFs() {
-      return fs;
-    }
-
-    public double getSor() {
-      return sor;
-    }
-
-    public double getMq() {
-      return mq;
-    }
-
-    public double getReadPosRankSum() {
-      return readPosRankSum;
-    }
+    public int[] getGT() { return gt; }
+    public ArrayList<int[]>[] getAd() { return ad; }
+    public ArrayList<int[]>[] getPl() { return pl; }
+    public Double getQual() { return qual; }
+    public Double getInbreedingCoef() { return inbreedingCoef; }
+    public Double getFs() { return fs; }
+    public Double getSor() { return sor; }
+    public Double getMq() { return mq; }
+    public Double getReadPosRankSum() { return readPosRankSum; }
   }
 }

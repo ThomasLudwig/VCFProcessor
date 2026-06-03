@@ -6,8 +6,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.StringParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectoryParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -184,7 +184,7 @@ public class F2 extends ParallelVCFVariantPedFunction<F2.F2Analysis> {
     //private final String comment;
 
      F2Analysis(Variant variant, int a, int firstGroup, int secondGroup) {
-      this.isOld = variant.getInfo().isInDBSNPVEP(a);
+      this.isOld = variant.getInfo().getVEPInfo().hasExistingVariants(a);
       this.isSnp = variant.isSNP(a);
       this.firstGroup = firstGroup;
       this.secondGroup = secondGroup;

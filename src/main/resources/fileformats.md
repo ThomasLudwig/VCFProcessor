@@ -40,4 +40,4 @@ The first three fields in each feature line are required:
 2. chromStart - Start position of the feature in standard chromosomal coordinates (i.e. first base is 0).
 3. chromEnd - End position of the feature in standard chromosomal coordinates
 
-See the full specifications : https://m.ensembl.org/info/website/upload/bed.html
+See the full specifications : https://m.ensembl.org/infoColumn/website/upload/bed.html

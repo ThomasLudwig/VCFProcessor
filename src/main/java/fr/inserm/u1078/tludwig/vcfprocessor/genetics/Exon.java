@@ -1,5 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+
 /**
  *
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 31 août 2016

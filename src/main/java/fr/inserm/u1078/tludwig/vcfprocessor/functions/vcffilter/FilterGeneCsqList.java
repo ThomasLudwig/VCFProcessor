@@ -7,9 +7,9 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFilterFu
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.StringParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPAnnotation;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.VEPConsequence;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPAnnotation;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -62,14 +62,14 @@ public class FilterGeneCsqList extends ParallelVCFVariantFilterFunction {
 
   @Override
   public String[] processInputVariantForFilter(Variant variant) {
-    for (VEPAnnotation annot : variant.getInfo().getAllVEPAnnotations())
+    for (VEPAnnotation annot : variant.getInfo().getVEPInfo().getAllVEPAnnotations())
       for (String gene : genes)
         if (gene.equalsIgnoreCase(annot.getSYMBOL())) {
           String efs = this.effects.getStringValue();
           if (efs == null || efs.isEmpty() || efs.equalsIgnoreCase("null"))
             return asOutput(variant);
           for (String effect : efs.split(",", -1))
-            if (annot.getConsequence().contains(effect))
+            if (annot.getConsequenceList().contains(effect))
               return asOutput(variant);
         }
     return NO_OUTPUT;

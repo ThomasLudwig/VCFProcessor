@@ -1,7 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.filters.genotype;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.filters.GenotypeFilter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Genotype;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 
 /**
  * Filters heterozygous genotypes that do not have 0.5-dev <= AB <= 0.5+dev <br/>

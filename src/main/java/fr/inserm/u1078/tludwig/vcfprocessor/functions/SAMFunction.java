@@ -8,7 +8,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.alignments.SAM;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.alignments.SAMException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.alignments.SAMHeader;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.SAMFileParameter;
-import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThread;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThreadFactory;
 
