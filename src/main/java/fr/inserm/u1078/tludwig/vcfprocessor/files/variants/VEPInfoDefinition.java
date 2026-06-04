@@ -32,8 +32,8 @@ public class VEPInfoDefinition extends InfoDefinition {
       String[] f = this.getDescription().substring(CUT.length()).split("\\|", -1);
       for(int i = 0; i < f.length; i++)
         vepFieldIndices.put(f[i], i);
-      if(!vepFieldIndices.containsKey(VEPVariantIDFacade.ALLELE_NUM))
-        throw new GeneticsException("VEP annotations must contain ["+VEPVariantIDFacade.ALLELE_NUM+"]");
+      if(!vepFieldIndices.containsKey(VEPVariantIDFacade.ALLELE_NUM.getId()))
+        throw new GeneticsException("VEP annotations must contain ["+VEPVariantIDFacade.ALLELE_NUM.getId()+"]");
       return vepFieldIndices;
     } catch(Exception e){
       throw new GeneticsException("Could not build the Map of VEP Annotations from ["+getDescription()+"] ["+e.getMessage()+"]", e);
