@@ -1,4 +1,4 @@
-## 1.3.0 (2026-06-03)
+## 1.3.0 (2026-06-04)
 ### core
 - **fixed** : More BCFv2.2 Compliance issues
 - **fixed** : Huge Bug. In output, Samples were (wrongfully) sorted in header, but not in body.

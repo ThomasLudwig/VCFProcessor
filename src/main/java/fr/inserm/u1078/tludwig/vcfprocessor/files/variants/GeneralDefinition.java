@@ -1,5 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
+import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.GeneticsException;
 
 public class GeneralDefinition {
@@ -28,27 +29,33 @@ public class GeneralDefinition {
   public static GeneralDefinition parseLine(String line, String header) throws GeneticsException {
     if (!line.startsWith(header))
       throw new GeneticsException("Line is expected to start with '" + header + "' [" + line + "]");
+
     String id = null;
     String type = null;
     String number = null;
     String description = null;
-    //TODO, in fact split by "," is dangerous, has description could contain several ,
-    for (String split : line.substring(header.length(), line.length() - 1).split(",")) {
-      String[] kv = split.split("=");
-      switch (kv[0].toLowerCase()) {
-        case "id":
-          id = kv[1];
-          break;
-        case "type":
-          type = kv[1];
-          break;
-        case "number":
-          number = kv[1];
-          break;
-        case "description":
-          description = removeQuote(kv[1]);
-          break;
+    try {
+      //TODO, in fact split by "," is dangerous, has description could contain several ,
+      for (String split : line.substring(header.length(), line.length() - 1).split(",")) {
+        String[] kv = split.split("=");
+        switch (kv[0].toLowerCase()) {
+          case "id":
+            id = kv[1];
+            break;
+          case "type":
+            type = kv[1];
+            break;
+          case "number":
+            number = kv[1];
+            break;
+          case "description":
+            description = removeQuote(kv[1]);
+            break;
+        }
       }
+    } catch(Exception e) {
+      Message.error("Error while parsing line [" + line + "]: " + e.getMessage());
+      throw new GeneticsException("Error while parsing line [" + line + "]: " + e.getMessage(), e);
     }
 
     if(id == null) throw new GeneticsException("Line does not contain an ID [" + line + "]");

@@ -1,5 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
+import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.GeneticsException;
 
 /**
@@ -39,17 +40,23 @@ public class InfoDefinition extends GeneralDefinition {
     String description = gd.getDescription();
     String source = null;
     String version = null;
-    //TODO, in fact split by "," is dangerous, has description could contain several ,
-    for (String split : line.substring(HEADER.length(), line.length() - 1).split(",")) {
-      String[] kv = split.split("=");
-      switch (kv[0].toLowerCase()) {
-        case "source":
-          source = removeQuote(kv[1]);
-          break;
-        case "version":
-          version = removeQuote(kv[1]);
-          break;
+
+    try {
+      //TODO, in fact split by "," is dangerous, has description could contain several ,
+      for (String split : line.substring(HEADER.length(), line.length() - 1).split(",")) {
+        String[] kv = split.split("=");
+        switch (kv[0].toLowerCase()) {
+          case "source":
+            source = removeQuote(kv[1]);
+            break;
+          case "version":
+            version = removeQuote(kv[1]);
+            break;
+        }
       }
+    } catch(Exception e) {
+      Message.error("Error while parsing line [" + line + "]: " + e.getMessage());
+      throw new GeneticsException("Error while parsing line [" + line + "]: " + e.getMessage(), e);
     }
 
     return VEPInfoDefinition.isCSQ(id)
