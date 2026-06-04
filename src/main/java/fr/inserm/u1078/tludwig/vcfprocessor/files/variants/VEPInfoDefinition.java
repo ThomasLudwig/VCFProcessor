@@ -36,7 +36,7 @@ public class VEPInfoDefinition extends InfoDefinition {
         throw new GeneticsException("VEP annotations must contain ["+VEPVariantIDFacade.ALLELE_NUM+"]");
       return vepFieldIndices;
     } catch(Exception e){
-      throw new GeneticsException("Could not build the Map of VEP Annotations for ["+getDescription()+"] ["+e.getMessage()+"]", e);
+      throw new GeneticsException("Could not build the Map of VEP Annotations from ["+getDescription()+"] ["+e.getMessage()+"]", e);
     }
   }
 

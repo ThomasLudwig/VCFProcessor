@@ -58,9 +58,7 @@ public class InfoDefinition extends GeneralDefinition {
       return VEPInfoDefinition.isCSQ(id)
           ? new VEPInfoDefinition(id, type, number, description, source, version)
           : new InfoDefinition(id, type, number, description, source, version);
-    } catch(GeneticsException ge){
-      throw ge;
-    }catch(Exception e) {
+    } catch(Exception e) {
       Message.error("Error while parsing line [" + line + "]: " + e.getMessage());
       throw new GeneticsException("Error while parsing line [" + line + "]: " + e.getMessage(), e);
     }
