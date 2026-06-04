@@ -54,14 +54,16 @@ public class InfoDefinition extends GeneralDefinition {
             break;
         }
       }
-    } catch(Exception e) {
+
+      return VEPInfoDefinition.isCSQ(id)
+          ? new VEPInfoDefinition(id, type, number, description, source, version)
+          : new InfoDefinition(id, type, number, description, source, version);
+    } catch(GeneticsException ge){
+      throw ge;
+    }catch(Exception e) {
       Message.error("Error while parsing line [" + line + "]: " + e.getMessage());
       throw new GeneticsException("Error while parsing line [" + line + "]: " + e.getMessage(), e);
     }
-
-    return VEPInfoDefinition.isCSQ(id)
-        ? new VEPInfoDefinition(id, type, number, description, source, version)
-        : new InfoDefinition(id, type, number, description, source, version);
   }
 
   /**
