@@ -53,21 +53,17 @@ public class GeneralDefinition {
             break;
         }
       }
-    } catch(Exception e) {
-      Message.error("Error while parsing line [" + line + "]: " + e.getMessage());
-      throw new GeneticsException("Error while parsing line [" + line + "]: " + e.getMessage(), e);
-    }
 
-    if(id == null) throw new GeneticsException("Line does not contain an ID [" + line + "]");
-    if(type == null) throw new GeneticsException("Line does not contain a Type [" + line + "]");
-    if(number == null) throw new GeneticsException("Line does not contain a Number of values [" + line + "]");
-    if(description == null) throw new GeneticsException("Line does not contain a Description [" + line + "]");
-    if("flag".equalsIgnoreCase(type) && !"0".equals(number)) throw new GeneticsException("Mismatch in line ["+line+"] Type=Flag implies Number=0");
-    if(!"flag".equalsIgnoreCase(type) && "0".equals(number)) throw new GeneticsException("Mismatch in line ["+line+"] Number=0 implies Type=Flag");
-    try{
+      if(id == null) throw new GeneticsException("Line does not contain an ID [" + line + "]");
+      if(type == null) throw new GeneticsException("Line does not contain a Type [" + line + "]");
+      if(number == null) throw new GeneticsException("Line does not contain a Number of values [" + line + "]");
+      if(description == null) throw new GeneticsException("Line does not contain a Description [" + line + "]");
+      if("flag".equalsIgnoreCase(type) && !"0".equals(number)) throw new GeneticsException("Mismatch in line ["+line+"] Type=Flag implies Number=0");
+      if(!"flag".equalsIgnoreCase(type) && "0".equals(number)) throw new GeneticsException("Mismatch in line ["+line+"] Number=0 implies Type=Flag");
+
       return new GeneralDefinition(id, parseType(type), parseNumber(number), description);
     } catch(GeneticsException e) {
-      throw new GeneticsException("Error parsing line [" + line + "]: "+e.getMessage(), e);
+      throw new GeneticsException("Error while parsing line [" + line + "] id("+id+") number("+number+") type("+type+") description("+description+") " + e.getMessage(), e);
     }
   }
 
@@ -93,7 +89,7 @@ public class GeneralDefinition {
     if(out.startsWith("\""))
       out = out.substring(1);
     if(out.endsWith("\""))
-      out = out.substring(out.length()-1);
+      out = out.substring(0, out.length()-1);
     return out;
   }
 
