@@ -59,8 +59,7 @@ public class InfoDefinition extends GeneralDefinition {
           ? new VEPInfoDefinition(id, type, number, description, source, version)
           : new InfoDefinition(id, type, number, description, source, version);
     } catch(Exception e) {
-      Message.error("Error while parsing line [" + line + "]: " + e.getMessage());
-      throw new GeneticsException("Error while parsing line [" + line + "]: " + e.getMessage(), e);
+      throw new GeneticsException("Error while parsing line [" + line + "] id("+id+") number("+number+") type("+type+") description("+description+") source("+source+") version("+version+"): " + e.getMessage(), e);
     }
   }
 
