@@ -32,7 +32,7 @@ public class VEPInfoDefinition extends InfoDefinition {
       String[] f = this.getDescription().substring(CUT.length()).split("\\|", -1);
       for(int i = 0; i < f.length; i++)
         vepFieldIndices.put(f[i], i);
-      if(!buildIndexMap().containsKey(VEPVariantIDFacade.ALLELE_NUM))
+      if(!vepFieldIndices.containsKey(VEPVariantIDFacade.ALLELE_NUM))
         throw new GeneticsException("VEP annotations must contain ["+VEPVariantIDFacade.ALLELE_NUM+"]");
       return vepFieldIndices;
     } catch(Exception e){
