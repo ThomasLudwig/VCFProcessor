@@ -30,12 +30,12 @@ public class InfoColumn implements HasPopulationAnnotation, HasMetricsAnnotation
           infoMap.put(key, InfoField.parseField(key, value, vcfFile.getInfoHeader(key)));
         } catch (GeneticsException e) {
           Message.error(e.getMessage(), e);
-          String out =  "Known keys: "+String.join(", ", infoMap.keySet())+"\n";
+          String out =  "key["+key+"] value["+value+"], Known keys: "+String.join(", ", infoMap.keySet())+"\n";
           Message.fatal(out, true);
         }
       }
       else
-        Message.warning("Duplicate key [" + kv[0] + "] found for info [" + merge(infoFields) + "]");
+        Message.warning("Duplicate key [" + key + "] found for info [" + merge(infoFields) + "]");
     }
   }
 
