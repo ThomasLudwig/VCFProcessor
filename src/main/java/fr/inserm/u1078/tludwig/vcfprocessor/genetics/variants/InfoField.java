@@ -32,7 +32,7 @@ public abstract class InfoField {
       case Float: new FloatInfoField(value, definition);
       case Character: new CharacterInfoField(value, definition);
       case Flag: new FlagInfoField(definition);
-      default: yield new GeneticsException("Unknown InfoField type for [" + key + "="+value+"]");
+      default: yield new GeneticsException("Unknown InfoField type ["+definition.getType()+"] for [" + key + "="+value+"]");
     };
   }
 
