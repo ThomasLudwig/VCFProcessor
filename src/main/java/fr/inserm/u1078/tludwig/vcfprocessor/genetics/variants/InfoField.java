@@ -26,13 +26,13 @@ public abstract class InfoField {
     if(definition instanceof VEPInfoDefinition)
       return new VEPInfoField(value, (VEPInfoDefinition)definition);
 
-    throw switch (definition.getType()) {
-      case String: new StringInfoField(value, definition);
-      case Integer: new IntegerInfoField(value, definition);
-      case Float: new FloatInfoField(value, definition);
-      case Character: new CharacterInfoField(value, definition);
-      case Flag: new FlagInfoField(definition);
-      default: yield new GeneticsException("Unknown InfoField type ["+definition.getType()+"] for [" + key + "="+value+"]");
+    return switch (definition.getType()) {
+      case String: yield new StringInfoField(value, definition);
+      case Integer: yield new IntegerInfoField(value, definition);
+      case Float: yield new FloatInfoField(value, definition);
+      case Character: yield new CharacterInfoField(value, definition);
+      case Flag: yield new FlagInfoField(definition);
+      default : throw new GeneticsException("Unknown InfoField type ["+definition.getType()+"] for [" + key + "="+value+"]");
     };
   }
 
