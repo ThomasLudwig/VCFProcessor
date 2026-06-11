@@ -159,7 +159,14 @@ public class Println {
   }
 
   public String print(int precision) {
-    Message.debug("print("+this.getClass().getSimpleName()+"@"+System.identityHashCode(this)+","+precision+")");
+    String tmp = "";
+    if(!this.contents.isEmpty()){
+      String[] t = new String[this.contents.size()];
+      for(int i=0; i < t.length; i++)
+        t[i] = this.contents.get(i).getClass().getSimpleName();
+      tmp = String.join(",", t);
+    }
+    Message.debug(this.getClass().getSimpleName()+"@"+System.identityHashCode(this)+"print("+precision+") ["+tmp+"]");
 
     StringBuilder sb = new StringBuilder();
     for (Object element : contents) {
