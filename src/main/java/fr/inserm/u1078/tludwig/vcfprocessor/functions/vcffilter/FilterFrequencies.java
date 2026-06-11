@@ -8,6 +8,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.RatioParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPFrequencyFacade;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.util.ArrayList;
 
@@ -53,7 +54,7 @@ public class FilterFrequencies extends ParallelVCFVariantFilterFunction {
   }
 
   @Override
-  public String[] processInputVariantForFilter(Variant variant) {
+  public Println[] processInputVariantForFilter(Variant variant) {
     boolean filter = true;
     for(int a = 1 ; a < variant.getAlleleCount(); a++){
       if(kept(variant, a)){

@@ -1,8 +1,9 @@
-## 1.3.0 (2026-06-04)
+## 1.3.0 (2026-06-10)
 ### core
 - **fixed** : More BCFv2.2 Compliance issues
 - **fixed** : Huge Bug. In output, Samples were (wrongfully) sorted in header, but not in body.
 - **changed** : Complete rewrite of Sample handling in VCF/BCF files
+- **added** : `Println` to handle output, and Double formating in particular
 ### functions
 ### filters
 ### graphs

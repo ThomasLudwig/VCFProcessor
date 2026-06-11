@@ -21,6 +21,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPAnn
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThread;
 
 import java.util.ArrayList;
@@ -108,7 +109,7 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
     Message.info("Found " + imputedVCF.getNumberOfSamples() + " samples in " + imputedVCF.getFilename());
     Message.info("Found " + samples.size() + " in common");
 
-    println(String.join(T, HEADERS));
+    println(Println.join(T, HEADERS));
 
     Consumer consumer = new Consumer();
     consumer.start();
@@ -167,7 +168,7 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
           data = queue.take();
 
           if (data.lines != null && data.lines.getFirst() != null) {
-            ArrayList<String> outputs = new ArrayList<>();
+            ArrayList<Println> outputs = new ArrayList<>();
             for (VariantRecord actLine : data.lines.getFirst()) {
               Variant actual = null;
               try {
@@ -193,25 +194,25 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
                           double iqs = iqs(actual, imputed, altA);
                           String suffix = /*1 + T + */ StringTools.formatDouble(iqs, 10) + T + getInfo(actual);
 
-                          for (LineBuilder prefix : getPrefixes(actual, imputed.getAlt()))
-                            outputs.add(prefix.addColumn(suffix).toString());
+                          for (Println prefix : getPrefixes(actual, imputed.getAlt()))
+                            outputs.add(prefix.append(T, suffix));
                         }
                       }
                     }
                 }
             }
-            pushOutput(data.nb, outputs.toArray(new String[0]));
+            pushOutput(data.nb, outputs.toArray(new Println[0]));
           } else {
             run = false;
-            pushOutput(data.nb, new String[]{END_MESSAGE});
+            pushOutput(data.nb, new Println[]{new Println(END_MESSAGE)});
           }
         } catch (InterruptedException ignore) { }
       }
     }
   }
 
-  private static ArrayList<LineBuilder> getPrefixes(Variant v, String allele) {
-    ArrayList<LineBuilder> ret = new ArrayList<>();
+  private static ArrayList<Println> getPrefixes(Variant v, String allele) {
+    ArrayList<Println> ret = new ArrayList<>();
     int a = -1;
     for (int i = 1; i < v.getAlleles().length; i++)
       if (v.getAllele(i).equals(allele))
@@ -221,30 +222,31 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
 
     for (String gene : worst.keySet()) {
       VEPAnnotation annot = worst.get(gene);
-      LineBuilder prefix = new LineBuilder(v.getChrom());
-      prefix.addColumn(v.getPos())
-              .addColumn(String.join(",", annot.getExisting_variation()))
-              .addColumn(v.getRef())
-              .addColumn(allele)
-              .addColumn(gene)
-              .addColumn(annot.getConsequence())
-              .addColumn(v.getAlleleFrequencyPresent(a))
-              .addColumn(Math.max(annot.getgnomADe_NFE_AF(), annot.getgnomADg_NFE_AF()))
-              .addColumn(annot.getMAX_AF())
-              .addColumn(annot.getMAX_AF_POPS());
+      Println prefix = Println.join(T,
+          v.getChrom(),
+          v.getPos(),
+          String.join(",", annot.getExisting_variation()),
+          v.getRef(),
+          allele,
+          gene,
+          annot.getConsequence(),
+          v.getAlleleFrequencyPresent(a),
+          Math.max(annot.getgnomADe_NFE_AF(), annot.getgnomADg_NFE_AF()),
+          annot.getMAX_AF(),
+          annot.getMAX_AF_POPS()
+      );
       ret.add(prefix);
     }
 
     if (ret.isEmpty()) {
       ArrayList<VEPAnnotation> veps = v.getInfo().getVEPInfo().getVEPAnnotations(a);
-      LineBuilder prefix = new LineBuilder(v.getChrom());
-      
       String rs = "";
       String nfe = "";
       String maxAF ="";
       String maxPop = "";
       if(veps !=null && !veps.isEmpty()){
         VEPAnnotation first = veps.get(0);
+
         if(first != null){
           rs = String.join(",", first.getExisting_variation());
           nfe = ""+Math.max(first.getgnomADe_NFE_AF(), first.getgnomADg_NFE_AF());
@@ -252,16 +254,18 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
           maxPop = first.getMAX_AF_POPS();
         }
       }
-      prefix.addColumn(v.getPos())
-              .addColumn(rs)
-              .addColumn(v.getRef())
-              .addColumn(allele)
-              .addColumn()
-              .addColumn()
-              .addColumn(v.getAlleleFrequencyPresent(a))
-              .addColumn(nfe)
-              .addColumn(maxAF)
-              .addColumn(maxPop);
+
+      Println prefix = Println.join(T, v.getChrom(),
+          v.getPos(),
+          rs,
+          v.getRef(),
+          allele,
+          "",
+          "",
+          v.getAlleleFrequencyPresent(a),
+          nfe,
+          maxAF,
+          maxPop);
       ret.add(prefix);
     }
 
@@ -306,7 +310,7 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
     return MathTools.iqs(p);
   }
 
-  public void pushOutput(int n, String[] lines) {
+  public void pushOutput(int n, Println[] lines) {
     try {
       this.outputLines.put(new Output(n, lines));
     } catch (InterruptedException ignore) { }
@@ -343,8 +347,8 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
       }
 
       //Process output
-      for (String line : out.lines)
-        switch (line) {
+      for (Println line : out.lines)
+        switch (line.print(3)) {
           case END_MESSAGE:
             double dur = DateTools.duration(start);
             int rate = (int) (out.n / dur);

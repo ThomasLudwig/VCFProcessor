@@ -5,6 +5,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
@@ -50,21 +52,22 @@ public class GeneList extends ParallelVCFVariantFunction<Set<String>> {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getFooters() {
-    ArrayList<String> out = new ArrayList<>();
-    out.add(genes.size() + " genes found");
-    out.addAll(genes);
-    return out.toArray(new String[0]);
+  public Println[] getFooters() {
+    ArrayList<Println> out = new ArrayList<>();
+    out.add(new Println(genes.size(), " genes found"));
+    for(String gene : genes)
+      out.add(new Println(genes));
+    return out.toArray(new Println[0]);
   }
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return null;
+  public Println[] getHeaders() {
+    return NO_OUTPUT;
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     pushAnalysis(variant.getInfo().getVEPInfo().getAllSYMBOLs());
     return NO_OUTPUT;
   }

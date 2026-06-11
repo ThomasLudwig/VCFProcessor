@@ -7,6 +7,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.ConsequencePara
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Filters the variants according to their consequences
@@ -37,7 +38,7 @@ public class FilterConsequenceLevel extends ParallelVCFVariantFilterFunction {
   public VCFPolicies getVCFPolicies() { return VCFPolicies.onlyVEP(VCFPolicies.MultiAllelicPolicy.KEEP_IF_ONE_SATISFY); }
 
   @Override
-  public String[] processInputVariantForFilter(Variant variant) {
+  public Println[] processInputVariantForFilter(Variant variant) {
     return VEPConsequence.getWorst(variant.getInfo().getVEPInfo().getAllVEPAnnotations()).getLevel() >= this.leastCsq.getConsequenceLevel() ? asOutput(variant) : NO_OUTPUT;
   }
 

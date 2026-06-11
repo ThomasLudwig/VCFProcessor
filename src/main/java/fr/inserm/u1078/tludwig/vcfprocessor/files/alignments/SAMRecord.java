@@ -2,6 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.files.alignments;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.alignments.Cigar;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.alignments.Tag;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.util.ArrayList;
 
@@ -108,4 +109,7 @@ public class SAMRecord extends AlignmentRecord {
     }
     return new Cigar(ls, ts);
   }
+
+  @Override
+  public Println println() { return Println.join(T,fields); } //TODO DoubleString left as is
 }

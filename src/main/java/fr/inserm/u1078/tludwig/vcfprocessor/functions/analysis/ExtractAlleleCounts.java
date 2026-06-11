@@ -8,6 +8,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * For every variant, exports the variant allele count for each sample
@@ -47,34 +48,29 @@ public class ExtractAlleleCounts extends ParallelVCFVariantFunction<Object> {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
+  public Println[] getHeaders() {
     StringBuilder header = new StringBuilder(String.join(T, HEADERS));
     for (Sample sample : getVCF().getSampleSet().getOutputSamples())
       header.append(T).append(sample.getId());
-    return new String[]{header.toString()};
+    return Println.asLines(header.toString());
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     String chr = variant.getChrom();
     int pos = variant.getPos();
     String id = variant.getId();
     String ref = variant.getRef();
     String common = chr + T + pos + T + id + T + ref;
     int[] nonStar = variant.getNonStarAltAllelesAsArray();
-    String[] outs = new String[nonStar.length];
+    Println[] outs = new Println[nonStar.length];
     for (int i = 0 ; i < nonStar.length; i++) {
       int a = nonStar[i];
-      LineBuilder out = new LineBuilder(common);
-      out.addColumn(variant.getAllele(a));
+      outs[i] = new Println(common, T, variant.getAllele(a));
       for (Sample sample : getVCF().getSampleSet().getOutputSamples()) {
         Genotype g = variant.getGenotype(sample);
-        if (g.isMissing())
-          out.addColumn(".");
-        else
-          out.addColumn(g.getCount(a));
+        outs[i].append(T, g.isMissing() ? "." : g.getCount(a));
       }
-      outs[i] = out.toString();
     }
     return outs;
   }

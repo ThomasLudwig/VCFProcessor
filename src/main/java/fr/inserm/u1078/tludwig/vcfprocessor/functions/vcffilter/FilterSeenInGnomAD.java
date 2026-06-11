@@ -5,6 +5,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 public class FilterSeenInGnomAD extends ParallelVCFFilterFunction {
   private final String EXOME = "gnomad_exome_AN";
@@ -26,14 +27,14 @@ public class FilterSeenInGnomAD extends ParallelVCFFilterFunction {
   public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.ALLELE_AS_LINE); }
 
   @Override
-  public String[] processInputRecordForFilter(VariantRecord record) {
+  public Println[] processInputRecordForFilter(VariantRecord record) {
     for(String[] info : record.getInfoFields()){
       if(GENOME.equals(info[0]) && getAN(info[1]) > 0)
         return NO_OUTPUT;
       if(EXOME.equals(info[0]) && getAN(info[1]) > 0)
         return NO_OUTPUT;
     }
-    return new String[]{record.toString()};
+    return new Println[]{record.println()};
   }
 
   private int getAN(String value){

@@ -7,6 +7,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPAnn
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Print the worst consequence/gene for each variant allele.
@@ -44,18 +45,18 @@ public class GetWorstConsequence extends ParallelVCFVariantFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return new String[]{String.join(T,HEADER)};
+  public Println[] getHeaders() {
+    return new Println[]{Println.join(T,HEADER)};
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     int[] nonStar = variant.getNonStarAltAllelesAsArray();
-    String[] outs = new String[nonStar.length];
+    Println[] outs = new Println[nonStar.length];
     for (int i = 0 ; i < nonStar.length; i++) {
       int a = nonStar[i];
       VEPAnnotation csqGene = VEPConsequence.getWorstVEPAnnotation(variant.getInfo().getVEPInfo().getVEPAnnotations(a));
-      outs[i] = variant.getChrom() + T + variant.getPos() + T + variant.getId() + T + variant.getRef() + T + variant.getAllele(a) + T + csqGene.getConsequence() + T + csqGene.getSYMBOL();
+      outs[i] = Println.join(T, variant.getChrom(), variant.getPos(), variant.getId(), variant.getRef(), variant.getAllele(a), csqGene.getConsequence(), csqGene.getSYMBOL());
     }
     return outs;
   }

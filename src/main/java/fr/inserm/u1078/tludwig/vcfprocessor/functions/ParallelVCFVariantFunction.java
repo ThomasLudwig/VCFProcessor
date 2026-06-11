@@ -4,6 +4,7 @@ import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCFException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  *
@@ -12,7 +13,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 public abstract class ParallelVCFVariantFunction<T> extends ParallelVCFFunction<T> {
 
   @Override
-  public String[] processInputRecord(VariantRecord record) {
+  public Println[] processInputRecord(VariantRecord record) {
     if(record == null)
       return null;
     try{
@@ -25,5 +26,5 @@ public abstract class ParallelVCFVariantFunction<T> extends ParallelVCFFunction<
     return null;
   }
   
-  public abstract String[] processInputVariant(Variant variant);  
+  public abstract Println[] processInputVariant(Variant variant);
 }

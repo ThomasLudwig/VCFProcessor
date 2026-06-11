@@ -2,6 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  *
@@ -12,14 +13,14 @@ public abstract class ParallelVCFVariantFilterFunction extends ParallelVCFVarian
   private int outputLines = 0;
 
   @Override
-  public final String[] processInputVariant(Variant variant) {
-    String[] ret = this.processInputVariantForFilter(variant);
+  public final Println[] processInputVariant(Variant variant) {
+    Println[] ret = this.processInputVariantForFilter(variant);
     if(ret != null)
       this.pushAnalysis(ret.length);
     return ret;
   }
   
-  public abstract String[] processInputVariantForFilter(Variant variant);
+  public abstract Println[] processInputVariantForFilter(Variant variant);
 
   @SuppressWarnings("unused")
   @Override

@@ -5,6 +5,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFilterFu
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Keeps only the variants not found in either dbSNP, 1KG or GnomAD
@@ -32,7 +33,7 @@ public class FilterNew extends ParallelVCFVariantFilterFunction {
   public VCFPolicies getVCFPolicies() { return VCFPolicies.onlyVEP(VCFPolicies.MultiAllelicPolicy.KEEP_IF_ONE_SATISFY); }
 
   @Override
-  public String[] processInputVariantForFilter(Variant variant) {
+  public Println[] processInputVariantForFilter(Variant variant) {
     for (int a = 1; a < variant.getAlleles().length; a++)
       if (variant.getInfo().getVEPInfo().hasExistingVariants(a) || variant.getInfo().getVEPInfo().isIn1kg(a) || variant.getInfo().getVEPInfo().isInGnomAD(a))
         return NO_OUTPUT;

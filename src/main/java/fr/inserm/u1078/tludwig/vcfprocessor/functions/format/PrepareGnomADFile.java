@@ -7,6 +7,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis.RAVAQOutput;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Canonical;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 public class PrepareGnomADFile extends ParallelVCFFunction<PrepareGnomADFile.GnomAD> {
   public static final String[] COLUMNS = {"canonical", "FILTER", "AF", "AF_afr", "AF_amr", "AF_asj", "AF_eas", "AF_fin", "AF_mid", "AF_nfe", "AF_sas"};
@@ -31,17 +33,17 @@ public class PrepareGnomADFile extends ParallelVCFFunction<PrepareGnomADFile.Gno
   public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.ALLELE_AS_LINE); }
 
   @Override
-  public String[] getHeaders() {
-    return new String[0];
+  public Println[] getHeaders() {
+    return NO_OUTPUT;
   }
 
   @Override
-  public String[] processInputRecord(VariantRecord record) {
-    String[] ret = new String[record.getAlts().length];
+  public Println[] processInputRecord(VariantRecord record) {
+    Println[] ret = new Println[record.getAlts().length];
     String filter = record.getFiltersString();
     String info = record.getInfoString();
     for(int a = 0 ; a < record.getAlts().length; a++) {
-      ret[a] = new GnomAD(new Canonical(record.getChrom(), record.getPos(), record.getRef(), record.getAlts()[a]), filter, info, a).toString();
+      ret[a] = new GnomAD(new Canonical(record.getChrom(), record.getPos(), record.getRef(), record.getAlts()[a]), filter, info, a).println();
     }
     return ret;
   }
@@ -51,37 +53,45 @@ public class PrepareGnomADFile extends ParallelVCFFunction<PrepareGnomADFile.Gno
     return new TestingScript[0];
   }
 
-  public static class GnomAD {
+  public static class GnomAD implements Printable {
     private final Canonical canonical;
     private final String filter;
-    private final String af;
-    private final String af_afr;
-    private final String af_amr;
-    private final String af_asj;
-    private final String af_eas;
-    private final String af_fin;
-    private final String af_mid;
-    private final String af_nfe;
-    private final String af_sas;
+    private final Double af;
+    private final Double af_afr;
+    private final Double af_amr;
+    private final Double af_asj;
+    private final Double af_eas;
+    private final Double af_fin;
+    private final Double af_mid;
+    private final Double af_nfe;
+    private final Double af_sas;
 
     @Override
-    public String toString() {
-      return String.join(T, canonical.toString(), filter, af, af_afr, af_amr, af_asj, af_eas, af_fin, af_mid, af_nfe, af_sas);
+    public Println println() {
+      return Println.join(T, canonical.toString(), filter, af, af_afr, af_amr, af_asj, af_eas, af_fin, af_mid, af_nfe, af_sas);
     }
 
     public GnomAD(String line) {
       String[] f = line.split(T, -1);
       canonical = Canonical.deserialize(f[0]);
       filter = f[1];
-      af = f[2];
-      af_afr = f[3];
-      af_amr = f[4];
-      af_asj = f[5];
-      af_eas = f[6];
-      af_fin = f[7];
-      af_mid = f[8];
-      af_nfe = f[9];
-      af_sas = f[10];
+      af = parseFrequency(f[2]);
+      af_afr = parseFrequency(f[3]);
+      af_amr = parseFrequency(f[4]);
+      af_asj = parseFrequency(f[5]);
+      af_eas = parseFrequency(f[6]);
+      af_fin = parseFrequency(f[7]);
+      af_mid = parseFrequency(f[8]);
+      af_nfe = parseFrequency(f[9]);
+      af_sas = parseFrequency(f[10]);
+    }
+
+    static Double parseFrequency(String f) {
+      try{
+        return Double.parseDouble(f);
+      } catch(NumberFormatException e){
+        return 0D;
+      }
     }
 
     public GnomAD(Canonical canonical, String filter, String info, int alt){
@@ -188,11 +198,11 @@ public class PrepareGnomADFile extends ParallelVCFFunction<PrepareGnomADFile.Gno
       }
     }
 
-    private String divide(double ac, double an) {
-      return an == 0 ? "" : (ac/an)+"";
+    private double divide(double ac, double an) {
+      return an == 0 ? 0 : (ac/an);
     }
 
-    public String getAF() {
+    public Double getAF() {
       return af;
     }
 
@@ -200,18 +210,19 @@ public class PrepareGnomADFile extends ParallelVCFFunction<PrepareGnomADFile.Gno
       return filter;
     }
 
-    public String getAF(String pop){
-      switch(pop.toUpperCase()){
-        case "AFR" : return af_afr;
-        case "AMR" : return af_amr;
-        case "ASJ" : return af_asj;
-        case "EAS" : return af_eas;
-        case "FIN" : return af_fin;
-        case "MID" : return af_mid;
-        case "NFE" : return af_nfe;
-        case "SAS" : return af_sas;
-        default: return "ERR";
-      }
+    public Double getAF(String pop){
+      return switch (pop.toUpperCase()) {
+        case "AFR" -> af_afr;
+        case "AMR" -> af_amr;
+        case "ASJ" -> af_asj;
+        case "EAS" -> af_eas;
+        case "FIN" -> af_fin;
+        case "MID" -> af_mid;
+        case "NFE" -> af_nfe;
+        case "SAS" -> af_sas;
+        //default: return "ERR";
+        default -> null;
+      };
     }
 
     public Canonical getCanonical() {

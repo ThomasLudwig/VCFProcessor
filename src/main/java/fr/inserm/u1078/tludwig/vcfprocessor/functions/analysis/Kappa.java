@@ -14,7 +14,9 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParamete
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
-import java.io.PrintWriter;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.FileOutputer;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 
 /**
@@ -77,9 +79,9 @@ public class Kappa extends VCFFunction { //TODO parallelize like in IQS
     int nbReadRight = 1;
     int nbProcessed = 0;
 
-    PrintWriter out = getPrintWriter(dir.getDirectory() + this.project + ".tsv");
+    FileOutputer out = getFileOutputer(dir.getDirectory() + this.project + ".tsv");
 
-    out.println("CHROM" + T + "POS" + T + "ID" + T + "MAF_" + this.vcfFile.getBasename() + T + "MAF_" + this.vcfFile2.getBasename() + T + "KAPPA_With_Missing" + T + "KAPPA_Ignore_Missing");
+    out.println(Println.join(T, "CHROM", "POS", "ID", "MAF_" + this.vcfFile.getBasename(), "MAF_" + this.vcfFile2.getBasename(), "KAPPA_With_Missing", "KAPPA_Ignore_Missing"));
 
     while (v1 != null && v2 != null) {
       if (nbReadLeft % 10000 == 0)
@@ -112,27 +114,27 @@ public class Kappa extends VCFFunction { //TODO parallelize like in IQS
     out.close();
 
     // Print Statistics
-    out = getPrintWriter(dir + this.project.getFilename() + ".stats", false);
-    out.println(T + "Kappa_With_Missing" + T + "Kappa_Ignore_Missing");
-    out.println("Mean" + T + missing.getMean() + T + ignore.getMean());
-    out.println("Standard Deviation" + T + missing.getStandardDeviation() + T + ignore.getStandardDeviation());
-    out.println("Min" + T + missing.getMin() + T + ignore.getMin());
-    out.println("D1" + T + missing.getPercentile(.1) + T + ignore.getPercentile(.1));
-    out.println("D2" + T + missing.getPercentile(.2) + T + ignore.getPercentile(.2));
-    out.println("Q1" + T + missing.getPercentile(.25) + T + ignore.getPercentile(.25));
-    out.println("D3" + T + missing.getPercentile(.3) + T + ignore.getPercentile(.3));
-    out.println("D4" + T + missing.getPercentile(.4) + T + ignore.getPercentile(.4));
-    out.println("Median" + T + missing.getMedian() + T + ignore.getMedian());
-    out.println("D6" + T + missing.getPercentile(.6) + T + ignore.getPercentile(.6));
-    out.println("D7" + T + missing.getPercentile(.7) + T + ignore.getPercentile(.7));
-    out.println("Q3" + T + missing.getPercentile(.75) + T + ignore.getPercentile(.75));
-    out.println("D8" + T + missing.getPercentile(.8) + T + ignore.getPercentile(.8));
-    out.println("D9" + T + missing.getPercentile(.9) + T + ignore.getPercentile(.9));
-    out.println("Max" + T + missing.getMax() + T + ignore.getMax());
+    out = getFileOutputer(dir + this.project.getFilename() + ".stats", false);
+    out.println(Println.join(T, "", "Kappa_With_Missing", "Kappa_Ignore_Missing"));
+    out.println(Println.join(T, "Mean", missing.getMean(), ignore.getMean()));
+    out.println(Println.join(T, "Standard Deviation", missing.getStandardDeviation(), ignore.getStandardDeviation()));
+    out.println(Println.join(T, "Min",  missing.getMin(), ignore.getMin()));
+    out.println(Println.join(T, "D1", missing.getPercentile(.1), ignore.getPercentile(.1)));
+    out.println(Println.join(T, "D2", missing.getPercentile(.2), ignore.getPercentile(.2)));
+    out.println(Println.join(T, "Q1", missing.getPercentile(.25), ignore.getPercentile(.25)));
+    out.println(Println.join(T, "D3", missing.getPercentile(.3), ignore.getPercentile(.3)));
+    out.println(Println.join(T, "D4", missing.getPercentile(.4), ignore.getPercentile(.4)));
+    out.println(Println.join(T, "Median", missing.getMedian(), ignore.getMedian()));
+    out.println(Println.join(T, "D6", missing.getPercentile(.6), ignore.getPercentile(.6)));
+    out.println(Println.join(T, "D7", missing.getPercentile(.7), ignore.getPercentile(.7)));
+    out.println(Println.join(T, "Q3", missing.getPercentile(.75), ignore.getPercentile(.75)));
+    out.println(Println.join(T, "D8", missing.getPercentile(.8), ignore.getPercentile(.8)));
+    out.println(Println.join(T, "D9", missing.getPercentile(.9), ignore.getPercentile(.9)));
+    out.println(Println.join(T, "Max", missing.getMax(), ignore.getMax()));
     out.close();
   }
 
-  private void evaluateVariant(Variant v1, Variant v2, PrintWriter out) {
+  private void evaluateVariant(Variant v1, Variant v2, FileOutputer out) {
     String chrom = v1.getChrom();
     int pos = v2.getPos();
     String id = v1.getId();
@@ -150,7 +152,7 @@ public class Kappa extends VCFFunction { //TODO parallelize like in IQS
     if (!Double.isNaN(kappaIgnore))
       this.ignore.add(kappaIgnore);
 
-    out.println(chrom + T + pos + T + id + T + maf1 + T + maf2 + T + kappaW + T + kappaI);
+    out.println(Println.join(T, chrom, pos, id, maf1, maf2, kappaW, kappaI));
   }
 
   private static final int AA = 0;

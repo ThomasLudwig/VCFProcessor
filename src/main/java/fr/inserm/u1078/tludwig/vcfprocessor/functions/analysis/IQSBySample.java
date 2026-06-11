@@ -18,6 +18,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParamete
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThread;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThreadFactory;
 
@@ -149,7 +150,7 @@ public class IQSBySample extends VCFPedFunction {
   }
 
   public void computeIQS() throws PedException {
-    println(String.join(T, HEADERS));
+    println(Println.join(T, HEADERS));
 
     String group = "NO_GROUP";
     Ped ped = null;
@@ -163,7 +164,7 @@ public class IQSBySample extends VCFPedFunction {
       SampleData data = sampleData.get(sample);
       double iqs = MathTools.iqs(data.matrix);
       int present = data.nbVariants;
-      println(sample + T + group + T + StringTools.formatDouble(iqs, 10) + T + present + T + totalVariants);
+      println(Println.join(T, sample, group, iqs, present, totalVariants), 10);
     }
     Message.info("\nDone");
   }

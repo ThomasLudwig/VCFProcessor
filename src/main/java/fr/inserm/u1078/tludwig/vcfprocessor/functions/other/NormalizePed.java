@@ -61,7 +61,7 @@ public class NormalizePed extends Function {
           r--;
         Sample sample = samples.remove(r);
         Sample out = new Sample(sample.getFid(), sample.getId(), sample.getPid(), sample.getMid(), sample.getSex(), sample.getPhenotype(), newGroupName);
-        println(out.toString());
+        println(out.println());
       }
     }
   }

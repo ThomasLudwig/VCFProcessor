@@ -11,6 +11,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPAnn
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -78,34 +79,28 @@ public class NumberOfCsqPerGene extends ParallelVCFVariantFunction<NumberOfCsqPe
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getFooters() {
-    ArrayList<String> out = new ArrayList<>();
+  public Println[] getFooters() {
+    ArrayList<Println> out = new ArrayList<>();
     for (String gene : table.navigableKeySet()){
-      LineBuilder line = new LineBuilder(gene);
+      Println line = new Println(gene);
       for (VEPConsequence v : VEPConsequence.values())
-        line.addColumn(table.get(gene).get(v));
-      out.add(line.toString());
+        line.append(T, table.get(gene).get(v));
+      out.add(line);
     }
-    return out.toArray(new String[0]);
+    return out.toArray(new Println[0]);
   }
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    LineBuilder sb = new LineBuilder("Gene");
+  public Println[] getHeaders() {
+    Println sb = new Println("Gene");
     for(VEPConsequence v: VEPConsequence.values())
-      sb.addColumn()
-        .append(v.getLevel())
-        .append(".")
-        .append(v.getName())
-        .append("(")
-        .append(v.getImpact().getName())
-        .append(")");
-    return new String[]{sb.toString()};
+      sb.append(T, v.getLevel(), ".",v.getName(),"(",v.getImpact().getName(),")");
+    return new Println[]{sb};
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     for(int a : variant.getNonStarAltAllelesAsArray()){
       Map<String, VEPAnnotation> worsts = VEPConsequence.getWorstVEPAnnotationsByGene(variant.getInfo().getVEPInfo().getVEPAnnotations(a));
       for (String gene : worsts.keySet()) {

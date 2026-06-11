@@ -9,10 +9,11 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.InfoColumn;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.FileOutputer;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,20 +32,20 @@ public class GetQCMetrics extends ParallelVCFVariantFunction<GetQCMetrics.Values
   AtomicInteger gt1;
   AtomicInteger gt2;
   AtomicInteger gtM;
-  PrintWriter gtProportion;
-  PrintWriter ad0;
-  PrintWriter ad1;
-  PrintWriter ad2;
-  PrintWriter pl0;
-  PrintWriter pl1;
-  PrintWriter pl2;
+  FileOutputer gtProportion;
+  FileOutputer ad0;
+  FileOutputer ad1;
+  FileOutputer ad2;
+  FileOutputer pl0;
+  FileOutputer pl1;
+  FileOutputer pl2;
 
-  PrintWriter qual;
-  PrintWriter inbreedingCoef;
-  PrintWriter fs;
-  PrintWriter sor;
-  PrintWriter mq;
-  PrintWriter readPosRankSum;
+  FileOutputer qual;
+  FileOutputer inbreedingCoef;
+  FileOutputer fs;
+  FileOutputer sor;
+  FileOutputer mq;
+  FileOutputer readPosRankSum;
 
   @Override
   public String getSummary() {
@@ -67,7 +68,7 @@ public class GetQCMetrics extends ParallelVCFVariantFunction<GetQCMetrics.Values
   public VCFPolicies getVCFPolicies() { return new VCFPolicies(VCFPolicies.MultiAllelicPolicy.DROP, false, "VCF Requires the following annotations QUAL_BY_DEPTH,INBREEDING_COEF,FS,SOR,MQ,READPOSRANKSUM,AD,PL,GT"); }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     if(variant.isBiallelic())
       this.pushAnalysis(new Values(variant));
 
@@ -82,33 +83,33 @@ public class GetQCMetrics extends ParallelVCFVariantFunction<GetQCMetrics.Values
     gt2.addAndGet(v.getGT()[2]);
     gtM.addAndGet(v.getGT()[3]);
 
-    gtProportion.println(v.getGT()[0]+T+v.getGT()[1]+T+v.getGT()[2]);
+    gtProportion.println(Println.join(T, v.getGT()[0], v.getGT()[1], v.getGT()[2]));
 
-    for(int[] ad : v.getAd()[0])
-      ad0.println(ad[0]+T+ad[1]);
-    for(int[] ad : v.getAd()[1])
-      ad1.println(ad[0]+T+ad[1]);
-    for(int[] ad : v.getAd()[2])
-      ad2.println(ad[0]+T+ad[1]);
+    for(int[] ad_0 : v.getAd()[0])
+      ad0.println(new Println(ad_0[0], T, ad_0[1]));
+    for(int[] ad_1 : v.getAd()[1])
+      ad1.println(new Println(ad_1[0], T, ad_1[1]));
+    for(int[] ad_2 : v.getAd()[2])
+      ad2.println(new Println(ad_2[0], T, ad_2[1]));
 
-    for(int[] pl : v.getPl()[0])
-      pl0.println(pl[0]+T+pl[1]+T+pl[2]);
-    for(int[] pl : v.getPl()[1])
-      pl1.println(pl[0]+T+pl[1]+T+pl[2]);
-    for(int[] pl : v.getPl()[2])
-      pl2.println(pl[0]+T+pl[1]+T+pl[2]);
-    qual.println(v.getQual());
+    for(int[] pl_0 : v.getPl()[0])
+      pl0.println(Println.join(T, pl_0[0], pl_0[1], pl_0[2]));
+    for(int[] pl_1 : v.getPl()[1])
+      pl1.println(Println.join(T, pl_1[0], pl_1[1], pl_1[2]));
+    for(int[] pl_2 : v.getPl()[2])
+      pl2.println(Println.join(T, pl_2[0], pl_2[1], pl_2[2]));
+    qual.println(new Println(v.getQual()));
 
     if(v.getInbreedingCoef() != null)
-      inbreedingCoef.println(v.getInbreedingCoef());
+      inbreedingCoef.println(new Println(v.getInbreedingCoef()));
     if(v.getFs() != null)
-      fs.println(v.getFs());
+      fs.println(new Println(v.getFs()));
     if(v.getSor() != null)
-      sor.println(v.getSor());
+      sor.println(new Println(v.getSor()));
     if(v.getMq() != null)
-      mq.println(v.getMq());
+      mq.println(new Println(v.getMq()));
     if(v.getReadPosRankSum() != null)
-      readPosRankSum.println(v.getReadPosRankSum());
+      readPosRankSum.println(new Println(v.getReadPosRankSum()));
   }
 
   @SuppressWarnings("unused")
@@ -120,19 +121,19 @@ public class GetQCMetrics extends ParallelVCFVariantFunction<GetQCMetrics.Values
     gtM = new AtomicInteger(0);
 
     try {
-      gtProportion = new PrintWriter(new FileWriter(filename.getStringValue() + "gtProportion" + ".txt"));
-      ad0 = new PrintWriter(new FileWriter(filename.getStringValue() + "AD0" + ".txt"));
-      ad1 = new PrintWriter(new FileWriter(filename.getStringValue() + "AD1" + ".txt"));
-      ad2 = new PrintWriter(new FileWriter(filename.getStringValue() + "AD2" + ".txt"));
-      pl0 = new PrintWriter(new FileWriter(filename.getStringValue() + "PL0" + ".txt"));
-      pl1 = new PrintWriter(new FileWriter(filename.getStringValue() + "PL1" + ".txt"));
-      pl2 = new PrintWriter(new FileWriter(filename.getStringValue() + "PL2" + ".txt"));
-      qual = new PrintWriter(new FileWriter(filename.getStringValue() + "QUAL" + ".txt"));
-      inbreedingCoef = new PrintWriter(new FileWriter(filename.getStringValue() + InfoColumn.INBREEDING_COEFF + ".txt"));
-      fs = new PrintWriter(new FileWriter(filename.getStringValue() + "FS" + ".txt"));
-      sor = new PrintWriter(new FileWriter(filename.getStringValue() + "SOR" + ".txt"));
-      mq = new PrintWriter(new FileWriter(filename.getStringValue() + "MQ" + ".txt"));
-      readPosRankSum = new PrintWriter(new FileWriter(filename.getStringValue() + "ReadPosRankSum" + ".txt"));
+      gtProportion = getFileOutputer(filename.getStringValue() + "gtProportion" + ".txt");
+      ad0 = getFileOutputer(filename.getStringValue() + "AD0" + ".txt");
+      ad1 = getFileOutputer(filename.getStringValue() + "AD1" + ".txt");
+      ad2 = getFileOutputer(filename.getStringValue() + "AD2" + ".txt");
+      pl0 = getFileOutputer(filename.getStringValue() + "PL0" + ".txt");
+      pl1 = getFileOutputer(filename.getStringValue() + "PL1" + ".txt");
+      pl2 = getFileOutputer(filename.getStringValue() + "PL2" + ".txt");
+      qual = getFileOutputer(filename.getStringValue() + "QUAL" + ".txt");
+      inbreedingCoef = getFileOutputer(filename.getStringValue() + InfoColumn.INBREEDING_COEFF + ".txt");
+      fs = getFileOutputer(filename.getStringValue() + "FS" + ".txt");
+      sor = getFileOutputer(filename.getStringValue() + "SOR" + ".txt");
+      mq = getFileOutputer(filename.getStringValue() + "MQ" + ".txt");
+      readPosRankSum = getFileOutputer(filename.getStringValue() + "ReadPosRankSum" + ".txt");
     } catch(IOException e){
       Message.fatal("Error in init", e, true);
     }
@@ -142,25 +143,15 @@ public class GetQCMetrics extends ParallelVCFVariantFunction<GetQCMetrics.Values
   @Override
   public void end() {
     super.end();
-    gtProportion.close();
-    ad0.close();
-    ad1.close();
-    ad2.close();
-    pl0.close();
-    pl1.close();
-    pl2.close();
-    qual.close();
-    inbreedingCoef.close();
-    fs.close();
-    sor.close();
-    mq.close();
-    readPosRankSum.close();
+    for(FileOutputer fo : new FileOutputer[]{gtProportion, ad0, ad1, ad2, pl0, pl1, pl2, qual, inbreedingCoef, fs, sor, mq, readPosRankSum})
+    try { fo.close(); }
+    catch(Exception e){ Message.error("Error while closing ["+fo.getFilename()+"] "+e.getMessage()); }
   }
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return new String[]{};
+  public Println[] getHeaders() {
+    return NO_OUTPUT;
   }
 
   @Override
@@ -206,11 +197,7 @@ public class GetQCMetrics extends ParallelVCFVariantFunction<GetQCMetrics.Values
         }
       }
 
-      Double q = null;
-      try{
-        q = Double.parseDouble(variant.getQual());
-      } catch(NumberFormatException ignore){}
-      this.qual = q;
+      this.qual = variant.getQual();
       this.inbreedingCoef = variant.getInfo().getInbreedingCoeff();
       this.fs = variant.getInfo().getFS();
       this.sor = variant.getInfo().getSOR();

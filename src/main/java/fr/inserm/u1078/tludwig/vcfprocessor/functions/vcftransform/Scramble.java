@@ -6,6 +6,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -42,23 +44,13 @@ public class Scramble extends ParallelVCFFunction {
   }
 
   @Override
-  public String[] processInputRecord(VariantRecord record) {
-    LineBuilder out = new LineBuilder(record.getChrom());
-    out.addColumn(record.getPos());
-    out.addColumn(record.getID());
-    out.addColumn(record.getRef());
-    out.addColumn(record.getAltString());
-    out.addColumn(record.getQual());
-    out.addColumn(record.getFiltersString());
-    out.addColumn(record.getInfoString());
-    out.addColumn(record.getFormatString());
-
+  public Println[] processInputRecord(VariantRecord record) {
+    Println out = Println.join(T, record.getChrom(),record.getPos(),record.getID(),record.getRef(),record.getAltString(),record.getQual(),record.getFiltersString(),record.getInfoString(),record.getFormatString());
     ArrayList<String> genos = new ArrayList<>();
     Collections.addAll(genos, record.getGenotypeStrings());
-
     while (!genos.isEmpty())
-      out.addColumn(genos.remove((int) (genos.size() * Math.random())));
-    return new String[]{out.toString()};
+      out.append(T, genos.remove((int) (genos.size() * Math.random())));
+    return new Println[]{out};
   }
 
   @Override

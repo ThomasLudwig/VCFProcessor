@@ -4,6 +4,7 @@ import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.ByteArray;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.alignments.Cigar;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.alignments.Tag;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 public class BAMRecord extends AlignmentRecord {
   private final BAM bamfile;
@@ -48,27 +49,28 @@ public class BAMRecord extends AlignmentRecord {
   }
 
   @Override
-  public String toString() {
-    final StringBuilder ret = new StringBuilder(this.queryName);
-    ret.append("\t").append(this.flag);
-    ret.append("\t").append(getRefId());
-    ret.append("\t").append(this.pos);
-    ret.append("\t").append(this.mapQ);
-    String c = "";
-    try {
-      c = this.getCigar().toString();
-    } catch(SAMException.InvalidCigarException ignore) {
+  public Println println() {
+    Cigar c = null;
+    try{
+      c = this.getCigar();
+    } catch (Exception ignore) {}
 
-    }
-    ret.append("\t").append(c);
-    ret.append("\t").append(this.getNextRefId());
-    ret.append("\t").append(this.nextPos);
-    ret.append("\t").append(this.templateLength);
-    ret.append("\t").append(this.sequence);
-    ret.append("\t").append(this.qual);
+    final Println ret = Println.join("\t",
+        this.queryName,
+        this.flag,
+        getRefId(),
+        this.pos,
+        this.mapQ,
+        c == null ? "" : c,
+        this.getNextRefId(),
+        this.nextPos,
+        this.templateLength,
+        this.sequence,
+        this.qual
+    );
     for(Tag tag : tags)
       ret.append("\t").append(tag);
-    return ret.toString();
+    return ret;
   }
 
   public int getBin() {

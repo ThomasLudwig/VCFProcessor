@@ -8,6 +8,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFHandling;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.util.Date;
 
@@ -109,9 +110,9 @@ public class MergeVQSR extends Function implements VCFHandling {
 
     //header
     if(snp.charAt(0) == '#'){
-      println(snp);
+      println(new Println(snp));
       if(!snp.equals(indel))
-        println(indel);
+        println(new Println(indel));
       return;
     }
     //variant
@@ -132,9 +133,9 @@ public class MergeVQSR extends Function implements VCFHandling {
     }
 
     if(skipS)
-      println(indel);
+      println(new Println(indel));
     else
-      println(snp);
+      println(new Println(snp));
 
   }
 

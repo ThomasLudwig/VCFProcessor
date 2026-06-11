@@ -10,13 +10,13 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.PositiveIntegerParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Region;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.FileOutputer;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThread;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThreadFactory;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +54,7 @@ public class BedCoverageMerge extends Function {
   public void executeFunction() throws Exception {
     int bSize = 2; //After bench this is the fastest parameter
     //check input
-    List<Batch[]> batchesList = divide(checkInputFile(), bSize, depth.getIntegerValue());
+    List<Batch[]> batchesList = divide(checkInputFile(), bSize, depth.getIntegerValue(), this);
     for(int s = 0 ; s < batchesList.size(); s++) {
       Batch[] batches = batchesList.get(s);
       int parallelBatches = Math.min(batches.length, threads.getIntegerValue());
@@ -313,16 +313,18 @@ public class BedCoverageMerge extends Function {
 
   public static class Batch extends WellBehavedThread {
     final HashMap<Integer, List<RegionSamples>> output;
+    private final Function mother;
     List<File> inputs;
     File outputFile;
     int minDepth;
     int threadNumber = 1;
 
-    public Batch(File outputFile, int minDepth) {
+    public Batch(File outputFile, int minDepth, Function mother) {
       output = new HashMap<>();
       this.inputs = new ArrayList<>();
       this.outputFile = outputFile;
       this.minDepth = minDepth;
+      this.mother = mother;
     }
 
     public void setThreadNumber(int threadNumber) {
@@ -385,27 +387,27 @@ public class BedCoverageMerge extends Function {
       if(outputFile == null)
         for(int chrom : chroms)
           for(RegionSamples region : output.get(chrom))
-            System.out.println(region);
+            mother.println(region.println());
       else {
-        try (PrintWriter out = new PrintWriter(new FileWriter(outputFile))) {
+        try (FileOutputer out = mother.getFileOutputer(outputFile.getAbsolutePath())) {
           for(int chrom : chroms)
             for(RegionSamples region : output.get(chrom))
-              out.println(region);
-        } catch(IOException e) {
+              out.println(region.println());
+        } catch(Exception e) {
           Message.die("Unable to write to ["+outputFile+"]");
         }
       }
     }
   }
 
-  private static ArrayList<Batch[]> divide(final List<File> files, final int width, final int minDepth) {
+  private static ArrayList<Batch[]> divide(final List<File> files, final int width, final int minDepth, Function mother) {
     ArrayList<Batch[]> batches = new ArrayList<>();
     int batchSize = files.size() / width;
     if(files.size() % width != 0)
       batchSize++;
     Batch[] previous = new Batch[batchSize];
     for(int batch = 0; batch < batchSize; batch++) {
-      previous[batch] = new Batch(files.size() > width ? tmpFile(0, batch) : null, minDepth);
+      previous[batch] = new Batch(files.size() > width ? tmpFile(0, batch) : null, minDepth, mother);
       for(int input = 0; input < width && batch * width + input < files.size(); input++)
         previous[batch].addInput(files.get(batch * width + input));
     }
@@ -418,7 +420,7 @@ public class BedCoverageMerge extends Function {
       Batch[] current = new Batch[nSize];
 
       for(int batch = 0 ; batch < nSize; batch++) {
-        current[batch] = new Batch(previous.length > width ? tmpFile(step, batch) : null, -1);
+        current[batch] = new Batch(previous.length > width ? tmpFile(step, batch) : null, -1, mother);
         for(int input = 0; input < width && batch * width + input < previous.length; input++)
           current[batch].addInput(previous[batch * width + input].getOutputFile());
       }

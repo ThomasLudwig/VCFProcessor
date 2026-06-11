@@ -13,6 +13,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPAnn
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -59,8 +61,8 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return new String[]{String.join(T, HEADER)};
+  public Println[] getHeaders() {
+    return new Println[]{Println.join(T, HEADER)};
   }
 
   @SuppressWarnings("unused")
@@ -103,13 +105,13 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     try {
       String[] infos = variant.getInfo().toString().split(";");
       int[] acs = getACs(infos);
       int an = getAN(infos);
       int[] nonStars = variant.getNonStarAltAllelesAsArray();
-      String[] outs = new String[nonStars.length];
+      Println[] outs = new Println[nonStars.length];
       for (int i = 0 ; i < nonStars.length; i++) {
         int a = nonStars[i];
         int ac = acs[i];
@@ -129,7 +131,7 @@ public class CompareToGnomAD extends ParallelVCFVariantFunction {
           if(VEPConsequence.getWorstConsequence(vep).equals(worst))
             genes.add(gene);
         }
-        outs[i] = variant.getChrom() + T + variant.getPos() + T + variant.getId() + T + variant.getRef() + T + variant.getAllele(a) + T + qual + T + worst.getName() + T + String.join(",", genes) + T + acs[a - 1] + T + af + T + an + T + gnom;
+        outs[i] = new Println(variant.getChrom(), T, variant.getPos(), T, variant.getId(), T, variant.getRef(), T, variant.getAllele(a), T, qual, T, worst.getName(), T, String.join(",", genes), T, acs[a - 1], T, + af, T, an, T, gnom);
       }
       return outs;
     } catch (NumberFormatException e) {

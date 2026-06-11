@@ -7,6 +7,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 
 /**
@@ -50,23 +52,23 @@ public class InbreedingCoeffDistribution extends ParallelVCFVariantFunction<Doub
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return null;
+  public Println[] getHeaders() {
+    return NO_OUTPUT;
   }
   
   @SuppressWarnings("unused")
   @Override
-  public String[] getFooters() {
+  public Println[] getFooters() {
     if(coeffs.isEmpty())
       return super.getFooters();
-    ArrayList<String> out = new ArrayList<>();
+    ArrayList<Println> out = new ArrayList<>();
     for (Double coeff : coeffs.getAllValues())
-      out.add(""+coeff);
-    return out.toArray(new String[0]);
+      out.add(new Println(coeff));
+    return out.toArray(new Println[0]);
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     Double coeff = variant.getInfo().getInbreedingCoeff();
     if (coeff != null)
       pushAnalysis(coeff);

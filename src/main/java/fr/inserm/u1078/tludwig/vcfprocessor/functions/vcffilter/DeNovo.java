@@ -7,6 +7,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.BooleanParamete
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.util.ArrayList;
 
@@ -22,9 +23,7 @@ public class DeNovo extends ParallelVCFVariantFilterPedFunction {
   private final BooleanParameter missing = new BooleanParameter(OPT_MISSING, "Missing genotypes allowed ?");
 
   @Override
-  public String getSummary() {
-    return "Keeps only variants that are compatible with a De Novo pattern of inheritance.";
-  }
+  public String getSummary() { return "Keeps only variants that are compatible with a De Novo pattern of inheritance."; }
 
   @SuppressWarnings("unused")
   @Override
@@ -40,7 +39,7 @@ public class DeNovo extends ParallelVCFVariantFilterPedFunction {
   public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.KEEP_IF_ONE_SATISFY); }
 
   @Override
-  public String[] processInputVariantForFilter(Variant variant) {
+  public Println[] processInputVariantForFilter(Variant variant) {
     for (int a = 1; a < variant.getAlleleCount(); a++) {
       boolean keep = true;
       for (Genotype g : variant.getGenotypes()) {

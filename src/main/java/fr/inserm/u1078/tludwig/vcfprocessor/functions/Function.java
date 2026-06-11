@@ -13,11 +13,12 @@ import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.vcfprocessor.commandline.CommandParser;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.GzParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.FileOutputer;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.io.BufferedOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -170,9 +171,6 @@ public abstract class Function {
   public final OutputParameter outFilename = new OutputParameter(OPT_OUT, this.getOutputExtension(), "ResultFile", "File that will contain the function's results", OutputParameter.TYPE_OUT);
   public final OutputParameter errFilename = new OutputParameter(OPT_ERR, OUT_LOG, "LogFile", "File that will contain the function's log", OutputParameter.TYPE_ERR);
 
-  
-  private static boolean FIRST_CALL_OUTPUT_BGZIPPED = true;
-  private static boolean BGZIPPED_OUTPUT = false;
   private PrintStream outStream = null;
   private PrintStream errStream = null;
   private static final PrintStream STD_OUT = System.out;
@@ -181,18 +179,6 @@ public abstract class Function {
   public abstract String getOutputExtension();
   
   //TODO add --gz to the docs (command line, and rtd)
-
-  public static void setOutputBgzipped(){ 
-    if(FIRST_CALL_OUTPUT_BGZIPPED)
-      BGZIPPED_OUTPUT = true;
-    else
-      Message.die("Call to "+Function.class.getSimpleName()+".setBgzippedOutput() can only made once");
-    FIRST_CALL_OUTPUT_BGZIPPED = false;
-  }
-  
-  public static boolean isOutputBgzipped(){
-    return BGZIPPED_OUTPUT;
-  }
 
   public static void setMonoThread(){ isMonoThread = true; }
   public static boolean isMonoThread(){ return isMonoThread; }
@@ -221,14 +207,14 @@ public abstract class Function {
     try {
       String out = outFilename.getStringValue();
       if (out != null) {
-        if(BGZIPPED_OUTPUT || out.endsWith(".gz"))
+        if(FileOutputer.isOutputBgzipped() || out.endsWith(".gz"))
           outStream = new PrintStream(new BgzipOutputStream(out.endsWith(".gz") ? out : out+".gz"));
         else
           outStream = new PrintStream(new BufferedOutputStream(Files.newOutputStream(Paths.get(out))));
         
         System.setOut(outStream);
       } else {
-        if(BGZIPPED_OUTPUT){
+        if(FileOutputer.isOutputBgzipped()){
           outStream = new PrintStream(new BgzipOutputStream(STD_OUT));
           System.setOut(outStream);
         }
@@ -298,8 +284,25 @@ public abstract class Function {
     }
   }
 
-  public final void println(Object o) {
-    System.out.println(o);
+  public final void println(Println o, int precision) {
+    if(o == null)
+      System.out.println();
+    System.out.println(o.print(precision));
+  }
+
+  public final void println(Println o) {
+    println(o, Println.DEFAULT_PRECISION);
+  }
+
+  public final void println(Println... pls) {
+    for(Println pl : pls)
+      println(pl);
+  }
+
+  public final void printlnString(String s) { println(new Println(s)); }
+
+  public final void println() {
+    System.out.println();
   }
 
   public void quit(boolean ok) {
@@ -501,18 +504,10 @@ public abstract class Function {
    */
 
   public abstract void executeFunction() throws Exception; //TODO should be FunctionException
-  
-  public static PrintWriter getPrintWriter(String filename, boolean bgzip) throws IOException{
-    if(bgzip)
-      return new PrintWriter(new BgzipOutputStream(filename.endsWith(".gz") ? filename : filename + ".gz"));
-    return new PrintWriter(new FileWriter(filename));
-  }
 
-  public static PrintWriter getPrintWriter(String filename) throws IOException{
-    if(filename.endsWith(".gz"))
-        return getPrintWriter(filename, true);
-    return getPrintWriter(filename, BGZIPPED_OUTPUT);
-  }
+  public FileOutputer getFileOutputer(String filename) throws IOException { return new FileOutputer(filename); }
+
+  public FileOutputer getFileOutputer(String filename, boolean bgzip) throws IOException { return new FileOutputer(filename, bgzip); }
 
   public static String progression(String type, int n, String filename, long start){
     double dur = DateTools.duration(start);

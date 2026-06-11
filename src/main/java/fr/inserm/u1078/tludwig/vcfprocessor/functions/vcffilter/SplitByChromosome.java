@@ -8,7 +8,8 @@ import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectoryParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
-import java.io.PrintWriter;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.FileOutputer;
+
 import java.util.Objects;
 
 /**
@@ -50,7 +51,7 @@ public class SplitByChromosome extends VCFFunction { //TODO parallelize
     VCF vcf = this.vcfFile.getVCF();
     vcf.getReaderAndStart();
     String current = "current";
-    PrintWriter out = null;
+    FileOutputer out = null;
 
     VariantRecord record;
     while ((record = vcf.getUnparallelizedNextRecord()) != null) {
@@ -61,11 +62,11 @@ public class SplitByChromosome extends VCFFunction { //TODO parallelize
           out.close();
         String filename = dir.getDirectory() + chrom + "." + basename + ".vcf";
         Message.info("Creating vcf file " + filename);
-        out = getPrintWriter(filename);
+        out = getFileOutputer(filename);
         vcf.printHeaders(out);
       }
       Objects.requireNonNull(out,"PrintWriter is null");
-      out.println(record.toString());
+      out.println(record.println());
     }
     if (out != null)
       out.close();

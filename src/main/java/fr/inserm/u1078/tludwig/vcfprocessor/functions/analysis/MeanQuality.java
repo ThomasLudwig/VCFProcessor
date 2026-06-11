@@ -7,6 +7,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Prints information and quality statistics for each variant.
@@ -51,13 +52,13 @@ public class MeanQuality extends ParallelVCFVariantFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return new String[]{String.join(T, HEADER)};
+  public Println[] getHeaders() {
+    return new Println[]{Println.join(T, HEADER)};
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
-    String[] outs = new String[variant.getAlleles().length-1];
+  public Println[] processInputVariant(Variant variant) {
+    Println[] outs = new Println[variant.getAlleles().length-1];
     for (int a = 1; a < variant.getAlleles().length; a++) {
       int totalDP = 0;
       int totalGQ = 0;
@@ -76,11 +77,11 @@ public class MeanQuality extends ParallelVCFVariantFunction {
           }
         }
 
-      String meanDPWith = StringTools.formatRatio(totalDP, known, 4);
-      String meanGQWith = StringTools.formatRatio(totalGQ, known, 4);
-      String meanDPWithout = StringTools.formatRatio(totalDP, samples, 4);
-      String meanGQWithout = StringTools.formatRatio(totalGQ, samples, 4);
-      outs[a-1] = variant.getChrom() + T + variant.getPos() + T + inDbSNP + T + inGnomAD + T + meanDPWith + T + meanGQWith + T + meanDPWithout + T + meanGQWithout;
+      double meanDPWith = known == 0 ? 0 : totalDP * 1d / known;
+      double meanGQWith = known == 0 ? 0 : totalGQ * 1d / known;
+      double meanDPWithout = samples  == 0 ? 0 : totalDP * 1d / samples;
+      double meanGQWithout = samples  == 0 ? 0 : totalGQ * 1d / samples;
+      outs[a-1] = Println.join(T, variant.getChrom(), variant.getPos(), inDbSNP, inGnomAD, meanDPWith, meanGQWith, meanDPWithout, meanGQWithout);
     }
     return outs;
   }

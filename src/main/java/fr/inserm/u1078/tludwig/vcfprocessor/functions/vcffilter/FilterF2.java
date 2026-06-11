@@ -6,6 +6,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Filters variants to keep only those contributing to F2 data.
@@ -34,7 +35,7 @@ public class FilterF2 extends ParallelVCFVariantFilterFunction {
   public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.KEEP_IF_ONE_SATISFY); }
 
   @Override
-  public String[] processInputVariantForFilter(Variant variant) {
+  public Println[] processInputVariantForFilter(Variant variant) {
     final int A = variant.getAlleleCount();
     int[] count = new int[A];
 

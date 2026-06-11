@@ -9,6 +9,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.alignments.SAMException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.alignments.SAMHeader;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.SAMFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThread;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThreadFactory;
 
@@ -30,7 +31,7 @@ public abstract class SAMFunction<T> extends Function {
   private LinkedBlockingQueue<SAMFunction.Output> outputLines;
   private Analyzer analyzer;
 
-  public void processOutput(String line) {
+  public void processOutput(Println line) {
     println(line);
   }
 
@@ -76,7 +77,7 @@ public abstract class SAMFunction<T> extends Function {
     this.printFooters();
   }
 
-  public void putOutput(int n, String[] lines) {
+  public void putOutput(int n, Println[] lines) {
     try {
       this.outputLines.put(new SAMFunction.Output(n, lines));
     } catch (InterruptedException ignore) { }
@@ -97,9 +98,9 @@ public abstract class SAMFunction<T> extends Function {
     }
     AlignmentRecord record = indexedRecord.getRecord();
     try {
-      String[] output =
+      Println[] output =
           record.isFiltered()
-              ? new String[0]
+              ? new Println[0]
               : this.processInputRecord(indexedRecord.getRecord());
       if(output == null)
         throw new RuntimeException("Trying to push an empty output for "+index+"th Record");
@@ -157,7 +158,7 @@ public abstract class SAMFunction<T> extends Function {
     SAMHeader.HeaderRecord[] headers = this.getHeaders();
     if (headers != null)
       for (SAMHeader.HeaderRecord header : headers)
-        println(header);
+        println(new Println(header));
   }
 
   @SuppressWarnings("unused")
@@ -169,7 +170,7 @@ public abstract class SAMFunction<T> extends Function {
     String[] footers = this.getFooters();
     if (footers != null)
       for (String footer : footers)
-        println(footer);
+        println(new Println(footer));
   }
 
   @SuppressWarnings("unused")
@@ -177,7 +178,7 @@ public abstract class SAMFunction<T> extends Function {
     //No default
   }
 
-  public abstract String[] processInputRecord(AlignmentRecord record);
+  public abstract Println[] processInputRecord(AlignmentRecord record);
 
   public class Worker extends WellBehavedThread {
     private final SAM.Reader reader;
@@ -249,14 +250,14 @@ public abstract class SAMFunction<T> extends Function {
 
   public static class Output {
     public final int n;
-    public final String[] lines;
+    public final Println[] lines;
 
     /**
      * Ouput
      * @param n the order ?
      * @param lines the output lines
      */
-    public Output(int n, String[] lines) {
+    public Output(int n, Println[] lines) {
       this.n = n;
       if(lines == null)
         throw new RuntimeException("Trying to create a null Output");
@@ -294,7 +295,7 @@ public abstract class SAMFunction<T> extends Function {
       }
 
       //Process output
-      for (String line : out.lines)
+      for (Println line : out.lines)
         processOutput(line);
 
       return true;

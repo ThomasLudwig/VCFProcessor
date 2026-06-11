@@ -9,6 +9,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.RatioParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -60,10 +62,10 @@ public class RandomVariants extends ParallelVCFFilterFunction {
   }
 
   @Override
-  public String[] processInputRecordForFilter(VariantRecord record) {
+  public Println[] processInputRecordForFilter(VariantRecord record) {
     if (positions.contains(record.getID()) || positions.contains(record.getChrom() + ":" + record.getPos()))
-      return new String[]{record.toString()};
-    return Math.random() < this.probability.getFloatValue() ? new String[]{record.toString()} : NO_OUTPUT;
+      return new Println[]{record.println()};
+    return Math.random() < this.probability.getFloatValue() ? new Println[]{record.println()} : NO_OUTPUT;
   }
 
   @Override

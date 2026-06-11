@@ -5,8 +5,10 @@ import fr.inserm.u1078.tludwig.maok.tools.FileTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.FileOutputer;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.io.File;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -50,9 +52,9 @@ public class GeneCardsParser extends Function {
     String entrez = getEntrez(lines);
     String uniprot = getUniProt(lines);
 
-    PrintWriter out = getPrintWriter(outfile);
-    out.println(String.join(T,HEADERS));
-    out.println(gene + T + genecards + T + entrez + T + uniprot);
+    FileOutputer out = getFileOutputer(outfile);
+    out.println(Println.join(T,HEADERS));
+    out.println(Println.join(T, gene, genecards, entrez, uniprot));
     out.close();
   }
 

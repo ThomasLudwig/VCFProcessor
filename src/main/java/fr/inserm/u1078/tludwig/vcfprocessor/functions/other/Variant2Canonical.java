@@ -35,7 +35,7 @@ public class Variant2Canonical extends Function {
       int pos = Integer.parseInt(f[1]);
       String ref = f[2];
       String alt = f[3];
-      println(new Canonical(chr, pos, ref, alt));
+      println(new Canonical(chr, pos, ref, alt).println());
     }
     in.close();
   }

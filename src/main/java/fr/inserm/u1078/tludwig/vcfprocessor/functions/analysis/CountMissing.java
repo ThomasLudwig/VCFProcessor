@@ -8,6 +8,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 
 /**
@@ -73,26 +75,26 @@ public class CountMissing extends ParallelVCFVariantPedFunction<boolean[][]> {
   
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return new String[]{HEADER + T + "Total_variants:" + total + T + "Kept_variants:" + kept};
+  public Println[] getHeaders() {
+    return new Println[]{new Println(HEADER + T + "Total_variants:" + total + T + "Kept_variants:" + kept)};
   }
   
   @SuppressWarnings("unused")
   @Override
-  public String[] getFooters() {
-    ArrayList<String> out = new ArrayList<>();
+  public Println[] getFooters() {
+    ArrayList<Println> out = new ArrayList<>();
     for (int s = 0; s < samples.size(); s++) {
       String name = samples.get(s).getId();
       int genotyped = ref[s] + alt[s];
       int missing = kept - genotyped;
-      double percent = (missing * 1.0) / kept;
-      out.add(name + T + kept + T + genotyped + T + missing + T + percent + T + ref[s] + T + alt[s]);
+      double percent = (missing * 1d) / kept;
+      out.add(new Println(name, T, kept, T, genotyped, T, missing, T, percent, T, ref[s], T, alt[s]));
     }
-    return out.toArray(new String[0]);
+    return out.toArray(new Println[0]);
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     //total++;
     boolean[][] sRefAlt = new boolean[samples.size()][2];
     if (variant.getPercentMissing() <= maxInd.getFloatValue()) {

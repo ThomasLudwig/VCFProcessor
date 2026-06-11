@@ -9,6 +9,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FastaFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * For every position in the vcf file, compares the reference from the VCF to the one in the fasta
@@ -64,12 +65,12 @@ public class CheckReference extends ParallelVCFFunction<Object> {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return new String[]{String.join(T, HEADER)};
+  public Println[] getHeaders() {
+    return new Println[]{Println.join(T, HEADER)};
   }
 
   @Override
-  public String[] processInputRecord(VariantRecord record) {
+  public Println[] processInputRecord(VariantRecord record) {
     String chrom = record.getChrom();
     int pos = record.getPos();
     String ref = record.getRef();
@@ -89,7 +90,7 @@ public class CheckReference extends ParallelVCFFunction<Object> {
         char fastaRef = fasta.getCharacterFor(chrom, pos);
         Message.warning(!isValid(fastaRef), "Unexpected fasta allele ["+fastaRef+"]");
         if (vcfRef != fastaRef)
-          return new String[]{chrom + T + pos + T + vcfRef + T + fastaRef};
+          return new Println[]{Println.join(T, chrom, pos, vcfRef, fastaRef)};
       } catch (FastaException ex) {
         Message.fatal("Unable to process line\n"+record, ex, true);
       }

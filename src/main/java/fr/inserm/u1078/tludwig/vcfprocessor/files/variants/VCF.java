@@ -10,6 +10,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.filters.VariantFilter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.GeneticsException;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.FileOutputer;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThread;
 
 import java.io.IOException;
@@ -293,14 +295,16 @@ public class VCF implements VariantProducer {
     return (this.mode & pattern) == pattern;
   }
 
-  public void printHeaders(PrintWriter out) {
+  public void printHeaders(FileOutputer out) {
     for (String h : this.getFullHeaders())
-      out.println(h);
+      out.println(new Println(h));
   }
 
-  public void addExtraHeaders(String[] extra) {
-    if (extra != null)
-      this.headers.addAll(Arrays.asList(extra));
+  public void addExtraHeaders(Println[] extra) {
+    if (extra != null) {
+      for(Println pl : extra)
+        this.headers.add(pl.toString());
+    }
   }
 
   /**
@@ -327,17 +331,17 @@ public class VCF implements VariantProducer {
     return ret;
   }
 
-  public void printHeaders(PrintWriter out, String[] extraHeaders) {
+  public void printHeaders(FileOutputer out, String[] extraHeaders) {
     if (extraHeaders == null) {
       printHeaders(out);
       return;
     }
 
     for (String h : this.getHeadersWithoutSamples())
-      out.println(h);
+      out.println(new Println(h));
     for (String header : extraHeaders)
-      out.println(header);
-    out.println(this.getSampleHeader());
+      out.println(new Println(header));
+    out.println(new Println(this.getSampleHeader()));
   }
 
   public Variant createVariant(VariantRecord record) throws VCFException {

@@ -6,6 +6,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 
 /**
@@ -56,24 +58,24 @@ public class PrivateAndShared extends ParallelVCFVariantPedFunction<PrivateAndSh
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getFooters() {
-    ArrayList<String> out = new ArrayList<>();
-    out.add("Total Number of Variants " + total);
-    out.add("Variants shared among all groups " + shared);
+  public Println[] getFooters() {
+    ArrayList<Println> out = new ArrayList<>();
+    out.add(new Println("Total Number of Variants ", total));
+    out.add(new Println("Variants shared among all groups ", shared));
     for (int g = 0; g < groups.size(); g++)
-      out.add("Private to " + groups.get(g) + " " + priv[g]);
+      out.add(new Println("Private to ", groups.get(g), " ", priv[g]));
     
-    return out.toArray(new String[0]);
+    return out.toArray(new Println[0]);
   }
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return null;
+  public Println[] getHeaders() {
+    return NO_OUTPUT;
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     for (int a : variant.getNonStarAltAllelesAsArray())
       if (!variant.getInfo().getVEPInfo().hasExistingVariants(a)) {
         ArrayList<Integer> gps = new ArrayList<>();

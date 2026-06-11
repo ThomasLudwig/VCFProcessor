@@ -5,6 +5,8 @@ import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.TSVFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 
 /**
@@ -83,12 +85,12 @@ public class JFSSummary extends Function {
     double as = getAS();
     double ws = getWS();
 
-    println("N = " + N);
-    println("V = " + (int) V);
-    println("threshold i + j <= " + threshold);
-    println("FST = " + fst);
-    println("AS = " + as);
-    println("WS = " + ws);
+    println(new Println("N = ", N));
+    println(new Println("V = ",  (int) V));
+    println(new Println("threshold i + j <= ", threshold));
+    println(new Println("FST = ", fst));
+    println(new Println("AS = ", as));
+    println(new Println("WS = ", ws));
   }
 
   private double getFST() {

@@ -7,6 +7,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.*;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.GenotypeFormat;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.util.*;
 
@@ -20,7 +21,7 @@ public class BCFRecord extends VariantRecord {
   private String id;
   private String ref;
   private String[] alts;
-  private String qual;
+  private Double qual;
   private String[] filters;
   private String[][] info; //TODO replace with HashMap ???
 
@@ -99,9 +100,11 @@ public class BCFRecord extends VariantRecord {
   /**
    * Reads the quality of the variant
    * @param in the array to parse
-   * @return the quality as a String
+   * @return the quality
    */
-  private String readQual(BCFByteArray in) { return in.readFloatsAsString(1); }
+  private Double readQual(BCFByteArray in) {
+    return in.readFloats(1)[0];
+  }
 
   /**
    * Reads the ID of the variants
@@ -250,6 +253,26 @@ public class BCFRecord extends VariantRecord {
   }
 
   /**
+   * Conversion of a BCF Record to a VCF String for the variant
+   * @return the line
+   */
+  @Override public Println println() {
+    Println out = Println.join(T,
+        getChrom(),
+        getPos(),
+        getID(),
+        getRef(),
+        String.join(",", getAlts()),
+        getQual() == null ? "." : getQual(),
+        String.join(",",getFilters()),
+        getInfoString()
+    );
+    for(String[] geno : filteredGenoValues)
+      out.append(T, String.join(":", geno));
+    return out;
+  }
+
+  /**
    * Return the Leftmost columns of the Record (CHROM through INFO)
    * @return the columns as a String Array
    */
@@ -260,7 +283,7 @@ public class BCFRecord extends VariantRecord {
         getID(),
         getRef(),
         String.join(",", getAlts()),
-        getQual(),
+        getQual() == null ? "." : ""+getQual(),
         String.join(",",getFilters()),
         getInfoString()
     };
@@ -277,12 +300,6 @@ public class BCFRecord extends VariantRecord {
     return right;
   }
 
-  /**
-   * Conversion of a BCF Record to a VCF String for the variant
-   * @return the line
-   */
-  @Override public String toString() { return String.join(AbstractRecord.T, asFields()); }
-
   public String[] asFields() {
     String[] left = this.getLeftColumns();
     String[] right = this.getRightColumns();
@@ -298,7 +315,6 @@ public class BCFRecord extends VariantRecord {
     String[] infos = new String[info.length];
     for(int i = 0 ; i < info.length; i++)
       infos[i] = info[i][1] == null ? info[i][0] : info[i][0] + "=" + info[i][1];
-
     return String.join(";", infos);
   }
 
@@ -445,7 +461,7 @@ public class BCFRecord extends VariantRecord {
 
   @Override public void setAlt(String alts) { this.alts = alts.split(","); }
 
-  @Override public void setQual(String qual) { this.qual = qual; }
+  @Override public void setQual(Double qual) { this.qual = qual; }
 
   @Override public String getAltString() { return String.join(",", alts); }
 
@@ -459,7 +475,7 @@ public class BCFRecord extends VariantRecord {
    * Gets the quality of the variant
    * @return a String representation of the float values, or "." if missing
    */
-  public String getQual() { return qual; }
+  public Double getQual() { return qual; }
 
   @Override public String getFiltersString() { return String.join(",", filters); }
 

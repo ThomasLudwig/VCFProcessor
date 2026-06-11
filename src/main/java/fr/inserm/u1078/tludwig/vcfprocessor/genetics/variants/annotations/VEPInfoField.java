@@ -39,4 +39,6 @@ public class VEPInfoField extends StringInfoField implements HasVEPConsequenceAn
 
   public VEPInfoDefinition getVEPDefinition() { return (VEPInfoDefinition)getDefinition(); }
   //public int getIndexFor(String key) { return this.getVEPDefinition().getIndexFor(key); }
+
+  //TODO specialize println() or keep the original content ?
 }

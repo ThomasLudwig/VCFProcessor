@@ -8,6 +8,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.ListParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Filters the variants to match the given genotype filter.
@@ -67,13 +68,13 @@ public class FilterGenotype extends ParallelVCFFilterFunction { //TODO add suppo
   }
 
   @Override
-  public String[] processInputRecordForFilter(VariantRecord record) {
+  public Println[] processInputRecordForFilter(VariantRecord record) {
     for (int i = 0; i < this.indices.length; i++) {
       String geno = record.getGT(i);
       if (geno.equals(this.genotypes[i]) != keeps[i]) //reject if "kept" genotypes mismatch, or "remove" genotypes match
         return NO_OUTPUT;
     }
-    return new String[]{record.toString()};
+    return new Println[]{record.println()};
   }
 
   @Override

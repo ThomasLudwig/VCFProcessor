@@ -8,6 +8,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
   * Adds the annotations : AB, ABHET, ABHOM, OND to a VCF file
@@ -26,6 +27,7 @@ public class AddAlleleBalance extends ParallelVCFVariantFunction<Object> {
   public static final String OND = "OND";
   public static final String AB = "AB";
 
+  //TODO vcf.addInfo() vcf.addFilter()
   public static final String[] HEADERS = {
     "##FORMAT=<ID="+AB+",Number=1,Type=Float,Description=\"Allele balance for each het genotype\">",
     "##INFO=<ID="+ABHET+",Number=1,Type=Float,Description=\"Allele Balance for heterozygous calls (ref/(ref+alt))\">",
@@ -36,9 +38,7 @@ public class AddAlleleBalance extends ParallelVCFVariantFunction<Object> {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getExtraHeaders() {
-    return HEADERS;
-  }
+  public Println[] getExtraHeaders() { return Println.asLines(HEADERS); }
 
   @Override
   public String getSummary() {
@@ -67,7 +67,7 @@ public class AddAlleleBalance extends ParallelVCFVariantFunction<Object> {
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     double numHom = 0;
     double denomHom = 0;
     double numHet = 0;

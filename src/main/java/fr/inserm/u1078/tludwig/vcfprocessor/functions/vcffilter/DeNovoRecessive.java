@@ -9,6 +9,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Keeps only variants that strictly respect this genotypes parent1 0/1 + parent2 0/0 + child 1/1
@@ -56,7 +57,7 @@ public class DeNovoRecessive extends ParallelVCFVariantFilterPedFunction {
   }
 
   @Override
-  public String[] processInputVariantForFilter(Variant variant) {
+  public Println[] processInputVariantForFilter(Variant variant) {
     Genotype gc = variant.getGenotype(child);
     Genotype gp1 = variant.getGenotype(p1);
     Genotype gp2 = variant.getGenotype(p2);

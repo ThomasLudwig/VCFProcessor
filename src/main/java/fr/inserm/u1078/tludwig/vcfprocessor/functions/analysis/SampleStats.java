@@ -9,6 +9,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -60,9 +62,7 @@ public class SampleStats extends ParallelVCFVariantPedFunction<SampleStats.Analy
     return OUT_TSV;
   }
   @Override
-  public String[] getHeaders() {
-    return new String[]{"#"+ String.join(T, HEADERS)};
-  }
+  public Println[] getHeaders() { return Println.asLines("#"+ String.join(T, HEADERS)); }
 
   @Override
   public void begin() {
@@ -81,36 +81,35 @@ public class SampleStats extends ParallelVCFVariantPedFunction<SampleStats.Analy
   }
 
   @Override
-  public String[] getFooters() {
-    ArrayList<String> out = new ArrayList<>();
+  public Println[] getFooters() {
+    ArrayList<Println> out = new ArrayList<>();
     for (int s = 0; s < S; s++) {
       Sample sample = this.samples.get(s);
       int genotyped = nbSites - this.missings[s];
-      String[] values = {sample.getId(),
+      out.add(Println.join(
+          T,
+          sample.getId(),
           sample.getGroup(),
-          nbSites+"",
-          genotyped+"",
-          this.missings[s]+"",
-          StringTools.formatRatio(100*this.missings[s], nbSites, 4)+"%",
-          StringTools.formatRatio(this.depths[s],this.depthPresent[s],4),
-          this.variants[s]+"",
-          this.singletons[s]+"",
-          this.tss[s]+"",
-          this.tvs[s]+"",
-          this.tvs[s] != 0 ? StringTools.formatRatio(this.tss[s], tvs[s], 4) : "0",
-          this.hets[s]+"",
-          genotyped != 0 ? StringTools.formatRatio(this.hets[s], genotyped, 4) : "0",
-          this.homAlts[s]+"",
-          this.haploids[s]+""
-      };
-
-      out.add(String.join(T, values));
+          nbSites,
+          genotyped,
+          this.missings[s],
+          new Println(100*this.missings[s]/nbSites, "%"),
+          this.depths[s]/this.depthPresent[s],
+          this.variants[s],
+          this.singletons[s],
+          this.tss[s],
+          this.tvs[s],
+          this.tvs[s] != 0 ? this.tss[s]/tvs[s] : 0,
+          this.hets[s],
+          genotyped != 0 ? this.hets[s]/genotyped : 0,
+          this.homAlts[s],
+          this.haploids[s]));
     }
-    return out.toArray(new String[0]);
+    return out.toArray(new Println[0]);
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     int[] lTransitions = new int[S];
     int[] lTransversions = new int[S];
     int[] lHomAlts = new int[S];

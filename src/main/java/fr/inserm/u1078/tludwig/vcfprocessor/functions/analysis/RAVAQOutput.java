@@ -15,6 +15,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -152,8 +153,8 @@ public class RAVAQOutput extends ParallelVCFVariantPedFunction<RAVAQOutput.Varia
   }
 
   @Override
-  public String[] getHeaders() {
-    StringBuilder h = new StringBuilder("Gene");
+  public Println[] getHeaders() {
+    Println h = new Println("Gene");
     h.append(T).append("Variant");
     for(String group : this.groups) {
       h.append(T).append("HET_").append(group);
@@ -170,11 +171,11 @@ public class RAVAQOutput extends ParallelVCFVariantPedFunction<RAVAQOutput.Varia
     h.append(T).append("gnomAD_EXOME_FILTERS");
     h.append(T).append("gnomAD_MAX_AF");
     h.append(T).append("gnomAD_FILTERS");
-    return new String[] {h.toString()};
+    return new Println[] {h};
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     for(int a = 1 ; a < variant.getAlleleCount(); a++) {
       final Canonical canonical = variant.getCanonical(a);
       final String genes = this.genesByVariants.get(canonical);
@@ -217,9 +218,7 @@ public class RAVAQOutput extends ParallelVCFVariantPedFunction<RAVAQOutput.Varia
           }
 
           //add gnomAD info
-          for(String gnomAD : getGnomADInfo(canonical))
-            genoString.append(T).append(gnomAD);
-
+          genoString.append(T).append(getGnomADInfo(canonical));
           this.pushAnalysis(new VariantAnalysis(gene, genoString.toString()));
         }
       }
@@ -227,35 +226,38 @@ public class RAVAQOutput extends ParallelVCFVariantPedFunction<RAVAQOutput.Varia
     return NO_OUTPUT;
   }
 
-  private String[] getGnomADInfo(Canonical canonical) {
-    String[] ret = {"", "", "", "", "", "", "0", ""};
+  private Println getGnomADInfo(Canonical canonical) {
     PrepareGnomADFile.GnomAD genome = gnomadGenome.get(canonical);
-    PrepareGnomADFile.GnomAD exome = gnomadExome.get(canonical);
+    double genomeAF = 0;
+    double genomeSubAF = 0;
+    String genomeFilter = "";
     if(genome != null) {
-      ret[0] = genome.getAF();
-      ret[1] = genome.getAF(gnomadSubpop.getStringValue());
-      ret[2] = genome.getFilter();
+      genomeAF = genome.getAF();
+      genomeSubAF = genome.getAF(gnomadSubpop.getStringValue());
+      genomeFilter = genome.getFilter();
     }
+
+    PrepareGnomADFile.GnomAD exome = gnomadExome.get(canonical);
+    double exomeAF = 0;
+    double exomeSubAF = 0;
+    String exomeFilter = "";
     if(exome != null) {
-      ret[3] = exome.getAF();
-      ret[4] = exome.getAF(gnomadSubpop.getStringValue());
-      ret[5] = exome.getFilter();
+      exomeAF = exome.getAF();
+      exomeSubAF = exome.getAF(gnomadSubpop.getStringValue());
+      exomeFilter = exome.getFilter();
     }
 
-    ret[6] = maxAF(ret[0],ret[1],ret[3],ret[4]);
-    ret[7] = combine(ret[2], ret[5]);
+    double maxAF = maxAF(genomeAF, genomeSubAF, exomeAF, exomeSubAF);
+    String combine = combine(genomeFilter, exomeFilter);
 
-    return ret;
+    return Println.join(T, genomeAF, genomeSubAF, genomeSubAF, exomeAF, exomeSubAF, exomeFilter, maxAF, combine);
   }
 
-  private String maxAF(String... s){
+  private double maxAF(Double... fs){
     double max = 0;
-    for(String ss : s)
-      try {
-        double f = Double.parseDouble(ss);
-        if(f > max) max = f;
-      } catch (NumberFormatException ignore) {}
-    return ""+max;
+    for(Double f : fs)
+      if(f != null && f > max) max = f;
+    return max;
   }
 
   public String combine(String...s){

@@ -6,6 +6,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.RatioParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Filters out variants with frequencies above threshold in GnomAD
@@ -36,7 +37,7 @@ public class FilterGnomADFrequency extends ParallelVCFVariantFilterFunction {
   public VCFPolicies getVCFPolicies() { return VCFPolicies.onlyVEP(VCFPolicies.MultiAllelicPolicy.KEEP_IF_ONE_SATISFY); }
 
   @Override
-  public String[] processInputVariantForFilter(Variant variant) {
+  public Println[] processInputVariantForFilter(Variant variant) {
     for(int a = 1 ; a < variant.getAlleleCount(); a++)
       if(variant.getInfo().getVEPInfo().getgnomAD_AF(a) <= this.frq.getFloatValue())
         return asOutput(variant);

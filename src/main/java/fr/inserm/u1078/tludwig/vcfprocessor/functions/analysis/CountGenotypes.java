@@ -9,6 +9,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPAnn
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Counts the genotypes 0/1 1/1 for each variant
@@ -55,7 +56,7 @@ public class CountGenotypes extends ParallelVCFVariantPedFunction<Override> {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
+  public Println[] getHeaders() {
     StringBuilder header1 = new StringBuilder();
     for (String group : getPed().getGroups())
       header1.append(T).append(group).append(T).append(getPed().getGroupSize(group));
@@ -64,13 +65,13 @@ public class CountGenotypes extends ParallelVCFVariantPedFunction<Override> {
 
     for (String group : getPed().getGroups())
       header2.append(T).append(group).append("_HETEROZYGOUS").append(T).append(group).append("_HOMOZYGOUS_ALT");
-    return new String[]{header1.substring(1), header2.toString()};
+    return new Println[]{new Println(header1.substring(1)), new Println(header2.toString())};
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     int[] nonStars = variant.getNonStarAltAllelesAsArray();
-    String[] outs = new String[nonStars.length - 1];
+    Println[] outs = new Println[nonStars.length - 1];
     for (int a = 1; a < nonStars.length; a++) {
       int[][] counts = new int[GRP + 1][3];
 
@@ -81,15 +82,16 @@ public class CountGenotypes extends ParallelVCFVariantPedFunction<Override> {
         counts[0][d]++;
       }
       VEPAnnotation worst = VEPConsequence.getWorstVEPAnnotation(variant.getInfo().getVEPInfo().getVEPAnnotations(a));
-      LineBuilder line = new LineBuilder(variant.getChrom());
-      line.addColumn(variant.getPos());
-      line.addColumn(variant.getRef());
-      line.addColumn(variant.getAlleles()[a]);
-      line.addColumn(worst.getConsequence());
-      for (int[] count : counts) 
-        line.addColumn(count[1]).addColumn(count[2]);
+      outs[a-1] = Println.join(T,
+          variant.getChrom(),
+          variant.getPos(),
+          variant.getAlleles()[a],
+          variant.getRef(),
+          worst.getConsequence());
+      for (int[] count : counts)
+        outs[a-1].append(T, count[1], T, count[2]);
       
-      outs[a-1] = line.toString();
+
     }
     return outs;
   }

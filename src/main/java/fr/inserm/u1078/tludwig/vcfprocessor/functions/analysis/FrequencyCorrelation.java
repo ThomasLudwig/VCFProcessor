@@ -8,8 +8,10 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectory
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.FileOutputer;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -21,12 +23,12 @@ import java.util.HashMap;
  * Checked for release on 2020-05-12
  * Unit Test defined on 2020-07-10 
  */
-public class FrequencyCorrelation extends ParallelVCFVariantFunction<Object> { //TODO really similar to CompareToGnomAD, but uses annotation instead of second VCF, GnomadAD should appears in title
+public class FrequencyCorrelation extends ParallelVCFVariantFunction<FrequencyCorrelation.Analysis> { //TODO really similar to CompareToGnomAD, but uses annotation instead of second VCF, GnomadAD should appears in title
 
   final String[] HEADER = {"CHR", "POS", "REF", "ALT", "Local", "GnomAD"};
 
   private final OutputDirectoryParameter dir = new OutputDirectoryParameter();
-  HashMap<VEPConsequence, PrintWriter> out;
+  HashMap<VEPConsequence, FileOutputer> out;
 
   @Override
   public String getSummary() {
@@ -53,8 +55,8 @@ public class FrequencyCorrelation extends ParallelVCFVariantFunction<Object> { /
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return null;
+  public Println[] getHeaders() {
+    return NO_OUTPUT;
   }
 
   @SuppressWarnings("unused")
@@ -65,8 +67,8 @@ public class FrequencyCorrelation extends ParallelVCFVariantFunction<Object> { /
     for (VEPConsequence csq : VEPConsequence.values()) {
       String name = dir.getDirectory() + "freq." + basename + "." + csq.getLevel() + "." + csq.getName() + ".tsv";
       try {
-        PrintWriter tmp = getPrintWriter(name);
-        tmp.println(String.join(T, HEADER));
+        FileOutputer tmp = getFileOutputer(name);
+        tmp.println(Println.join(T, HEADER));
         out.put(csq, tmp);
       } catch (IOException e) {
         Message.die("Unable to write to output file " + name);
@@ -77,13 +79,13 @@ public class FrequencyCorrelation extends ParallelVCFVariantFunction<Object> { /
   @SuppressWarnings("unused")
   @Override
   public void end() {
-    for (PrintWriter pw : out.values())
-      pw.close();
+    for (FileOutputer pw : out.values())
+      try { pw.close(); }
+      catch (Exception e) { Message.error("Error while closing ["+pw.getFilename()+"] "+e.getMessage()); }
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
-    ArrayList<String> ret = new ArrayList<>();
+  public Println[] processInputVariant(Variant variant) {
     if (variant.getPercentMissing() <= 0.01)
       for (int a : variant.getNonStarAltAllelesAsArray()) {
         String chr = variant.getChrom();
@@ -93,20 +95,19 @@ public class FrequencyCorrelation extends ParallelVCFVariantFunction<Object> { /
         double local = variant.getAlleleFrequencyTotal(a);
         if (local != 0) {
           double gnomad = variant.getInfo().getVEPInfo().getgnomAD_AF(a);
-          String line = chr + T + pos + T + ref + T + alt + T + local + T + gnomad;
-          for (VEPConsequence csq : variant.getInfo().getVEPInfo().getAllVEPConsequences(a))
-            ret.add(csq.getLevel()+"¤"+line);
+          Println line = Println.join(T, chr, pos, ref, alt, local, gnomad);
+          for (VEPConsequence csq : variant.getInfo().getVEPInfo().getAllVEPConsequences(a)){
+            pushAnalysis(new Analysis(csq.getLevel(), line));
+          }
         }
       }
-    return ret.toArray(new String[0]);
-    //return NO_OUTPUT;
+    return NO_OUTPUT;
   }
 
   @Override
-  public void processOutput(String line) {
-    String[] ol = line.split(("¤"));
-    for (String level : ol[0].split(","))
-      out.get(VEPConsequence.getConsequence(Integer.parseInt(level))).println(ol[1]);
+  public void processAnalysis(Analysis analysis) {
+    super.processAnalysis(analysis);
+    out.get(analysis.level).println(analysis.println);
   }
 
   @Override
@@ -114,5 +115,15 @@ public class FrequencyCorrelation extends ParallelVCFVariantFunction<Object> { /
     TestingScript scr = TestingScript.newDirectoryAnalysis();
     scr.addAnonymousFilename("vcf", "vcf");
     return new TestingScript[]{scr};
+  }
+
+  public static class Analysis {
+    private final int level;
+    private final Println println;
+
+    public Analysis(int level, Println println) {
+      this.level = level;
+      this.println = println;
+    }
   }
 }

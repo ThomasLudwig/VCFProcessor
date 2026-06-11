@@ -7,8 +7,10 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectoryParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.FileOutputer;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.io.File;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -70,10 +72,10 @@ public class SplitByGene extends VCFFunction { //TODO parallelize
     }
 
     for (String gene : variantsByGenes.navigableKeySet()) {
-      PrintWriter out = getPrintWriter(this.dir.getDirectory() + File.separator + gene + ".vcf");
+      FileOutputer out = getFileOutputer(this.dir.getDirectory() + File.separator + gene + ".vcf");
       vcf.printHeaders(out);
       for (String l : variantsByGenes.get(gene))
-        out.println(l);
+        out.println(new Println(l));
       out.close();
     }
   }

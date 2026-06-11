@@ -5,6 +5,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 public class FilterSingletonOnAC extends ParallelVCFFilterFunction {
 
@@ -18,12 +19,12 @@ public class FilterSingletonOnAC extends ParallelVCFFilterFunction {
   public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.KEEP_IF_ONE_SATISFY); }
 
   @Override
-  public String[] processInputRecordForFilter(VariantRecord record) {
+  public Println[] processInputRecordForFilter(VariantRecord record) {
     String AC = record.getInfo("AC");
     for(String ac : AC.split(",")){
       try{
         if(Integer.parseInt(ac) == 1)
-          return asOutput(record);
+          return new Println[]{record.println()};
       } catch(NumberFormatException ignore){}
     }
     return NO_OUTPUT;

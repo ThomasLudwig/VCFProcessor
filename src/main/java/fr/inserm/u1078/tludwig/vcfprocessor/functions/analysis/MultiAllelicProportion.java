@@ -7,6 +7,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 
 /**
@@ -53,7 +55,7 @@ public class MultiAllelicProportion extends ParallelVCFFunction<Integer[]> {
   }
 
   @Override
-  public String[] processInputRecord(VariantRecord record) {
+  public Println[] processInputRecord(VariantRecord record) {
     int chr = Variant.chromToNumber(record.getChrom());
     if (chr <= 22) {
       int value = record.getAlts().length + 1;
@@ -72,15 +74,15 @@ public class MultiAllelicProportion extends ParallelVCFFunction<Integer[]> {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return new String[]{String.join(T, HEADER)};
+  public Println[] getHeaders() {
+    return new Println[]{Println.join(T, HEADER)};
   }
   
   @SuppressWarnings("unused")
   @Override
-  public String[] getFooters() {  
+  public Println[] getFooters() {
     Message.info("VCF file parsed, begin sliding windows");
-    ArrayList<String> out = new ArrayList<>();
+    ArrayList<Println> out = new ArrayList<>();
     
     for (int chr = 0; chr < 22; chr++) {
       Message.info("Chromosome " + (chr + 1));
@@ -97,17 +99,17 @@ public class MultiAllelicProportion extends ParallelVCFFunction<Integer[]> {
       for(int i = 0; i < 1000; i++)
         sum += chrom[i];
       if(sum > 0)
-        out.add((chr + 1) + T + 1 + T + 1000 + T + sum);//TODO at the moment when several window overlap, only the first one is kept, maybe change END-index
+        out.add(Println.join(T, (chr + 1), 1, 1000, sum));//TODO at the moment when several window overlap, only the first one is kept, maybe change END-index
       
       for(int i = 1; i+999 < chrom.length; i++){
         if(chrom[i-1] != chrom[i+999]){
           sum += chrom[i+999] - chrom[i-1];
           if(sum > 0)
-            out.add((chr + 1) + T + (i + 1) + T + (i + 1000) + T + sum);
+            out.add(Println.join(T, (chr + 1), (i + 1), (i + 1000), sum));
         }
       }
     }
-    return out.toArray(new String[0]);
+    return out.toArray(new Println[0]);
   }
   
   @Override

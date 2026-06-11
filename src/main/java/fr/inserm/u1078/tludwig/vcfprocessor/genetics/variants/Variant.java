@@ -2,9 +2,12 @@ package fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants;
 
 import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.maok.tools.ArrayTools;
+import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.Ped;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.*;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.AnnotationException;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.util.*;
 
@@ -13,14 +16,14 @@ import java.util.*;
  *
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 23 juin 2015
  */
-public class Variant implements Comparable<Variant> {
+public class Variant implements Comparable<Variant>, Printable {
   //TODO use contigs defined in header to manage chromosomes (the shortcut (chr)1->22 X Y M/MT) will not work for non human organisms
   private static final String[] CHROMS = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "x", "y", "m", "mt"};
 
   private final String chrom;
   private final int pos;
-  private final String id;
-  private final String qual;
+  private String id;
+  private final Double qual;
   private String filter;
   private final InfoColumn infoColumn;
   private final GenotypeFormat format;
@@ -46,7 +49,7 @@ public class Variant implements Comparable<Variant> {
     variantTypes = null;
   }
 
-  public Variant(String chrom, int pos, String id, String ref, String alt, String qual, String filter, InfoColumn infoColumn, GenotypeFormat format, Genotype[] genotypes) throws VariantException {
+  public Variant(String chrom, int pos, String id, String ref, String alt, Double qual, String filter, InfoColumn infoColumn, GenotypeFormat format, Genotype[] genotypes) throws VariantException {
     this.chrom = chrom;
     this.pos = pos;
     this.id = id;
@@ -88,6 +91,8 @@ public class Variant implements Comparable<Variant> {
       throw new VariantException("Multiple variants for the same annotation for variant " + chrom + ":" + pos + " " + this.getRef() + "/" + this.getAlt(), e);
     }
   }
+
+  public void setId(String id) { this.id = id; }
 
   public boolean isBiallelic() {
     return this.getAlleleCount() == 2;
@@ -141,29 +146,25 @@ public class Variant implements Comparable<Variant> {
 
   public static final String T = "\t";
 
-  public String[] getFields() {
-    String[] ret = new String[9 + genotypes.length];
-    ret[0] = this.chrom;
-    ret[1] = this.pos + "";
-    ret[2] = this.id;
-    ret[3] = this.getRef();
-    ret[4] = this.getAlt();
-    ret[5] = this.qual;
-    ret[6] = this.filter;
-    ret[7] = this.infoColumn.toString();
-    ret[8] = this.format.toString();
-    for (int i = 0; i < this.genotypes.length; i++)
-      ret[9 + i] = this.genotypes[i].toString();
-    return ret;
-  }
-  
   @Override
-  public String toString() { // should return the line that was used to construct the variant .... NO ! that would ignore updates
-    String[] left = {chrom, pos+"", id, getRef(), getAlt(),this.getQual(), this.getFilter(), this.infoColumn.toString(), this.format.toString()};
-    LineBuilder ret = new LineBuilder(String.join(T, left));
+  public String toString() { return println().toString(); }
+
+  @Override
+  public Println println() {
+    Println ret = Println.join(T,
+        chrom,
+        pos,
+        id,
+        getRef(),
+        getAlt(),
+        this.getQual() == null ? "." : this.getQual(),
+        this.getFilter(),
+        this.infoColumn,
+        this.format
+    );
     for (Genotype genotype : genotypes)
-      ret.addColumn(genotype);
-    return ret.toString();
+      ret.append(T, genotype);
+    return ret;
   }
 
   public String shortString() {
@@ -449,9 +450,7 @@ public class Variant implements Comparable<Variant> {
     return alt.toString();
   }
 
-  public String getQual() {
-    return qual;
-  }
+  public Double getQual() { return qual; }
 
   public String getFilter() {
     return filter;

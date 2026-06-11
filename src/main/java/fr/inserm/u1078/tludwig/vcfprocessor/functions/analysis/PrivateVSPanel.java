@@ -11,6 +11,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Set;
@@ -88,14 +90,14 @@ public class PrivateVSPanel extends VCFFunction { //TODO parallelize the reading
   private void printResults() {
     Message.info("Exporting results");
     for (int c = 0; c < C; c++) {
-      StringBuilder line = new StringBuilder(Objects.requireNonNull(VEPConsequence.getConsequence(c)).getName());
+      Println line = new Println(Objects.requireNonNull(VEPConsequence.getConsequence(c)).getName());
       int remaining = total[c];
       line.append(T).append(remaining);
       for (int n = 0; n < N; n++) {
         remaining -= count[c][n];
         line.append(T).append(remaining);
       }
-      println(line.toString());
+      println(line);
     }
   }
 

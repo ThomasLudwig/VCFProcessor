@@ -10,6 +10,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FastaFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.util.Date;
 
@@ -60,42 +61,43 @@ public class GenerateHomoRefForPosition extends Function { //TODO Parallelize
   @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
-    println("##fileformat=VCFv4.1");
-    println("##ALT=<ID=NON_REF,Description=\"Represents any possible alternative allele at this location\">");
-    println("##FORMAT=<ID=AD,Number=.,Type=Integer,Description=\"Allelic depths for the ref and alt alleles in the order listed\">");
-    println("##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Approximate read depth (reads with MQ=255 or with bad mates are filtered)\">");
-    println("##FORMAT=<ID=GQ,Number=1,Type=Integer,Description=\"Genotype Quality\">");
-    println("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">");
-    println("##FORMAT=<ID=PL,Number=G,Type=Integer,Description=\"Normalized, Phred-scaled likelihoods for genotypes as defined in the VCF specification\">");
+    //TODO REWRITE THE WHOLE HEADER
+    printlnString("##fileformat=VCFv4.1");
+    printlnString("##ALT=<ID=NON_REF,Description=\"Represents any possible alternative allele at this location\">");
+    printlnString("##FORMAT=<ID=AD,Number=.,Type=Integer,Description=\"Allelic depths for the ref and alt alleles in the order listed\">");
+    printlnString("##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Approximate read depth (reads with MQ=255 or with bad mates are filtered)\">");
+    printlnString("##FORMAT=<ID=GQ,Number=1,Type=Integer,Description=\"Genotype Quality\">");
+    printlnString("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">");
+    printlnString("##FORMAT=<ID=PL,Number=G,Type=Integer,Description=\"Normalized, Phred-scaled likelihoods for genotypes as defined in the VCF specification\">");
 
-    println("##contig=<ID=1,length=249250621,assembly=b37>");//TODO get from ref get contig from index http://www.htslib.org/doc/faidx.html
-    println("##contig=<ID=2,length=243199373,assembly=b37>");
-    println("##contig=<ID=3,length=198022430,assembly=b37>");
-    println("##contig=<ID=4,length=191154276,assembly=b37>");
-    println("##contig=<ID=5,length=180915260,assembly=b37>");
-    println("##contig=<ID=6,length=171115067,assembly=b37>");
-    println("##contig=<ID=7,length=159138663,assembly=b37>");
-    println("##contig=<ID=8,length=146364022,assembly=b37>");
-    println("##contig=<ID=9,length=141213431,assembly=b37>");
-    println("##contig=<ID=10,length=135534747,assembly=b37>");
-    println("##contig=<ID=11,length=135006516,assembly=b37>");
-    println("##contig=<ID=12,length=133851895,assembly=b37>");
-    println("##contig=<ID=13,length=115169878,assembly=b37>");
-    println("##contig=<ID=14,length=107349540,assembly=b37>");
-    println("##contig=<ID=15,length=102531392,assembly=b37>");
-    println("##contig=<ID=16,length=90354753,assembly=b37>");
-    println("##contig=<ID=17,length=81195210,assembly=b37>");
-    println("##contig=<ID=18,length=78077248,assembly=b37>");
-    println("##contig=<ID=19,length=59128983,assembly=b37>");
-    println("##contig=<ID=20,length=63025520,assembly=b37>");
-    println("##contig=<ID=21,length=48129895,assembly=b37>");
-    println("##contig=<ID=22,length=51304566,assembly=b37>");
-    println("##contig=<ID=X,length=155270560,assembly=b37>");
-    println("##contig=<ID=Y,length=59373566,assembly=b37>");
-    println("##contig=<ID=MT,length=16569,assembly=b37>");
+    printlnString("##contig=<ID=1,length=249250621,assembly=b37>");//TODO get from ref get contig from index http://www.htslib.org/doc/faidx.html
+    printlnString("##contig=<ID=2,length=243199373,assembly=b37>");
+    printlnString("##contig=<ID=3,length=198022430,assembly=b37>");
+    printlnString("##contig=<ID=4,length=191154276,assembly=b37>");
+    printlnString("##contig=<ID=5,length=180915260,assembly=b37>");
+    printlnString("##contig=<ID=6,length=171115067,assembly=b37>");
+    printlnString("##contig=<ID=7,length=159138663,assembly=b37>");
+    printlnString("##contig=<ID=8,length=146364022,assembly=b37>");
+    printlnString("##contig=<ID=9,length=141213431,assembly=b37>");
+    printlnString("##contig=<ID=10,length=135534747,assembly=b37>");
+    printlnString("##contig=<ID=11,length=135006516,assembly=b37>");
+    printlnString("##contig=<ID=12,length=133851895,assembly=b37>");
+    printlnString("##contig=<ID=13,length=115169878,assembly=b37>");
+    printlnString("##contig=<ID=14,length=107349540,assembly=b37>");
+    printlnString("##contig=<ID=15,length=102531392,assembly=b37>");
+    printlnString("##contig=<ID=16,length=90354753,assembly=b37>");
+    printlnString("##contig=<ID=17,length=81195210,assembly=b37>");
+    printlnString("##contig=<ID=18,length=78077248,assembly=b37>");
+    printlnString("##contig=<ID=19,length=59128983,assembly=b37>");
+    printlnString("##contig=<ID=20,length=63025520,assembly=b37>");
+    printlnString("##contig=<ID=21,length=48129895,assembly=b37>");
+    printlnString("##contig=<ID=22,length=51304566,assembly=b37>");
+    printlnString("##contig=<ID=X,length=155270560,assembly=b37>");
+    printlnString("##contig=<ID=Y,length=59373566,assembly=b37>");
+    printlnString("##contig=<ID=MT,length=16569,assembly=b37>");
 
-    println("##reference=file://" + this.fasta.getFullPath());
-    println(VCF.getStamp());
+    printlnString("##reference=file://" + this.fasta.getFullPath());
+    printlnString(VCF.getStamp());
 
     //Get Samples
     StringBuilder header = new StringBuilder(String.join(T, "#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT"));
@@ -111,7 +113,7 @@ public class GenerateHomoRefForPosition extends Function { //TODO Parallelize
 
     Fasta reference = fasta.getFasta();
 
-    println(header.toString());
+    printlnString(header.toString());
     try (UniversalReader in = positionFile.getReader()) {
       Date start = new Date();
       int read = 0;
@@ -132,13 +134,13 @@ public class GenerateHomoRefForPosition extends Function { //TODO Parallelize
         out[VCF.IDX_ID] = ".";
         out[VCF.IDX_REF] = "" + reference.getCharacterFor(out[VCF.IDX_CHROM], Long.parseLong(out[VCF.IDX_POS]));
         out[VCF.IDX_ALT] = "" + transition(out[VCF.IDX_REF].charAt(0));
-        out[VCF.IDX_QUAL] = "2000";
+        out[VCF.IDX_QUAL] = "2000"; //TODO double
         out[VCF.IDX_FILTER] = "PASS";
         out[VCF.IDX_INFO] = ".";
         out[VCF.IDX_FORMAT] = DEFAULT_FORMAT;
         for (int i = 0; i < nbSample; i++)
           out[VCF.IDX_SAMPLE + i] = DEFAULT_GENOTYPE;
-        println(String.join(T, out));
+        println(Println.join(T, out));
       }
       Date now = new Date();
       int seconds = DateTools.durationInSeconds(start, now);

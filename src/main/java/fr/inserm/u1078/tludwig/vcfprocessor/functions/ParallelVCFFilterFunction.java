@@ -2,6 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  *
@@ -13,14 +14,14 @@ public abstract class ParallelVCFFilterFunction extends ParallelVCFFunction<Inte
   private int outputLines = 0;
 
   @Override
-  public final String[] processInputRecord(VariantRecord record) {
-    String[] ret = this.processInputRecordForFilter(record);
+  public final Println[] processInputRecord(VariantRecord record) {
+    Println[] ret = this.processInputRecordForFilter(record);
     if(ret != null)
       this.pushAnalysis(ret.length);
     return ret;
   }
   
-  public abstract String[] processInputRecordForFilter(VariantRecord record);
+  public abstract Println[] processInputRecordForFilter(VariantRecord record);
 
   @Override
   public final String getOutputExtension() {

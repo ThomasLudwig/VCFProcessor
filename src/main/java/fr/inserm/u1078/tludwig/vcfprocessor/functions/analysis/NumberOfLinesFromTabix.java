@@ -5,6 +5,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.TabixReader;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Gets the number of lines indexed by a tabix file
@@ -44,9 +45,9 @@ public class NumberOfLinesFromTabix extends VCFFunction {
     for(String chr : tabix.getChromosomes()){
       long nb = tabix.getVariantCount(chr);
       total += nb;
-      println(chr + " : " + nb);
+      println(new Println(chr, " : ", nb));
     }
-    println("Total : " + total);
+    println(new Println("Total : ", total));
   }
   
   @Override

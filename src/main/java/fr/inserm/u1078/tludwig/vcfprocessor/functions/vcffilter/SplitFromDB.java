@@ -7,7 +7,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectoryParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
-import java.io.PrintWriter;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.FileOutputer;
 
 /**
  * Generates two new VCF files with variants present/absent in 1kG/GnomAD.
@@ -48,8 +48,8 @@ public class SplitFromDB extends VCFFunction { //TODO parallelize
   @Override
   public void executeFunction() throws Exception {
     String basename = this.vcfFile.getBasename();
-    PrintWriter outIn = getPrintWriter(dir.getDirectory() + "inDB." + basename);
-    PrintWriter outNot = getPrintWriter(dir.getDirectory() + "notInDB." + basename);
+    FileOutputer outIn = getFileOutputer(dir.getDirectory() + "inDB." + basename);
+    FileOutputer outNot = getFileOutputer(dir.getDirectory() + "notInDB." + basename);
 
     VCF vcf = this.vcfFile.getVCF();
     vcf.getReaderAndStart();
@@ -68,9 +68,9 @@ public class SplitFromDB extends VCFFunction { //TODO parallelize
         }
 
       if (in)
-        outIn.println(variant);
+        outIn.println(variant.println());
       else
-        outNot.println(variant);
+        outNot.println(variant.println());
     }
 
     outIn.close();

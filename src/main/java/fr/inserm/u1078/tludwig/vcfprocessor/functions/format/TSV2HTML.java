@@ -7,6 +7,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.PositiveInteger
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.StringParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.TSVFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.HashMap;
 
 /**
@@ -48,32 +50,34 @@ public class TSV2HTML extends Function {
     try(UniversalReader in = this.filename.getReader()) {
       HashMap<Integer, String> headers = new HashMap<>();
 
-      println("<!doctype html>");
-      println("<html>");
-      println("<head>");
-      println("<title>" + this.title + "</title>");
-      println("<link rel=\"icon\" type=\"image/png\" href=\"https://lysine.univ-brest.fr/VCFReporter/vcfreporter.logo.16x16.png\" sizes=\"16x16\"/>"
+      println(Println.asLines(
+          "<!doctype html>",
+          "<html>",
+          "<head>",
+          "<title>" + this.title + "</title>",
+          "<link rel=\"icon\" type=\"image/png\" href=\"https://lysine.univ-brest.fr/VCFReporter/vcfreporter.logo.16x16.png\" sizes=\"16x16\"/>"
               + "<link rel=\"icon\" type=\"image/png\" href=\"https://lysine.univ-brest.fr/VCFReporter/vcfreporter.logo.32x32.png\" sizes=\"32x32\"/>"
-              + "<link rel=\"icon\" type=\"image/png\" href=\"https://lysine.univ-brest.fr/VCFReporter/vcfreporter.logo.1131x1131.png\" sizes=\"1131x1131\"/>");
+              + "<link rel=\"icon\" type=\"image/png\" href=\"https://lysine.univ-brest.fr/VCFReporter/vcfreporter.logo.1131x1131.png\" sizes=\"1131x1131\"/>",
 
-      println("<link href=\"https://fonts.googleapis.com/css?family=Lato|Comfortaa|Dynalight|Playball|Share|Space+Mono|Ubuntu\" rel=\"stylesheet\">");
-      println("<link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css\" />");
-      println("<link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdn.datatables.net/fixedcolumns/3.2.6/css/fixedColumns.dataTables.min.css\" />");
-      println("<link rel=\"stylesheet\" type=\"text/css\" href=\"https://lysine.univ-brest.fr/VCFReporter/vcfreporter.css\"/>");
+          "<link href=\"https://fonts.googleapis.com/css?family=Lato|Comfortaa|Dynalight|Playball|Share|Space+Mono|Ubuntu\" rel=\"stylesheet\">",
+          "<link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css\" />",
+          "<link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdn.datatables.net/fixedcolumns/3.2.6/css/fixedColumns.dataTables.min.css\" />",
+          "<link rel=\"stylesheet\" type=\"text/css\" href=\"https://lysine.univ-brest.fr/VCFReporter/vcfreporter.css\"/>",
 
-      println("<script src=\"https://code.jquery.com/jquery-3.3.1.js\"></script>");
-      println("<script src=\"https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js\"></script>");
-      println("<script src=\"https://cdn.datatables.net/fixedcolumns/3.2.6/js/dataTables.fixedColumns.min.js\"></script>");
-      println("<script type=\"text/javascript\" src=\"https://lysine.univ-brest.fr/VCFReporter/vcfreporter.js\"></script>");
-      println("<script type=\"text/javascript\" src=\"https://lysine.univ-brest.fr/VCFReporter/table" + fixed + ".js\"></script>");
+          "<script src=\"https://code.jquery.com/jquery-3.3.1.js\"></script>",
+          "<script src=\"https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js\"></script>",
+          "<script src=\"https://cdn.datatables.net/fixedcolumns/3.2.6/js/dataTables.fixedColumns.min.js\"></script>",
+          "<script type=\"text/javascript\" src=\"https://lysine.univ-brest.fr/VCFReporter/vcfreporter.js\"></script>",
+          "<script type=\"text/javascript\" src=\"https://lysine.univ-brest.fr/VCFReporter/table" + fixed + ".js\"></script>",
 
-      println("</head>");
-      println("<body>");
-      println("<header><div id=\"logo\"><img src=\"https://lysine.univ-brest.fr/VCFReporter/vcfreporter.logo.png\" height=\"100px\"/></div><div id=\"title\"><h1>" + title + "</h1></div></header>");
-      println("<div class=\"wrapper\">");
-      println("<div class=\"scroller\">");
-      println("<table id=\"scrolltable\" class=\"stripe\" style=\"width:100%\">");
-      println("<thead>");
+          "</head>",
+          "<body>",
+          "<header><div id=\"logo\"><img src=\"https://lysine.univ-brest.fr/VCFReporter/vcfreporter.logo.png\" height=\"100px\"/></div><div id=\"title\"><h1>" + title + "</h1></div></header>",
+          "<div class=\"wrapper\">",
+          "<div class=\"scroller\">",
+          "<table id=\"scrolltable\" class=\"stripe\" style=\"width:100%\">",
+          "<thead>"
+      ));
       String sep = "th";
       String line;
       while ((line = in.readLine()) != null) {
@@ -97,21 +101,23 @@ public class TSV2HTML extends Function {
         }
 
         out.append("</tr>");
-        println(out.toString());
+        println(new Println(out.toString()));
         if ("th".equals(sep)) {
-          println("</thead>");
-          println("<tbody>");
+          println(Println.asLines("</thead>","<tbody>"));
         }
         sep = "td";
       }
-      println("</tbody>");
-      println("</table>");
-      println("</div>");
-      println("</div>");
-      println("<div w3-include-html=\"https://lysine.univ-brest.fr/VCFReporter/footer.html\" id=\"pagefooter\" class=\"pagefooter\"></div>");
-      println("<script>includeHTML();</script>");
-      println("</body>");
-      println("</html>");
+
+      println(Println.asLines(
+          "</tbody>",
+          "</table>",
+          "</div>",
+          "</div>",
+          "<div w3-include-html=\"https://lysine.univ-brest.fr/VCFReporter/footer.html\" id=\"pagefooter\" class=\"pagefooter\"></div>",
+          "<script>includeHTML();</script>",
+          "</body>",
+          "</html>"
+      ));
     }
   }
 

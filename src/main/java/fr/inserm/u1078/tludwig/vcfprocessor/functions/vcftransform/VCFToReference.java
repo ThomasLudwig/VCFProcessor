@@ -10,6 +10,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FastaFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Outputs the given VCF File and reverts genotypes when ref/alt alleles are inverted according to given reference (as a fasta file)
@@ -76,7 +77,7 @@ public class VCFToReference extends ParallelVCFFunction<Boolean> {
   }
 
   @Override
-  public String[] processInputRecord(VariantRecord record) {
+  public Println[] processInputRecord(VariantRecord record) {
     try {
       String vcfRef = record.getRef();
       String vcfAlt = record.getAltString();
@@ -89,7 +90,7 @@ public class VCFToReference extends ParallelVCFFunction<Boolean> {
       String fastaRef = fasta.getStringFor(record.getChrom(), record.getPos(), 1);
       if (vcfRef.equals(fastaRef)) {
         this.pushAnalysis(true);//kept++;
-        return new String[]{record.toString()};
+        return new Println[]{record.createVariant().println()};
       }
       
       if (!vcfAlt.equals(fastaRef)){

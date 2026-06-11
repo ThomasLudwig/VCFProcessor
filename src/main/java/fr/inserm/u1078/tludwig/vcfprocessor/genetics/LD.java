@@ -1,12 +1,15 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.Objects;
 
 /**
  *
  * @author Thomas E. Ludwig (INSERM - U1078)
  */
-public class LD {
+public class LD implements Printable {
 
   private static final int REF = 0;
   private static final int HET = 1;
@@ -128,7 +131,7 @@ public class LD {
     return min;
   }
 
-  private class Root {
+  private class Root implements Printable {
 
     private final static double LIMIT = 10e-9;
 
@@ -144,18 +147,25 @@ public class LD {
 
     @SuppressWarnings("SpellCheckingInspection")
     @Override
-    public String toString() {
-      return "Root{" + "\n"
-              + "\tf11=" + f11 + "\n"
-              + "\tf12=" + f12 + "\n"
-              + "\tf21=" + f21 + "\n"
-              + "\tf22=" + f22 + "\n"
-              + "\td=" + d + "\n"
-              + "\tdprime=" + dPrime + "\n"
-              + "\trsq=" + rsq + "\n"
-              + "\tlod=" + lod + "\n"
-              + "\tchiSquarePvalue=" + chiSquarePvalue + "\n"
-              + "}";
+    public String toString() { return println().toString(); }
+
+    @Override
+    public Println println() {
+      final String T = "\t";
+      final String N = "\n";
+
+      return new Println(
+          "Root{", N,
+          T, "f11=", f11, N,
+          T, "f12=", f12, N,
+          T, "f21=", f21, N,
+          T, "f22=", f22, N,
+          T, "d=", d, N,
+          T, "dprime=", dPrime, N,
+          T, "rsq=", rsq, N,
+          T, "lod=", lod, N,
+          T, "chiSquarePvalue=", chiSquarePvalue, N,
+          "}");
     }
 
     private Root(double root) {
@@ -261,6 +271,11 @@ public class LD {
 
   @Override
   public String toString() {
-    return "D=" + this.d + " D'=" + this.dPrime + " R²=" + this.r2 + " LOD=" + this.lod + " chi² p-value=" + this.chiSquarePvalue;
+    return println().toString();
+  }
+
+  @Override
+  public Println println() {
+    return new Println("D=", this.d, " D'=", this.dPrime, " R²=", this.r2, " LOD=", this.lod, " chi² p-value=", this.chiSquarePvalue);
   }
 }

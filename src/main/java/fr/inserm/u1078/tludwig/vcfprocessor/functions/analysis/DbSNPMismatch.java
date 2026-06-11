@@ -6,6 +6,9 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 
 /**
@@ -44,8 +47,8 @@ public class DbSNPMismatch extends ParallelVCFVariantFunction<DbSNPMismatch.Mini
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return new String[]{String.join(T, HEADERS)};
+  public Println[] getHeaders() {
+    return new Println[]{Println.join(T, HEADERS)};
   }
 
   @SuppressWarnings("unused")
@@ -56,7 +59,7 @@ public class DbSNPMismatch extends ParallelVCFVariantFunction<DbSNPMismatch.Mini
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     String id = variant.getId();
     String rs = String.join(",", variant.getInfo().getVEPInfo().getRSs());
     if(rs == null || rs.isEmpty())
@@ -80,14 +83,14 @@ public class DbSNPMismatch extends ParallelVCFVariantFunction<DbSNPMismatch.Mini
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getFooters() {
-    ArrayList<String> out = new ArrayList<>();
+  public Println[] getFooters() {
+    ArrayList<Println> out = new ArrayList<>();
     for(MiniVar minivar : this.outputs)
-      out.add(minivar.toString());
-    return out.toArray(new String[0]);
+      out.add(minivar.println());
+    return out.toArray(new Println[0]);
   }
   
-  public static class MiniVar implements Comparable<MiniVar>{
+  public static class MiniVar implements Comparable<MiniVar>, Printable {
     private final String chr;
     private final int pos;
     private final String id;
@@ -113,9 +116,7 @@ public class DbSNPMismatch extends ParallelVCFVariantFunction<DbSNPMismatch.Mini
     }
 
     @Override
-    public String toString() {
-      return String.join(T, new String[]{chr, pos+"", id, ref, alt, vep});
-    }
+    public Println println() { return Println.join(T, chr, pos, id, ref, alt, vep); }
   }
   
   @Override

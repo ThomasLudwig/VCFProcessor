@@ -12,6 +12,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.TSVFileParamete
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Canonical;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -98,7 +99,7 @@ public class RAVAQPrefilter extends ParallelVCFVariantFilterPedFunction {
   }
 
   @Override
-  public String[] processInputVariantForFilter(Variant variant) {
+  public Println[] processInputVariantForFilter(Variant variant) {
     for (int a : variant.getNonStarAltAllelesAsArray())
       if(filter(variant, a))
         return NO_OUTPUT;
@@ -137,12 +138,9 @@ public class RAVAQPrefilter extends ParallelVCFVariantFilterPedFunction {
     double max = 0;
     for(PrepareGnomADFile.GnomAD gnomad : new PrepareGnomADFile.GnomAD[]{exome, genome})
       if(gnomad != null)
-        for(String s : new String[]{gnomad.getAF(), gnomad.getAF(pop)}){
-          try{
-            double d = Double.parseDouble(s);
+        for(Double d : new Double[]{gnomad.getAF(), gnomad.getAF(pop)}){
             if(d > max)
               max = d;
-          } catch (NumberFormatException ignore) {}
         }
     return max;
   }

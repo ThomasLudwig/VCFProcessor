@@ -7,6 +7,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPVariantIDFacade;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Puts all observed RS numbers in the ID column
@@ -39,14 +40,13 @@ public class ReaffectdbSNP extends ParallelVCFVariantFunction<Object> {
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
-    String[] f = variant.getFields();
+  public Println[] processInputVariant(Variant variant) {
     String rs = String.join(",", variant.getInfo().getVEPInfo().getRSs());
-    if(rs == null)
+    if(rs.isEmpty())
       rs = ".";
-    
-    f[VCF.IDX_ID] = rs;
-    return new String[]{String.join(T, f)};
+
+    variant.setId(rs);
+    return new Println[]{variant.println()};
   }
 
   @Override

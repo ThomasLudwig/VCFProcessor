@@ -7,6 +7,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.HashMap;
 
 /**
@@ -54,14 +56,14 @@ public class VQSLod extends ParallelVCFFunction<VQSLod.Analysis> {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return new String[]{String.join(T, HEADER)};
+  public Println[] getHeaders() {
+    return new Println[]{Println.join(T, HEADER)};
   }
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getFooters() {
-    String[] ret = new String[tranches.size()];
+  public Println[] getFooters() {
+    Println[] ret = new Println[tranches.size()];
     int i = 0;
     for (NumberSeries tranche : tranches.values()) {
       ret[i] = getStats(tranche);
@@ -70,22 +72,22 @@ public class VQSLod extends ParallelVCFFunction<VQSLod.Analysis> {
     return ret;
   }
 
-  private String getStats(NumberSeries tranche) {
-    StringBuilder out = new StringBuilder(tranche.getName());
+  private Println getStats(NumberSeries tranche) {
+    Println out = new Println(tranche.getName());
     out.append(T).append(tranche.getMean());
     for (double d = 0; d <= 1; d += .1)
       out.append(T).append(tranche.getPercentile(d));
-    return out.toString();
+    return out;
   }
 
   @Override
-  public String[] processInputRecord(VariantRecord record) {
+  public Println[] processInputRecord(VariantRecord record) {
     String tr = record.getFiltersString();
     String[][] info = record.getInfoFields();
     for(String[] kv : info)
       if(kv[0].equals(VQSLOD))
         this.pushAnalysis(new Analysis(tr, Double.parseDouble(kv[1])));
-    return new String[]{};
+    return NO_OUTPUT;
   }
 
   @SuppressWarnings("unused")

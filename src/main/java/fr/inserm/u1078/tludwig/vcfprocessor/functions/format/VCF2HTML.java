@@ -2,11 +2,14 @@ package fr.inserm.u1078.tludwig.vcfprocessor.functions.format;
 
 import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
+import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -78,16 +81,16 @@ public class VCF2HTML extends ParallelVCFFunction {
 
   @SuppressWarnings({"unused"})
   @Override
-  public String[] getHeaders() {
-    ArrayList<String> out = new ArrayList<>();
-    out.add("<html>");
-    out.add("<head>");
-    out.add("<title>" + this.vcfFile.getFilename() + "</title>");
-    out.add("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
-    out.add("<link rel=\"stylesheet\" type=\"text/css\" href=\"https://lysine.univ-brest.fr/css/vcf.css\">");
-    out.add("</head>");
-    out.add("<body>");
-    out.add("<table class=\"vcftable\">");
+  public Println[] getHeaders() {
+    ArrayList<Println> out = new ArrayList<>();
+    out.add(new Println("<html>"));
+    out.add(new Println("<head>"));
+    out.add(new Println("<title>" + this.vcfFile.getFilename() + "</title>"));
+    out.add(new Println("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">"));
+    out.add(new Println("<link rel=\"stylesheet\" type=\"text/css\" href=\"https://lysine.univ-brest.fr/css/vcf.css\">"));
+    out.add(new Println("</head>"));
+    out.add(new Println("<body>"));
+    out.add(new Println("<table class=\"vcftable\">"));
         
     LineBuilder line = new LineBuilder();
     line.openHTML("tr",HEAD);
@@ -98,19 +101,19 @@ public class VCF2HTML extends ParallelVCFFunction {
     for (String sample : samples)
       th(line, sample, HEAD);
     line.closeHTML("tr");
-    out.add(line.toString());
+    out.add(new Println(line.toString()));
     
-    return out.toArray(new String[0]);
+    return out.toArray(new Println[0]);
   }
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getFooters() {
-    ArrayList<String> out = new ArrayList<>();
-    out.add("</table>");
-    out.add("</body>");
-    out.add("</html>");
-    return out.toArray(new String[0]);
+  public Println[] getFooters() {
+    ArrayList<Println> out = new ArrayList<>();
+    out.add(new Println("</table>"));
+    out.add(new Println("</body>"));
+    out.add(new Println("</html>"));
+    return out.toArray(new Println[0]);
   }
 
   private void setInfoHeader(String line) {
@@ -146,7 +149,7 @@ public class VCF2HTML extends ParallelVCFFunction {
   }
 
   @Override
-  public String[] processInputRecord(VariantRecord record) {
+  public Println[] processInputRecord(VariantRecord record) {
     String[][] inf = record.getInfoFields();
     /*String[] infs = f[7].split(";");*/
     StringBuilder infoSB = new StringBuilder(inf[0][0]);
@@ -167,7 +170,7 @@ public class VCF2HTML extends ParallelVCFFunction {
       return NO_OUTPUT;
     
     boolean first = true;
-    String[] outs = new String[csqLists.length];
+    Println[] outs = new Println[csqLists.length];
     for (int c = 0 ; c < csqLists.length; c++) {
       String csqs = csqLists[c];
       LineBuilder out = new LineBuilder();
@@ -177,7 +180,7 @@ public class VCF2HTML extends ParallelVCFFunction {
       td(out, record.getID(), COMMONS[2], first);
       td(out, record.getRef(), COMMONS[3], first);
       td(out, record.getAltString(), COMMONS[4], first);
-      td(out, record.getQual(), COMMONS[5], first);
+      td(out, record.getQual() == null ? "." : StringTools.scientificFormat(record.getQual(), 4), COMMONS[5], first);
       td(out, record.getFiltersString(), COMMONS[6], first);
       td(out, infoSB.toString(), COMMONS[COMMONS.length - 1], first);
       String[] csq = (csqs + " ").split("\\|");
@@ -201,7 +204,7 @@ public class VCF2HTML extends ParallelVCFFunction {
 
       out.closeHTML("tr");
       out.newLine();
-      outs[c] = out.toString();
+      outs[c] = new Println(out);
       first = false;
     }
     return outs;

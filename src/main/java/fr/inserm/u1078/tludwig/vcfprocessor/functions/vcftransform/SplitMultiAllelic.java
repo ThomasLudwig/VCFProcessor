@@ -8,6 +8,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,20 +61,18 @@ public class SplitMultiAllelic extends ParallelVCFFunction {
 
 
   @Override
-  public String[] processInputRecord(VariantRecord record) {
+  public Println[] processInputRecord(VariantRecord record) {
     //not a multi allelic variant --> jobs done
     if(record.getAlts().length == 1)
-      return new String[]{record.toString()};
-
+      return new Println[]{record.println()};
 
     String[] f = record.asFields();
-
 
     String ref = record.getRef();
     String[] alts = record.getAlts();
     String[] infos = f[VCF.IDX_INFO].split(";");
 
-    String[] ret = new String[alts.length];
+    Println[] ret = new Println[alts.length];
     for (int a = 0; a < alts.length; a++) {
       String[] out = new String[f.length];
       System.arraycopy(f, 0, out, 0, f.length);
@@ -92,9 +91,9 @@ public class SplitMultiAllelic extends ParallelVCFFunction {
       out[VCF.IDX_INFO] = String.join(";", outInfos);
 
       for (int i = VCF.IDX_SAMPLE; i < out.length; i++)
-        out[i] = convertGenotype(out[i], f[VCF.IDX_FORMAT], a);
+        out[i] = convertGenotype(out[i], f[VCF.IDX_FORMAT], a); //TODO leave has is ? or format double ?
 
-      ret[a] = String.join(T, out[a]);
+      ret[a] = Println.join(T, out[a]);
     }
 
     return ret;

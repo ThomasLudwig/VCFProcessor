@@ -1,12 +1,14 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  *
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 31 août 2016
  */
-public class Exon {
+public class Exon implements Comparable<Exon>, Printable {
 
   private final String chr;
   private final int start;
@@ -56,6 +58,14 @@ public class Exon {
       return ret;
 
     return this.number - exon.number;
+  }
+
+  @Override
+  public Println println() { return new Println(name,"/", number, "(", chr, ":", start,"-",end,")"); }
+
+  @Override
+  public String toString() {
+    return println().toString();
   }
 
   public boolean isInExon(String chr, int pos) {

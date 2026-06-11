@@ -7,6 +7,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Canonical;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.util.ArrayList;
 
@@ -32,22 +33,22 @@ public class ExtractCanonical extends ParallelVCFFunction {
   public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.IGNORE_STAR_ALLELE_AS_LINE); }
 
   @Override
-  public String[] getHeaders() {
-    return new String[]{String.join(T,"#Canonical","AC>0")};
+  public Println[] getHeaders() {
+    return new Println[]{Println.join(T,"#Canonical","AC>0")};
   }
 
   @Override
-  public String[] processInputRecord(VariantRecord record) {
-    ArrayList<String> ret = new ArrayList<>();
+  public Println[] processInputRecord(VariantRecord record) {
+    ArrayList<Println> ret = new ArrayList<>();
     String[] alt = record.getAlts();
     boolean[] AC = areACPositive(record);
 
     for (int a = 0; a < AC.length; a++) {
       if(!"*".equals(record.getAlts()[a]))
-        ret.add(new Canonical(record.getChrom(), record.getPos(), record.getRef(), alt[a]).toString() + "\t" + AC[a]);
+        ret.add(new Println(new Canonical(record.getChrom(), record.getPos(), record.getRef(), alt[a]), T, AC[a]));
     }
 
-    return ret.toArray(new String[0]);
+    return ret.toArray(new Println[0]);
   }
 
   @Override

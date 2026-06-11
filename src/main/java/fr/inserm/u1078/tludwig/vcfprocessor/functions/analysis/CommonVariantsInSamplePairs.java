@@ -9,6 +9,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -81,7 +82,7 @@ public class CommonVariantsInSamplePairs extends ParallelVCFVariantFunction<Comm
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     //initialize analysis (count)
     Count count = new Count(S);
     int A = variant.getAlleleCount();
@@ -159,8 +160,8 @@ public class CommonVariantsInSamplePairs extends ParallelVCFVariantFunction<Comm
   }
 
   @Override
-  public String[] getHeaders() {
-    return new String[]{String.join(
+  public Println[] getHeaders() {
+    return new Println[]{Println.join(
         T,
         "sampleA",
         "sampleB",
@@ -177,23 +178,24 @@ public class CommonVariantsInSamplePairs extends ParallelVCFVariantFunction<Comm
   }
 
   @Override
-  public String[] getFooters() {
-    String[] footers = new String[P];
+  public Println[] getFooters() {
+    Println[] footers = new Println[P];
     int i = 0;
     for(int a = 0; a < S - 1; a++)
       for (int b = a + 1; b < S; b++, i++)
-        footers[i] =
-            SAMPLES[a]
-                +T+SAMPLES[b]
-                +T+counts[i][HETHETP]
-                +T+counts[i][HETHETS]
-                +T+counts[i][HETHOMP]
-                +T+counts[i][HETHOMS]
-                +T+counts[i][HOMHETP]
-                +T+counts[i][HOMHETS]
-                +T+counts[i][HOMHOMP]
-                +T+counts[i][HOMHOMS]
-                +T+counts[i][TOTAL];
+        footers[i] = Println.join(T,
+            SAMPLES[a],
+            SAMPLES[b],
+            counts[i][HETHETP],
+            counts[i][HETHETS],
+            counts[i][HETHOMP],
+            counts[i][HETHOMS],
+            counts[i][HOMHETP],
+            counts[i][HOMHETS],
+            counts[i][HOMHOMP],
+            counts[i][HOMHOMS],
+            counts[i][TOTAL]
+        );
     return footers;
   }
 

@@ -7,6 +7,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.util.ArrayList;
 
@@ -45,8 +46,8 @@ public class ExtractPrivateToGroup extends ParallelVCFVariantPedFunction<Object>
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return new String[]{String.join(T,HEADER)};
+  public Println[] getHeaders() {
+    return new Println[]{Println.join(T, HEADER)};
   }
 
   @SuppressWarnings("unused")
@@ -89,9 +90,9 @@ public class ExtractPrivateToGroup extends ParallelVCFVariantPedFunction<Object>
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     //Init
-    ArrayList<String> outs = new ArrayList<>();
+    ArrayList<Println> outs = new ArrayList<>();
     ArrayList<Integer> alleles = variant.getNonStarAltAllelesAsList();
     int N = variant.getAlleleCount()+1;
     Allele[] all = new Allele[N];
@@ -116,9 +117,9 @@ public class ExtractPrivateToGroup extends ParallelVCFVariantPedFunction<Object>
     //Output results
     for (int a : alleles)
       if (all[a].isOutput())
-        outs.add(variant.getChrom() + T + variant.getPos() + T + all[a].getOutput());
+        outs.add(new Println(variant.getChrom(), T, variant.getPos(), T, all[a].getOutput()));
 
-    return outs.toArray(new String[0]);
+    return outs.toArray(new Println[0]);
   }
 
   private void test(Sample sample, int a, Allele[] all) {

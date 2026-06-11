@@ -1,5 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -116,7 +118,7 @@ public class Stats {
    * @param z
    * @return
    */
-  static double igf(double s, double z) {
+  public static double igf(double s, double z) {
     if (z < 0.0)
       return 0.0;
 

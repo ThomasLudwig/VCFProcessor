@@ -7,6 +7,7 @@ import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.ListParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  *
@@ -44,12 +45,12 @@ public class GzPaste extends Function {
     String line;
     int read = 0;
     while ((line = ins[0].readLine()) != null) {
-      LineBuilder out = new LineBuilder(line);
+      Println out = new Println(line);
       for (int i = 1; i < fns.length; i++)
-        out.addColumn(ins[i].readLine());
+        out.append(T, ins[i].readLine());
       if ((read++ % 100000) == 0)
         Message.progressInfo("Read : " + read);
-      println(out.toString());
+      println(out);
     }
 
     for (int i = 0; i < fns.length; i++)

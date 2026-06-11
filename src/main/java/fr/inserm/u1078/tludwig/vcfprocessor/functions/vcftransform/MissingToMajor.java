@@ -7,6 +7,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Replaces every missing genotype by the most frequent allele present
@@ -43,7 +44,7 @@ public class MissingToMajor extends ParallelVCFVariantFunction<Object> {
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     int majorAllele = variant.getMajorAllele();
     StringBuilder dflt = new StringBuilder(majorAllele + "");
     for(int i = 1; i < variant.getMostFrequentPloidy(); i++)

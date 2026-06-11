@@ -1,9 +1,11 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
+import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.AbstractRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.*;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.*;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.util.Arrays;
 
@@ -28,8 +30,8 @@ public class VCFRecord extends VariantRecord {
   }
 
   @Override
-  public String toString() {
-    return String.join(AbstractRecord.T, left) + AbstractRecord.T + String.join(AbstractRecord.T, filteredRight);
+  public Println println() {
+    return Println.join(AbstractRecord.T, left, filteredRight);
   }
 
   @Override
@@ -109,13 +111,11 @@ public class VCFRecord extends VariantRecord {
   }
 
   @Override
-  public String getQual() {
-    return left[VCF.IDX_QUAL];
-  }
+  public Double getQual() { return readQual(left[VCF.IDX_QUAL]); }
 
   @Override
-  public void setQual(String qual) {
-    left[VCF.IDX_QUAL] = qual;
+  public void setQual(Double qual) {
+    left[VCF.IDX_QUAL] = qual == null ? "." : StringTools.scientificFormat(qual, 4);
   }
 
   @Override
@@ -222,7 +222,7 @@ public class VCFRecord extends VariantRecord {
       String id = left[VCF.IDX_ID];
       String ref = left[VCF.IDX_REF];
       String alt = left[VCF.IDX_ALT];
-      String qual = left[VCF.IDX_QUAL];
+      Double qual = readQual(left[VCF.IDX_QUAL]);
       String filter = left[VCF.IDX_FILTER];
       InfoColumn infoColumn = getInfo();
       GenotypeFormat format = getVCF().checkMode(VCF.MODE_QUICK_GENOTYPING) ? new GenotypeFormat("GT") : new GenotypeFormat(filteredRight[0]);
@@ -239,6 +239,14 @@ public class VCFRecord extends VariantRecord {
       return new Variant(chrom, pos, id, ref, alt, qual, filter, infoColumn, format, genotypes);
     } catch (VariantException | NumberFormatException e) {
       throw new VCFException(getVCF(), "Could not create variant ("+ e.getMessage()+")", this, e);
+    }
+  }
+
+  private static Double readQual(String qual) {
+    try{
+      return Double.parseDouble(qual);
+    } catch(NumberFormatException e){
+      return null;
     }
   }
 

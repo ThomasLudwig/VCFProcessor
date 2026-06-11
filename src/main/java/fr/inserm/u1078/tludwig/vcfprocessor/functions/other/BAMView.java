@@ -5,6 +5,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.alignments.AlignmentRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.alignments.BAMRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.SAMFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 public class BAMView extends SAMFunction<Object> {
 
@@ -24,10 +25,9 @@ public class BAMView extends SAMFunction<Object> {
   }
 
   @Override
-  public String[] processInputRecord(AlignmentRecord record) {
+  public Println[] processInputRecord(AlignmentRecord record) {
     BAMRecord bamRecord = (BAMRecord)record;
-    String string = bamRecord.getPointer()+T+bamRecord.getRefId()+T+bamRecord.getPos()+T+"bin["+bamRecord.getBin()+"]";
-    return new String[]{string};
+    return new Println[]{new Println(bamRecord.getPointer(), T, bamRecord.getRefId(), T, bamRecord.getPos(), T, "bin[", bamRecord.getBin(), "]")};
   }
 
   @Override

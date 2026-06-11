@@ -5,6 +5,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * "Replaces the Info column by "."
@@ -37,9 +38,9 @@ public class ClearInfoField extends ParallelVCFFunction {
   }
 
   @Override
-  public String[] processInputRecord(VariantRecord record) {
+  public Println[] processInputRecord(VariantRecord record) {
     record.clearInfo();
-    return new String[]{record.toString()};
+    return new Println[]{record.println()};
   }
   
   @Override

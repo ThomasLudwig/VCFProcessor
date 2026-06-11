@@ -19,10 +19,8 @@ public class QualityFilter extends LineFilter {
 
   @Override
   public boolean pass(VariantRecord record) {
-    double qual = 0;
-    try {
-      qual = Double.parseDouble(record.getQual());
-    } catch (NumberFormatException ignore) { }
+    Double qual = record.getQual();
+    if(qual==null) qual=0D;
     return minQ <= qual && qual <= maxQ;
   }
 

@@ -1,12 +1,14 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations;
 
 import fr.inserm.u1078.tludwig.maok.tools.ArrayTools;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  *
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 26 juil. 2016
  */
-public class FrExAnnotation {
+public class FrExAnnotation implements Printable {
 
   private final String[] alleles;
   private final double[] frexFreq;
@@ -108,4 +110,7 @@ public class FrExAnnotation {
       return 0;
     return rouenFreq[i];
   }
+
+  @Override
+  public Println println() { throw new UnsupportedOperationException(); }
 }

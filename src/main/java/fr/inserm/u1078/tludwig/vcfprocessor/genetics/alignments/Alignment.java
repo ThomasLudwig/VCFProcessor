@@ -1,9 +1,12 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.genetics.alignments;
 
 
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 
-public  class Alignment {
+public  class Alignment implements Printable {
   private String queryName;
   private int flag;
   private String refID;
@@ -285,20 +288,27 @@ public  class Alignment {
 
   @Override
   public String toString() {
+    return println().toString();
+  }
+
+  @Override
+  public Println println() {
     String T = "\t";
-    StringBuilder ret = new StringBuilder(getQueryName())
-        .append(T).append(getFlag())
-        .append(T).append(getRefID())
-        .append(T).append(getPos())
-        .append(T).append(getMappingQuality())
-        .append(T).append(getCigar())
-        .append(T).append(getNextRefID())
-        .append(T).append(getNextPos())
-        .append(T).append(getTemplateLength())
-        .append(T).append(getSequence())
-        .append(T).append(getSeqQuality());
+    Println ret = Println.join(T,
+        getQueryName(),
+        getFlag(),
+        getRefID(),
+        getPos(),
+        getMappingQuality(),
+        getCigar(),
+        getNextRefID(),
+        getNextPos(),
+        getTemplateLength(),
+        getSequence(),
+        getSeqQuality()
+    );
     for(Tag tag : getTags())
-      ret.append(T).append(tag);
-    return ret.toString();
+      ret.append(T, tag);
+    return ret;
   }
 }

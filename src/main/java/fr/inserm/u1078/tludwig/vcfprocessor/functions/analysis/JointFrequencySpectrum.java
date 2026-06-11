@@ -10,8 +10,10 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.FileOutputer;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -80,8 +82,8 @@ public class JointFrequencySpectrum extends ParallelVCFVariantPedFunction<int[]>
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return null;
+  public Println[] getHeaders() {
+    return NO_OUTPUT;
   }
 
   @SuppressWarnings("unused")
@@ -95,15 +97,15 @@ public class JointFrequencySpectrum extends ParallelVCFVariantPedFunction<int[]>
         String groupB = groups.get(gb);
         String outFilename = outdir.getDirectory() + groupA + "." + groupB + "." + suffix+ ".tsv";
         try {
-          PrintWriter out = getPrintWriter(outFilename);
-          for (int ca = 0; ca < size; ca++) {
-            LineBuilder line = new LineBuilder();
-            for (int cb = 0; cb < size; cb++)
-              line.addColumn(count[ga][gb][ca][cb]);
-            out.println(line.substring(1));
+          FileOutputer out = getFileOutputer(outFilename);
+          for (int ca = 0; ca < size; ca++) { //size is always >1
+            Println line = new Println(count[ga][gb][ca][0]);
+            for (int cb = 1; cb < size; cb++)
+              line.append(T).append(count[ga][gb][ca][cb]);
+            out.println(line);
           }
           out.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
           Message.error("Unable to write results to "+outFilename);
         }
       }
@@ -115,7 +117,7 @@ public class JointFrequencySpectrum extends ParallelVCFVariantPedFunction<int[]>
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     //count variants for each groups
     int alts = variant.getAlleleCount() - 1;
     int[][] tmpCount = new int[nb * 2][alts];

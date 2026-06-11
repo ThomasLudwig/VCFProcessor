@@ -8,6 +8,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.BooleanParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.util.*;
 
@@ -53,9 +54,7 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getExtraHeaders() {
-    return new String[]{DEFINITION};
-  }
+  public Println[] getExtraHeaders() { return Println.asLines(DEFINITION); }
 
   @SuppressWarnings("unused")
   @Override
@@ -71,7 +70,7 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
   public abstract boolean areCompound(Genotype[] g1, int a, Genotype[] g2, int b);
 
   @Override
-  public final String[] processInputVariant(Variant variant) {
+  public final Println[] processInputVariant(Variant variant) {
     Genotype[] genos = variant.getGenotypes();
     HashMap<Integer, Set<String>> genesByAllele = new HashMap<>();
     for (int a = 1; a < variant.getAlleles().length; a++)
@@ -120,8 +119,8 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getFooters(){
-    ArrayList<String> out = new ArrayList<>();
+  public Println[] getFooters(){
+    ArrayList<Println> out = new ArrayList<>();
     //Here there is a list of variant per gene, such has all variants are OK for the cases
     //Need to remove variants not valid for the controls...
     //take each pair of variants, if a pair is valid, add both variants (and annotate variants)
@@ -172,7 +171,7 @@ public abstract class AbstractCompoundFunction extends ParallelVCFVariantPedFunc
       out.add(asOutput(variant)[0]);
     }
     Message.info("Output written 100% (" + w + " variants)");
-    return out.toArray(new String[0]);
+    return out.toArray(new Println[0]);
   }
 
   //To store Annotation there are three levels

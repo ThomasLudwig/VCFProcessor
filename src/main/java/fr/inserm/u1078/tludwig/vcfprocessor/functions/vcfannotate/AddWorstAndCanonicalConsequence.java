@@ -8,6 +8,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.InfoColumn;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPAnnotation;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * For each variant, add the most severe VEP consequence and add the VEP consequence for the annotation marked as Canonical.
@@ -24,6 +25,7 @@ public class AddWorstAndCanonicalConsequence extends ParallelVCFFunction<Object>
   public static final String KEY_CANONICAL_CSQ = "CANONICAL_CSQ";
   public static final String KEY_CANONICAL_GENE = "CANONICAL_GENE";
 
+  //TODO AddInfoDefinition
   public static final String HEADER_WORST_CSQ = "##INFO=<ID=" + KEY_WORST_CSQ + ",Number=A,Type=String,Description=\"Most Severe vep Consequence for the variant\">";
   public static final String HEADER_WORST_GENE = "##INFO=<ID=" + KEY_WORST_GENE + ",Number=A,Type=String,Description=\"Gene affected by Most Severe vep Consequence for the variant\">";
   public static final String HEADER_CANONICAL_CSQ = "##INFO=<ID=" + KEY_CANONICAL_CSQ + ",Number=A,Type=String,Description=\"Canonical vep Consequence for the variant\">";
@@ -56,7 +58,7 @@ public class AddWorstAndCanonicalConsequence extends ParallelVCFFunction<Object>
   }
 
   @Override
-  public String[] processInputRecord(VariantRecord record) {
+  public Println[] processInputRecord(VariantRecord record) {
     int nbAllele = 1 + record.getAlts().length;
     InfoColumn infoColumn = record.getInfo();
     StringBuilder worstCsq = new StringBuilder();
@@ -66,31 +68,31 @@ public class AddWorstAndCanonicalConsequence extends ParallelVCFFunction<Object>
     for (int a = 1; a < nbAllele; a++) {
       VEPAnnotation worst = VEPConsequence.getWorstVEPAnnotation(infoColumn.getVEPInfo().getVEPAnnotations(a));
       VEPAnnotation canon = infoColumn.getVEPInfo().getCanonicalVEPAnnotation(a);
-      worstCsq.append(",").append(worst.getConsequence());
+      worstCsq.append(",").append(String.join("&",worst.getConsequence()));
       worstGene.append(",").append(worst.getSYMBOL());
-      canonicalCsq.append(",").append(canon.getConsequence());
+      canonicalCsq.append(",").append(String.join("&", canon.getConsequence()));
       canonicalGene.append(",").append(canon.getSYMBOL());
     }
-    if (worstCsq.length() == 0)
+    if (worstCsq.isEmpty())
       worstCsq = new StringBuilder(",");
-    if (worstGene.length() == 0)
+    if (worstGene.isEmpty())
       worstGene = new StringBuilder(",");
-    if (canonicalCsq.length() == 0)
+    if (canonicalCsq.isEmpty())
       canonicalCsq = new StringBuilder(",");
-    if (canonicalGene.length() == 0)
+    if (canonicalGene.isEmpty())
       canonicalGene = new StringBuilder(",");
 
     record.addInfo(KEY_WORST_CSQ, worstCsq.substring(1));
     record.addInfo(KEY_WORST_GENE, worstGene.substring(1));
     record.addInfo(KEY_CANONICAL_CSQ, canonicalCsq.substring(1));
     record.addInfo(KEY_CANONICAL_GENE, canonicalGene.substring(1));
-    return new String[]{record.toString()};
+    return new Println[]{record.println()};
   }
   
   @SuppressWarnings("unused")
   @Override
-  public String[] getExtraHeaders(){
-    return new String[]{HEADER_WORST_CSQ, HEADER_WORST_GENE, HEADER_CANONICAL_CSQ, HEADER_CANONICAL_GENE};
+  public Println[] getExtraHeaders(){
+    return Println.asLines(HEADER_WORST_CSQ, HEADER_WORST_GENE, HEADER_CANONICAL_CSQ, HEADER_CANONICAL_GENE);
   } 
 
   @Override

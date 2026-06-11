@@ -5,6 +5,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Resets the AC; AN; and AF value for the given VCF file
@@ -36,7 +37,7 @@ public class UpdateACANAF extends ParallelVCFVariantFunction<Object> {
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     variant.recomputeACAN();
     return asOutput(variant);
   }

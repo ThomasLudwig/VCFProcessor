@@ -10,6 +10,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Canonical;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -163,7 +164,7 @@ public class SimulateVCFFromExisting extends ParallelVCFPedFunction<Boolean> {
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     if(variant.isBiallelic() && variant.isSNP(1)) {
       //Get Gene
       final Canonical canonical = variant.getCanonical(1);
@@ -185,7 +186,7 @@ public class SimulateVCFFromExisting extends ParallelVCFPedFunction<Boolean> {
       //push KEPT/DROPPED
       if (variant.getAC()[1] > 0) {
         this.pushAnalysis(true);
-        return new String[]{variant.toString()};
+        return asOutput(variant);
       }
     }
     this.pushAnalysis(false);

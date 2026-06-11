@@ -6,6 +6,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 
 /**
@@ -44,20 +46,20 @@ public class VCF2TSV extends ParallelVCFFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders(){
+  public Println[] getHeaders(){
     String[] vh = getVCF().getSampleHeader().split(T);
-    LineBuilder header = new LineBuilder(vh[0]);
+    Println header = new Println(vh[0]);
     for (int i = 1; i < 8; i++)
-      header.addColumn(vh[i]);
+      header.append(T, vh[i]);
 
     if (vepHeaders != null)
       for (String v : vepHeaders)
-        header.addColumn(v);
+        header.append(T, v);
 
     for (int i = 8; i < vh.length; i++)
-      header.addColumn(vh[i]);
+      header.append(T, vh[i]);
 
-    return new String[]{header.toString()};
+    return new Println[]{new Println(header.toString())};
   }
 
   @SuppressWarnings("unused")
@@ -91,7 +93,7 @@ public class VCF2TSV extends ParallelVCFFunction {
   }
 
   @Override
-  public String[] processInputRecord(VariantRecord record) {
+  public Println[] processInputRecord(VariantRecord record) {
     ArrayList<String[]> veps = getVEPs(record.getInfoFields());
     //ArrayList<String[]> frexs = new ArrayList<>();
 
@@ -111,36 +113,27 @@ public class VCF2TSV extends ParallelVCFFunction {
     //Some columns (general ones) are only valued once, other are valued once per line, for multiple vep annotations)
     int size = Math.max(1, veps.size());
     //size = Math.max(size, frexs.size());
-    String[] outs = new String[size];
+    Println[] outs = new Println[size];
     for (int l = 0; l < size; l++) {
-      LineBuilder out = new LineBuilder();
-      if(l != 0)
-        out.addColumn().addColumn().addColumn().addColumn().addColumn().addColumn().addColumn();
-      else {
-        out.addColumn(record.getChrom());
-        out.addColumn(record.getPos());
-        out.addColumn(record.getID() );
-        out.addColumn(record.getRef());
-        out.addColumn(record.getAltString());
-        out.addColumn(record.getQual());
-        out.addColumn(record.getFilters());
-      }
+      Println out = l != 0
+          ? new Println(T, T, T, T, T, T)
+          : Println.join(T, record.getChrom(), record.getPos(), record.getID(), record.getRef(), record.getAltString(), record.getQual(), record.getFilters());
 
       if (vepHeaders != null)
         for (int s = 0; s < vepHeaders.length; s++) {
-          out.addColumn();
+          out.append(T);
           if (l < veps.size())
             if (veps.get(l)[s] != null)
               out.append(veps.get(l)[s]);
         }
       if(l != 0){
-        out.addColumn();//info
-        out.addColumn();//format
+        out.append(T);//info
+        out.append(T);//format
       }
       for(String geno : record.getGenotypeStrings())
-        out.addColumn(l == 0 ? geno : "");
+        out.append(T, l == 0 ? geno : "");
 
-      outs[l] = out.substring(1);
+      outs[l] =out;
     }
     return outs;
   }

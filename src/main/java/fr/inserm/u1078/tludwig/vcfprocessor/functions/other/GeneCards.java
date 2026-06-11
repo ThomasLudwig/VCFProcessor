@@ -5,6 +5,7 @@ import fr.inserm.u1078.tludwig.maok.UniversalReader;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  *
@@ -32,7 +33,7 @@ public class GeneCards extends Function {
   @SuppressWarnings("unused")
   @Override
   public void executeFunction() throws Exception {
-    println("#!/bin/bash");
+    println(new Println("#!/bin/bash"));
     try(UniversalReader in = this.geneList.getReader()) {
       String line;
       while ((line = in.readLine()) != null)
@@ -41,7 +42,7 @@ public class GeneCards extends Function {
   }
 
   private void getHTML(String gene) {
-    println("wget https://www.genecards.org/cgi-bin/carddisp.pl?gene=" + gene + " -O " + gene + ".html;");
+    println(new Println("wget https://www.genecards.org/cgi-bin/carddisp.pl?gene=" , gene , " -O " , gene , ".html;"));
   }
   
   @Override

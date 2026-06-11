@@ -2,6 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.files.alignments;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.alignments.Cigar;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.alignments.Tag;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 public class CRAMRecord extends AlignmentRecord {
 
@@ -62,6 +63,11 @@ public class CRAMRecord extends AlignmentRecord {
 
   @Override
   public Tag[] getTags() {
+    throw new UnsupportedOperationException(); //TODO implement
+  }
+
+  @Override
+  public Println println()  {
     throw new UnsupportedOperationException(); //TODO implement
   }
 }

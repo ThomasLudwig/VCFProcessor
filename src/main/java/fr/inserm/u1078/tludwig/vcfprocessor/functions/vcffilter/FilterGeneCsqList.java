@@ -11,6 +11,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPAnn
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -61,7 +63,7 @@ public class FilterGeneCsqList extends ParallelVCFVariantFilterFunction {
   }
 
   @Override
-  public String[] processInputVariantForFilter(Variant variant) {
+  public Println[] processInputVariantForFilter(Variant variant) {
     for (VEPAnnotation annot : variant.getInfo().getVEPInfo().getAllVEPAnnotations())
       for (String gene : genes)
         if (gene.equalsIgnoreCase(annot.getSYMBOL())) {

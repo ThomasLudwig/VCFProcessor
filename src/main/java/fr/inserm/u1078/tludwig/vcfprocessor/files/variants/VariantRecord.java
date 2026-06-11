@@ -141,8 +141,8 @@ public abstract class VariantRecord extends AbstractRecord {
   public abstract String[] getAlts();
   public abstract String getAltString();
   public abstract void setAlt(String alts);
-  public abstract String getQual();
-  public abstract void setQual(String qual);
+  public abstract Double getQual();
+  public abstract void setQual(Double qual);
   public abstract String[] getFilters();
 
   public boolean containsFilter(String filter){
@@ -159,7 +159,7 @@ public abstract class VariantRecord extends AbstractRecord {
   public abstract String getInfoString();
   public abstract String[][] getInfoFields();
   public abstract String getInfo(String key);
-  public abstract void addInfo(String key, String value);
+  public abstract void addInfo(String key, String value); //TODO extends for String, Double, Int,...
   public void addInfo(String[] kv){
     this.addInfo(kv[0], kv[1]);
   }

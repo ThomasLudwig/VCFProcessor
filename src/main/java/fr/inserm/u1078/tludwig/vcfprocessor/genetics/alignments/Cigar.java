@@ -1,8 +1,11 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.genetics.alignments;
 
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 
-public class Cigar {
+public class Cigar implements Printable {
   public static final int M = 0;
   public static final int I = 1;
   public static final int D = 2;
@@ -80,13 +83,18 @@ public class Cigar {
 
   @Override
   public String toString() {
+    return println().toString();
+  }
+
+  @Override
+  public Println println() {
     if(lengths.length == 0)
-      return "*";
-    final StringBuilder ret = new StringBuilder();
+      return new Println("*");
+    final Println ret = new Println();
     for(int i = 0 ; i < lengths.length; i++){
       ret.append(lengths[i]);
       ret.append(CIGAR[types[i]]);
     }
-    return ret.toString();
+    return ret;
   }
 }

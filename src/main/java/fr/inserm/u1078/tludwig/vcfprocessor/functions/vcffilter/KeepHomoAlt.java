@@ -6,6 +6,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.StringParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Returns a VCF containing only the position homozygous to alt for the given SAMPLES
@@ -43,7 +44,7 @@ public class KeepHomoAlt extends ParallelVCFVariantFilterFunction {
   }
   
   @Override
-  public String[] processInputVariantForFilter(Variant variant) {
+  public Println[] processInputVariantForFilter(Variant variant) {
     for(String sample : samples)
       if (!variant.getGenotype(sample).isHomozygousOrHaploidToAlt())
         return NO_OUTPUT;

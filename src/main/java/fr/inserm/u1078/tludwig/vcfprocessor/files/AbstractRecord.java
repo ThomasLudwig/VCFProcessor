@@ -1,8 +1,8 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files;
 
-import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
 
-public class AbstractRecord {
+public abstract class AbstractRecord implements Printable {
   public static final String T = "\t";
   private boolean isFiltered = false;
 
@@ -19,4 +19,7 @@ public class AbstractRecord {
   public final boolean isFiltered(){
     return this.isFiltered;
   }
+
+  @Override
+  public final String toString(){ return println().toString(); }
 }

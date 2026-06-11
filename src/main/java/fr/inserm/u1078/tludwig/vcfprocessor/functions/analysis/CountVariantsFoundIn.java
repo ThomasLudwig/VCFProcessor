@@ -11,6 +11,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -90,7 +91,7 @@ public class CountVariantsFoundIn extends ParallelVCFVariantFunction<CountVarian
   }
 
   @Override
-  public String[] getHeaders() {
+  public Println[] getHeaders() {
     final String T0 = "INDEL_NOTSINGLETON_ABSENT";
     final String T1 = "SNP_NOTSINGLETON_ABSENT";
     final String T2 = "INDEL_SINGLETON_ABSENT";
@@ -99,7 +100,7 @@ public class CountVariantsFoundIn extends ParallelVCFVariantFunction<CountVarian
     final String T5 = "SNP_NOTSINGLETON_PRESENT";
     final String T6 = "INDEL_SINGLETON_PRESENT";
     final String T7 = "SNP_SINGLETON_PRESENT";
-    return new String[]{String.join(T, "#CHROM", "SAMPLE", T0, T1, T2, T3, T4, T5, T6, T7)};
+    return new Println[]{Println.join(T, "#CHROM", "SAMPLE", T0, T1, T2, T3, T4, T5, T6, T7)};
   }
 
   @Override
@@ -119,25 +120,24 @@ public class CountVariantsFoundIn extends ParallelVCFVariantFunction<CountVarian
   }
 
   @Override
-  public void end() {
-    super.end();
-
+  public Println[] getFooters() {
+    Println[] out = new Println[samples.length];
     for(int chr = 0; chr < 24; chr++){
       String chrName = (chr+1)+"";
       if(chr == 22) chrName = "X";
       if(chr == 23) chrName = "Y";
       for(int s = 0 ; s <= samples.length; s++) {
         String sample = s < samples.length ? samples[s] : "GLOBAL";
-        StringBuilder out = new StringBuilder(chrName).append(T).append(sample);
+        out[s] = new Println(chrName, T, sample);
         for(int t = 0 ; t <= IS_SNP + IS_SINGLETON + IS_IN_REFERENCE; t++)
-          out.append(T).append(counts[chr][s][t]);
-        System.out.println(out);
+          out[s].append(T, counts[chr][s][t]);
       }
     }
+    return out;
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     if(isKept(variant)) {
       for(int a : variant.getNonStarAltAllelesAsArray()) {
         Canonical canonical = variant.getCanonical(a);
@@ -172,7 +172,7 @@ public class CountVariantsFoundIn extends ParallelVCFVariantFunction<CountVarian
       }
     }
 
-    return new String[0];
+    return NO_OUTPUT;
   }
 
   private boolean isKept(Variant variant){

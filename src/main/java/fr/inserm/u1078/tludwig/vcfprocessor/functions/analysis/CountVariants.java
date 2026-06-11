@@ -9,6 +9,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 
 /**
@@ -61,8 +63,8 @@ public class CountVariants extends ParallelVCFVariantPedFunction<int[]> {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getFooters() {
-    ArrayList<String> out = new ArrayList<>();
+  public Println[] getFooters() {
+    ArrayList<Println> out = new ArrayList<>();
     NumberSeries total = new NumberSeries("Total", SortedList.Strategy.SORT_AFTERWARDS);
     ArrayList<NumberSeries> series = new ArrayList<>();
     for (int ig = 0; ig < groups.size(); ig++) {
@@ -70,20 +72,20 @@ public class CountVariants extends ParallelVCFVariantPedFunction<int[]> {
       series.add(cGroup);
       for (int is = 0; is < this.samples[ig].size(); is++) {
         int value = this.counts.get(ig)[is];
-        out.add(this.samples[ig].get(is) + T + value);
+        out.add(new Println(this.samples[ig].get(is), T, value));
         total.add(value);
         cGroup.add(value);
       }
     }
 
     for (NumberSeries serie : series)
-      out.add(serie.getQuartileStats());
-    out.add(total.getQuartileStats());
-    return out.toArray(new String[0]);
+      out.add(new Println(serie.getQuartileStats()));
+    out.add(new Println(total.getQuartileStats()));
+    return out.toArray(new Println[0]);
   }
   
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     for (Genotype g : variant.getGenotypes()) {
       Sample s = g.getSample();
       String group = s.getGroup();
@@ -105,8 +107,8 @@ public class CountVariants extends ParallelVCFVariantPedFunction<int[]> {
   
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return new String[]{String.join(T, HEADER)};
+  public Println[] getHeaders() {
+    return new Println[]{Println.join(T, HEADER)};
   }
   
   @Override

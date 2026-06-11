@@ -7,6 +7,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.util.ArrayList;
 
@@ -51,17 +52,17 @@ public class FrequencyForPrivate extends ParallelVCFVariantPedFunction<Object> {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    StringBuilder out = new StringBuilder("CHROM" + T + "POS" + T + "REF" + T + "ALT" + T + "Frq_Total");
+  public Println[] getHeaders() {
+    Println out = Println.join(T, "CHROM", "POS", "REF", "ALT", "Frq_Total");
     for (int i = 0; i < G; i++)
-      out.append(T + "Frq_").append(getPed().getGroups().get(i));
-    out.append(T + "Consequences");
-    return new String[]{out.toString()};
+      out.append(T).append("Frq_").append(getPed().getGroups().get(i));
+    out.append(T).append("Consequences");
+    return new Println[]{out};
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
-    ArrayList<String> outs = new ArrayList<>();
+  public Println[] processInputVariant(Variant variant) {
+    ArrayList<Println> outs = new ArrayList<>();
     for (int a : variant.getNonStarAltAllelesAsArray())
       if (!variant.getInfo().getVEPInfo().isIn1kg(a) && !variant.getInfo().getVEPInfo().hasExistingVariants(a) && !variant.getInfo().getVEPInfo().isInGnomAD(a)) {
         int[] countByGroup = new int[G];
@@ -82,17 +83,18 @@ public class FrequencyForPrivate extends ParallelVCFVariantPedFunction<Object> {
           }
         }
 
-        LineBuilder out = new LineBuilder(variant.getChrom());
-        out.addColumn(variant.getPos());
-        out.addColumn(variant.getRef());
-        out.addColumn(variant.getAlleles()[a]);
-        out.addColumn(count / (1d * total));
+        Println out = Println.join(T,
+            variant.getChrom(),
+            variant.getPos(),
+            variant.getRef(),
+            variant.getAlleles()[a],
+            total == 0 ? 0 : count / (1d * total));
         for (int g = 0; g < G; g++)
-          out.addColumn(countByGroup[g] / (1d * totalInGroup[g]));
-        out.addColumn(String.join(",", variant.getInfo().getVEPInfo().getAllConsequences(a)));
-        outs.add(out.toString());
+          out.append(T, totalInGroup[g] == 0 ? 0 : countByGroup[g] / (1d * totalInGroup[g]));
+        out.append(T, String.join(",", variant.getInfo().getVEPInfo().getAllConsequences(a)));
+        outs.add(out);
       }
-    return outs.toArray(new String[0]);
+    return outs.toArray(new Println[0]);
   }
 
   @Override

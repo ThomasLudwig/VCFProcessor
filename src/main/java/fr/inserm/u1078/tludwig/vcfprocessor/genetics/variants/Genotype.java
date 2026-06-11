@@ -2,6 +2,8 @@ package fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.util.ArrayList;
 
@@ -11,11 +13,11 @@ import java.util.ArrayList;
  * @author Thomas E. Ludwig (INSERM - U1078)
  * Started : 2015/03/17
  */
-public class Genotype {
+public class Genotype implements Printable {
 
   private final GenotypeFormat format;
   private final Sample sample;
-  private String genotype;  
+  private String rawGenotype;
   private int nbChrom;
   private int[] alleles;
   private boolean phased = false;
@@ -27,12 +29,12 @@ public class Genotype {
   }
   
   public final void setTo(String genotype) {
-    this.genotype = genotype;
+    this.rawGenotype = genotype;
     if (genotype.charAt(0) == '.') {//missing
       this.nbChrom = 0;
       this.alleles = null;
     } else {
-      String gts = this.genotype.split(":")[0];
+      String gts = this.rawGenotype.split(":")[0];
       this.phased = isPhased(gts);
       this.alleles = getAlleles(gts);
       this.nbChrom = this.alleles == null ? 0 : alleles.length;
@@ -70,7 +72,7 @@ public class Genotype {
   }
 
   public final void setTo(Genotype replacement) {
-    this.setTo(replacement.genotype);
+    this.setTo(replacement.rawGenotype);
   }
 
   public final void setToMissing() {
@@ -95,9 +97,9 @@ public class Genotype {
   }
 
   public String getValue(String key/*, GenotypeFormat format*/) { //TODO possible bug source, don't understand why we had to provide format
-    if (this.genotype.charAt(0) == '.')
+    if (this.rawGenotype.charAt(0) == '.')
       return null;
-    return format.getValue(genotype, key);
+    return format.getValue(rawGenotype, key);
   }
 
   public Sample getSample() {
@@ -344,8 +346,11 @@ public class Genotype {
 
   @Override
   public String toString() {
-    return this.genotype;
-  }
+    return this.rawGenotype;
+  } //TODO in the future, split according to VCF format
+
+  @Override
+  public Println println() { return new Println(this); }
 
   /**
    * Add a trailing field, for a newly created annotation
@@ -355,7 +360,7 @@ public class Genotype {
   public void addField(String value) {
     if(isShortFormatMissing() && ".".equals(value))
       return;
-    this.genotype += ":" + value;
+    this.rawGenotype += ":" + value;
   }
 
   /**
@@ -363,14 +368,14 @@ public class Genotype {
    * @return true if a genotype is short missing
    */
   public boolean isShortFormatMissing(){
-    String[] f = this.genotype.split(":", -1);
+    String[] f = this.rawGenotype.split(":", -1);
     if(!f[0].startsWith("."))
       return false;
     return this.format.getSize() != f.length;
   }
 
   public void setMissing() {
-    this.genotype = this.createMissingGenotype();
+    this.rawGenotype = this.createMissingGenotype();
     this.nbChrom = 0;
     this.alleles = null;
   }

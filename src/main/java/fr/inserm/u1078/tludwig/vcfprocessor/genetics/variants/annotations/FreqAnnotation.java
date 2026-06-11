@@ -1,12 +1,14 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.InfoColumn;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  *
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 9 nov. 2016
  */
-public class FreqAnnotation {
+public class FreqAnnotation implements Printable {
 
   public static final String DBAF_FREX = "dbAF_FREX";
   public static final String DBAF_FREX_BOR = "dbAF_FREX_BOR";
@@ -255,4 +257,7 @@ public class FreqAnnotation {
   public double getDbAF_GONL(int a) {
     return this.frequencies[getIndex(DBAF_GONL)][a - 1];
   }
+
+  @Override
+  public Println println() { throw new UnsupportedOperationException(); }
 }

@@ -7,6 +7,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.BooleanParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Affect a genotype for each sample, for each position from the GenotypeProbability annotation
@@ -65,7 +66,7 @@ public class SetGenotypeFromProbability extends ParallelVCFFunction<Object> {
   }
 
   @Override
-  public String[] processInputRecord(VariantRecord record) {
+  public Println[] processInputRecord(VariantRecord record) {
     if(record.getAlts().length > 1){
       Message.warning("Can't process line why more than 1 alternate allele ["+record+"].");
       return NO_OUTPUT;
@@ -86,7 +87,7 @@ public class SetGenotypeFromProbability extends ParallelVCFFunction<Object> {
     for(int i = 0 ; i < record.getNumberOfSamples(); i++)
       updateGenotype(record, i, p);
 
-    return new String[]{record.toString()};
+    return new Println[]{record.println()};
   }
 
   @Override

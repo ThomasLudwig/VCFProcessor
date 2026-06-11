@@ -12,6 +12,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.VCFFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Canonical;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.TreeSet;
@@ -73,19 +75,19 @@ public class CommonVariants extends ParallelVCFFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return new String[]{};
+  public Println[] getHeaders() {
+    return NO_OUTPUT;
   }
 
   @Override
-  public String[] processInputRecord(VariantRecord record) {
-    ArrayList<String> ret = new ArrayList<>();
+  public Println[] processInputRecord(VariantRecord record) {
+    ArrayList<Println> ret = new ArrayList<>();
     for(Canonical c :Canonical.getCanonicals(record))
       if(this.variants.contains(c))
-        ret.add(c.toString());
+        ret.add(new Println(c));
     if(ret.isEmpty())
       return NO_OUTPUT;
-    return ret.toArray(new String[0]);
+    return ret.toArray(new Println[0]);
   }
 
   @Override

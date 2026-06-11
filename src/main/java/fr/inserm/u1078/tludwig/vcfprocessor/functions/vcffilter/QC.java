@@ -18,9 +18,11 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.HasMetricsAnnotation;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.FileOutputer;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -167,7 +169,7 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
   private boolean enableAF1 = true;
 
   public static final String MISSING = ".";
-  private PrintWriter out;
+  private FileOutputer out;
 
   private SortedList<Export> reportLines;
 
@@ -370,42 +372,43 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
     return defaultValue;
   }
 
-  private String getHeader() {
-    String[] headers = {
-      "#CHROM",
-      "POS",
-      "ID",
-      "REF",
-      "ALT",
-      "CallRate<" + this.minCallRate,
-      "Fisher(CallRate)<" + this.minFisherCallRate,
-      "QualByDepth<" + this.minQD,
-      "InbreedingCoef<" + this.minInbreeding,
-      "MQRankSum<" + this.minMQRankSum,
-      "FS>[" + this.maxFS_Indel + ";" + this.maxFS_SNP + "]",
-      "SOR>[" + this.maxSOR_Indel + ";" + this.maxSOR_SNP + "]",
-      "MQ<[" + this.minMQ_Indel + ";" + this.minMQ_SNP + "]",
-      "ReadPosRankSum<[" + this.minRPRS_Indel + ";" + this.minRPRS_SNP + "]",
-      //"HQRatio<" + this.minHQRatio,
-      "AltHQ<" + this.minAltHQ,
-      "AbHetDev(0.5)>" + this.maxABHetDev,
-      "AC=0(" + this.minDP + "<DP<" + this.maxDP + ";" + this.minGQ + "<GQ" + "; AB dev <" + this.maxABGenoDev+")",
-      "AF=1(" + this.minDP + "<DP<" + this.maxDP + ";" + this.minGQ + "<GQ" + "; AB dev <" + this.maxABGenoDev+")"};
-    return String.join(T, headers);
+  private Println getHeader() {
+    Println header = Println.join(T,
+        "#CHROM",
+        "POS",
+        "ID",
+        "REF",
+        "ALT");
+    header.append(T, "CallRate<", this.minCallRate);
+    header.append(T, "Fisher(CallRate)<", this.minFisherCallRate);
+    header.append(T, "QualByDepth<", this.minQD);
+    header.append(T, "InbreedingCoef<", this.minInbreeding);
+    header.append(T, "MQRankSum<", this.minMQRankSum);
+    header.append(T, "FS>[", this.maxFS_Indel, ";", this.maxFS_SNP, "]");
+    header.append(T, "SOR>[", this.maxSOR_Indel, ";", this.maxSOR_SNP, "]");
+    header.append(T, "MQ<[", this.minMQ_Indel, ";", this.minMQ_SNP, "]");
+    header.append(T, "ReadPosRankSum<[", this.minRPRS_Indel, ";", this.minRPRS_SNP, "]");
+    //header.append(T, "HQRatio<", this.minHQRatio);
+    header.append(T, "AltHQ<", this.minAltHQ);
+    header.append(T, "AbHetDev(0.5)>", this.maxABHetDev);
+    Println dpgq = new Println("(",this.minDP, "<DP<", this.maxDP, ";", this.minGQ, "<GQ", "; AB dev <", this.maxABGenoDev,")");
+    header.append(T, "AC=0", dpgq);
+    header.append(T, "AC=1", dpgq);
+    return header;
   }
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getExtraHeaders() {
-    if (ped == null)
+  public Println[] getExtraHeaders() {
+    if (ped == null)//TODO addinfo
       return null;
     ArrayList<String> groups = ped.getGroups();
-    String[] headers = new String[groups.size() * 3];
+    Println[] headers = new Println[groups.size() * 3];
     for (int i = 0; i < groups.size(); i++) {
       String group = groups.get(i);
-      headers[3 * i + 0] = "##INFO=<ID=" + group + "_AC,Number=A,Type=Integer,Description=\"Allele count in genotypes, for each ALT allele for group " + group + ", in the same order as listed\">";
-      headers[3 * i + 1] = "##INFO=<ID=" + group + "_AF,Number=A,Type=Float,Description=\"Allele Frequency, for each ALT allele for group " + group + ", in the same order as listed\">";
-      headers[3 * i + 2] = "##INFO=<ID=" + group + "_AN,Number=1,Type=Integer,Description=\"Total number of alleles in called genotypes for group " + group + "\">";
+      headers[3 * i + 0] = new Println("##INFO=<ID=" + group + "_AC,Number=A,Type=Integer,Description=\"Allele count in genotypes, for each ALT allele for group " + group + ", in the same order as listed\">");
+      headers[3 * i + 1] = new Println("##INFO=<ID=" + group + "_AF,Number=A,Type=Float,Description=\"Allele Frequency, for each ALT allele for group " + group + ", in the same order as listed\">");
+      headers[3 * i + 2] = new Println("##INFO=<ID=" + group + "_AN,Number=1,Type=Integer,Description=\"Total number of alleles in called genotypes for group " + group + "\">");
     }
     return headers;
   }
@@ -458,9 +461,13 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
     Message.info("Number of Variants [" + FILTER_AF1 + "] " + count[IDX_AF1]);
 
     for (Export ex : this.reportLines)
-      out.println(ex.toString());
+      out.println(ex.println());
 
-    out.close();
+    try {
+      out.close();
+    } catch(Exception e) {
+      Message.error("Error while closing ["+out.getFilename()+"] "+e.getMessage());
+    }
   }
 
   @SuppressWarnings("unused")
@@ -471,7 +478,7 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
     this.parseParameters(this.parameters.getFilename());
 
     try {
-      out = getPrintWriter(this.report.getFilename()); //can be bgzipped if output is also bgzipped
+      out = getFileOutputer(this.report.getFilename()); //can be bgzipped if output is also bgzipped
       out.println(getHeader());
       reportLines = new SortedList<>(new ArrayList<>(), SortedList.Strategy.ADD_FROM_END);
     } catch (IOException e) {
@@ -555,7 +562,7 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
     13.	Mean allelic balance calculated over heterozygous genotypes was within [25%-75%] in each group (not relevant if no heterozygous genotypes called)
    */
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     Export export = new Export(variant);
     InfoColumn infoColumn = variant.getInfo();
     StringBuilder theAB = new StringBuilder();
@@ -700,8 +707,8 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
     //measure callrate for each groups
     int altHQ = 0;
     //double nbHQ = 0;
-    double[] called = new double[this.samples.keySet().size()];
-    double[] total = new double[this.samples.keySet().size()];
+    double[] called = new double[this.samples.size()];
+    double[] total = new double[this.samples.size()];
     int i = 0;
     for (String group : this.samples.keySet()) {
       total[i] = this.samples.get(group).size();
@@ -866,7 +873,7 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
     }
   }
 
-  public static class Export implements Comparable<Export> {
+  public static class Export implements Comparable<Export>, Printable {
 
     private final String chrom;
     private final String pos;
@@ -919,27 +926,27 @@ public class QC extends ParallelVCFVariantPedFunction<QC.Export> {
     }
 
     @Override
-    public String toString() {
-      LineBuilder sb = new LineBuilder(chrom);
-      sb.addColumn(pos);
-      sb.addColumn(id);
-      sb.addColumn(ref);
-      sb.addColumn(alt);
-      sb.addColumn(callRate);
-      sb.addColumn(fisherCallRate);
-      sb.addColumn(qualByDepth);
-      sb.addColumn(inbreedingCoef);
-      sb.addColumn(mqRankSum);
-      sb.addColumn(fs);
-      sb.addColumn(sor);
-      sb.addColumn(mq);
-      sb.addColumn(readPosRankSum);
-   //   sb.addColumn(lowQual);
-      sb.addColumn(altLowQual);
-      sb.addColumn(abHet);
-      sb.addColumn(ac0);
-      sb.addColumn(af1);
-      return sb.toString();
+    public Println println() {
+      Println sb = new Println(chrom);
+      sb.append(T, pos);
+      sb.append(T, id);
+      sb.append(T, ref);
+      sb.append(T, alt);
+      sb.append(T, callRate);
+      sb.append(T, fisherCallRate);
+      sb.append(T, qualByDepth);
+      sb.append(T, inbreedingCoef);
+      sb.append(T, mqRankSum);
+      sb.append(T, fs);
+      sb.append(T, sor);
+      sb.append(T, mq);
+      sb.append(T, readPosRankSum);
+   //   sb.append(T, lowQual);
+      sb.append(T, altLowQual);
+      sb.append(T, abHet);
+      sb.append(T, ac0);
+      sb.append(T, af1);
+      return sb;
     }
 
     @Override

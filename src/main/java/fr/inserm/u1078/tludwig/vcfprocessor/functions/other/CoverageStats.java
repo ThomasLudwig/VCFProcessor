@@ -1,6 +1,5 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.other;
 
-import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.maok.NumberSeries;
 import fr.inserm.u1078.tludwig.maok.SortedList;
 import fr.inserm.u1078.tludwig.maok.UniversalReader;
@@ -9,6 +8,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.StringParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.TSVFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.util.ArrayList;
 
@@ -54,13 +54,14 @@ public class CoverageStats extends Function {
             while ((line = in.readLine()) != null) {
                 pos++;
                 NumberSeries s = new NumberSeries("", SortedList.Strategy.SORT_AFTERWARDS);
-                LineBuilder lb = new LineBuilder(this.chr.getStringValue());
-                lb.addColumn(pos);
                 String[] f = line.split("\\s+", -1);
                 for (String g : f)
                     s.add(Integer.parseInt(g));
-                lb.addColumn(s.getMean());
-                lb.addColumn(s.getMedian());
+
+                Println lb = new Println(this.chr.getStringValue());
+                lb.append(T, pos);
+                lb.append(T, s.getMean());
+                lb.append(T, s.getMedian());
                 int l = s.size();
                 ArrayList<Double> v = s.getAllValues();
                 int i = 0;
@@ -68,12 +69,11 @@ public class CoverageStats extends Function {
                     while (i < l) {
                         if (v.get(i) >= depth)
                             break;
-
                         i++;
                     }
-                    lb.addColumn(l - i);
+                    lb.append(T, l - i);
                 }
-                println(lb.toString());
+                println(lb);
             }
         }
     }

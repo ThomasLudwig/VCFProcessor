@@ -1,6 +1,9 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.genetics.alignments;
 
-public class Tag {
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
+public class Tag implements Printable {
   private final String key;
   private final char type;
   private final String value; //TODO store has Object and convert on parse/print ?
@@ -32,6 +35,11 @@ public class Tag {
 
   @Override
   public String toString() {
-    return key+":"+type+":"+value;
+    return println().toString();
+  }
+
+  @Override
+  public Println println() {
+    return Println.join(":", key, type, value);
   }
 }

@@ -8,6 +8,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.PositiveInteger
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.StringParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Region;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  *
@@ -48,8 +49,8 @@ public class IsInBed extends Function {
 
     for (Region r : bed.getRegions(this.chromosome.getStringValue())) {
       if (r.contains(chr, pos)) {
-        println("The position " + this.chromosome + ":" + this.position + " has been found in bed file " + this.bedFile.getFilename());
-        println(r.toString());
+        println(new Println("The position ", this.chromosome, ":", this.position, " has been found in bed file ", this.bedFile.getFilename()));
+        println(r.println());
         return;
       }
 
@@ -64,14 +65,14 @@ public class IsInBed extends Function {
       }
     }
 
-    println("Position " + this.chromosome + ":" + this.position + " is not covered bed file " + this.bedFile);
+    println(new Println("Position ", this.chromosome, ":", this.position, " is not covered bed file ", this.bedFile));
     if (previousRegion != null) {
-      println("Previous Interval");
-      println(previousRegion.toString());
+      println(new Println("Previous Interval"));
+      println(previousRegion.println());
     }
     if (nextRegion != null) {
-      println("Next Interval");
-      println(nextRegion.toString());
+      println(new Println("Next Interval"));
+      println(nextRegion.println());
     }
   }
   

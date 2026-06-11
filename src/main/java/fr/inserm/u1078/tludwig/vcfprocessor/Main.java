@@ -6,6 +6,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.commandline.Argument;
 import fr.inserm.u1078.tludwig.vcfprocessor.commandline.CommandParser;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.FunctionFactory;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.FileOutputer;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -241,7 +242,7 @@ public class Main {
           Message.setDebugActive(true);
           break;
         case KEY_GZ:
-          Function.setOutputBgzipped();
+          FileOutputer.setOutputBgzipped();
           break;
         case KEY_MONO_THREAD:;
           Function.setMonoThread();

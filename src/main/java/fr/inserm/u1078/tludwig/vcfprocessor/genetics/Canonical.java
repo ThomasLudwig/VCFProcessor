@@ -3,12 +3,14 @@ package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  *
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 4 nov. 2016
  */
-public class Canonical implements Comparable<Canonical> {
+public class Canonical implements Comparable<Canonical>, Printable {
 //TODO read https://genome.sph.umich.edu/wiki/Variant_Normalization and other doc on left alignment and normalization
 
   private final int chr;
@@ -138,9 +140,10 @@ public class Canonical implements Comparable<Canonical> {
   }
 
   @Override
-  public String toString() {
-    return this.chr + ":" + this.pos + ":" + this.length + ":" + this.allele;
-  }
+  public String toString() { return println().toString(); }
+
+  @Override
+  public Println println() { return Println.join(":", this.chr, this.pos, this.length, this.allele); }
 
   @Override
   public boolean equals(Object o) {

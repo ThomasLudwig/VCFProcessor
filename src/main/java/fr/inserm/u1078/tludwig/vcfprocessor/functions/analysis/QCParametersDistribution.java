@@ -16,6 +16,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.HasMetricsAnnotation;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -117,33 +118,33 @@ public class QCParametersDistribution extends ParallelVCFVariantPedFunction<QCPa
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getFooters() {
-    ArrayList<String> out = new ArrayList<>();
-    out.add(callrateSB.getAllValuesAsString());
-    out.add(fisherCallrateSB.getAllValuesAsString());
-    out.add(qualByDepthSB.getAllValuesAsString());
-    out.add(inbreedingCoefSB.getAllValuesAsString());
-    out.add(mq_rsSB.getAllValuesAsString());
-    out.add(fs_snpSB.getAllValuesAsString());
-    out.add(sor_snpSB.getAllValuesAsString());
-    out.add(mq_snpSB.getAllValuesAsString());
-    out.add(rprs_snpSB.getAllValuesAsString());
-    out.add(fs_indelSB.getAllValuesAsString());
-    out.add(sor_indelSB.getAllValuesAsString());
-    out.add(mq_indelSB.getAllValuesAsString());
-    out.add(rprs_indelSB.getAllValuesAsString());
-    out.add(hqPercentSB.getAllValuesAsString());
-    out.add(gqSB.getAllValuesAsString());
-    out.add(sumADSB.getAllValuesAsString());
-    out.add(abHetDistSB.getAllValuesAsString());
-    return out.toArray(new String[0]);
+  public Println[] getFooters() {
+    return new Println[]{
+        Println.getAllValues(callrateSB),
+        Println.getAllValues(fisherCallrateSB),
+        Println.getAllValues(qualByDepthSB),
+        Println.getAllValues(inbreedingCoefSB),
+        Println.getAllValues(mq_rsSB),
+        Println.getAllValues(fs_snpSB),
+        Println.getAllValues(sor_snpSB),
+        Println.getAllValues(mq_snpSB),
+        Println.getAllValues(rprs_snpSB),
+        Println.getAllValues(fs_indelSB),
+        Println.getAllValues(sor_indelSB),
+        Println.getAllValues(mq_indelSB),
+        Println.getAllValues(rprs_indelSB),
+        Println.getAllValues(hqPercentSB),
+        Println.getAllValues(gqSB),
+        Println.getAllValues(sumADSB),
+        Println.getAllValues(abHetDistSB)
+    };
   }
+
+
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return null;
-  }
+  public Println[] getHeaders() { return NO_OUTPUT; }
 
   @SuppressWarnings("unused")
   @Override
@@ -199,7 +200,7 @@ public class QCParametersDistribution extends ParallelVCFVariantPedFunction<QCPa
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     InfoColumn infoColumn = variant.getInfo();
     Analysis a = new Analysis();
 

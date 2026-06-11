@@ -14,6 +14,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 
 /**
@@ -124,7 +126,7 @@ public class CompareGenotype extends VCFPedFunction {//TODO parallelize like in 
     }
     Message.info(nbProcessed + "/[" + nbReadLeft + "|" + nbReadRight + "] variants processed");
 
-    println(String.join(T, HEADERS));
+    println(new Println(String.join(T, HEADERS)));
     for (int s = 0; s < this.samples.size(); s++) {
       String name = this.samples.get(s).getId();
       String group = this.samples.get(s).getGroup();
@@ -137,14 +139,14 @@ public class CompareGenotype extends VCFPedFunction {//TODO parallelize like in 
       double ratio = (100.0 * match) / tot;
       stats[idx].add(ratio);
       global.add(ratio);
-      println(String.join(T, new String[]{name,group,tot+"",match+"",mismatch+"",left+"",right+"",ratio+""}));
+      println(Println.join(T, name,group,tot,match,mismatch,left,right,ratio));
     }
 
-    println("");
-    println(T + "Mean" + T + "Min" + T + "Q1" + T + "Median" + T + "Q3" + T + "Max");
-    println(global.getName() + T + StringTools.formatDouble(global.getMean(), 3) + T + StringTools.formatDouble(global.getMin(), 3) + T + StringTools.formatDouble(global.getFirstQuartile(), 3) + T + StringTools.formatDouble(global.getMedian(), 3) + T + StringTools.formatDouble(global.getLastQuartile(), 3) + T + StringTools.formatDouble(global.getMax(), 3));
+    println();
+    println(new Println(T, Println.join(T, "Mean","Min","Q1","Median","Q3","Max")));
+    println(Println.join(T, global.getName(), global.getMean(), global.getMin(), global.getFirstQuartile(), global.getMedian(), global.getLastQuartile(), global.getMax()));
     for (NumberSeries stat : stats)
-      println(stat.getName() + T + StringTools.formatDouble(stat.getMean(), 3) + T + StringTools.formatDouble(stat.getMin(), 3) + T + StringTools.formatDouble(stat.getFirstQuartile(), 3) + T + StringTools.formatDouble(stat.getMedian(), 3) + T + StringTools.formatDouble(stat.getLastQuartile(), 3) + T + StringTools.formatDouble(stat.getMax(), 3));
+      println(Println.join(T, stat.getName(), stat.getMean(), stat.getMin(), stat.getFirstQuartile(), stat.getMedian(), stat.getLastQuartile(), stat.getMax()));
 
     vcf1.close();
     vcf2.close();

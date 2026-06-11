@@ -6,6 +6,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 
 /**
@@ -43,7 +45,8 @@ public class AddGroupACANAF extends ParallelVCFVariantPedFunction<Object> {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getExtraHeaders(){
+  public Println[] getExtraHeaders(){
+    //TODO addinfodefinition
     ArrayList<String> groups = getPed().getGroups();
     String[] headers = new String[groups.size() * 3];
     for (int i = 0; i < groups.size(); i++) {
@@ -52,7 +55,7 @@ public class AddGroupACANAF extends ParallelVCFVariantPedFunction<Object> {
       headers[3 * i + 1] = "##INFO=<ID=" + group + "_AF,Number=A,Type=Float,Description=\"Allele Frequency, for each ALT allele for group " + group + ", in the same order as listed\">";
       headers[3 * i + 2] = "##INFO=<ID=" + group + "_AN,Number=1,Type=Integer,Description=\"Total number of alleles in called genotypes for group " + group + "\">";
     }
-    return headers;
+    return Println.asLines(headers);
   }
 
   private String[] getAnnotation(ArrayList<String> groups, Variant v) {
@@ -84,7 +87,7 @@ public class AddGroupACANAF extends ParallelVCFVariantPedFunction<Object> {
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     variant.addInfo(getAnnotation(getPed().getGroups(), variant));
     return asOutput(variant);
   }

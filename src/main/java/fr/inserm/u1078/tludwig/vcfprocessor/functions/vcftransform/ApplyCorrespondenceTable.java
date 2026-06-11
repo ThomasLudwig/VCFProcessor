@@ -10,6 +10,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.TSVFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.PGPBouncyCastle;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -56,9 +57,9 @@ public class ApplyCorrespondenceTable extends ParallelVCFFilterFunction {
   }
 
   @Override
-  public String[] getHeaders() {
-    String[] ret = super.getHeaders();
-    String[] last = ret[ret.length - 1].split("\t");
+  public Println[] getHeaders() {
+    Println[] ret = super.getHeaders();
+    String[] last = ret[ret.length - 1].toString().split("\t");
     ArrayList<String> samples = new ArrayList<>();
     for(int i = 9; i < last.length; i++) {
       if(!correspondence.containsKey(last[i]))
@@ -87,12 +88,12 @@ public class ApplyCorrespondenceTable extends ParallelVCFFilterFunction {
     for(int i = 0; i < samples.size(); i++)
       fromTo[i] = newOrder.indexOf(samples.get(i));
 
-    ret[ret.length - 1] = String.join("\t", last);
+    ret[ret.length - 1] = Println.join("\t", last);
     return ret;
   }
 
   @Override
-  public String[] processInputRecordForFilter(VariantRecord record) {
+  public Println[] processInputRecordForFilter(VariantRecord record) {
     String[] f = record.asFields();
     String[] ret = new String[f.length];
     System.arraycopy(f, 0, ret, 0, VCF.IDX_INFO);
@@ -102,7 +103,7 @@ public class ApplyCorrespondenceTable extends ParallelVCFFilterFunction {
     for(int i = 0 ; i < fromTo.length; i++)
       ret[VCF.IDX_SAMPLE + fromTo[i]] = f[VCF.IDX_SAMPLE + i];
 
-    return new String[]{String.join("\t", ret)};
+    return new Println[]{Println.join(T, ret)};
   }
 
   public String processInfo(String info) {

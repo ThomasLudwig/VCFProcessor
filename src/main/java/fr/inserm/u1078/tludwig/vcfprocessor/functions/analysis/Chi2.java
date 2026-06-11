@@ -4,6 +4,7 @@ import fr.inserm.u1078.tludwig.maok.tools.MathTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
@@ -54,14 +55,14 @@ public class Chi2 extends ParallelVCFVariantPedFunction<Chi2.Chi2Analysis> {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return null;
+  public Println[] getHeaders() {
+    return NO_OUTPUT;
   }
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getFooters() {
-    ArrayList<String> out = new ArrayList<>();
+  public Println[] getFooters() {
+    ArrayList<Println> out = new ArrayList<>();
     int maxCase = MathTools.min(allelesCases);
     int maxControls = MathTools.max(allelesControls);
     int max = Math.max(maxCase, maxControls);
@@ -73,9 +74,9 @@ public class Chi2 extends ParallelVCFVariantPedFunction<Chi2.Chi2Analysis> {
       for (int ctrl : allelesControls)
         input[1][ctrl]++;
 
-      out.add("#" + T + "Cases" + T + "Controls");
+      out.add(Println.join(T, "#", "Cases", "Controls"));
       for (int i = 0; i <= max; i++)
-        out.add(i + T + input[0][i] + T + input[1][i]);
+        out.add(Println.join(T, i, input[0][i], input[1][i]));
 
       ArrayList<Integer> nonEmpty = new ArrayList<>();
       for (int i = 0; i <= max; i++)
@@ -85,20 +86,21 @@ public class Chi2 extends ParallelVCFVariantPedFunction<Chi2.Chi2Analysis> {
       if (nonEmpty.size() > 1) {
         long[][] merged = new long[2][nonEmpty.size()];
 
-        out.add("\nNon Empty Categories");
-        out.add("#" + T + "Cases" + T + "Controls");
+        out.add(new Println());
+        out.add(new Println("Non Empty Categories"));
+        out.add(Println.join(T, "#", "Cases", "Controls"));
         for (int i = 0; i < nonEmpty.size(); i++) {
           int idx = nonEmpty.get(i);
           merged[0][i] = input[0][idx];
           merged[1][i] = input[1][idx];
-          out.add(idx + T + merged[0][i] + T + merged[1][i]);
+          out.add(Println.join(T, idx, merged[0][i], merged[1][i]));
         }
 
         ChiSquareTest chi2 = new ChiSquareTest();
         double chi = chi2.chiSquare(merged);
         double pvalue = chi2.chiSquareTest(merged);
 
-        out.add("Chi2 = [" + chi + "] pvalue=[" + pvalue + "]");
+        out.add(new Println("Chi2 = [", chi, "] pvalue=[", pvalue, "]"));
 
         long[][] simple = new long[2][2];
         simple[0][0] = input[0][0];
@@ -110,28 +112,28 @@ public class Chi2 extends ParallelVCFVariantPedFunction<Chi2.Chi2Analysis> {
           simple[1][1] += input[1][i];
         }
 
-        out.add("Variants" + T + "Cases" + T + "Controls");
-        out.add("Absent" + T + simple[0][0] + T + simple[1][0]);
-        out.add("Present" + T + simple[0][1] + T + simple[1][1]);
+        out.add(Println.join(T, "Variants", "Cases", "Controls"));
+        out.add(Println.join(T, "Absent", simple[0][0], simple[1][0]));
+        out.add(Println.join(T,"Present", simple[0][1], simple[1][1]));
 
         if (simple[0][0] == 0 && simple[1][0] == 0)
-          out.add("Neither case nor control have samples without variants");
+          out.add(new Println("Neither case nor control have samples without variants"));
         else if (simple[0][1] == 0 && simple[1][1] == 0)
-          out.add("Neither case nor control have samples with variants");
+          out.add(new Println("Neither case nor control have samples with variants"));
         else {
           ChiSquareTest chi2PA = new ChiSquareTest();
           double chiPA = chi2PA.chiSquare(simple);
           double pvaluePA = chi2PA.chiSquareTest(simple);
-          out.add("Chi2 = [" + chiPA + "] pvalue=[" + pvaluePA + "]");
+          out.add(new Println("Chi2 = [", chiPA, "] pvalue=[", pvaluePA, "]"));
         }
       } else
-        out.add("Not enough categories with non empty data");
+        out.add(new Println("Not enough categories with non empty data"));
     }
-    return out.toArray(new String[0]);
+    return out.toArray(new Println[0]);
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     int i = 0;
     for (Sample sample : getPed().getCases()) {
       int[] alleles = variant.getGenotype(sample).getAlleles();

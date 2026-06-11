@@ -6,6 +6,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.StringParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 public class FilterNumericInfo extends ParallelVCFFilterFunction {
   private final StringParameter query = new StringParameter(OPT_QUERY, "\"VALUE1>0|VALUE2>0\"", "A query describing the variants to filter out");
@@ -33,8 +34,8 @@ public class FilterNumericInfo extends ParallelVCFFilterFunction {
   }
 
   @Override
-  public String[] processInputRecordForFilter(VariantRecord record) {
-    return new String[0];
+  public Println[] processInputRecordForFilter(VariantRecord record) {
+    return NO_OUTPUT;
   }
 
   @Override

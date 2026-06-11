@@ -9,9 +9,10 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.FileOutputer;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 /**
  * returns a series of matrices [individuals/individuals] with the number of shared alleles.
@@ -65,7 +66,7 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction<SharedAlleleM
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     Genotype[] genos = variant.getGenotypes();
 
     double[] af = variant.getAF();
@@ -115,8 +116,8 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction<SharedAlleleM
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return null;
+  public Println[] getHeaders() {
+    return NO_OUTPUT;
   }
 
   @SuppressWarnings("unused")
@@ -125,16 +126,16 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction<SharedAlleleM
     try {
       String directory = this.dir.getDirectory();
 
-      StringBuilder header = new StringBuilder("X");
+      Println header = new Println("X");
       for (Sample s : samples)
-        header.append(T).append(s.getId());
+        header.append(T, s.getId());
 
       String prefix = this.vcfFile.getBasename();
 
-      PrintWriter outNew = getPrintWriter(directory + prefix + ".snp.new.tsv");
-      PrintWriter out05 = getPrintWriter(directory + prefix + ".snp.0.005.tsv");
-      PrintWriter out1 = getPrintWriter(directory + prefix + ".snp.0.01.tsv");
-      PrintWriter out5 = getPrintWriter(directory + prefix + ".snp.0.05.tsv");
+      FileOutputer outNew = getFileOutputer(directory + prefix + ".snp.new.tsv");
+      FileOutputer out05 = getFileOutputer(directory + prefix + ".snp.0.005.tsv");
+      FileOutputer out1 = getFileOutputer(directory + prefix + ".snp.0.01.tsv");
+      FileOutputer out5 = getFileOutputer(directory + prefix + ".snp.0.05.tsv");
 
       outNew.println(header);
       out05.println(header);
@@ -144,16 +145,16 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction<SharedAlleleM
       int l = 0;
       for(Sample sample : samples) {
       //for (int l = 0; l < samples.size(); l++) {
-        StringBuilder lNew = new StringBuilder(sample.getId());
-        StringBuilder l05 = new StringBuilder(lNew.toString());
-        StringBuilder l1 = new StringBuilder(lNew.toString());
-        StringBuilder l5 = new StringBuilder(lNew.toString());
+        Println lNew = new Println(sample.getId());
+        Println l05 = new Println(sample.getId());
+        Println l1 = new Println(sample.getId());
+        Println l5 = new Println(sample.getId());
 
         for (int c = 0; c < samples.length; c++) {
-          lNew.append(T).append(snpNew[l][c]);
-          l05.append(T).append(snp05[l][c]);
-          l1.append(T).append(snp1[l][c]);
-          l5.append(T).append(snp5[l][c]);
+          lNew.append(T, snpNew[l][c]);
+          l05.append(T, snp05[l][c]);
+          l1.append(T, snp1[l][c]);
+          l5.append(T, snp5[l][c]);
         }
         outNew.println(lNew);
         out05.println(l05);
@@ -166,7 +167,7 @@ public class SharedAlleleMatrix extends ParallelVCFVariantFunction<SharedAlleleM
       out05.close();
       out1.close();
       out5.close();
-    } catch (IOException e) {
+    } catch (Exception e) {
       Message.error("Error while writing results to file", e);
     }
   }

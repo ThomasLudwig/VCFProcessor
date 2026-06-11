@@ -5,6 +5,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Keep only the lines containing monoallelic SNVs
@@ -32,12 +33,12 @@ public class MonoAllelicSNV extends ParallelVCFFilterFunction {
   public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.NA); }
 
   @Override
-  public String[] processInputRecordForFilter(VariantRecord record) {
+  public Println[] processInputRecordForFilter(VariantRecord record) {
     String ref = record.getRef();
     String alt = record.getAltString();
     if (ref.length() != 1 || ref.charAt(0) == '.' || alt.length() != 1 || alt.charAt(0) == '.')
       return NO_OUTPUT;    
-    return new String[]{record.toString()};
+    return new Println[]{record.println()};
   }
   
   @Override

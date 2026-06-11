@@ -9,8 +9,10 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.OutputDirectory
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.FileOutputer;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -147,24 +149,25 @@ public class F2 extends ParallelVCFVariantPedFunction<F2.F2Analysis> {
 
   private void printResults(String filename, int[][] f2) {
     try {
-      PrintWriter out = getPrintWriter(filename);
-      StringBuilder line = new StringBuilder("X" + T + String.join(T, groups) + T + "TOTAL");
+      //TODO PrintWriter to Outputer
+      FileOutputer out = getFileOutputer(filename);
+      Println line = new Println("X" + T + String.join(T, groups) + T + "TOTAL");
       out.println(line);
 
       for (int f = 0; f < total; f++) {
-        line = new StringBuilder(this.groups.get(f));
+        line = new Println(this.groups.get(f));
         for (int s = 0; s <= total; s++)
           line.append(T).append(f2[f][s]);
         out.println(line);
       }
       out.close();
-    } catch (IOException e) {
+    } catch (Exception e) {
       Message.error("Unable to write to result file " + filename);
     }
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     for (int a : variant.getNonStarAltAllelesAsArray())
       process(variant, a);
     return NO_OUTPUT;
@@ -172,8 +175,8 @@ public class F2 extends ParallelVCFVariantPedFunction<F2.F2Analysis> {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return null;
+  public Println[] getHeaders() {
+    return NO_OUTPUT;
   }
 
   public static class F2Analysis {

@@ -1,5 +1,8 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants;
 
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -9,7 +12,7 @@ import java.util.Arrays;
  * @author Thomas E. Ludwig (INSERM - U1078)
  * Started : 23 juin 2015
  */
-public class GenotypeFormat {
+public class GenotypeFormat implements Printable {
 
   public static final String GT = "GT";
   public static final String GQ = "GQ";
@@ -75,7 +78,10 @@ public class GenotypeFormat {
   @Override
   public String toString() {
     return this.format;
-  }
+  } //TODO Split according to VCF format
+
+  @Override
+  public Println println() { return new Println(this); }
 
   public void addField(String key) {
     keys.add(key);

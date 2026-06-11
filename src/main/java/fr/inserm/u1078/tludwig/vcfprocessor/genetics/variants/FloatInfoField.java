@@ -2,8 +2,11 @@ package fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.InfoDefinition;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
-public class FloatInfoField extends InfoField{
+import java.util.Arrays;
+
+public class FloatInfoField extends InfoField {
   public FloatInfoField(String rawValue, InfoDefinition definition) { super(rawValue, definition); }
 
   private double[] floatValues;
@@ -31,4 +34,11 @@ public class FloatInfoField extends InfoField{
 
   @Override
   public void resetOutput() { this.floatValues = null; }
+
+  @Override
+  public Println println() {
+    Println out = new Println(this.getKey(),"=");
+    out.append(Println.join(",", floatValues));
+    return out;
+  }
 }

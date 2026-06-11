@@ -11,8 +11,10 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.FileOutputer;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.io.IOException;
-import java.io.PrintWriter;
 
 /**
  * Computes F2 data by samples and not by groups (Each sample is its own group).
@@ -66,8 +68,8 @@ public class F2Individuals extends ParallelVCFVariantPedFunction<F2Individuals.F
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return null;
+  public Println[] getHeaders() {
+    return NO_OUTPUT;
   }
 
   @SuppressWarnings("unused")
@@ -109,7 +111,7 @@ public class F2Individuals extends ParallelVCFVariantPedFunction<F2Individuals.F
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     for (int a : variant.getNonStarAltAllelesAsArray())
         process(variant, a);
     return NO_OUTPUT;
@@ -192,22 +194,23 @@ public class F2Individuals extends ParallelVCFVariantPedFunction<F2Individuals.F
 
   private void printResults(String filename, int[][] f2) {
     try {
-      PrintWriter out = getPrintWriter(filename);
-      LineBuilder line = new LineBuilder("X");
+      //TODO printWriter to Outputer
+      FileOutputer out = getFileOutputer(filename);
+      Println line = new Println("X");
       for (Sample sample : samples)
-        line.addColumn(sample.getId());
-      line.addColumn("TOTAL");
+        line.append(T).append(sample.getId());
+      line.append(T).append("TOTAL");
       out.println(line);
 
       for (int f = 0; f < total; f++) {
-        line = new LineBuilder(this.samples[f].getId());
+        line = new Println(this.samples[f].getId());
         for (int s = 0; s <= total; s++)
-          line.addColumn(f2[f][s]);
+          line.append(T).append(f2[f][s]);
         out.println(line);
       }
 
       out.close();
-    } catch (IOException e) {
+    } catch (Exception e) {
       Message.error("Unable to write to output file " + filename);
     }
   }

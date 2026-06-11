@@ -10,6 +10,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 
 /**
@@ -65,26 +67,32 @@ public class ShowFields extends ParallelVCFVariantFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    LineBuilder sb = new LineBuilder();
+  public Println[] getHeaders() {
+    Println sb = new Println("#");
+    String[] q = this.query.getStringValue().split(",");
+    Println[] pls =  new Println[q.length];
 
-    for (String key : this.query.getStringValue().split(",")) {
+    for (int i = 0 ; i < q.length ; i++) {
+      String key = q[i].trim();
       if (key.toLowerCase().startsWith(PREFIX_INFO)) {
         String infoQuery = key.split(":")[1];
-        for (String k : infoQuery.split(";"))
-          sb.addColumn(k);
+        pls[i] = Println.join(T, infoQuery.split(";"));
       } else if (key.toLowerCase().startsWith(PREFIX_GENO)) {
         String genoQuery = key.split(":")[1];
         String[] ks = genoQuery.split(";");
+        String add = "";
         for (Sample sample : this.getVCF().getSampleSet().getOutputSamples())
-          for (String k : ks)
-            sb.addColumn(sample.getId()).append(":").append(k);
+          for (String k : ks) {
+            sb.append(add, sample.getId(), ":", k);
+            add = T;
+          }
       } else {
-        sb.addColumn(key);
+        pls[i] = new Println(key);
       }
     }
-    sb.setCharAt(0, '#');
-    return new String[]{sb.toString()};
+
+    sb.append(Println.join(T, pls));
+    return new Println[]{sb};
   }
 
   @SuppressWarnings("unused")
@@ -107,58 +115,57 @@ public class ShowFields extends ParallelVCFVariantFunction {
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
-    LineBuilder sb = new LineBuilder();
-
+  public Println[] processInputVariant(Variant variant) {
+    Println sb = new Println();
+    String add = "";
     for (String key : this.fields) {
       switch (key.toUpperCase()) {
         case KEY_CHROM:
-          sb.addColumn(variant.getChrom());
+          sb.append(add, variant.getChrom());
           break;
         case KEY_POS:
-          sb.addColumn(variant.getPos());
+          sb.append(add, variant.getPos());
           break;
         case KEY_ID:
-          sb.addColumn(variant.getId());
+          sb.append(add, variant.getId());
           break;
         case KEY_REF:
-          sb.addColumn(variant.getRef());
+          sb.append(add, variant.getRef());
           break;
         case KEY_ALT:
-          sb.addColumn(variant.getAlt());
+          sb.append(add, variant.getAlt());
           break;
         case KEY_QUAL:
-          sb.addColumn(variant.getQual());
+          sb.append(add, variant.getQual());
           break;
         case KEY_FILTER:
-          sb.addColumn(variant.getFilter());
+          sb.append(add, variant.getFilter());
           break;
         case KEY_INFO:
-          sb.addColumn(variant.getInfo().toString());
+          sb.append(add, variant.getInfo().toString());
           break;
         case KEY_FORMAT:
-          sb.addColumn(variant.getFormat());
+          sb.append(add, variant.getFormat());
           break;
         default:
           if (key.startsWith("I:")) {
             String k = key.split("I:")[1];
-            sb.addColumn(variant.getInfo().getInfoField(k));
+            sb.append(add, variant.getInfo().getInfoField(k));
           }
           if (key.toLowerCase().startsWith(PREFIX_GENO)) {
             String[] genoQuery = key.split(":")[1].split(";");
-            LineBuilder sg = new LineBuilder();
             for (Genotype g : variant.getGenotypes())
-              for (String k : genoQuery)
-                sg.addColumn(g.getValue(k));
-            
-            if (sg.length() > 0)
-              sb.addColumn(sg.substring(1));
+              for (String k : genoQuery) {
+                sb.append(add, g.getValue(k));
+                add = T;
+              }
           }
           break;
       }
+      add = T;
     }
 
-    return new String[]{sb.substring(1)};
+    return new Println[]{sb};
   }
 
   @Override

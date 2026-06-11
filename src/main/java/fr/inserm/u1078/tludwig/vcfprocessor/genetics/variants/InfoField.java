@@ -4,8 +4,9 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.InfoDefinition;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.GeneticsException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VEPInfoDefinition;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPInfoField;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
 
-public abstract class InfoField {
+public abstract class InfoField implements Printable {
 
   public static final String MISSING = ".";
 
@@ -56,4 +57,7 @@ public abstract class InfoField {
   }
 
   public abstract void resetOutput();
+
+  @Override
+  public final String toString(){ return println().toString(); }
 }

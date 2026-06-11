@@ -1,6 +1,8 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * In this class everything is done as [1-based;1-based]
@@ -8,7 +10,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
  *
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 5 avr. 2016
  */
-public class Region implements Comparable<Region> {
+public class Region implements Comparable<Region>, Printable {
   public enum Format {FULL_1_BASED, BED_FILE, FULL_0_BASED};
 
   private final String chrom;
@@ -191,7 +193,12 @@ public class Region implements Comparable<Region> {
   public String toString() {
     if(this.getStart0Based() == 0 && this.getEnd0Based() == 0)
       return this.getChrom();
-   /* return this.as1Based()+ " (1-based) "+asBed()+" (bedFormat)";*/
+    /* return this.as1Based()+ " (1-based) "+asBed()+" (bedFormat)";*/
     return asBed(true);
+  }
+
+  @Override
+  public Println println() {
+    return new Println(toString());
   }
 }

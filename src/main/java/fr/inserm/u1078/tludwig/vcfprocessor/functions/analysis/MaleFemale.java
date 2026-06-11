@@ -9,7 +9,9 @@ import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPAnn
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations.VEPConsequence;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -60,13 +62,13 @@ public class MaleFemale extends ParallelVCFVariantPedFunction {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return new String[]{String.join(T, HEADERS)};
+  public Println[] getHeaders() {
+    return new Println[]{Println.join(T, HEADERS)};
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
-    String[] ret = new String[variant.getAlleleCount() - 1];
+  public Println[] processInputVariant(Variant variant) {
+    Println[] ret = new Println[variant.getAlleleCount() - 1];
 
     double[] an = {0,0,0};
     int[][] ac = new int[3][variant.getAlleleCount()];
@@ -94,25 +96,21 @@ public class MaleFemale extends ParallelVCFVariantPedFunction {
 
     for(int a = 1 ; a < variant.getAlleleCount(); a++){
       Map<String, VEPAnnotation> geneCsqs = VEPConsequence.getWorstVEPAnnotationsByGene(variant.getInfo().getVEPInfo().getVEPAnnotations(a));
-      StringBuilder geneCsq = new StringBuilder();
-      for(String gene : geneCsqs.keySet()){
-        geneCsq.append(",").append(gene).append(":").append(VEPConsequence.getWorstConsequence(geneCsqs.get(gene).getConsequence()));
-      }
+      ArrayList<String> geneCsq = new ArrayList<>();
+      for(String gene : geneCsqs.keySet())
+        geneCsq.add(new Println(gene).append(":").append(VEPConsequence.getWorstConsequence(geneCsqs.get(gene).getConsequence())).toString());
 
-      if(geneCsq.length() > 0)
-        geneCsq = new StringBuilder(geneCsq.substring(1));
-
-      ret[a - 1] = String.join(T
+      ret[a - 1] = Println.join(T
           , variant.getChrom()
-          , variant.getPos()+""
+          , variant.getPos()
           , variant.getId()
           , variant.getRef()
           , variant.getAllele(a)
           , variant.getFilter()
-          , geneCsq
-          , afT[a]+""
-          , af[Ped.SEX_MALE][a]+""
-          , af[Ped.SEX_FEMALE][a]+""
+          , Println.join(",", geneCsq)
+          , afT[a]
+          , af[Ped.SEX_MALE][a]
+          , af[Ped.SEX_FEMALE][a]
       );
     }
 

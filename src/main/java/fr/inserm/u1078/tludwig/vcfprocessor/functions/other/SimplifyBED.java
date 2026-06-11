@@ -75,7 +75,7 @@ public class SimplifyBED extends Function {
 
       Message.info("After simplification there are " + merged.size() + " regions in the file");
       for (Region m : merged)
-        println(m.asBed());
+        println(m.println());
     }
   }
 

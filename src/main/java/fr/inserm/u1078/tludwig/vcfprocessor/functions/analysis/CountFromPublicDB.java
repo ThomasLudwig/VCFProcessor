@@ -6,6 +6,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFunction
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Returns the number of Variants, SNVs, INDEL, in dbSNP, 1kG, GnomAD.
@@ -53,7 +54,7 @@ public class CountFromPublicDB extends ParallelVCFVariantFunction<CountFromPubli
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getFooters() {
+  public Println[] getFooters() {
     int total = snp + indel;
     int total_db = snp_db + indel_db;
     int total_1kg = snp_1kg + indel_1kg;
@@ -80,21 +81,21 @@ public class CountFromPublicDB extends ParallelVCFVariantFunction<CountFromPubli
     String ratio_indel_1kg = StringTools.formatRatio(indel_not_1kg, indel, 3);
     String ratio_indel_exac = StringTools.formatRatio(indel_not_exac, indel, 3);
     
-    return new String[]{
+    return Println.asLines(
       "Total" + T + total + T + total_db + T + total_1kg + T + total_exac + T + total_not_db + "(" + ratio_total_db + ")" + T + total_not_1kg + "(" + ratio_total_1kg + ")" + T + total_not_exac + "(" + ratio_total_exac + ")",
       "SNP" + T + snp + T + snp_db + T + snp_1kg + T + snp_gnomad + T + snp_not_db + "(" + ratio_snp_db + ")" + T + snp_not_1kg + "(" + ratio_snp_1kg + ")" + T + snp_not_exac + "(" + ratio_snp_exac + ")",
       "INDEL" + T + indel + T + indel_db + T + indel_1kg + T + indel_gnomad + T + indel_not_db + "(" + ratio_indel_db + ")" + T + indel_not_1kg + "(" + ratio_indel_1kg + ")" + T + indel_not_exac + "(" + ratio_indel_exac + ")"
-    };
+    );
   }
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getHeaders() {
-    return new String[]{T + String.join(T, HEADER)};
+  public Println[] getHeaders() {
+    return new Println[]{Println.join(T, "", HEADER)};
   }
     
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     for (int a : variant.getNonStarAltAllelesAsArray())
       this.pushAnalysis(new CountAnalysis(variant.isSNP(a), variant.getInfo().getVEPInfo().hasExistingVariants(a), variant.getInfo().getVEPInfo().isIn1kg(a), variant.getInfo().getVEPInfo().isInGnomAD(a)));
     return NO_OUTPUT;

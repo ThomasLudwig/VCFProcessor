@@ -9,6 +9,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Sample;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Creates a bed file of the positions where at least one sample has 2 SNVs that could be in the same triplet (regardless of the reading frame)
@@ -75,7 +76,7 @@ public class ExtractNeighbours extends VCFFunction {
         if (previous.isSNP() && current.isSNP())
           for (Sample sample : samples)
             if (previous.getGenotype(sample).hasAlternate() && current.getGenotype(sample).hasAlternate()) {
-              println(previous.getChrom() + T + previous.getPos() + T + current.getPos());
+              println(Println.join(T, previous.getChrom(), previous.getPos(), current.getPos()));
               return;
             }
       } catch (Exception ignore) { }

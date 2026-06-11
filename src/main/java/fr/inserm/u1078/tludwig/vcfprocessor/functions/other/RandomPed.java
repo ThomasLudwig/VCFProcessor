@@ -6,6 +6,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.Function;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.PositiveIntegerParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.PedFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.ArrayList;
 
 /**
@@ -57,7 +59,7 @@ public class RandomPed extends Function {
       while ((line = in.readLine()) != null) {
         nbLine++;
         if (keep.contains(nbLine))
-          println(line);
+          println(new Println(line));
       }
     }
   }

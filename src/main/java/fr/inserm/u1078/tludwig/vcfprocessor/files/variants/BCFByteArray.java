@@ -1,6 +1,7 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.files.variants;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
+import fr.inserm.u1078.tludwig.maok.tools.StringTools;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.ByteArray;
 
 import javax.xml.crypto.Data;
@@ -224,7 +225,7 @@ public class BCFByteArray extends ByteArray {
     if(isEndOfVector(v, type))
       return "";
     if(type == DataType.FLOAT)
-      return ","+rawFloatToFloat(v);
+      return ","+StringTools.scientificFormat(rawFloatToFloat(v), 4);
 
     return ","+v;
   }
@@ -238,15 +239,25 @@ public class BCFByteArray extends ByteArray {
     String[] ret = new String[l];
     for(int i = 0 ; i < l; i++){
       int v = readLittleEndianSInt32();
-      if(isMissing(v, DataType.FLOAT))
-        ret[i] = ".";
-      else
-        ret[i] = rawFloatToFloat(v)+"";
+      ret[i] = isMissing(v, DataType.FLOAT)
+          ? "."
+          : StringTools.scientificFormat(rawFloatToFloat(v), 4);
     }
     String nRet = String.join(",", ret);
     if(nRet.replace(",","").replace(".","").isEmpty())
       return ".";
     return nRet;
+  }
+
+  public Double[] readFloats(int l){
+    Double[] ret = new Double[l];
+    for(int i = 0 ; i < l; i++){
+      int v = readLittleEndianSInt32();
+      ret[i] = isMissing(v, DataType.FLOAT)
+          ? null
+          : (double)rawFloatToFloat(v);
+    }
+    return ret;
   }
 
   /**

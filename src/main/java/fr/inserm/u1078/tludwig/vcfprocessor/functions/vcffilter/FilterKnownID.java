@@ -5,6 +5,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Keeps only variant with and empty 3rd field
@@ -33,9 +34,9 @@ public class FilterKnownID extends ParallelVCFFilterFunction {
   public VCFPolicies getVCFPolicies() { return VCFPolicies.nothing(VCFPolicies.MultiAllelicPolicy.NA); }
 
   @Override
-  public String[] processInputRecordForFilter(VariantRecord record) {
+  public Println[] processInputRecordForFilter(VariantRecord record) {
     String id = record.getID();
-    return id == null || id.isEmpty() || id.equals(".") ? new String[]{record.toString()} : NO_OUTPUT;
+    return id == null || id.isEmpty() || id.equals(".") ? new Println[]{record.println()} : NO_OUTPUT;
   }
   
   @Override

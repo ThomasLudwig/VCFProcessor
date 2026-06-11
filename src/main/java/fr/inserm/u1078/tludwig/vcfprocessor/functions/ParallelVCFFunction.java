@@ -7,6 +7,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCF.Reader;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VCFException;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VariantRecord;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThread;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThreadFactory;
 
@@ -27,14 +28,14 @@ public abstract class ParallelVCFFunction<T> extends VCFFunction {
   public static final int QUEUE_DEPTH = 200;
   public static final int STEP = 10000;
 
-  public static final String[] NO_OUTPUT = new String[]{};
+  public static final Println[] NO_OUTPUT = new Println[]{};
 
   private VCF vcf;
   private LinkedBlockingQueue<Output> outputLines;
 
   private Analyzer analyzer;
 
-  public void processOutput(String line) {
+  public void processOutput(Println line) {
     println(line);
   }
 
@@ -44,32 +45,33 @@ public abstract class ParallelVCFFunction<T> extends VCFFunction {
   }
 
   @SuppressWarnings("unused")
-  public String[] getExtraHeaders() {
+  public Println[] getExtraHeaders() {
     return null;
   }
 
   @SuppressWarnings("unused")
-  public String[] getHeaders() {
+  public Println[] getHeaders() {
+    //TODO add INFO, add FORMAT, add COMMAND, add FILTER...
     getVCF().addExtraHeaders(getExtraHeaders());
-    return getVCF().getFullHeaders().toArray(new String[0]);
+    return getVCF().getFullHeaders().toArray(new Println[0]);
   }
 
   public final void printHeaders() { //can't move begin/headers/execute/end/footers be moved to Function, getHeaders might need to production differents headers for different output
-    String[] headers = this.getHeaders();
+    Println[] headers = this.getHeaders();
     if (headers != null)
-      for (String header : headers)
+      for (Println header : headers)
         println(header);
   }
 
   public final void printFooters() {
-    String[] footers = this.getFooters();
+    Println[] footers = this.getFooters();
     if (footers != null)
-      for (String footer : footers)
+      for (Println footer : footers)
         println(footer);
   }
 
   @SuppressWarnings("unused")
-  public String[] getFooters() {
+  public Println[] getFooters() {
     return null;
   }
 
@@ -94,8 +96,8 @@ public abstract class ParallelVCFFunction<T> extends VCFFunction {
     this.vcf = vcf;
   }
   
-  public static String[] asOutput(Variant variant){
-    return new String[]{variant.toString()};
+  public static Println[] asOutput(Variant variant){
+    return new Println[]{variant.println()};
   }
 
   public static String[] asOutput(VariantRecord variant){
@@ -140,7 +142,7 @@ public abstract class ParallelVCFFunction<T> extends VCFFunction {
     this.printFooters();
   }
 
-  public void putOutput(int n, String[] lines) {
+  public void putOutput(int n, Println[] lines) {
     try {
       this.outputLines.put(new Output(n, lines));
     } catch (InterruptedException ignore) { }
@@ -167,9 +169,9 @@ public abstract class ParallelVCFFunction<T> extends VCFFunction {
     }
     VariantRecord record = indexedRecord.getRecord();
     try {
-      String[] output =
+      Println[] output =
            record.isFiltered()
-           ? new String[0]
+           ? new Println[0]
            : this.processInputRecord(indexedRecord.getRecord());
       if(output == null)
         throw new RuntimeException("Trying to push an empty output for "+index+"th Record");
@@ -180,7 +182,7 @@ public abstract class ParallelVCFFunction<T> extends VCFFunction {
     return true;
   }
 
-  public abstract String[] processInputRecord(VariantRecord record);
+  public abstract Println[] processInputRecord(VariantRecord record);
 
   public class Worker extends WellBehavedThread {
 
@@ -271,14 +273,14 @@ public abstract class ParallelVCFFunction<T> extends VCFFunction {
 
   public static class Output {
     public final int n;
-    public final String[] lines;
+    public final Println[] lines;
 
     /**
      * Ouput
      * @param n the order ?
      * @param lines the output lines
      */
-    public Output(int n, String[] lines) {
+    public Output(int n, Println[] lines) {
       this.n = n;
       if(lines == null)
         throw new RuntimeException("Trying to create a null Output");
@@ -316,7 +318,7 @@ public abstract class ParallelVCFFunction<T> extends VCFFunction {
       }
 
       //Process output
-      for (String line : out.lines)
+      for (Println line : out.lines)
         processOutput(line);
 
       return true;

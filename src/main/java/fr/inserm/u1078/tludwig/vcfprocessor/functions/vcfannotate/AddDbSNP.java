@@ -9,6 +9,8 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.FileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -97,12 +99,13 @@ public class AddDbSNP extends ParallelVCFFunction<Object> {
 
   @SuppressWarnings("unused")
   @Override
-  public String[] getExtraHeaders(){
-    return new String[]{RS_HEADER, BUILD_HEADER};
+  public Println[] getExtraHeaders(){
+    //TODO vcf.addinfo
+    return Println.asLines(RS_HEADER, BUILD_HEADER);
   }
 
   @Override
-  public String[] processInputRecord(VariantRecord record) {
+  public Println[] processInputRecord(VariantRecord record) {
     String key = record.getChrom() + "_" + record.getPos();
     String[] value = dbsnp.get(key);
     if (value != null) {
@@ -110,7 +113,7 @@ public class AddDbSNP extends ParallelVCFFunction<Object> {
       record.addInfo(RS_KEY, value[0]);
       record.addInfo(BUILD_KEY, value[1]);
     }
-    return new String[]{record.toString()};
+    return new Println[]{record.println()};
   }
 
   @Override

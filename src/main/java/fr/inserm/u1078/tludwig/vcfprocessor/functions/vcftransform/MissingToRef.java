@@ -7,6 +7,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Genotype;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.Variant;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 /**
  * Replaces every missing genotype by 0/0:0:0:0....
@@ -40,7 +41,7 @@ public class MissingToRef extends ParallelVCFVariantFunction {
   }
 
   @Override
-  public String[] processInputVariant(Variant variant) {
+  public Println[] processInputVariant(Variant variant) {
     StringBuilder dflt = new StringBuilder(0 + "/" + 0);
     String format = variant.getFormat().toString();
     String[] keys = format.split(":");

@@ -12,6 +12,7 @@ import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.BedFileParamete
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.parameters.SAMFileParameter;
 import fr.inserm.u1078.tludwig.vcfprocessor.genetics.Region;
 import fr.inserm.u1078.tludwig.vcfprocessor.testing.TestingScript;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThread;
 import fr.inserm.u1078.tludwig.vcfprocessor.utils.WellBehavedThreadFactory;
 
@@ -65,11 +66,11 @@ public class BAMCoverage  extends Function {
     public void doRun() {
       AlignmentRecord record;
       for(SAMHeader.HeaderRecord header :  sam.getHeaders().getHeaderRecords())
-        println(header);
+        println(new Println(header));
       try {
         while (!AlignmentRecord.EOF.equals(record = records.take())) {
           try {
-            println(record.createAlignment(sam));
+            println(new Println(record.createAlignment(sam)));
           } catch (SAMException e) {
             Message.fatal("Can't Create Alignment from record \n" + record, e, true);
           }

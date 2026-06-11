@@ -1,8 +1,11 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.genetics;
 
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
+
 import java.util.Objects;
 
-public class Sample implements Comparable<Sample> {
+public class Sample implements Comparable<Sample>, Printable {
 
   /* PED File Description
         Family ID
@@ -133,9 +136,19 @@ public class Sample implements Comparable<Sample> {
   }
 
   @Override
-  public String toString() {
-    String T = "\t";
-    return this.fid + T + this.id + T + this.pid + T + this.mid + T + this.sex + T + this.phenotype + T + this.group;
+  public String toString() { return println().toString(); }
+
+  @Override
+  public Println println() {
+    return Println.join("\t",
+        this.fid,
+        this.id,
+        this.pid,
+        this.mid,
+        this.sex,
+        this.phenotype,
+        this.group
+    );
   }
 
   public void apply(Sample pedSample) {

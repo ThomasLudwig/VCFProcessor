@@ -2,6 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.InfoDefinition;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 public class IntegerInfoField extends InfoField {
   public IntegerInfoField(String rawValue, InfoDefinition definition) { super(rawValue, definition); }
@@ -26,6 +27,13 @@ public class IntegerInfoField extends InfoField {
     Message.warning(!this.getDefinition().isUnique(), "Trying to fetch a unique value from an array annotation (Number="+this.getDefinition().getNumber()+")");
     int[] out = getValuesAsIntegers();
     return out.length == 0 ? null : out[0];
+  }
+
+  @Override
+  public Println println() {
+    Println out = new Println(this.getKey(),"=");
+    out.append(Println.join(",", intValues));
+    return out;
   }
 
   @Override

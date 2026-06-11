@@ -2,6 +2,8 @@ package fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations;
 
 import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.files.variants.VEPInfoDefinition;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Printable;
+import fr.inserm.u1078.tludwig.vcfprocessor.utils.Println;
 
 import java.util.ArrayList;
 
@@ -10,7 +12,7 @@ import java.util.ArrayList;
  *
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 21 avr. 2016
  */
-public class VEPAnnotation implements VEPConsequenceFacade, VEPFrequencyFacade, VEPLocationFacade, VEPMetaFacade, VEPVariantIDFacade {
+public class VEPAnnotation implements VEPConsequenceFacade, VEPFrequencyFacade, VEPLocationFacade, VEPMetaFacade, VEPVariantIDFacade, Printable {
   private final String[] values;
   private final VEPInfoDefinition vepDefinition;
 
@@ -50,8 +52,9 @@ public class VEPAnnotation implements VEPConsequenceFacade, VEPFrequencyFacade, 
 
   @Override
   public String toString(){
-    return String.join("|", values);
+    return println().toString();
   }
 
-
+  @Override
+  public Println println() { return Println.join("|", values); }
 }
