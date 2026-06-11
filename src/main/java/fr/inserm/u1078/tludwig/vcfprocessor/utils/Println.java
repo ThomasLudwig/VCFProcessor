@@ -159,6 +159,7 @@ public class Println {
   }
 
   public String print(int precision) {
+    /*
     String tmp = "";
     if(!this.contents.isEmpty()){
       String[] t = new String[this.contents.size()];
@@ -167,7 +168,7 @@ public class Println {
       tmp = String.join(",", t);
     }
     Message.debug(this.getClass().getSimpleName()+"@"+System.identityHashCode(this)+"print("+precision+") ["+tmp+"]");
-
+    */
     StringBuilder sb = new StringBuilder();
     for (Object element : contents) {
       String s;
