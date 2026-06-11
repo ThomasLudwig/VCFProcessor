@@ -9,7 +9,7 @@ public interface VEPConsequenceFacade extends VEPFacade {
   String POLYPHEN_POSSIBLY_DAMAGING = "possibly_damaging";
   String POLYPHEN_BENIGN = "benign";
 
-  VEPField CONSEQUENCE = new VEPField("Consequence", Category.Consequence, Type.String, "Consequence type (SO term, e.g. missense_variant, stop_gained)");
+  VEPField CONSEQUENCE = new VEPField("Consequence", Category.Consequence, Type.Strings, "Consequence type (SO term, e.g. missense_variant, stop_gained)");
   VEPField IMPACT = new VEPField("IMPACT", Category.Consequence, Type.String, "Subjective impact modifier: HIGH, MODERATE, LOW, or MODIFIER");
   VEPField SIFT = new VEPField("SIFT", Category.Consequence, Type.String, "SIFT prediction and/or score for missense variants, e.g. deleterious(0.02)");
   VEPField POLYPHEN = new VEPField("PolyPhen", Category.Consequence, Type.String, "PolyPhen-2 prediction and/or score, e.g. probably_damaging(0.998)");
