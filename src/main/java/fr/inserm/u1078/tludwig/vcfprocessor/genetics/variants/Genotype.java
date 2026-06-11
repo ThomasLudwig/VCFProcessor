@@ -350,7 +350,7 @@ public class Genotype implements Printable {
   } //TODO in the future, split according to VCF format
 
   @Override
-  public Println println() { return new Println(this); }
+  public Println println() { return new Println(this.toString()); }
 
   /**
    * Add a trailing field, for a newly created annotation
