@@ -132,7 +132,10 @@ public class Println {
       return doAppend((Collection<?>)element);
     if(element instanceof Object[])
       return doAppend((Object[])element);
-    this.contents.add(element);
+    if(element == this)
+      Message.error("Cannot append a Println object to itself");
+    else
+      this.contents.add(element);
     return this;
   }
 
