@@ -81,7 +81,7 @@ public class GenotypeFormat implements Printable {
   } //TODO Split according to VCF format
 
   @Override
-  public Println println() { return new Println(this); }
+  public Println println() { return new Println(toString()); }
 
   public void addField(String key) {
     keys.add(key);
