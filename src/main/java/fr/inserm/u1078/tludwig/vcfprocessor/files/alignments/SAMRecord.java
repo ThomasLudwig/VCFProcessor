@@ -111,5 +111,6 @@ public class SAMRecord extends AlignmentRecord {
   }
 
   @Override
-  public Println println() { return Println.join(T,fields); } //TODO DoubleString left as is
+  public Println println() { return Println.join(T, fields); }
+
 }

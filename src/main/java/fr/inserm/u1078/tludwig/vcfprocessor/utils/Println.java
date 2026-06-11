@@ -105,6 +105,9 @@ public class Println {
     return out;
   }
 
+  public static Println join(String sep, String[] strings){ return join(sep, new Object[]{strings}); }
+  public static Println join(String sep, Println[] printlns){ return join(sep, new Object[]{printlns}); }
+
   public static Println join(String sep, Object... elements) {
     Println out = new Println();
     boolean first = true;
