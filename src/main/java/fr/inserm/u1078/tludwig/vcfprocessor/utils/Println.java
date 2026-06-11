@@ -156,7 +156,7 @@ public class Println {
   }
 
   public String print(int precision) {
-    Message.debug("Print("+System.identityHashCode(this)+","+precision+")");
+    Message.debug("Print("+this.getClass().getSimpleName()+"@"+System.identityHashCode(this)+","+precision+")");
     StringBuilder sb = new StringBuilder();
     for (Object element : contents)
       sb.append(asString(element, precision));
@@ -169,7 +169,7 @@ public class Println {
   public String toString() { return print(); }
 
   public static String asString(Object element, int precision) {
-    Message.debug("asString("+System.identityHashCode(element)+","+precision+")");
+    Message.debug("asString("+element.getClass().getSimpleName()+"@"+System.identityHashCode(element)+","+precision+")");
     if(element == null)
       return "null";
     if(element instanceof Double)
