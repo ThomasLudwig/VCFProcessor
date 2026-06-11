@@ -283,7 +283,7 @@ public class VCF implements VariantProducer {
     return Variant.compare(f[0], Integer.parseInt(f[1]), chrom, pos) >= 0;
   }
 
-    public String getSampleHeader() {
+  public String getSampleHeader() {
     StringBuilder ret = new StringBuilder(String.join(T, "#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT"));
     //for (Sample sample : this.sampleIndices.navigableKeySet())
     for (Sample sample : this.sampleSet.getOutputSamples())
@@ -296,8 +296,8 @@ public class VCF implements VariantProducer {
   }
 
   public void printHeaders(FileOutputer out) {
-    for (String h : this.getFullHeaders())
-      out.println(new Println(h));
+    for (Println h : this.getFullHeaders())
+      out.println(h);
   }
 
   public void addExtraHeaders(Println[] extra) {
@@ -325,9 +325,11 @@ public class VCF implements VariantProducer {
     this.headers.add("##FILTER=<ID=" + id + ",Description=\"" + description + "\">");
   }
 
-  public ArrayList<String> getFullHeaders() {
-    ArrayList<String> ret = new ArrayList<>(this.getHeadersWithoutSamples());
-    ret.add(this.getSampleHeader());
+  public ArrayList<Println> getFullHeaders() {
+    ArrayList<Println> ret = new ArrayList<>();
+    for(String s : this.getHeadersWithoutSamples())
+      ret.add(new Println(s));
+    ret.add(new Println(this.getSampleHeader()));
     return ret;
   }
 
