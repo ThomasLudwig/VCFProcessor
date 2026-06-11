@@ -136,7 +136,8 @@ public interface VEPFacade {
     if(field.type.equals(type))
       return true;
     Message.warning("Trying to read ["+field.type+"] as a ["+type+"] for Field ["+field.id+"]");
-    return false;
+    throw new RuntimeException();
+    //return false;
   }
 
   static boolean checkType(VEPField field, Type type, Type types) {
