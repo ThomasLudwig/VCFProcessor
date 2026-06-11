@@ -159,9 +159,23 @@ public class Println {
     Message.debug("print("+this.getClass().getSimpleName()+"@"+System.identityHashCode(this)+","+precision+")");
 
     StringBuilder sb = new StringBuilder();
-    for (Object element : contents)
-      sb.append(element == null ? "null" : asString(element, precision));
-
+    for (Object element : contents) {
+      String s;
+      if(element == null)
+        s = "null";
+      else if(element instanceof Boolean || element instanceof Byte || element instanceof Short || element instanceof Integer || element instanceof Long)
+        s = ""+element;
+      else if(element instanceof Double || element instanceof Float)
+        s = StringTools.scientificFormat((Double)element, precision);
+      else if(element instanceof String)
+        s = (String)element;
+      else if(element instanceof Println)
+        s = ((Println)element).print(precision);
+      else if(element instanceof Printable)
+        s = ((Printable) element).println().print(precision);
+      else s = element.toString();
+      sb.append(s);
+    }
     return sb.toString();
   }
 
@@ -169,7 +183,7 @@ public class Println {
 
   @Override
   public String toString() { return print(); }
-
+/*
   private static String asString(Object element, int precision) {
     if(element == null)
       return "null";
@@ -211,6 +225,6 @@ public class Println {
     Message.debug("asString("+element.getClass().getSimpleName()+"@"+System.identityHashCode(element)+","+precision+")");
     return StringTools.scientificFormat(element, precision);
   }
-
+*/
   public boolean isEmpty() { return contents.isEmpty(); }
 }
