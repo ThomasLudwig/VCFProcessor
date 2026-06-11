@@ -156,10 +156,12 @@ public class Println {
   }
 
   public String print(int precision) {
-    Message.debug("Print("+this.getClass().getSimpleName()+"@"+System.identityHashCode(this)+","+precision+")");
+    Message.debug("print("+this.getClass().getSimpleName()+"@"+System.identityHashCode(this)+","+precision+")");
+
     StringBuilder sb = new StringBuilder();
     for (Object element : contents)
-      sb.append(asString(element, precision));
+      sb.append(element == null ? "null" : asString(element, precision));
+
     return sb.toString();
   }
 
@@ -168,29 +170,46 @@ public class Println {
   @Override
   public String toString() { return print(); }
 
-  public static String asString(Object element, int precision) {
-    Message.debug("asString("+element.getClass().getSimpleName()+"@"+System.identityHashCode(element)+","+precision+")");
+  private static String asString(Object element, int precision) {
     if(element == null)
       return "null";
+    Message.debug("asString("+element.getClass().getSimpleName()+"@"+System.identityHashCode(element)+","+precision+")");
     if(element instanceof Double)
       return asString((Double) element, precision);
     if(element instanceof Float)
       return asString((Float) element, precision);
     if(element instanceof String)
-      return (String)element;
+      return asString((String) element, precision);
     if(element instanceof Printable)
-      return asString(((Printable)element).println(),precision);
+      return asString((Printable) element, precision);
     if(element instanceof Println)
-      return ((Println)element).print(precision);
+      return asString((Println) element, precision);
     return element.toString();
   }
 
-  public static String asString(Float element, int precision) {
-    return element == null ?  "null" : StringTools.scientificFormat(element, precision);
+  private static String asString(Printable element, int precision) {
+    Message.debug("asString("+element.getClass().getSimpleName()+"@"+System.identityHashCode(element)+","+precision+")");
+    return asString(element.println(), precision);
   }
 
-  public static String asString(Double element, int precision) {
-    return element == null ?  "null" : StringTools.scientificFormat(element, precision);
+  private static String asString(Println element, int precision) {
+    Message.debug("asString("+element.getClass().getSimpleName()+"@"+System.identityHashCode(element)+","+precision+")");
+    return element.print(precision);
+  }
+
+  private static String asString(String element, int precision) {
+    Message.debug("asString("+element.getClass().getSimpleName()+"@"+System.identityHashCode(element)+","+precision+")");
+    return element;
+  }
+
+  private static String asString(Float element, int precision) {
+    Message.debug("asString("+element.getClass().getSimpleName()+"@"+System.identityHashCode(element)+","+precision+")");
+    return StringTools.scientificFormat(element, precision);
+  }
+
+  private static String asString(Double element, int precision) {
+    Message.debug("asString("+element.getClass().getSimpleName()+"@"+System.identityHashCode(element)+","+precision+")");
+    return StringTools.scientificFormat(element, precision);
   }
 
   public boolean isEmpty() { return contents.isEmpty(); }
