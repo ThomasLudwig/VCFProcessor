@@ -45,6 +45,8 @@ public class VEPInfoDefinition extends InfoDefinition {
     return i == null ? -1 : i;
   }
 
+  public boolean hasField(String vepField) { return vepFieldIndices.containsKey(vepField); }
+
   public static boolean isCSQ(String s) { return CSQ.equals(s) || ANN.equals(s); }
 
   public int size() { return vepFieldIndices.size(); }

@@ -50,6 +50,8 @@ public class VEPAnnotation implements VEPConsequenceFacade, VEPFrequencyFacade, 
     return values[idx];
   }
 
+  public boolean hasField(VEPField field) { return this.vepDefinition.hasField(field.getId()); }
+
   @Override
   public String toString(){
     return println().toString();

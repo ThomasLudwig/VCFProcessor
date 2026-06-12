@@ -64,13 +64,15 @@ public interface VEPFacade {
       return null;
     SortedSet<Double> result = new TreeSet<>();
     for(VEPAnnotation annotation : annotations)
-      if(field.type.equals(Type.Float)) {
-        Double f = annotation.getFloatValue(field);
-        if(f != null)
-          result.add(f);
-      } else
-        for(Double f : annotation.getFloatArrayValue(field))
-          result.add(f);
+      if(annotation.hasField(field)) {
+        if (field.type.equals(Type.Float)) {
+          Double f = annotation.getFloatValue(field);
+          if (f != null)
+            result.add(f);
+        } else
+          for (Double f : annotation.getFloatArrayValue(field))
+            result.add(f);
+      }
     return result;
   }
 
