@@ -11,6 +11,18 @@ public interface VEPFrequencyFacade extends VEPFacade {
   VEPField EUR_AF = new VEPField("EUR_AF", Category.Frequency, Type.Float, "Frequency in 1000 Genomes combined European population");
   VEPField EAS_AF = new VEPField("EAS_AF", Category.Frequency, Type.Float, "Frequency in 1000 Genomes combined East Asian population");
   VEPField SAS_AF = new VEPField("SAS_AF", Category.Frequency, Type.Float, "Frequency in 1000 Genomes combined South Asian population");
+  VEPField ESP_AA_AF = new VEPField("AA_AF", Category.Frequency, Type.Float, "Legacy Annotation for Frequency in ESP Africa American population");
+  VEPField ESP_EA_AF = new VEPField("EA_AF", Category.Frequency, Type.Float, "Legacy Annotation for Frequency in ESP European American population");
+  VEPField LEGACY_GNOMAD_AF = new VEPField("gnomAD_AF", Category.Frequency, Type.Float, "Legacy Annotation for Frequency in gnomAD(exomes) combined population");
+  VEPField LEGACY_GNOMAD_AFR_AF = new VEPField("gnomAD_AFR_AF", Category.Frequency, Type.Float, "Legacy Annotation for Frequency in gnomAD(exomes) African/American population");
+  VEPField LEGACY_GNOMAD_AMR_AF = new VEPField("gnomAD_AMR_AF", Category.Frequency, Type.Float, "Legacy Annotation for Frequency in gnomAD(exomes) American (Latino) population");
+  VEPField LEGACY_GNOMAD_ASJ_AF = new VEPField("gnomAD_ASJ_AF", Category.Frequency, Type.Float, "Legacy Annotation for Frequency in gnomAD(exomes) Ashkenazi Jewish population");
+  VEPField LEGACY_GNOMAD_EAS_AF = new VEPField("gnomAD_EAS_AF", Category.Frequency, Type.Float, "Legacy Annotation for Frequency in gnomAD(exomes) East Asian population");
+  VEPField LEGACY_GNOMAD_FIN_AF = new VEPField("gnomAD_FIN_AF", Category.Frequency, Type.Float, "Legacy Annotation for Frequency in gnomAD(exomes) Finnish population");
+  VEPField LEGACY_GNOMAD_NFE_AF = new VEPField("gnomAD_NFE_AF", Category.Frequency, Type.Float, "Legacy Annotation for Frequency in gnomAD(exomes) Non-Finnish European population");
+  VEPField LEGACY_GNOMAD_OTH_AF = new VEPField("gnomAD_OTH_AF", Category.Frequency, Type.Float, "Legacy Annotation for Frequency in gnomAD(exomes) other population");
+  VEPField LEGACY_GNOMAD_SAS_AF = new VEPField("gnomAD_SAS_AF", Category.Frequency, Type.Float, "Legacy Annotation for Frequency in gnomAD(exomes) South Asian population");
+
   VEPField GNOMADE_AF = new VEPField("gnomADe_AF", Category.Frequency, Type.Float, "gnomAD exomes combined population allele frequency");
   VEPField GNOMADE_AFR_AF = new VEPField("gnomADe_AFR_AF", Category.Frequency, Type.Float, "gnomAD exomes — African/American population");
   VEPField GNOMADE_AMR_AF = new VEPField("gnomADe_AMR_AF", Category.Frequency, Type.Float, "gnomAD exomes — American (Latino) population");

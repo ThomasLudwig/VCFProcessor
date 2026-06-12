@@ -68,7 +68,7 @@ public interface VEPFacade {
         Double f = annotation.getFloatValue(field);
         if(f != null)
           result.add(f);
-      }  else
+      } else
         for(Double f : annotation.getFloatArrayValue(field))
           result.add(f);
     return result;

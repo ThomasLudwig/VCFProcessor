@@ -45,11 +45,10 @@ public interface HasVEPAnnotations {
   }
 
   default boolean hasValue(SortedSet<Double> set) {
-    return set != null && set.first() != null;
+    return set != null && !set.isEmpty() && set.first() != null;
   }
 
 /*
-
   default double getPolyPhenScore(int allele) {
     for (String ann : this.getPolyPhens(allele)) {
       String[] kv = ann.split("\\(");

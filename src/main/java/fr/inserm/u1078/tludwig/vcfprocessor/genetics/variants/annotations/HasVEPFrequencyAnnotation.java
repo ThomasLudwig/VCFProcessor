@@ -15,6 +15,17 @@ public interface HasVEPFrequencyAnnotation extends HasVEPAnnotations {
   default double getASN_AF(int allele){ return getFrequency(VEPFrequencyFacade.ASN_AF, allele); }
   default double getEAS_AF(int allele){ return getFrequency(VEPFrequencyFacade.EAS_AF, allele); }
   default double getEUR_AF(int allele){ return getFrequency(VEPFrequencyFacade.EUR_AF, allele); }
+  default double getESP_AA_AF(int allele) { return getFrequency(VEPFrequencyFacade.ESP_AA_AF, allele); }
+  default double getESP_EA_AF(int allele) { return getFrequency(VEPFrequencyFacade.ESP_EA_AF, allele); }
+  default double getLegacyGnomAD_AF(int allele) { return getFrequency(VEPFrequencyFacade.LEGACY_GNOMAD_AF, allele); }
+  default double getLegacyGnomAD_AFR_AF(int allele) { return getFrequency(VEPFrequencyFacade.LEGACY_GNOMAD_AFR_AF, allele); }
+  default double getLegacyGnomAD_AMR_AF(int allele) { return getFrequency(VEPFrequencyFacade.LEGACY_GNOMAD_AMR_AF, allele); }
+  default double getLegacyGnomAD_ASJ_AF(int allele) { return getFrequency(VEPFrequencyFacade.LEGACY_GNOMAD_ASJ_AF, allele); }
+  default double getLegacyGnomAD_EAS_AF(int allele) { return getFrequency(VEPFrequencyFacade.LEGACY_GNOMAD_EAS_AF, allele); }
+  default double getLegacyGnomAD_FIN_AF(int allele) { return getFrequency(VEPFrequencyFacade.LEGACY_GNOMAD_FIN_AF, allele); }
+  default double getLegacyGnomAD_NFE_AF(int allele) { return getFrequency(VEPFrequencyFacade.LEGACY_GNOMAD_NFE_AF, allele); }
+  default double getLegacyGnomAD_OTH_AF(int allele) { return getFrequency(VEPFrequencyFacade.LEGACY_GNOMAD_OTH_AF, allele); }
+  default double getLegacyGnomAD_SAS_AF(int allele) { return getFrequency(VEPFrequencyFacade.LEGACY_GNOMAD_SAS_AF, allele); }
   default double getgnomADe_AF(int allele){ return getFrequency(VEPFrequencyFacade.GNOMADE_AF, allele); }
   default double getgnomADe_AFR_AF(int allele){ return getFrequency(VEPFrequencyFacade.GNOMADE_AFR_AF, allele); }
   default double getgnomADe_AMR_AF(int allele){ return getFrequency(VEPFrequencyFacade.GNOMADE_AMR_AF, allele); }
@@ -46,16 +57,26 @@ public interface HasVEPFrequencyAnnotation extends HasVEPAnnotations {
    * @param allele
    * @return
    */
-  default double getgnomAD_AF(int allele){ return Math.min(getgnomADe_AF(allele), getgnomADg_AF(allele)); }
+  default double getgnomAD_AF(int allele){
+    return getMax(getgnomADe_AF(allele), getgnomADg_AF(allele), getLegacyGnomAD_AF(allele));
+  }
   /**
    *
    * Gets the min of gnomadG/gnomadE
    * @param allele
    * @return
    */
-  default double getgnomAD_NFE_AF(int allele){ return Math.min(getgnomADe_NFE_AF(allele), getgnomADg_NFE_AF(allele)); }
+  default double getgnomAD_NFE_AF(int allele){
+    return getMax(getgnomADe_NFE_AF(allele), getgnomADg_NFE_AF(allele), getLegacyGnomAD_NFE_AF(allele));
+  }
 
-
+  static double getMax(double... ds){
+    double max = 0;
+    for(double d : ds)
+      if(d > max)
+        max = d;
+    return max;
+  }
 
 
   default String getMAX_AF_POPS(int allele) {
@@ -67,14 +88,12 @@ public interface HasVEPFrequencyAnnotation extends HasVEPAnnotations {
     return hasValue(VEPFrequencyFacade.AF, allele);
   }
 
-  default boolean isInGnomAD(int allele) { return isInGnomADExome(allele) || isInGnomADGenome(allele); }
+  default boolean isInGnomAD(int allele) { return isInGnomADExome(allele) || isInGnomADGenome(allele) || isInGnomADLegacy(allele); }
 
-  default boolean isInGnomADExome(int allele) {
-    return hasValue(VEPFrequencyFacade.GNOMADE_AF, allele);
-  }
+  default boolean isInGnomADExome(int allele) { return hasValue(VEPFrequencyFacade.GNOMADE_AF, allele); }
 
-  default boolean isInGnomADGenome(int allele) {
-    return hasValue(VEPFrequencyFacade.GNOMADG_AF, allele);
-  }
+  default boolean isInGnomADGenome(int allele) { return hasValue(VEPFrequencyFacade.GNOMADG_AF, allele); }
+
+  default boolean isInGnomADLegacy(int allele) { return hasValue(VEPFrequencyFacade.LEGACY_GNOMAD_AF, allele); }
 
 }
