@@ -105,7 +105,10 @@ public interface VEPFacade {
   default String[] getStringArrayValue(VEPField field){
     if(checkType(field, Type.Strings))
       try{
-        return getRawValue(field).split("&", -1);
+        String raw = getRawValue(field);
+        if(raw == null || raw.isEmpty())
+          return new String[0];
+        return raw.split("&", -1);
       } catch(Exception ignore){}
     return new String[0];
   }
