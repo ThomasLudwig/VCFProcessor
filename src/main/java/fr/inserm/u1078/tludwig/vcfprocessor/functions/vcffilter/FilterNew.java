@@ -1,5 +1,6 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.vcffilter;
 
+import fr.inserm.u1078.tludwig.maok.tools.Message;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantFilterFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
@@ -34,9 +35,14 @@ public class FilterNew extends ParallelVCFVariantFilterFunction {
 
   @Override
   public Println[] processInputVariantForFilter(Variant variant) {
-    for (int a = 1; a < variant.getAlleles().length; a++)
-      if (variant.getInfo().getVEPInfo().hasExistingVariants(a) || variant.getInfo().getVEPInfo().isIn1kg(a) || variant.getInfo().getVEPInfo().isInGnomAD(a))
+    for (int a = 1; a < variant.getAlleles().length; a++) {
+      boolean existing = variant.getInfo().getVEPInfo().hasExistingVariants(a);
+      boolean kg = variant.getInfo().getVEPInfo().isIn1kg(a);
+      boolean gnomad = variant.getInfo().getVEPInfo().isInGnomAD(a);
+      Message.debug(variant.getChrom()+T+variant.getPos()+T+variant.getAllele(a)+T+(existing?'Y':'N')+(kg?'Y':'N')+(gnomad?'Y':'N'));
+      if ( existing || kg || gnomad)
         return NO_OUTPUT;
+    }
 
     return asOutput(variant);
   }
