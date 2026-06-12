@@ -68,9 +68,9 @@ public class AddWorstAndCanonicalConsequence extends ParallelVCFFunction<Object>
     for (int a = 1; a < nbAllele; a++) {
       VEPAnnotation worst = VEPConsequence.getWorstVEPAnnotation(infoColumn.getVEPInfo().getVEPAnnotations(a));
       VEPAnnotation canon = infoColumn.getVEPInfo().getCanonicalVEPAnnotation(a);
-      worstCsq.append(",").append(String.join("&",worst.getConsequence()));
+      worstCsq.append(",").append(String.join("&",worst.getConsequences()));
       worstGene.append(",").append(worst.getSYMBOL());
-      canonicalCsq.append(",").append(String.join("&", canon.getConsequence()));
+      canonicalCsq.append(",").append(String.join("&", canon.getConsequences()));
       canonicalGene.append(",").append(canon.getSYMBOL());
     }
     if (worstCsq.isEmpty())

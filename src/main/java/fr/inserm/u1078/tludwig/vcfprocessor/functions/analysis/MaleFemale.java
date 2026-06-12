@@ -98,7 +98,7 @@ public class MaleFemale extends ParallelVCFVariantPedFunction {
       Map<String, VEPAnnotation> geneCsqs = VEPConsequence.getWorstVEPAnnotationsByGene(variant.getInfo().getVEPInfo().getVEPAnnotations(a));
       ArrayList<String> geneCsq = new ArrayList<>();
       for(String gene : geneCsqs.keySet())
-        geneCsq.add(new Println(gene).append(":").append(VEPConsequence.getWorstConsequence(geneCsqs.get(gene).getConsequence())).toString());
+        geneCsq.add(new Println(gene).append(":").append(VEPConsequence.getWorstConsequence(geneCsqs.get(gene).getConsequences())).toString());
 
       ret[a - 1] = Println.join(T
           , variant.getChrom()

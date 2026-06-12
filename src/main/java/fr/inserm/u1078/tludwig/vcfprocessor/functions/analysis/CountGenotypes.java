@@ -1,6 +1,5 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 
-import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.vcfprocessor.documentation.Description;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.ParallelVCFVariantPedFunction;
 import fr.inserm.u1078.tludwig.vcfprocessor.functions.VCFPolicies;
@@ -87,7 +86,7 @@ public class CountGenotypes extends ParallelVCFVariantPedFunction<Override> {
           variant.getPos(),
           variant.getAlleles()[a],
           variant.getRef(),
-          worst.getConsequence());
+          worst.getConsequences());
       for (int[] count : counts)
         outs[a-1].append(T, count[1], T, count[2]);
       

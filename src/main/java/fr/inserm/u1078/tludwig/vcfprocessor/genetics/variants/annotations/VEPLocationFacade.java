@@ -2,6 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public interface VEPLocationFacade extends VEPFacade {
   VEPField SYMBOL = new VEPField("SYMBOL", Category.Location, Type.String, "Gene symbol (e.g. BRCA2)");
@@ -68,6 +69,7 @@ public interface VEPLocationFacade extends VEPFacade {
   default String getHGVSc(){ return getStringValue(HGVSC); }
   default String getHGVSg(){ return getStringValue(HGVSG); }
   default String getHGVSp(){ return getStringValue(HGVSP); }
+
   default String getINTRON(){ return getStringValue(INTRON); }
   default String getMANE_PLUS_CLINICAL(){ return getStringValue(MANE_PLUS_CLINICAL); }
   default String getMANE_SELECT(){ return getStringValue(MANE_SELECT); }
@@ -86,7 +88,7 @@ public interface VEPLocationFacade extends VEPFacade {
   default String getUNIPROT_ISOFORM(){ return getStringValue(UNIPROT_ISOFORM); }
   default String getVARIANT_CLASS(){ return getStringValue(VARIANT_CLASS); }
 
-  static ArrayList<String> getDistinctSymbols(Collection<VEPAnnotation> veps){
+  static List<String> getDistinctSymbols(Collection<VEPAnnotation> veps){
     ArrayList<String> symbols = new ArrayList<>();
     if(veps != null)
       for(VEPAnnotation vep : veps){
@@ -97,6 +99,12 @@ public interface VEPLocationFacade extends VEPFacade {
     return symbols;
   }
 
-
-
+  static List<VEPAnnotation> getVEPAnnotations(Collection<VEPAnnotation> veps, String symbol) {
+    ArrayList<VEPAnnotation> annotations = new ArrayList<>();
+    if(veps != null)
+      for(VEPAnnotation vep : veps)
+        if(symbol.equals(vep.getSYMBOL()))
+          annotations.add(vep);
+    return annotations;
+  }
 }

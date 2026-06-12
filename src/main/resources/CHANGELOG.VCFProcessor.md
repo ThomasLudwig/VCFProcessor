@@ -5,6 +5,7 @@
 - **changed** : Complete rewrite of Sample handling in VCF/BCF files
 - **added** : `Println` to handle output, and Double formating in particular
 ### functions
+- **fixed** : `GetWorstConsequence` in case of 'csq1&csq2&csq3', only display the worst of the list
 ### filters
 ### graphs
 ### other

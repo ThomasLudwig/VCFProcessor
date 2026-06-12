@@ -18,15 +18,15 @@ public interface VEPConsequenceFacade extends VEPFacade {
   default String[] getCLIN_SIG(){ return getStringArrayValue(CLIN_SIG); }
   default List<String> getConsequenceList(){
     ArrayList<String> list = new ArrayList<>();
-    Collections.addAll(list, getConsequence());
+    Collections.addAll(list, getConsequences());
     return list;
   }
 
-  default String[] getConsequence(){ return getStringArrayValue(CONSEQUENCE); }
+  default String[] getConsequences(){ return getStringArrayValue(CONSEQUENCE); }
 
   default String getIMPACT(){ return getStringValue(IMPACT); }
   default String getPolyPhen(){ return getStringValue(POLYPHEN); }
   default String getSIFT(){ return getStringValue(SIFT); }
 
-  default String getWorstConsequence() { return VEPConsequence.getWorstConsequence(this.getConsequence()).getName(); }
+  default String getWorstConsequence() { return VEPConsequence.getWorstConsequence(this.getConsequences()).getName(); }
 }

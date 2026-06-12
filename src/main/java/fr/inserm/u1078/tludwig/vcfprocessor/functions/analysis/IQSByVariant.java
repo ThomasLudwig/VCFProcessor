@@ -1,6 +1,5 @@
 package fr.inserm.u1078.tludwig.vcfprocessor.functions.analysis;
 
-import fr.inserm.u1078.tludwig.maok.LineBuilder;
 import fr.inserm.u1078.tludwig.maok.tools.DateTools;
 import fr.inserm.u1078.tludwig.maok.tools.MathTools;
 import fr.inserm.u1078.tludwig.maok.tools.Message;
@@ -229,7 +228,7 @@ public class IQSByVariant extends VCFFunction {//TODO check why ID field is alwa
           v.getRef(),
           allele,
           gene,
-          annot.getConsequence(),
+          annot.getConsequences(),
           v.getAlleleFrequencyPresent(a),
           Math.max(annot.getgnomADe_NFE_AF(), annot.getgnomADg_NFE_AF()),
           annot.getMAX_AF(),
