@@ -141,7 +141,7 @@ public interface VEPFacade {
   }
 
   static boolean checkType(VEPField field, Type type, Type types) {
-    if(field.type.equals(type) &&  checkType(field, types))
+    if(field.type.equals(type) || field.type.equals(types))
       return true;
     Message.warning("Trying to read ["+field.type+"] as a ["+type+" or "+types+"] for Field ["+field.id+"]");
     return false;
