@@ -36,7 +36,7 @@ public interface VEPFacade {
     for(VEPAnnotation annotation : annotations)
       if(field.type.equals(Type.String)) {
         String s = annotation.getStringValue(field);
-        if(s != null)
+        if(s != null && !s.isEmpty())
           result.add(s);
       } else
         Collections.addAll(result, annotation.getStringArrayValue(field));
