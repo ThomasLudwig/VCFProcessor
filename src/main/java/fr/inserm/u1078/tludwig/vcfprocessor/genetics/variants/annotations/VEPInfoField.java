@@ -29,7 +29,7 @@ public class VEPInfoField extends StringInfoField implements HasVEPConsequenceAn
   @Override
   public ArrayList<VEPAnnotation> getAllVEPAnnotations() {
     ArrayList<VEPAnnotation> annotations = new ArrayList<>();
-    for(ArrayList<VEPAnnotation> list : this.getVEPAnnotations().values())
+    for(ArrayList<VEPAnnotation> list : this.getVEPAnnotations().values()) //Get for all alleles
       annotations.addAll(list);
     return annotations;
   }

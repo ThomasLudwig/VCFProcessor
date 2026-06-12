@@ -56,7 +56,7 @@ public class GetWorstConsequence extends ParallelVCFVariantFunction {
     for (int i = 0 ; i < nonStar.length; i++) {
       int a = nonStar[i];
       VEPAnnotation csqGene = VEPConsequence.getWorstVEPAnnotation(variant.getInfo().getVEPInfo().getVEPAnnotations(a));
-      outs[i] = Println.join(T, variant.getChrom(), variant.getPos(), variant.getId(), variant.getRef(), variant.getAllele(a), csqGene.getConsequence(), csqGene.getSYMBOL());
+      outs[i] = Println.join(T, variant.getChrom(), variant.getPos(), variant.getId(), variant.getRef(), variant.getAllele(a), csqGene.getWorstConsequence(), csqGene.getSYMBOL());
     }
     return outs;
   }
