@@ -45,7 +45,7 @@ public interface HasVEPAnnotations {
   }
 
   default boolean hasValue(SortedSet<Double> set) {
-    return set.first() != null;
+    return set != null && set.first() != null;
   }
 
 /*
