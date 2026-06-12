@@ -2,7 +2,7 @@ package fr.inserm.u1078.tludwig.vcfprocessor.genetics.variants.annotations;
 
 public interface VEPVariantIDFacade extends VEPFacade {
   VEPField ALLELE = new VEPField("Allele", Category.VariantID, Type.String, "The variant allele used to calculate the consequence");
-  VEPField EXISTING_VARIATION = new VEPField("Existing_variation", Category.VariantID, Type.String, "Identifier(s) of co-located known variants (e.g. rs IDs, COSV IDs)");
+  VEPField EXISTING_VARIATION = new VEPField("Existing_variation", Category.VariantID, Type.Strings, "Identifier(s) of co-located known variants (e.g. rs IDs, COSV IDs)");
   VEPField ALLELE_NUM = new VEPField("ALLELE_NUM", Category.VariantID, Type.Integer, "Allele number from input: 0=reference, 1=first ALT, 2=second ALT, etc.");
   VEPField PUBMED = new VEPField("PUBMED", Category.VariantID, Type.Integer, "PubMed ID(s) of publications citing the co-located existing variant");
   VEPField SOMATIC = new VEPField("SOMATIC", Category.VariantID, Type.String, "Somatic status of co-located variant(s); multi-value corresponds to Existing_variation entries");
