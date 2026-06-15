@@ -61,20 +61,13 @@ public class Variant implements Comparable<Variant>, Printable {
     String[] alter = alt.split(",");
     this.alleles = new String[alter.length + 1];
     this.alleles[0] = ref;
-    this.ac = new int[alleles.length];
-
+    this.ac = null;
     this.an = 0;
 
     for (int i = 0 ; i < genotypes.length; i++) {
       Genotype g = genotypes[i];
       if(g == null)
         throw new VariantException("At least one genotype is null ["+i+"th sample]");
-      if (g.getNbChrom() > 0)
-        for (int a : g.getAlleles())
-          if (a > -1) {
-            an++;
-            ac[a]++;
-          }
     }
     System.arraycopy(alter, 0, alleles, 1, alter.length);
     variantTypes = new VariantType[alleles.length];
@@ -198,6 +191,8 @@ public class Variant implements Comparable<Variant>, Printable {
   }
 
   public int getMajorAllele() {//use of AC, that is updates on variant creation
+    if(ac == null)
+      this.recomputeACAN();
     int major = 0;
     int max = ac[0];
     for (int i = 1; i < ac.length; i++)
@@ -263,18 +258,25 @@ public class Variant implements Comparable<Variant>, Printable {
   }
 
   public int[] getAC() {
+    if(ac == null)
+      this.recomputeACAN();
     return ac;
   }
 
   public void setAC(int[] ac) {
     this.ac = ac;
+    this.recomputeACAN();
   }
 
   public int getAN() {
+    if(ac == null)
+      this.recomputeACAN();
     return an;
   }
 
   public double[] getAF() {
+    if(ac == null)
+      this.recomputeACAN();
     double[] af = new double[this.alleles.length];
     for (int a = 0; a < af.length; a++)
       af[a] = (1d * ac[a]) / an;
