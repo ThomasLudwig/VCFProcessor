@@ -232,8 +232,11 @@ public class VCFRecord extends VariantRecord {
       final Sample[] samples = getVCF().getSampleSet().getOutputSamples();
       for(int i = 0 ; i < samples.length; i++) {
         String geno = filteredRight[i+1];//right index, because line has already been cut
-        if (getVCF().checkMode(VCF.MODE_QUICK_GENOTYPING))
-          geno = geno.split(":")[0];
+        if (getVCF().checkMode(VCF.MODE_QUICK_GENOTYPING)) {
+          int idx = geno.indexOf(':');
+          if(idx > 0)
+            geno = geno.substring(0, idx);
+        }
         genotypes[i] = new Genotype(geno, format, samples[i]);//right index, because samples has already been reduced
       }
       return new Variant(chrom, pos, id, ref, alt, qual, filter, infoColumn, format, genotypes);

@@ -538,9 +538,9 @@ public class VCF implements VariantProducer {
     public VariantRecord getRecord() {
       if(raw == null)
         return null;
-      if(record == null){
+      if(record == null)
         record = buildRecord();
-      }
+
       return record;
     }
 

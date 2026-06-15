@@ -13,26 +13,28 @@ import java.util.ArrayList;
  * @author Thomas E. Ludwig (INSERM - U1078) Started : 21 avr. 2016
  */
 public class VEPAnnotation implements VEPConsequenceFacade, VEPFrequencyFacade, VEPLocationFacade, VEPMetaFacade, VEPVariantIDFacade, Printable {
-  private final String[] values;
+  private String[] values;
+  private final String raw;
   private final VEPInfoDefinition vepDefinition;
 
   public VEPAnnotation(String annotations, VEPInfoDefinition vepDefinition) {
     this.vepDefinition = vepDefinition;
-    String[] tmpValues = annotations.split("\\|", -1);
-    if (tmpValues.length != vepDefinition.size()){//TODO temporarily disabled, should be reEnabled : for some annotated 1000g variant this is false !!
-      String msg = "Mismatch between number of values (" + tmpValues.length + ") and size of format (" + vepDefinition.size() + ") : line \n" + annotations;
-      Message.warning(msg);
-      //throw new AnnotationException(msg);
-      this.values = new String[vepDefinition.size()];
-      System.arraycopy(tmpValues, 0, this.values, 0, tmpValues.length);
-    } else
-      this.values = tmpValues;
+    this.raw = annotations;
   }
 
-  /**
-   * to print only warning once for each missing key
-   */
-  private final static ArrayList<String> missingKeys = new ArrayList<>();
+  public String[] getStrings () {
+    if(values==null) {
+      values = raw.split("\\|", -1);
+      if (values.length != vepDefinition.size()) {//TODO temporarily disabled, should be reEnabled : for some annotated 1000g variant this is false !!
+        String msg = "Mismatch between number of values (" + values.length + ") and size of format (" + vepDefinition.size() + ") : line \n" + raw;
+        Message.warning(msg);
+        /*//throw new AnnotationException(msg);
+        this.values = new String[vepDefinition.size()];
+        System.arraycopy(tmpValues, 0, this.values, 0, tmpValues.length);*/
+      }
+    }
+    return values;
+  }
 
   @Override
   public String getRawValue(VEPField field) {
@@ -47,16 +49,19 @@ public class VEPAnnotation implements VEPConsequenceFacade, VEPFrequencyFacade, 
       }
       return null;
     }
-    return values[idx];
+    return getStrings()[idx];
   }
+
+  /**
+   * to print only warning once for each missing key
+   */
+  private final static ArrayList<String> missingKeys = new ArrayList<>();
 
   public boolean hasField(VEPField field) { return this.vepDefinition.hasField(field.getId()); }
 
   @Override
-  public String toString(){
-    return println().toString();
-  }
+  public String toString(){ return raw; }
 
   @Override
-  public Println println() { return Println.join("|", values); }
+  public Println println() { return new Println(toString()); }
 }
