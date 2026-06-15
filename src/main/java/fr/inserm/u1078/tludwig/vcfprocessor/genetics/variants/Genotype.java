@@ -69,7 +69,11 @@ public class Genotype implements Printable {
       if (c == '/' || c == '|') {
         all[idx++] = val;
         val = 0;
-      } else {
+      } else if (c < '0' || c > '9') {
+        Message.error("Could not get alleles from the genotype [" + geno + "]");
+        return null;
+      }
+      else {
         val = val * 10 + (c - '0'); //int parsing
       }
     }
