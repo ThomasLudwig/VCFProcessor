@@ -18,9 +18,9 @@ public class Genotype implements Printable {
   private final GenotypeFormat format;
   private final Sample sample;
   private String rawGenotype;
-  private int nbChrom;
   private int[] alleles;
   private boolean phased = false;
+  private boolean mustBuild = true;
 
   //TODO only build inner fields when needed, use a status boolean
 
@@ -32,16 +32,43 @@ public class Genotype implements Printable {
   
   public final void setTo(String genotype) {
     this.rawGenotype = genotype;
-    if (genotype.charAt(0) == '.') {//missing
-      this.nbChrom = 0;
+    mustBuild = true;
+  }
+
+  private void build(){
+    if (rawGenotype.charAt(0) == '.')//missing
       this.alleles = null;
-    } else {
+    else {
       int colon = rawGenotype.indexOf(':');
       String gts = colon == -1 ? rawGenotype : rawGenotype.substring(0, colon);
       this.phased = gts.indexOf('|') >= 0;
       this.alleles = getAlleles(gts);
-      this.nbChrom = this.alleles == null ? 0 : alleles.length;
     }
+    mustBuild = false;
+  }
+
+  public int[] getAlleles() {
+    if(mustBuild)
+      build();
+    return alleles;
+  }
+
+  public Sample getSample() {
+    return this.sample;
+  }
+
+  public int getNbChrom() {
+    return this.getAlleles() == null ? 0 : getAlleles().length;
+  }
+
+  public boolean isPhased(){
+    if(mustBuild)
+      build();
+    return this.phased;
+  }
+
+  public int getFormatSize() {
+    return this.format.size();
   }
 
   /**
@@ -52,6 +79,8 @@ public class Genotype implements Printable {
   public static int[] getAlleles(String geno) {
     if(geno.startsWith("."))
       return null;
+
+    //Harder to read, but faster when repeated numerous times
 
     // First pass: count alleles (= number of delimiters + 1)
     int count = 1;
@@ -94,14 +123,6 @@ public class Genotype implements Printable {
 
     return new Genotype("./.", format, sample);
   }
-  
-  public boolean isPhased(){
-    return this.phased;
-  }
-
-  public int getFormatSize() {
-    return this.format.size();
-  }
 
   public String createMissingGenotype() {
     return "."+":.".repeat(Math.max(0, this.getFormatSize() - 1));
@@ -113,23 +134,13 @@ public class Genotype implements Printable {
     return format.getValue(rawGenotype, key);
   }
 
-  public Sample getSample() {
-    return this.sample;
-  }
 
-  public int getNbChrom() {
-    return nbChrom;
-  }
 
-  public int[] getAlleles() {
-    return alleles;
-  }
-  
   public int getCount(int allele){
     if(this.isMissing())
       return 0;
     int count = 0;
-    for(int a : this.alleles)
+    for(int a : this.getAlleles())
       if(a == allele)
         count ++;
     return count;
@@ -138,14 +149,14 @@ public class Genotype implements Printable {
   public boolean hasAllele(int allele) {
     if(this.isMissing())
       return false;
-    for(int a : this.alleles)
+    for(int a : this.getAlleles())
       if(a == allele)
         return true;
     return false;
   }
 
   public boolean isMissing() {
-    return this.nbChrom == 0;
+    return this.getAlleles() == null;
   }
   
   public int getNbAlleles(){
@@ -164,11 +175,11 @@ public class Genotype implements Printable {
   public boolean isHomozygousOrHaploidToAlt() {
     if(this.isMissing())
       return false;
-    int allele = alleles[0];
+    int allele = getAlleles()[0];
     if(allele == 0)
       return false;
-    for(int a = 1 ; a < this.nbChrom; a++)
-      if(alleles[a] != allele)
+    for(int a = 1 ; a < this.getNbChrom(); a++)
+      if(getAlleles()[a] != allele)
         return false;
     return true;
   }
@@ -180,11 +191,11 @@ public class Genotype implements Printable {
   public boolean isHomozygousOrHaploid(){
     if(this.isMissing())
       return false;
-    int allele = alleles[0];
+    int allele = getAlleles()[0];
     if(allele == -1)
       return false;
-    for(int a = 1 ; a < this.nbChrom; a++)
-      if(alleles[a] != allele)
+    for(int a = 1 ; a < this.getNbChrom(); a++)
+      if(getAlleles()[a] != allele)
         return false;
     return true;
   }
@@ -201,17 +212,17 @@ public class Genotype implements Printable {
     return
         !isMissing()
         && !isHaploid()
-        && alleles[0] == alleles[1];
+        && getAlleles()[0] == getAlleles()[1];
   }
   
   public boolean isHomozygousOrHaploid(int al){
     if(this.isMissing())
       return false;
-    int allele = alleles[0];
+    int allele = getAlleles()[0];
     if(allele == al)
       return false;
-    for(int a = 1 ; a < this.nbChrom; a++)
-      if(alleles[a] != allele)
+    for(int a = 1 ; a < this.getNbChrom(); a++)
+      if(getAlleles()[a] != allele)
         return false;
     return true;
   }
@@ -221,19 +232,19 @@ public class Genotype implements Printable {
    * @return  if heterozygous and diploid
    */
   public boolean isHeterozygousDiploid() {
-    if(this.nbChrom != 2)
+    if(this.getNbChrom() != 2)
       return false;
-    return this.alleles[0] != this.alleles[1];
+    return this.getAlleles()[0] != this.getAlleles()[1];
   }
 
   public boolean isHaploid() {
-    return this.nbChrom == 1;
+    return this.getNbChrom() == 1;
   }
 
   public boolean hasAlternate() {
     if(this.isMissing())
       return false;
-    for(int a : this.alleles)
+    for(int a : this.getAlleles())
       if(a > 0)
         return true;
     return false;
@@ -243,7 +254,7 @@ public class Genotype implements Printable {
     ArrayList<Integer> ret = new ArrayList<>();
     if(this.isMissing())
       return ret;
-    for(int a : this.alleles)
+    for(int a : this.getAlleles())
       if(!ret.contains(a))
         ret.add(a);
     return ret;
@@ -358,7 +369,7 @@ public class Genotype implements Printable {
   @Override
   public String toString() {
     return this.rawGenotype;
-  } //TODO in the future, split according to VCF format
+  }
 
   @Override
   public Println println() { return new Println(this.toString()); }
@@ -387,7 +398,6 @@ public class Genotype implements Printable {
 
   public void setMissing() {
     this.rawGenotype = this.createMissingGenotype();
-    this.nbChrom = 0;
     this.alleles = null;
   }
 }
