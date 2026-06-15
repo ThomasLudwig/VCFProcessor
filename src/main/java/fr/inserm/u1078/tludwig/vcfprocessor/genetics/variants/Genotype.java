@@ -22,6 +22,8 @@ public class Genotype implements Printable {
   private int[] alleles;
   private boolean phased = false;
 
+  //TODO only build inner fields when needed, use a status boolean
+
   public Genotype(String genotype, GenotypeFormat format, Sample sample) {
     this.format = format;
     this.sample = sample;
@@ -34,20 +36,12 @@ public class Genotype implements Printable {
       this.nbChrom = 0;
       this.alleles = null;
     } else {
-      String gts = this.rawGenotype.split(":")[0];
-      this.phased = isPhased(gts);
+      int colon = rawGenotype.indexOf(':');
+      String gts = colon == -1 ? rawGenotype : rawGenotype.substring(0, colon);
+      this.phased = gts.indexOf('|') >= 0;
       this.alleles = getAlleles(gts);
       this.nbChrom = this.alleles == null ? 0 : alleles.length;
     }
-  }
-
-  /**
-   * Checks if a genotype String is phased
-   * @param geno the String representing the genotype
-   * @return true if the genotype is phased
-   */
-  public static boolean isPhased(String geno) {
-    return geno.contains("|");
   }
 
   /**
@@ -58,15 +52,28 @@ public class Genotype implements Printable {
   public static int[] getAlleles(String geno) {
     if(geno.startsWith("."))
       return null;
-    String[] genos = geno.split("[/\\|]", -1); //split by / or |
-    int[] all = new int[genos.length];
-    for(int i = 0 ; i < all.length; i++) {
-      try {
-        all[i] = Integer.parseInt(genos[i]);
-      } catch(NumberFormatException e){
-        Message.error("Could not get alleles from the genotype ["+geno+"]");
+
+    // First pass: count alleles (= number of delimiters + 1)
+    int count = 1;
+    for (int i = 0; i < geno.length(); i++) {
+      char c = geno.charAt(i);
+      if (c == '/' || c == '|') count++;
+    }
+
+    // Second pass: parse each allele directly
+    int[] all = new int[count];
+    int idx = 0;
+    int val = 0;
+    for (int i = 0; i < geno.length(); i++) {
+      char c = geno.charAt(i);
+      if (c == '/' || c == '|') {
+        all[idx++] = val;
+        val = 0;
+      } else {
+        val = val * 10 + (c - '0'); //int parsing
       }
     }
+    all[idx] = val; // last allele
 
     return all;
   }
