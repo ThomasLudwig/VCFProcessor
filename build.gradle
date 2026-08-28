@@ -69,13 +69,13 @@ tasks.register('release', Jar) {
 }
 
 tasks.register('deploy', Copy) {
+    dependsOn('jar')
     from "build/libs"
     into "build/libs"
     include "/${rootProject.name}-${version}.jar"
     rename { String fileName -> fileName.replace("-${version}", "") }
 }
 
-deploy.dependsOn(release)
 
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
