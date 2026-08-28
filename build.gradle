@@ -70,6 +70,7 @@ tasks.register('release', Jar) {
 
 tasks.register('deploy', Copy) {
     dependsOn('release')
+    dependsOn('jar')
     from "build/libs"
     into "build/libs"
     include "/${rootProject.name}-${version}.jar"
