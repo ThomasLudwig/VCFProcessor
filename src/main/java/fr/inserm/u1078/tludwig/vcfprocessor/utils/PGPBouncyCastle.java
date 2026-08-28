@@ -78,6 +78,25 @@ public class PGPBouncyCastle {
     }
   }
 
+  public static byte[] readEncryptedFile(String privateKeyFile, String filename, String passphrase) {
+    start();
+    try {
+      PGPSecretKeyRingCollection secrets = new PGPSecretKeyRingCollection(PGPUtil.getDecoderStream(Files.newInputStream(Path.of(privateKeyFile))), new JcaKeyFingerprintCalculator());
+
+      PGPPrivateKey privateKey = null;
+      try {
+        privateKey = extractPrivateKey(secrets, passphrase.toCharArray());
+      } catch(Exception e){
+        System.err.println("Passphrase does not match encryption key. Try again.");
+      }
+      Message.asserts(privateKey != null, "Passphrase does not match encryption key");
+      return doReadEncrypted(privateKey, filename);
+    } catch(Exception e){
+      Message.fatal("Could not read encrypted file ["+filename+"]", e, true);
+      return new byte[0];
+    }
+  }
+
   public static byte[] readEncryptedFile(String privateKeyFile, String filename) {
     start();
     try {

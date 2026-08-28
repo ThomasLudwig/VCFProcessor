@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 public class ApplyCorrespondenceTable extends ParallelVCFFilterFunction {
   private final TSVFileParameter tableFile = new TSVFileParameter(OPT_TABLE, "MyCorrespondenceTable", "Encrypted file containing the correspondence table");
   private final FileParameter keyFile = new TSVFileParameter("--key", "secret.OIE2S1PK.pgp", "The file containing the secret key");
+  private final FileParameter passPhraseFile = new TSVFileParameter("--pass", "passphrase.txt", "The file containing the passphrase");
   private Map<String, String> correspondence;
   private int[] fromTo;
 
@@ -41,7 +42,8 @@ public class ApplyCorrespondenceTable extends ParallelVCFFilterFunction {
     super.begin();
     correspondence = new LinkedHashMap<>();
     try {
-      byte[] encryptedTable = PGPBouncyCastle.readEncryptedFile(keyFile.getFilename(), tableFile.getFilename());
+      String passphrase = passPhraseFile.getReader().readLine();
+      byte[] encryptedTable = PGPBouncyCastle.readEncryptedFile(keyFile.getFilename(), tableFile.getFilename(), passphrase);
 
       BufferedReader in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(encryptedTable)));
 

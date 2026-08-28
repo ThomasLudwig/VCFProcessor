@@ -1,4 +1,4 @@
-## 1.3.0 (2026-06-12)
+## 1.3.0 (2026-08-28)
 ### core
 - **fixed** : More BCFv2.2 Compliance issues
 - **fixed** : Huge Bug. In output, Samples were (wrongfully) sorted in header, but not in body.
@@ -6,6 +6,7 @@
 - **added** : `Println` to handle output, and Double formating in particular
 ### functions
 - **fixed** : `GetWorstConsequence` in case of 'csq1&csq2&csq3', only display the worst of the list
+- **changed** : `ApplyCorrespondenceTable` to read passphrase from a file
 ### filters
 ### graphs
 ### other
